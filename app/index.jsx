@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, Image } from 'react-native';
 
-const dicusing = require("/home/menga/vs code/mobapp/SupApp/assets/images/dicus.jpeg");
+const dicusing = require("/home/menga/vs code/mobapp/Supermarket-Mobile-App/assets/images/dicus.jpeg");
 
 export default function App() {
   return (
@@ -10,7 +10,9 @@ export default function App() {
       <Text style={styles.text}>
         Hello everyone, this is the start of the application.
       </Text>
+     <View style={styles.imageStyl} >
       <Image source={dicusing} style={styles.imageStyle} />
+      </View>    
     </View>
   );
 }
@@ -32,5 +34,12 @@ const styles = StyleSheet.create({
   imageStyle: {
     width: 300,
     height: 300,
+    borderRadius:300,
+    backgroundColor:"red"
+  },
+  imageStyl: {
+    width: 300,
+    height: 500,
+
   },
 });
