@@ -11,20 +11,16 @@ export default function App() {
         <Text style={styles.text}>
           Welcome to Queen Supermarket System
         </Text>
-        
+
         <View style={styles.login}>
           <TextInput style={styles.textInput} placeholder='Enter your username here' />
           <TextInput style={styles.textInput} placeholder='Enter your password here' secureTextEntry />
           <View style={styles.buttonContainer}>
             <Button title='Login' onPress={() => {}} />
-            <Button title='Sign Up' onPress={() => {}} />
           </View>
-        </View>
+          <Text style={styles.text}>You don't have an account?{<Button title='Sign Up' onPress={() => {}} />}</Text>
 
-        {/* Uncomment this if you want to display the image */}
-        {/* <View style={styles.imageStyl}>
-          <Image source={dicusing} style={styles.imageStyle} />
-        </View> */}
+        </View>
       </View>
     </SafeAreaView>
   );
@@ -46,7 +42,8 @@ const styles = StyleSheet.create({
     fontSize: 30,
     textAlign: 'center',
     marginBottom: 20,
-    color: 'white',
+    color: 'black',
+    marginVertical:10,
   },
   imageStyle: {
     width: 300,
