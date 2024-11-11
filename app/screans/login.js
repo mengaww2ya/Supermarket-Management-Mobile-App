@@ -6,13 +6,13 @@ export default function Login() {
   return (
     <SafeAreaView style={styles.safeContainer}>
       <View style={styles.container}>
-        <Text style={styles.text}>Welcome to Queen Supermarket System</Text>
+        <Text style={styles.wlcome}>Welcome to Queen Supermarket System</Text>
 
         <View style={styles.login}>
           <TextInput style={styles.textInput} placeholder="Enter your username here" />
           <TextInput style={styles.textInput} placeholder="Enter your password here" secureTextEntry />
           <View >
-            <TouchableOpacity  style={[styles.button,styles.buttonContainer]} onPress={() => {}} >
+            <TouchableOpacity  style={[styles.button]} onPress={() => {}} >
               <Text>Log in</Text>
               </TouchableOpacity>
           </View>
@@ -30,6 +30,7 @@ export default function Login() {
 
 const styles = StyleSheet.create({
     button:{
+      width:300,
       padding:10,
       alignItems:"center",
         backgroundColor: 'hsl(23, 100%, 66%)',
@@ -45,15 +46,14 @@ const styles = StyleSheet.create({
     padding: 5,
   },
   text: {
-    fontSize: "100%",
+    fontSize: 20,
     textAlign: 'center',
     marginBottom: 20,
     color: 'black',
     marginVertical: 10,
   },
   textInput: {
-    fontSize: "100%",
-    width: "70%",
+    fontSize: 20,
     borderRadius: 5,
     borderWidth:1,
     marginBottom: 10,
@@ -73,5 +73,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-evenly',
     backgroundColor: 'hsl(23, 100%, 66%)',
   },
-  
+  wlcome:{
+    fontSize:22,
+  }
 });
