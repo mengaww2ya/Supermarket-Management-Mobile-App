@@ -2,9 +2,12 @@ import React from 'react';
 import { TouchableOpacity } from 'react-native';
 import { View, Text, StyleSheet, TextInput, Button } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import  Header from '../subscrean/header.js';
 export default function Login() {
   return (
     <SafeAreaView style={styles.safeContainer}>
+
+      <Header/>
       <View style={styles.container}>
         <Text style={styles.wlcome}>Welcome to Queen Supermarket System</Text>
 
