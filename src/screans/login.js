@@ -1,9 +1,14 @@
-import React from 'react';
+import React ,{useState,useRef} from 'react';
 import { TouchableOpacity } from 'react-native';
 import { View, Text, StyleSheet, TextInput, Button } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import * as Animatable from'react-native-animatable';
+import { colors, Icon } from 'react-native-elements';
 import  Header from '../subscrean/header.js';
 export default function Login() {
+  const [textInput2focused,settextInput2focused]=useState(false)
+  const textInput1=useRef(1)
+  const textInput2=useRef(2)
   return (
     <SafeAreaView style={styles.safeContainer}>
 
@@ -12,8 +17,39 @@ export default function Login() {
         <Text style={styles.wlcome}>Welcome to Queen Supermarket System</Text>
 
         <View style={styles.login}>
-          <TextInput style={styles.textInput} placeholder="Enter your username here" />
-          <TextInput style={styles.textInput} placeholder="Enter your password here" secureTextEntry />
+          <TextInput
+           style={styles.textInput1}
+            placeholder="Enter your username here" 
+            ref={textInput1}
+            />
+          <View style={styles.textInput2}>
+            <Animatable.View animation={textInput2focused?"":"fadeInLeft"}  direction={400}>
+             <Icon
+             name='lock'
+             iconStyle={colors.grey3}
+             type='material'
+             style={{marginRight:10}}
+             />
+            </Animatable.View>
+          <TextInput  
+          placeholder="Enter your password here" 
+          secureTextEntry
+          style={{width:"80%",padding:10}}
+          ref={textInput2}
+          onFocus={()=>{settextInput2focused(false)}}
+          onBlur={()=>{settextInput2focused(true)}}
+           />
+
+          <Animatable.View animation={textInput2focused?"":"fadeInLeft"} direction='400'>
+          <Icon
+             name='visibility-off'
+             iconStyle={colors.grey3}
+             type='material'
+             style={{marginLeft:10}}
+             />
+          </Animatable.View >
+
+          </View>
           <View >
             <TouchableOpacity  style={[styles.button]} onPress={() => {}} >
               <Text>Log in</Text>
@@ -55,13 +91,19 @@ const styles = StyleSheet.create({
     color: 'black',
     marginVertical: 10,
   },
-  textInput: {
+  textInput1: {
     fontSize: 20,
     borderRadius: 5,
     borderWidth:1,
     marginBottom: 10,
     padding: 10,
-    textAlign:"center"
+  },
+  textInput2: {
+    fontSize: 20,
+    borderRadius: 5,
+    borderWidth:1,
+    marginBottom: 10,
+    flexDirection:'row',
   },
   login: {
     width: "70%",
