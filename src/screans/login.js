@@ -61,7 +61,11 @@ export default function Login() {
               <Text>Sign Up</Text>
               </TouchableOpacity>
           </Text>
+          <TouchableOpacity style={styles.touchable}><Text style={styles.text}>sign with google</Text></TouchableOpacity>
+        <TouchableOpacity style={styles.touchable}><Text style={styles.text}>sign with google</Text></TouchableOpacity>
         </View>
+        
+
       </View>
     </SafeAreaView>
   );
@@ -120,5 +124,12 @@ const styles = StyleSheet.create({
   },
   wlcome:{
     fontSize:22,
-  }
+  },
+  touchable:{
+    width:"90%",
+    backgroundColor:"hsl(258, 81%, 52%)",
+    margin:20,
+    // fontSize:20,
+    // textAlign:"center",
+  },
 });
