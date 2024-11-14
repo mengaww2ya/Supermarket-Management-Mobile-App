@@ -1,15 +1,26 @@
 import React, { useState, useRef } from 'react';
-import { TouchableOpacity } from 'react-native';
-import { View, Text, StyleSheet, TextInput } from 'react-native';
+import { TouchableOpacity, View, Text, StyleSheet, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Animatable from 'react-native-animatable';
-import { colors, Icon } from 'react-native-elements';
+import { colors, Icon ,SocialIcon} from 'react-native-elements';
 import Header from '../subscrean/header.js';
 
 export default function Login() {
   const [textInput2Focused, setTextInput2Focused] = useState(false);
   const textInput1 = useRef(null);
   const textInput2 = useRef(null);
+
+  const handleFocus = () => setTextInput2Focused(true);
+  const handleBlur = () => setTextInput2Focused(false);
+  const handleLogin = () => {
+    // Handle login logic here
+  };
+  const handleSignUp = () => {
+    // Navigate to the sign-up page
+  };
+  const handleForgotPassword = () => {
+    // Handle forgot password logic
+  };
 
   return (
     <SafeAreaView style={styles.safeContainer}>
@@ -26,43 +37,43 @@ export default function Login() {
 
           <View style={styles.passwordContainer}>
             <Animatable.View animation={textInput2Focused ? "" : "fadeInLeft"} duration={400}>
-              <Icon
-                name='lock'
-                iconStyle={colors.grey3}
-                type='material'
-                style={styles.icon}
-              />
+              <Icon name='lock' iconStyle={colors.grey3} type='material' style={styles.icon} />
             </Animatable.View>
             <TextInput
               placeholder="Enter your password"
               secureTextEntry
               style={styles.textInput}
               ref={textInput2}
-              onFocus={() => setTextInput2Focused(true)}
-              onBlur={() => setTextInput2Focused(false)}
+              onFocus={handleFocus}
+              onBlur={handleBlur}
             />
             <Animatable.View animation={textInput2Focused ? "" : "fadeInLeft"} duration={400}>
-              <Icon
-                name='visibility-off'
-                iconStyle={colors.grey3}
-                type='material'
-                style={styles.icon}
-              />
+              <Icon name='visibility-off' iconStyle={colors.grey3} type='material' style={styles.icon} />
             </Animatable.View>
           </View>
 
-          <TouchableOpacity style={styles.button} onPress={() => {}}>
+          <TouchableOpacity style={styles.button} onPress={handleLogin}>
             <Text style={styles.buttonText}>Log In</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={handleForgotPassword}>
+            <Text style={styles.text}>Forgot password?</Text>
           </TouchableOpacity>
 
           <Text style={styles.text}>
             Don't have an account?{' '}
-            <TouchableOpacity onPress={() => {}}>
+            <TouchableOpacity onPress={handleSignUp}>
               <Text style={styles.linkText}>Sign Up</Text>
             </TouchableOpacity>
           </Text>
 
           <TouchableOpacity style={styles.googleButton}>
+            <SocialIcon
+              name='Sign In With Google'
+              iconStyle={colors.grey3}
+              type='google'
+              style={styles.SocialIcon}
+            />
             <Text style={styles.buttonText}>Sign in with Google</Text>
           </TouchableOpacity>
         </View>
@@ -126,9 +137,13 @@ const styles = StyleSheet.create({
   },
   googleButton: {
     backgroundColor: 'hsl(258, 81%, 52%)',
-    padding: 15,
     borderRadius: 5,
     alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  googleIcon: {
+    marginRight: 10, // Space between icon and text
   },
   text: {
     fontSize: 16,
