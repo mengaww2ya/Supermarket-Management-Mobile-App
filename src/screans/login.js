@@ -42,13 +42,13 @@ export default function Login() {
             <TextInput
               placeholder="Enter your password"
               secureTextEntry
-              style={styles.textInput}
+              style={styles.textInputPass}
               ref={textInput2}
               onFocus={handleFocus}
               onBlur={handleBlur}
             />
             <Animatable.View animation={textInput2Focused ? "" : "fadeInLeft"} duration={400}>
-              <Icon name='visibility-off' iconStyle={colors.grey3} type='material' style={styles.icon} />
+              <Icon name='visibility-off' iconStyle={[colors.grey3]} type='material' style={styles.icon} />
             </Animatable.View>
           </View>
 
@@ -111,6 +111,16 @@ const styles = StyleSheet.create({
     padding: 10,
     backgroundColor: 'white',
   },
+  textInputPass:{
+    width:"100%",
+    fontSize: 18,
+    borderRadius: 5,
+    borderWidth: 1,
+    borderColor: colors.grey4,
+    marginBottom: 15,
+    padding: 15,
+    backgroundColor: 'white',
+  },
   passwordContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -154,4 +164,7 @@ const styles = StyleSheet.create({
     color: 'hsl(23, 100%, 66%)',
     fontWeight: 'bold',
   },
+  visiblIcon:{
+    marginLeft:"50"
+  }
 });
