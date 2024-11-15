@@ -1,11 +1,13 @@
 import React, { useState, useRef } from 'react';
-import { TouchableOpacity, View, Text, StyleSheet, TextInput } from 'react-native';
+import { TouchableOpacity, View, Text, StyleSheet, TextInput ,Image} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Animatable from 'react-native-animatable';
 import { colors, Icon ,SocialIcon} from 'react-native-elements';
 import Header from '../subscrean/header.js';
+import { ScrollView } from 'react-native-web';
 
 export default function Login() {
+  const wellImage=require("../../assets/images/welImage.jpg");
   const [textInput2Focused, setTextInput2Focused] = useState(false);
   const textInput1 = useRef(null);
   const textInput2 = useRef(null);
@@ -21,11 +23,13 @@ export default function Login() {
   const handleForgotPassword = () => {
     // Handle forgot password logic
   };
-
   return (
     <SafeAreaView style={styles.safeContainer}>
+      <ScrollView>
       <Header />
       <View style={styles.container}>
+      <Image source={wellImage} style={styles.wellimage}/>
+
         <Text style={styles.welcome}>Welcome to Queen Supermarket System</Text>
 
         <View style={styles.login}>
@@ -78,6 +82,7 @@ export default function Login() {
           </TouchableOpacity>
         </View>
       </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -164,7 +169,9 @@ const styles = StyleSheet.create({
     color: 'hsl(23, 100%, 66%)',
     fontWeight: 'bold',
   },
-  visiblIcon:{
-    marginLeft:"50"
-  }
+  wellimage:{
+    width:500,
+    height:"50%",
+marginTop:"10%",
+  },
 });

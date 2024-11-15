@@ -3,7 +3,7 @@
     "name": "my-new-project",
     "slug": "my-new-project",
     "version": "1.0.0",
-    "orientation": "default",
+    "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
