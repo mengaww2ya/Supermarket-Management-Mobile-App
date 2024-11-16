@@ -1,58 +1,106 @@
-import React, { useState, useRef } from 'react';
-import { TouchableOpacity, View, Text, StyleSheet, TextInput ,Image} from 'react-native';
+import React from 'react';
+import { TouchableOpacity, View, Text, StyleSheet ,Image} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import * as Animatable from 'react-native-animatable';
-import { colors, Icon ,SocialIcon} from 'react-native-elements';
-import { ScrollView } from 'react-native-web';
+import { colors} from 'react-native-elements';
+import {Header} from '../subscrean/header.js'
+import { ScrollView } from 'react-native';
 import Swiper from 'react-native-swiper';
 export default function Welcome(){
-    const image1=require("../../assets/images/dicus.jpeg");
+    const image1=require("../../assets/images/goodinbag.png");
     const image2=require("../../assets/images/welImage.jpg");
-    const image3=require("../../assets/images/welc.png");
+    const image3=require("../../assets/images/good5.png");
+    const image4=require("../../assets/images/good2.png");
+    const image5=require("../../assets/images/good3.png");
+    const image6=require("../../assets/images/cartwithgoods.png");
+    const image7=require("../../assets/images/goods.png");
+
 
     return(
-<SafeAreaView>
+<SafeAreaView style={[styles.SafeAreaView,{flex:"100%"}]}>
+    {/* <View><Header/>
+    </View> */}
+    <ScrollView>
     <View >
-    <View style={{flex:1}}>
+    <View style={[styles.welcMessagView,{flex:"20%"}]}>
         <Text style={styles.welcomSlogan}>Start Your Smart Shopping Here:
         </Text>
-<Text style={styles.welcomSlogan}>
+     <Text style={styles.welcomSlogan}>
              Discover Groceries at Your Fingertips
              Better Living
 
-</Text>
-<Text style={styles.welcomSlogan}>
+     </Text>
+      <Text style={styles.welcomSlogan}>
              Anytime, Anywhere!
-</Text>
-    </View>
+     </Text>
+     </View>
 
-    <View style={{flex:3}}>
-<Swiper autoplay={true}>
-    <View>
+     <View style={[styles.welcImagContainer,{flex:"90%"}]}>
+     <Swiper autoplay={true}>
+     <View     style={styles.slidImageOnWelcView}>
         <Image 
         source={image1}
+        style={{width:"100%", height:"100%"}}
+
         />
     </View>
 
-    <View style={styles.welcImagContainer}>  
+    <View     style={styles.slidImageOnWelcView}>  
         <Image
-       source={image2}/>
+       source={image2}
+       style={{width:"100%", height:"100%"}}
+
+       />
 
      
         </View>
-    <View>
+    <View    style={styles.slidImageOnWelcView}>
         <Image
     
     source={image3}
-    />
+    style={{width:"100%", height:"100%"}}
 
- 
+    />
+    
     </View>
+    <View   style={styles.slidImageOnWelcView}>
+        <Image 
+        source={image4}
+        style={{width:"100%", height:"100%"}}
+
+        />
+    </View>
+
+    <View   style={styles.slidImageOnWelcView}>  
+        <Image
+       source={image5}
+       style={{width:"100%", height:"100%"}}
+
+       />
+
+     
+        </View>
+        <View  style={styles.slidImageOnWelcView}>
+        <Image 
+        source={image6}
+        style={{width:"100%", height:"100%"}}
+
+        />
+    </View>
+
+    <View style={styles.slidImageOnWelcView} >  
+        <Image
+       source={image7}
+       style={{width:"100%", height:"100%"}}
+
+       />
+
+     
+        </View>
     
 </Swiper>
     </View>
     </View>
-    <View style={{flex:3}}>
+    <View style={[styles.buttonContainer,{flex:"10%"}] }>
     <TouchableOpacity style={styles.button}>
             <Text style={styles.buttonText}>Log In</Text>
           </TouchableOpacity>
@@ -60,6 +108,7 @@ export default function Welcome(){
             <Text style={styles.buttonText}>create account</Text>
           </TouchableOpacity>
     </View>
+    </ScrollView>
 </SafeAreaView>
     );
 }
@@ -75,6 +124,19 @@ const styles=StyleSheet.create({
         alignContent:"center",
         margin:"3%",
     },
+    welcMessagView:{
+        justifyContent:"flex-start",
+        alignItems:"center",
+     backgroundColor:"wheet",
+     marginHorizontal:"10%",
+     marginVertical:"10%",
+
+
+    },
+    buttonContainer:{
+        alignContent:"center",
+
+    },
     button: {
         backgroundColor: 'hsl(23, 100%, 66%)',
         padding: 15,
@@ -82,6 +144,7 @@ const styles=StyleSheet.create({
         alignItems: 'center',
         marginBottom: 10,
         marginTop: 10,
+        marginHorizontal:"10%",
 
       },
       buttonText: {
@@ -89,4 +152,17 @@ const styles=StyleSheet.create({
         fontSize: 18,
         fontWeight: 'bold',
       },
+      slidImageOnWelc:{
+      width:"100%",
+      height:"100%",
+      },
+      slidImageOnWelcView:{
+      flex:1,
+      justifyContent:"center",
+      alignItems:"center",
+      },
+      SafeAreaView:{
+    //     display:"flex",
+    // flexDirection:"column",
+      }
 })
