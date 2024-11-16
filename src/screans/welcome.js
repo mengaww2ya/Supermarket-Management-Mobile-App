@@ -5,6 +5,7 @@ import { colors} from 'react-native-elements';
 import {Header} from '../subscrean/header.js'
 import { ScrollView } from 'react-native';
 import Swiper from 'react-native-swiper';
+import { Link, router } from 'expo-router';
 export default function Welcome(){
     const image1=require("../../assets/images/goodinbag.png");
     const image2=require("../../assets/images/welImage.jpg");
@@ -21,7 +22,7 @@ export default function Welcome(){
     </View> */}
     <ScrollView>
     <View >
-    <View style={[styles.welcMessagView,{flex:"20%"}]}>
+    <View style={[styles.welcMessagView,{flex:"10%"}]}>
         <Text style={styles.welcomSlogan}>Start Your Smart Shopping Here:
         </Text>
      <Text style={styles.welcomSlogan}>
@@ -34,7 +35,7 @@ export default function Welcome(){
      </Text>
      </View>
 
-     <View style={[styles.welcImagContainer,{flex:"90%"}]}>
+     <View style={[styles.welcImagContainer,{flex:"20%"}]}>
      <Swiper autoplay={true}>
      <View     style={styles.slidImageOnWelcView}>
         <Image 
@@ -101,9 +102,12 @@ export default function Welcome(){
     </View>
     </View>
     <View style={[styles.buttonContainer,{flex:"10%"}] }>
-    <TouchableOpacity style={styles.button}>
+    
+   {/* <Link href={"src/screans/login.js"}> */}
+    <TouchableOpacity style={styles.button} onPress={()=>{router.push("../src/screans/login.js")}}>
             <Text style={styles.buttonText}>Log In</Text>
           </TouchableOpacity>
+          {/* </Link> */}
           <TouchableOpacity style={styles.button} >
             <Text style={styles.buttonText}>create account</Text>
           </TouchableOpacity>
