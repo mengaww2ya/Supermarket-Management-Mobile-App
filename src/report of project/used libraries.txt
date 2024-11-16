@@ -1,0 +1,2 @@
+react native elements
+react native swiper

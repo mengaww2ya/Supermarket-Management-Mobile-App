@@ -9,11 +9,11 @@ import { ScrollView } from 'react-native-web';
 export default function Login() {
   const wellImage=require("../../assets/images/welImage.jpg");
   const [textInput2Focused, setTextInput2Focused] = useState(false);
-  const textInput1 = useRef(null);
-  const textInput2 = useRef(null);
+  const textInput1 = useRef();
+  const textInput2 = useRef();
 
-  const handleFocus = () => setTextInput2Focused(true);
-  const handleBlur = () => setTextInput2Focused(false);
+  const handleFocus = () => setTextInput2Focused(false);
+  const handleBlur = () => setTextInput2Focused(true);
   const handleLogin = () => {
     // Handle login logic here
   };
@@ -26,11 +26,15 @@ export default function Login() {
   return (
     <SafeAreaView style={styles.safeContainer}>
       <ScrollView>
-      <Header />
+      <View>
+              <Header />
+      </View>
       <View style={styles.container}>
-      <Image source={wellImage} style={styles.wellimage}/>
+        {/* <View style={styles.wellimageContainer}>
+          <Image source={wellImage} style={styles.wellimage}/>
+        </View> */}
 
-        <Text style={styles.welcome}>Welcome to Queen Supermarket System</Text>
+        <View><Text style={styles.welcome}>Welcome to Queen Supermarket System</Text></View>
 
         <View style={styles.login}>
           <TextInput
@@ -63,15 +67,8 @@ export default function Login() {
           <TouchableOpacity onPress={handleForgotPassword}>
             <Text style={styles.text}>Forgot password?</Text>
           </TouchableOpacity>
-
-          <Text style={styles.text}>
-            Don't have an account?{' '}
-            <TouchableOpacity onPress={handleSignUp}>
-              <Text style={styles.linkText}>Sign Up</Text>
-            </TouchableOpacity>
-          </Text>
-
-          <TouchableOpacity style={styles.googleButton}>
+             
+           <TouchableOpacity style={styles.googleButton}>
             <SocialIcon
               name='Sign In With Google'
               iconStyle={colors.grey3}
@@ -81,7 +78,17 @@ export default function Login() {
             <Text style={styles.buttonText}>Sign in with Google</Text>
           </TouchableOpacity>
         </View>
+        <View style={styles.dontAcount}>
+      <Text style={styles.text}>
+        Don't have an account?{' '}
+      </Text>
+            <TouchableOpacity style={styles.signup} onPress={handleSignUp}>
+              <Text style={styles.linkText}>Create Acount</Text>
+            </TouchableOpacity>
+       
       </View>
+      </View>
+      
       </ScrollView>
     </SafeAreaView>
   );
@@ -151,7 +158,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   googleButton: {
-    backgroundColor: 'hsl(258, 81%, 52%)',
+    backgroundColor: 'hsl(261, 87%, 68%)',
     borderRadius: 5,
     alignItems: 'center',
     flexDirection: 'row',
@@ -166,12 +173,39 @@ const styles = StyleSheet.create({
     marginVertical: 10,
   },
   linkText: {
-    color: 'hsl(23, 100%, 66%)',
+    padding:"3%",
+    color: 'white',
     fontWeight: 'bold',
   },
+  wellimageContainer:{
+    width:"20%",
+    height:"20%",
+    marginTop:"30%",
+    marginBottom:"0.5%",
+
+   
+   },
   wellimage:{
-    width:500,
+    width:"100%",
     height:"50%",
-marginTop:"10%",
+
   },
+  signup:{
+    width:"100%",
+    backgroundColor:"hsl(23, 100%, 66%)",
+    alignItems:"center",
+    marginLeft:"20%",
+    marginBottom:"20%",
+    padding:"5%",
+    borderRadius:"2%",
+    justifyContent:"flex-end"
+
+  },
+  dontAcount:{
+    margin:"5%",
+    alignItems:"center",
+    
+
+  }
+
 });

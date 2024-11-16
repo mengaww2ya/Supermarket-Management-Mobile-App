@@ -17,7 +17,7 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: "row",
     backgroundColor: "hsl(23, 100%, 66%)",
-    height: 60,
+    height:"auto",
     alignItems: "center", 
     paddingHorizontal: 10, 
   },
