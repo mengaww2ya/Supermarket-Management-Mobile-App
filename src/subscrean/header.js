@@ -1,13 +1,15 @@
-import React from "react";
-import { View, StyleSheet } from "react-native";
-import { Icon } from "@rneui/base";
-export default function Header() {
+import React from 'react';
+import { View, StyleSheet } from 'react-native';
+import { Icon } from 'react-native-elements';
+
+export default function Header({ navigation }) {
   return (
     <View style={styles.header}>
       <Icon
-    type="material-community"
-    name="arrow-left"
-    color="#hsl(0, 0%, 100%)"
+        type="material-community"
+        name="arrow-left"
+        color="white"
+        onPress={() => navigation.navigate("Welcome")} 
       />
     </View>
   );
@@ -16,9 +18,8 @@ export default function Header() {
 const styles = StyleSheet.create({
   header: {
     flexDirection: "row",
-    backgroundColor: "hsl(23, 100%, 66%)",
-    height:"auto",
-    alignItems: "center", 
-    paddingHorizontal: 10, 
+    alignItems: "center",
+    backgroundColor: "hsl(227, 86%, 55%)",
+    padding: 10,
   },
 });
