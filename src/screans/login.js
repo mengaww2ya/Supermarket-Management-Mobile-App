@@ -1,66 +1,81 @@
-import React ,{useState,useRef} from 'react';
-import { TouchableOpacity } from 'react-native';
-import { View, Text, StyleSheet, TextInput, Button } from 'react-native';
+import React, { useState, useRef } from 'react';
+import { TouchableOpacity, View, Text, StyleSheet, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import * as Animatable from'react-native-animatable';
-import { colors, Icon } from 'react-native-elements';
-import  Header from '../subscrean/header.js';
+import * as Animatable from 'react-native-animatable';
+import { colors, Icon ,SocialIcon} from 'react-native-elements';
+import Header from '../subscrean/header.js';
+
 export default function Login() {
-  const [textInput2focused,settextInput2focused]=useState(false)
-  const textInput1=useRef(1)
-  const textInput2=useRef(2)
+  const [textInput2Focused, setTextInput2Focused] = useState(false);
+  const textInput1 = useRef(null);
+  const textInput2 = useRef(null);
+
+  const handleFocus = () => setTextInput2Focused(true);
+  const handleBlur = () => setTextInput2Focused(false);
+  const handleLogin = () => {
+    // Handle login logic here
+  };
+  const handleSignUp = () => {
+    // Navigate to the sign-up page
+  };
+  const handleForgotPassword = () => {
+    // Handle forgot password logic
+  };
+
   return (
     <SafeAreaView style={styles.safeContainer}>
-
-      <Header/>
+      <Header />
       <View style={styles.container}>
-        <Text style={styles.wlcome}>Welcome to Queen Supermarket System</Text>
+        <Text style={styles.welcome}>Welcome to Queen Supermarket System</Text>
 
         <View style={styles.login}>
           <TextInput
-           style={styles.textInput1}
-            placeholder="Enter your username here" 
+            style={styles.textInput}
+            placeholder="Enter your username"
             ref={textInput1}
-            />
-          <View style={styles.textInput2}>
-            <Animatable.View animation={textInput2focused?"":"fadeInLeft"}  direction={400}>
-             <Icon
-             name='lock'
-             iconStyle={colors.grey3}
-             type='material'
-             style={{marginRight:10}}
-             />
+          />
+
+          <View style={styles.passwordContainer}>
+            <Animatable.View animation={textInput2Focused ? "" : "fadeInLeft"} duration={400}>
+              <Icon name='lock' iconStyle={colors.grey3} type='material' style={styles.icon} />
             </Animatable.View>
-          <TextInput  
-          placeholder="Enter your password here" 
-          secureTextEntry
-          style={{width:"80%",padding:10}}
-          ref={textInput2}
-          onFocus={()=>{settextInput2focused(false)}}
-          onBlur={()=>{settextInput2focused(true)}}
-           />
-
-          <Animatable.View animation={textInput2focused?"":"fadeInLeft"} direction='400'>
-          <Icon
-             name='visibility-off'
-             iconStyle={colors.grey3}
-             type='material'
-             style={{marginLeft:10}}
-             />
-          </Animatable.View >
-
+            <TextInput
+              placeholder="Enter your password"
+              secureTextEntry
+              style={styles.textInput}
+              ref={textInput2}
+              onFocus={handleFocus}
+              onBlur={handleBlur}
+            />
+            <Animatable.View animation={textInput2Focused ? "" : "fadeInLeft"} duration={400}>
+              <Icon name='visibility-off' iconStyle={colors.grey3} type='material' style={styles.icon} />
+            </Animatable.View>
           </View>
-          <View >
-            <TouchableOpacity  style={[styles.button]} onPress={() => {}} >
-              <Text>Log in</Text>
-              </TouchableOpacity>
-          </View>
+
+          <TouchableOpacity style={styles.button} onPress={handleLogin}>
+            <Text style={styles.buttonText}>Log In</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={handleForgotPassword}>
+            <Text style={styles.text}>Forgot password?</Text>
+          </TouchableOpacity>
+
           <Text style={styles.text}>
-            You don't have an account?
-            <TouchableOpacity style={styles.button}  onPress={() => {}} >
-              <Text>Sign Up</Text>
-              </TouchableOpacity>
+            Don't have an account?{' '}
+            <TouchableOpacity onPress={handleSignUp}>
+              <Text style={styles.linkText}>Sign Up</Text>
+            </TouchableOpacity>
           </Text>
+
+          <TouchableOpacity style={styles.googleButton}>
+            <SocialIcon
+              name='Sign In With Google'
+              iconStyle={colors.grey3}
+              type='google'
+              style={styles.SocialIcon}
+            />
+            <Text style={styles.buttonText}>Sign in with Google</Text>
+          </TouchableOpacity>
         </View>
       </View>
     </SafeAreaView>
@@ -68,57 +83,75 @@ export default function Login() {
 }
 
 const styles = StyleSheet.create({
-    button:{
-      width:300,
-      padding:10,
-      alignItems:"center",
-        backgroundColor: 'hsl(23, 100%, 66%)',
-      },
   safeContainer: {
     flex: 1,
-    backgroundColor: "white",
+    backgroundColor: "#f7f9fc",
   },
   container: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 5,
+    padding: 16,
   },
-  text: {
-    fontSize: 20,
-    textAlign: 'center',
+  welcome: {
+    fontSize: 24,
+    fontWeight: 'bold',
     marginBottom: 20,
-    color: 'black',
-    marginVertical: 10,
-  },
-  textInput1: {
-    fontSize: 20,
-    borderRadius: 5,
-    borderWidth:1,
-    marginBottom: 10,
-    padding: 10,
-  },
-  textInput2: {
-    fontSize: 20,
-    borderRadius: 5,
-    borderWidth:1,
-    marginBottom: 10,
-    flexDirection:'row',
+    textAlign: 'center',
   },
   login: {
-    width: "70%",
+    width: "90%",
   },
-
-  buttonContainer: {
-    width: "50%",
-    alignItems:"center",
-    borderRadius:"2%",
-    marginTop: 20,
+  textInput: {
+    fontSize: 18,
+    borderRadius: 5,
+    borderWidth: 1,
+    borderColor: colors.grey4,
+    marginBottom: 15,
+    padding: 10,
+    backgroundColor: 'white',
+  },
+  passwordContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-evenly',
-    backgroundColor: 'hsl(23, 100%, 66%)',
+    alignItems: 'center',
+    borderRadius: 5,
+    borderWidth: 1,
+    borderColor: colors.grey4,
+    marginBottom: 15,
+    backgroundColor: 'white',
   },
-  wlcome:{
-    fontSize:22,
-  }
+  icon: {
+    marginHorizontal: 10,
+  },
+  button: {
+    backgroundColor: 'hsl(23, 100%, 66%)',
+    padding: 15,
+    borderRadius: 5,
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  buttonText: {
+    color: 'white',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  googleButton: {
+    backgroundColor: 'hsl(258, 81%, 52%)',
+    borderRadius: 5,
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  googleIcon: {
+    marginRight: 10, // Space between icon and text
+  },
+  text: {
+    fontSize: 16,
+    textAlign: 'center',
+    marginVertical: 10,
+  },
+  linkText: {
+    color: 'hsl(23, 100%, 66%)',
+    fontWeight: 'bold',
+  },
 });
