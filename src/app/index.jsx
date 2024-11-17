@@ -1,15 +1,13 @@
 import React from 'react';
 import { SafeAreaView, StyleSheet } from 'react-native';
-import Login from '../screans/login.js';
-
+import RootNavigator from '../navigator/RootNavigator.js'
 export default function App() {
   return (
-    <SafeAreaView style={styles.safeContainer}>
-      <Login />
+     <SafeAreaView style={styles.safeContainer}>
+       <RootNavigator />
     </SafeAreaView>
   );
 }
-
 const styles = StyleSheet.create({
   safeContainer: {
     flex: 1,
