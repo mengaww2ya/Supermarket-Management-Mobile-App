@@ -5,44 +5,29 @@ import * as Animatable from 'react-native-animatable';
 import { colors, Icon ,SocialIcon} from 'react-native-elements';
 import Header from '../subscrean/header.js';
 import { ScrollView } from 'react-native-web';
-
-export default function Login() {
+export default function Login({navigation}) {
   const wellImage=require("../../assets/images/welImage.jpg");
   const [textInput2Focused, setTextInput2Focused] = useState(false);
   const textInput1 = useRef();
   const textInput2 = useRef();
-
   const handleFocus = () => setTextInput2Focused(false);
   const handleBlur = () => setTextInput2Focused(true);
-  const handleLogin = () => {
-    // Handle login logic here
-  };
-  const handleSignUp = () => {
-    // Navigate to the sign-up page
-  };
   const handleForgotPassword = () => {
-    // Handle forgot password logic
   };
   return (
     <SafeAreaView style={styles.safeContainer}>
       <ScrollView>
       <View>
-              <Header />
+        <Header title="sign in" type="arrow-left" navigation={navigation}/>
       </View>
       <View style={styles.container}>
-        {/* <View style={styles.wellimageContainer}>
-          <Image source={wellImage} style={styles.wellimage}/>
-        </View> */}
-
         <View><Text style={styles.welcome}>Welcome to Queen Supermarket System</Text></View>
-
         <View style={styles.login}>
           <TextInput
             style={styles.textInput}
             placeholder="Enter your username"
             ref={textInput1}
           />
-
           <View style={styles.passwordContainer}>
             <Animatable.View animation={textInput2Focused ? "" : "fadeInLeft"} duration={400}>
               <Icon name='lock' iconStyle={colors.grey3} type='material' style={styles.icon} />
@@ -60,14 +45,13 @@ export default function Login() {
             </Animatable.View>
           </View>
 
-          <TouchableOpacity style={styles.button} onPress={handleLogin}>
+          <TouchableOpacity style={styles.button}>
             <Text style={styles.buttonText}>Log In</Text>
           </TouchableOpacity>
 
           <TouchableOpacity onPress={handleForgotPassword}>
             <Text style={styles.text}>Forgot password?</Text>
-          </TouchableOpacity>
-             
+          </TouchableOpacity>             
            <TouchableOpacity style={styles.googleButton}>
             <SocialIcon
               name='Sign In With Google'
@@ -82,7 +66,7 @@ export default function Login() {
       <Text style={styles.text}>
         Don't have an account?{' '}
       </Text>
-            <TouchableOpacity style={styles.signup} onPress={handleSignUp}>
+            <TouchableOpacity style={styles.signup}>
               <Text style={styles.linkText}>Create Acount</Text>
             </TouchableOpacity>
        
@@ -93,7 +77,6 @@ export default function Login() {
     </SafeAreaView>
   );
 }
-
 const styles = StyleSheet.create({
   safeContainer: {
     flex: 1,
@@ -165,7 +148,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   googleIcon: {
-    marginRight: 10, // Space between icon and text
+    marginRight: 10, 
   },
   text: {
     fontSize: 16,
@@ -181,14 +164,11 @@ const styles = StyleSheet.create({
     width:"20%",
     height:"20%",
     marginTop:"30%",
-    marginBottom:"0.5%",
-
-   
+    marginBottom:"0.5%",   
    },
   wellimage:{
     width:"100%",
     height:"50%",
-
   },
   signup:{
     width:"100%",
@@ -199,13 +179,9 @@ const styles = StyleSheet.create({
     padding:"5%",
     borderRadius:"2%",
     justifyContent:"flex-end"
-
   },
   dontAcount:{
     margin:"5%",
     alignItems:"center",
-    
-
   }
-
 });
