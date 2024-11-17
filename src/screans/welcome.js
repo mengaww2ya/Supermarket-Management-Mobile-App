@@ -14,13 +14,12 @@ export default function Welcome( {navigation}){
     return(
 <SafeAreaView style={[styles.SafeAreaView, { flex: 1 }]}>
   <ScrollView>
-    <View>
-      <View style={[styles.welcMessagView, { flex: 0.3 }]}>
+      <View style={[styles.welcMessagView, { flex: 3 }]}>
         <Text style={styles.welcomSlogan}>Start Your Smart Shopping Here:</Text>
         <Text style={styles.welcomSlogan}>Discover Groceries at Your Fingertips Better Living</Text>
         <Text style={styles.welcomSlogan}>Anytime, Anywhere!</Text>
       </View>
-      <View style={[styles.welcImagContainer, { flex: 0.5 }]}>
+      <View style={[styles.welcImagContainer, { flex: 4 }]}>
         <Swiper autoplay={true}>
           <View style={styles.slidImageOnWelcView}>
             <Image source={image1} style={{ width: "100%", height: "100%" }} />
@@ -45,8 +44,7 @@ export default function Welcome( {navigation}){
           </View>
         </Swiper>
       </View>
-    </View>
-    <View style={[styles.buttonContainer, { flex: 0.2 }]}>
+    <View style={[styles.buttonContainer, { flex: 4 }]}>
       <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("Login")}>
         <Text style={styles.buttonText}>Log In</Text>
       </TouchableOpacity>
@@ -66,18 +64,22 @@ const styles=StyleSheet.create({
         textAlign:"center",    
     },
     welcImagContainer:{
-        alignContent:"center",
-        margin:"3%",
+    justifyContent:"center",
+    alignContent:"center",
+    margin:"3%",
      },
     welcMessagView:{
+      alignItems:"center",
         justifyContent:"flex-start",
-        alignItems:"center",
      backgroundColor:"wheet",
-     marginHorizontal:"10%",
-     marginVertical:"10%",
+     marginHorizontal:"3%",
+     padding:"3%",
     },
     buttonContainer:{
-        alignContent:"center",
+      marginBottom:20,
+      justifyContent:"flex-end",
+      marginHorizontal:"3%",
+
     },
     button: {
         backgroundColor: 'hsl(23, 100%, 66%)',
@@ -101,5 +103,7 @@ const styles=StyleSheet.create({
       flex:1,
       justifyContent:"center",
       alignItems:"center",
+      marginHorizontal:"3%",
+
       },
 })

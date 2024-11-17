@@ -12,17 +12,13 @@ export default function Login({navigation}) {
   const textInput2 = useRef();
   const handleFocus = () => setTextInput2Focused(false);
   const handleBlur = () => setTextInput2Focused(true);
-  const handleLogin = () => {
-  };
-  const handleSignUp = () => {
-  };
   const handleForgotPassword = () => {
   };
   return (
     <SafeAreaView style={styles.safeContainer}>
       <ScrollView>
       <View>
-              <Header title={"sign in"}/>
+        <Header title="sign in" type="arrow-left" navigation={navigation}/>
       </View>
       <View style={styles.container}>
         <View><Text style={styles.welcome}>Welcome to Queen Supermarket System</Text></View>
@@ -49,7 +45,7 @@ export default function Login({navigation}) {
             </Animatable.View>
           </View>
 
-          <TouchableOpacity style={styles.button} onPress={handleLogin}>
+          <TouchableOpacity style={styles.button}>
             <Text style={styles.buttonText}>Log In</Text>
           </TouchableOpacity>
 
@@ -70,7 +66,7 @@ export default function Login({navigation}) {
       <Text style={styles.text}>
         Don't have an account?{' '}
       </Text>
-            <TouchableOpacity style={styles.signup} onPress={handleSignUp}>
+            <TouchableOpacity style={styles.signup}>
               <Text style={styles.linkText}>Create Acount</Text>
             </TouchableOpacity>
        
