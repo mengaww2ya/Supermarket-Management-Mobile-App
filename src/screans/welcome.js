@@ -13,7 +13,9 @@ export default function Welcome( {navigation}){
     const image7=require("../../assets/images/goods.png");
     return(
 <SafeAreaView style={[styles.SafeAreaView]}>
-  <ScrollView style={ {flex: 1} }>
+  <ScrollView 
+  showsVerticalScrollIndicator={true}
+  >
       <View style={[styles.welcMessagView, { flex: 3 }]}>
         <Text style={styles.welcomSlogan}>Start Your Smart Shopping Here:</Text>
         <Text style={styles.welcomSlogan}>Discover Groceries at Your Fingertips Better Living</Text>

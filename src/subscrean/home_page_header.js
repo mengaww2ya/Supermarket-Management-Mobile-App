@@ -1,7 +1,8 @@
 import React from 'react';
 import { View, StyleSheet ,Text} from 'react-native';
-import { Icon } from 'react-native-elements';
+import { Icon,withBadge } from 'react-native-elements';
 export default function HomeHeader({title, type,navigation }) {
+const BadgeIcon=withBadge(0)(Icon)
   return (
     <View style={styles.header}>
         {/* <View style={{justifyContent:"flex-end"}}>
@@ -27,7 +28,16 @@ export default function HomeHeader({title, type,navigation }) {
             Queen Spermarket
         </Text>
       </View>
-      
+      <View style={{alignItems:"center",justifyContent:"center",marginRight:15}}>
+      <BadgeIcon
+        type="material-community"
+        name="cart"
+        color="white"
+        // onPress={() => {navigation.menu()}} 
+        size={32}
+      />
+     
+    </View>
     </View>
   );
 }
@@ -37,8 +47,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "hsl(27, 88%, 58%)",
-    padding: 10,
     height:"100%",
+    justifyContent:"space-between",
     
   },
   menuIconViw:{
