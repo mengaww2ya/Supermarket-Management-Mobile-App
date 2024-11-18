@@ -20,5 +20,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "hsl(227, 86%, 55%)",
     padding: 10,
+    
   },
 });

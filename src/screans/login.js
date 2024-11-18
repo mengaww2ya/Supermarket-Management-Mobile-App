@@ -45,7 +45,8 @@ export default function Login({navigation}) {
             </Animatable.View>
           </View>
 
-          <TouchableOpacity style={styles.button}>
+          <TouchableOpacity style={styles.button} onPress={()=>{navigation.navigate("Homepage")}}
+          >
             <Text style={styles.buttonText}>Log In</Text>
           </TouchableOpacity>
 
