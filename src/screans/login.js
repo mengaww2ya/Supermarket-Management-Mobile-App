@@ -6,7 +6,6 @@ import { colors, Icon ,SocialIcon} from 'react-native-elements';
 import Header from '../subscrean/header.js';
 import { ScrollView } from 'react-native-web';
 export default function Login({navigation}) {
-  const wellImage=require("../../assets/images/welImage.jpg");
   const [textInput2Focused, setTextInput2Focused] = useState(false);
   const textInput1 = useRef();
   const textInput2 = useRef();
@@ -18,7 +17,7 @@ export default function Login({navigation}) {
     <SafeAreaView style={styles.safeContainer}>
       <ScrollView>
       <View>
-        <Header title="sign in" type="arrow-left" navigation={navigation}/>
+        <Header  type="arrow-left" navigation={navigation}/>
       </View>
       <View style={styles.container}>
         <View><Text style={styles.welcome}>Welcome to Queen Supermarket System</Text></View>

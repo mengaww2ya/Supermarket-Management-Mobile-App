@@ -1,22 +1,33 @@
 import React from 'react';
-import { View, StyleSheet,Text } from 'react-native';
+import { View, StyleSheet ,Text} from 'react-native';
 import { Icon } from 'react-native-elements';
-export default function Header({title, type,navigation }) {
+export default function HomeHeader({title, type,navigation }) {
   return (
     <View style={styles.header}>
-        <View style={styles.menuIconViw}>
-        <Icon
+        {/* <View style={{justifyContent:"flex-end"}}>
+      <Icon
         type="material-community"
         name="arrow-left"
         color="white"
         onPress={() => {navigation.goBack()}} 
       />
-      </View>
-      <View style={{alignItems:"center",justifyContent:"center",flexDirection:"row"}}>
+      </View> */}
+        <View style={styles.menuIconViw}>
+      <Icon
+        type="material-community"
+        name="menu"
+        color="white"
+        onPress={() => {navigation.menu()}} 
+        size={32}
+      />
+     
+    </View>
+     <View style={{alignItems:"center",justifyContent:"center",flexDirection:"row"}}>
         <Text style={styles.titleText}>
-            Sign In
+            Queen Spermarket
         </Text>
       </View>
+      
     </View>
   );
 }
