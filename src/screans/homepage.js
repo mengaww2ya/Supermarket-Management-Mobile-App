@@ -1,10 +1,11 @@
-import React,{useState} from "react";
-import { Text,View , StyleSheet,TouchableOpacity, ScrollView} from "react-native";
+import React,{useState,} from "react";
+import { Text,View ,Pressable, StyleSheet,TouchableOpacity, ScrollView,FlatList, Image} from "react-native";
 import HomeHeader from '../subscrean/home_page_header';
-import Header from "../subscrean/header";
+import promotionCategories from '../global/data.js';
 import { colors,Icon } from "react-native-elements";
 export default function Homepage({navigation}){
   const [Delivery,setDelivery]=useState(false);
+  const [indexcheck,setindexcheck]=useState("0");
     return(
     <View style={{flex:1}}>
         <View>
@@ -74,6 +75,34 @@ export default function Homepage({navigation}){
     </View>
 
     </View>
+    <View style={styles.promotionView}>
+      <Text style={styles.promotionTextHead}>
+        Promotion Categories(what is news)
+      </Text>
+      <View>
+     <FlatList
+     horizontal={true}
+     showsHorizontalScrollIndicator={false}
+       data={promotionCategories}
+       keyExtractor={(item)=>item.id}
+       extraData={indexcheck}
+       renderItem={({item,index})=>(
+      <Pressable
+       onPress={()=>{setindexcheck(item.id)}}>
+      <View style={indexcheck === item.id ? {...styles.promotionCardsSelected} : {...styles.promotionCards}} >
+         <Image
+         style={{height:60,width:60,borderRadius:30}}
+         source={item.image}
+         />
+         <View>
+          <Text style={indexcheck ===item.id ? {...styles.promotionCardtextSelected} : {...styles.promotionCardtext}}>{item.name}</Text>
+         </View>
+        </View>
+      </Pressable>
+    )}
+     />
+      </View>
+       </View>
           </ScrollView>
         </View>
     )
@@ -131,5 +160,46 @@ const styles = StyleSheet.create({
 filterView:{
   alignItems:"center",
  marginRight:5,
+},
+promotionView:{
+  backgroundColor:colors.grey5,
+  paddingVertical:5,
+  marginTop:10,
+
+  // justifyContent:"center",
+},
+promotionTextHead:{
+  color:colors.grey2,
+  fontSize:22,
+  fontWeight:"bold",
+  paddingLeft:10,
+  textAlign:"center",
+},
+promotionCards:{
+  borderRadius:30,
+  backgroundColor:colors.grey5,
+  justifyContent:"center",
+  alignItems:"center",
+  padding:5,
+  width:80,
+  height:100,
+},
+promotionCardsSelected:{
+  borderRadius:30,
+  backgroundColor:"hsl(23, 100%, 66%)",
+  justifyContent:"center",
+  alignItems:"center",
+  padding:5,
+  width:80,
+  height:100,
+},
+promotionCardtextSelected:{
+  fontWeight:"bold",
+  color:"white"
+},
+promotionCardtext:{
+  fontWeight:"bold",
+  color:colors.grey2,
 }
+
   });
