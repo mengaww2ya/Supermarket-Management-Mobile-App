@@ -1,7 +1,6 @@
 import React from 'react';
-import { TouchableOpacity, View, Text, StyleSheet ,Image} from 'react-native';
+import { TouchableOpacity, View, Text, StyleSheet ,Image,ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ScrollView } from 'react-native';
 import Swiper from 'react-native-swiper';
 import { colors } from 'react-native-elements';
 export default function Welcome( {navigation}){

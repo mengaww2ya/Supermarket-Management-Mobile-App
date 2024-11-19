@@ -1,8 +1,8 @@
-import React,{useState,} from "react";
-import { Text,View ,Pressable, StyleSheet,TouchableOpacity, ScrollView,FlatList, Image} from "react-native";
-import HomeHeader from '../subscrean/home_page_header';
-import {promoCategories,standard,recomended} from '../global/data.js'
-import { colors,Icon } from "react-native-elements";
+import React, { useState } from "react";
+import { Text, View, Pressable, StyleSheet, TouchableOpacity, ScrollView, FlatList, Image } from "react-native";
+import HomeHeader from "../subscrean/home_page_header";
+import { promoCategories, standard, recomended } from "../global/data.js";
+import { colors, Icon } from "react-native-elements";
 export default function Homepage({navigation}){
   const [Delivery,setDelivery]=useState(false);
   const [indexcheck,setindexcheck,]=useState(" ");
@@ -16,9 +16,12 @@ export default function Homepage({navigation}){
         {/* <Header  type="arrow-left" navigation={navigation}/> */}
          <HomeHeader title="sign in" type="arrow-left" navigation={navigation}/>
          </View>
+          <ScrollView contentContainerStyle={{flexGrow:1,padding:20}}
+showsVerticalScrollIndicator={true}
+stickyHeaderIndices={[0]}>
      
         <View>
-         <View style={[styles.container]}>
+         <View style={styles.container}>
           <TouchableOpacity 
           onPress={()=>{
             setDelivery(true)
@@ -78,12 +81,8 @@ export default function Homepage({navigation}){
 
     </View>
     </View>
-    <ScrollView 
-
-contentContainerStyle={{flexGrow:1,padding:20}}
-showsVerticalScrollIndicator={true}
-stickyHeaderIndices={[0]}
->
+   
+       <View>
     <View >
       <Text style={styles.TextHead}>
         Promotion Categories
@@ -98,13 +97,13 @@ stickyHeaderIndices={[0]}
        renderItem={({item,index})=>(
       <Pressable style={{padding:10}}
        onPress={()=>{setindexcheck(item.id)}}>
-      <View style={indexcheck == item.id ? styles.promotionCardsSelected:styles.promotionCards} >
+      <View style={indexcheck === item.id ? styles.promotionCardsSelected:styles.promotionCards} >
          <Image
          style={{height:"70%",width:"70%",borderRadius:15,padding:10}}
          source={item.image}
          />
          <View>
-          <Text style={indexcheck == item.id ? styles.promotionCardtextSelected : styles.promotionCardtext}>{item.ProductName}</Text>
+          <Text style={indexcheck === item.id ? styles.promotionCardtextSelected : styles.promotionCardtext}>{item.ProductName}</Text>
          </View>
         </View>
       </Pressable>
@@ -127,13 +126,13 @@ stickyHeaderIndices={[0]}
        renderItem={({item,index})=>(
       <Pressable style={{padding:10}}
        onPress={()=>{ssetindexcheck(item.id)}}>
-      <View style={sindexcheck == item.id ? styles.standardCardsSelected:styles.standardCards} >
+      <View style={sindexcheck === item.id ? styles.standardCardsSelected:styles.standardCards} >
          <Image
          style={{height:"70%",width:"70%",borderRadius:15,padding:10}}
          source={item.image}
          />
          <View>
-          <Text style={indexcheck == item.id ? styles.promotionCardtextSelected : styles.promotionCardtext}>{item.name}</Text>
+          <Text style={indexcheck === item.id ? styles.promotionCardtextSelected : styles.promotionCardtext}>{item.name}</Text>
          </View>
         </View>
       </Pressable>
@@ -155,13 +154,13 @@ stickyHeaderIndices={[0]}
        renderItem={({item,index})=>(
       <Pressable style={{padding:10}}
        onPress={()=>{recosetindexcheck(item.id)}}>
-      <View style={recoindexcheck == item.id ? styles.standardCardsSelected:styles.standardCards} >
+      <View style={recoindexcheck === item.id ? styles.standardCardsSelected:styles.standardCards} >
          <Image
          style={{height:"70%",width:"70%",borderRadius:15,padding:10}}
          source={item.image}
          />
          <View>
-          <Text style={recoindexcheck == item.id ? styles.promotionCardtextSelected : styles.promotionCardtext}>
+          <Text style={recoindexcheck === item.id ? styles.promotionCardtextSelected : styles.promotionCardtext}>
             {item.name}
 
           </Text>
@@ -172,8 +171,9 @@ stickyHeaderIndices={[0]}
      />
       </View>
        </View>
+       </View>
           </ScrollView>
-        </View>
+          </View>
     )
 }
 
