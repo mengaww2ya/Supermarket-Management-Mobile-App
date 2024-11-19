@@ -3,6 +3,7 @@ import { TouchableOpacity, View, Text, StyleSheet ,Image} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ScrollView } from 'react-native';
 import Swiper from 'react-native-swiper';
+import { colors } from 'react-native-elements';
 export default function Welcome( {navigation}){
     const image1=require("../../assets/images/goodinbag.png");
     const image2=require("../../assets/images/welImage.jpg");
@@ -12,41 +13,41 @@ export default function Welcome( {navigation}){
     const image6=require("../../assets/images/cartwithgoods.png");
     const image7=require("../../assets/images/goods.png");
     return(
-<SafeAreaView style={[styles.SafeAreaView]}>
-  <ScrollView 
+<SafeAreaView style={styles.SafeAreaView}>
+  <ScrollView  style={{flex:1}}
   showsVerticalScrollIndicator={true}
   >
-      <View style={[styles.welcMessagView, { flex: 3 }]}>
+      <View style={styles.welcMessagView}>
         <Text style={styles.welcomSlogan}>Start Your Smart Shopping Here:</Text>
         <Text style={styles.welcomSlogan}>Discover Groceries at Your Fingertips Better Living</Text>
         <Text style={styles.welcomSlogan}>Anytime, Anywhere!</Text>
       </View>
-      <View style={[styles.welcImagContainer, { flex: 4 }]}>
+      <View style={[styles.welcImagContainer]}>
         <Swiper autoplay={true}>
           <View style={styles.slidImageOnWelcView}>
-            <Image source={image1} style={{ width: "100%", height: "100%" }} />
+            <Image source={image1} style={{ width: 300, height: 300 }} />
           </View>
           <View style={styles.slidImageOnWelcView}>
-            <Image source={image2} style={{ width: "100%", height: "100%" }} />
+            <Image source={image2} style={{  width: 300, height: 300 }} />
           </View>
           <View style={styles.slidImageOnWelcView}>
-            <Image source={image3} style={{ width: "100%", height: "100%" }} />
+            <Image source={image3} style={{  width: 300, height: 300 }} />
           </View>
           <View style={styles.slidImageOnWelcView}>
-            <Image source={image4} style={{ width: "100%", height: "100%" }} />
+            <Image source={image4} style={{ width: 300, height: 300 }} />
           </View>
           <View style={styles.slidImageOnWelcView}>
-            <Image source={image5} style={{ width: "100%", height: "100%" }} />
+            <Image source={image5} style={{ width: 300, height: 300}} />
           </View>
           <View style={styles.slidImageOnWelcView}>
-            <Image source={image6} style={{ width: "100%", height: "100%" }} />
+            <Image source={image6} style={{  width: 300, height: 300 }} />
           </View>
           <View style={styles.slidImageOnWelcView}>
-            <Image source={image7} style={{ width: "100%", height: "100%" }} />
+            <Image source={image7} style={{  width: 300, height: 300 }} />
           </View>
         </Swiper>
       </View>
-    <View style={[styles.buttonContainer, { flex: 4 }]}>
+    <View style={[styles.buttonContainer]}>
       <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("Login")}>
         <Text style={styles.buttonText}>Log In</Text>
       </TouchableOpacity>
@@ -67,20 +68,25 @@ const styles=StyleSheet.create({
     },
     welcImagContainer:{
     justifyContent:"center",
-    alignContent:"center",
-    margin:"3%",
+    // alignContent:"center",
+    backgroundColor:colors.grey3,
+    marginLeft:"20%",
+    width:"50%",
+   height:"50%",
+    padding:5,
      },
     welcMessagView:{
       alignItems:"center",
-        justifyContent:"flex-start",
+      justifyContent:"flex-start",
      backgroundColor:"wheet",
-     marginHorizontal:"3%",
-     padding:"3%",
+     marginHorizontal:10,
+     paddingVertical:5,
+     
     },
     buttonContainer:{
-      marginBottom:20,
+      marginBottom:10,
       justifyContent:"flex-end",
-      marginHorizontal:"3%",
+      marginHorizontal:10,
 
     },
     button: {
@@ -97,15 +103,12 @@ const styles=StyleSheet.create({
         fontSize: 18,
         fontWeight: 'bold',
       },
-      slidImageOnWelc:{
-      width:"100%",
-      height:"100%",
-      },
       slidImageOnWelcView:{
-      flex:1,
-      justifyContent:"center",
       alignItems:"center",
-      marginHorizontal:"3%",
+      // flex:1,
+       marginHorizontal:10,
+      // width:600,
+      // height:600,
 
       },
 })

@@ -1,21 +1,23 @@
 import React,{useState,} from "react";
 import { Text,View ,Pressable, StyleSheet,TouchableOpacity, ScrollView,FlatList, Image} from "react-native";
 import HomeHeader from '../subscrean/home_page_header';
-import promotionCategories from '../global/data.js';
+import {promoCategories,standard,recomended} from '../global/data.js'
 import { colors,Icon } from "react-native-elements";
 export default function Homepage({navigation}){
   const [Delivery,setDelivery]=useState(false);
-  const [indexcheck,setindexcheck]=useState("0");
+  const [indexcheck,setindexcheck,]=useState(" ");
+  const [sindexcheck,ssetindexcheck]=useState(" ");
+  const [recoindexcheck,recosetindexcheck]=useState(" ");
+
+ 
     return(
     <View style={{flex:1}}>
         <View>
         {/* <Header  type="arrow-left" navigation={navigation}/> */}
          <HomeHeader title="sign in" type="arrow-left" navigation={navigation}/>
          </View>
-      <ScrollView
-      showsVerticalScrollIndicator={true}
-      stickyHeaderIndices={[0]}
-      >
+     
+        <View>
          <View style={[styles.container]}>
           <TouchableOpacity 
           onPress={()=>{
@@ -75,27 +77,94 @@ export default function Homepage({navigation}){
     </View>
 
     </View>
-    <View style={styles.promotionView}>
-      <Text style={styles.promotionTextHead}>
-        Promotion Categories(what is news)
+    </View>
+    <ScrollView 
+
+contentContainerStyle={{flexGrow:1,padding:20}}
+showsVerticalScrollIndicator={true}
+stickyHeaderIndices={[0]}
+>
+    <View >
+      <Text style={styles.TextHead}>
+        Promotion Categories
       </Text>
-      <View>
+      <View style={styles.promotionView}>
      <FlatList
      horizontal={true}
      showsHorizontalScrollIndicator={false}
-       data={promotionCategories}
+       data={promoCategories}
        keyExtractor={(item)=>item.id}
        extraData={indexcheck}
        renderItem={({item,index})=>(
-      <Pressable
+      <Pressable style={{padding:10}}
        onPress={()=>{setindexcheck(item.id)}}>
-      <View style={indexcheck === item.id ? {...styles.promotionCardsSelected} : {...styles.promotionCards}} >
+      <View style={indexcheck == item.id ? styles.promotionCardsSelected:styles.promotionCards} >
          <Image
-         style={{height:60,width:60,borderRadius:30}}
+         style={{height:"70%",width:"70%",borderRadius:15,padding:10}}
          source={item.image}
          />
          <View>
-          <Text style={indexcheck ===item.id ? {...styles.promotionCardtextSelected} : {...styles.promotionCardtext}}>{item.name}</Text>
+          <Text style={indexcheck == item.id ? styles.promotionCardtextSelected : styles.promotionCardtext}>{item.name}</Text>
+         </View>
+        </View>
+      </Pressable>
+    )}
+     />
+      </View>
+       </View>
+
+       <View >
+      <Text style={styles.TextHead}>
+        standard Categories
+      </Text>
+      <View style={styles.promotionView}>
+     <FlatList
+     horizontal={true}
+     showsHorizontalScrollIndicator={false}
+       data={standard}
+       keyExtractor={(item)=>item.id}
+       extraData={sindexcheck}
+       renderItem={({item,index})=>(
+      <Pressable style={{padding:10}}
+       onPress={()=>{ssetindexcheck(item.id)}}>
+      <View style={sindexcheck == item.id ? styles.standardCardsSelected:styles.standardCards} >
+         <Image
+         style={{height:"70%",width:"70%",borderRadius:15,padding:10}}
+         source={item.image}
+         />
+         <View>
+          <Text style={indexcheck == item.id ? styles.promotionCardtextSelected : styles.promotionCardtext}>{item.name}</Text>
+         </View>
+        </View>
+      </Pressable>
+    )}
+     />
+      </View>
+       </View>
+       <View >
+      <Text style={styles.TextHead}>
+        recomended Categories
+      </Text>
+      <View style={styles.promotionView}>
+     <FlatList
+     horizontal={true}
+     showsHorizontalScrollIndicator={false}
+       data={recomended}
+       keyExtractor={(item)=>item.id}
+       extraData={recoindexcheck}
+       renderItem={({item,index})=>(
+      <Pressable style={{padding:10}}
+       onPress={()=>{recosetindexcheck(item.id)}}>
+      <View style={recoindexcheck == item.id ? styles.standardCardsSelected:styles.standardCards} >
+         <Image
+         style={{height:"70%",width:"70%",borderRadius:15,padding:10}}
+         source={item.image}
+         />
+         <View>
+          <Text style={recoindexcheck == item.id ? styles.promotionCardtextSelected : styles.promotionCardtext}>
+            {item.name}
+
+          </Text>
          </View>
         </View>
       </Pressable>
@@ -163,43 +232,80 @@ filterView:{
 },
 promotionView:{
   backgroundColor:colors.grey5,
-  paddingVertical:5,
+  // paddingVertical:5,
   marginTop:10,
+  margin:10,
+  padding:10
 
   // justifyContent:"center",
 },
-promotionTextHead:{
+TextHead:{
   color:colors.grey2,
   fontSize:22,
   fontWeight:"bold",
-  paddingLeft:10,
+  paddingLeft:5,
   textAlign:"center",
 },
 promotionCards:{
-  borderRadius:30,
-  backgroundColor:colors.grey5,
+  borderRadius:15,
+  backgroundColor:colors.grey3,
   justifyContent:"center",
   alignItems:"center",
   padding:5,
   width:80,
-  height:100,
+  height:80,
+  paddingVertical:10,
+  paddingHorizontal:10,
+  marginVertical:10,
+  marginHorizontal:10,
 },
 promotionCardsSelected:{
-  borderRadius:30,
-  backgroundColor:"hsl(23, 100%, 66%)",
+  borderRadius:15,
+  backgroundColor:"hsl(27, 88%, 58%)",
   justifyContent:"center",
   alignItems:"center",
-  padding:5,
-  width:80,
+  paddingVertical:10,
+  paddingHorizontal:10,
+  marginVertical:10,
+  marginHorizontal:10,
+
+  width:100,
   height:100,
 },
 promotionCardtextSelected:{
   fontWeight:"bold",
-  color:"white"
+  color:colors.grey1,
 },
 promotionCardtext:{
   fontWeight:"bold",
   color:colors.grey2,
-}
+},
+
+standardCards:{
+  borderRadius:15,
+  backgroundColor:colors.grey3,
+  justifyContent:"center",
+  alignItems:"center",
+  padding:5,
+  width:300,
+  height:300,
+  paddingVertical:10,
+  paddingHorizontal:10,
+  marginVertical:10,
+  marginHorizontal:10,
+},
+standardCardsSelected:{
+  borderRadius:15,
+  backgroundColor:"hsl(27, 88%, 58%)",
+  justifyContent:"center",
+  alignItems:"center",
+  paddingVertical:10,
+  paddingHorizontal:10,
+  marginVertical:10,
+  marginHorizontal:10,
+
+  width:400,
+  height:400,
+},
 
   });
