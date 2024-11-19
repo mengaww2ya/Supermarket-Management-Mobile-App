@@ -104,7 +104,7 @@ stickyHeaderIndices={[0]}
          source={item.image}
          />
          <View>
-          <Text style={indexcheck == item.id ? styles.promotionCardtextSelected : styles.promotionCardtext}>{item.name}</Text>
+          <Text style={indexcheck == item.id ? styles.promotionCardtextSelected : styles.promotionCardtext}>{item.ProductName}</Text>
          </View>
         </View>
       </Pressable>

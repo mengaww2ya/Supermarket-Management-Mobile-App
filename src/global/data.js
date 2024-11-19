@@ -1,17 +1,42 @@
-export const promoCategories=[{name:"Soft drink",image:require("../../assets/images/softDrink.jpeg"),id:"0"},
-    {name:"Alcholic drink",image:require("../../assets/images/alcolicDirnk.jpeg"),id:"1"},
-    {name:"Vegetable",image:require("../../assets/images/vegetable.jpeg"),id:"2"},  
-     {name:"Pcked food",image:require("../../assets/images/packedfood.jpeg"),id:"3"},
-     {name:"cosmotics",image:require("../../assets/images/cosmotics.jpeg"),id:"4"},];
+export const promoCategories=[
+    {ProductName:"Soft drink",image:require("../../assets/images/softDrink.jpeg")
+        ,Price:20,DiscountPrice:15,Rating:"4.5 of 5 stars)",NumberofReviews:"200",ShortDescription:"sample discription",id:"0"},
+        {ProductName:"Alcholic drink",image:require("../../assets/images/alcolicDirnk.jpeg")
+        ,Price:20,DiscountPrice:15,Rating:"4.5 of 5 stars)",NumberofReviews:"200",ShortDescription:"sample discription",id:"1"},
+        {ProductName:"Vegetable",image:require("../../assets/images/vegetable.jpeg")
+     ,Price:20,DiscountPrice:15,Rating:"4.5 of 5 stars)",NumberofReviews:"200",ShortDescription:"sample discription",id:"2"},
+ {ProductName:"Pcked food",image:require("../../assets/images/packedfood.jpeg")
+  ,Price:20,DiscountPrice:15,Rating:"4.5 of 5 stars)",NumberofReviews:"200",ShortDescription:"sample discription",id:"3"},
+  {ProductName:"cosmotics",image:require("../../assets/images/cosmotics.jpeg")
+    ,Price:20,DiscountPrice:15,Rating:"4.5 of 5 stars)",NumberofReviews:"200",ShortDescription:"sample discription",id:"4"}]
+
+
      ////////////////////////////////
-     export const standard=[{name:"Soft drink",image:require("../../assets/images/softDrink.jpeg"),id:"0"},
-      {name:"Alcholic drink",image:require("../../assets/images/alcolicDirnk.jpeg"),id:"1"},
-      {name:"Vegetable",image:require("../../assets/images/vegetable.jpeg"),id:"2"},  
-       {name:"Pcked food",image:require("../../assets/images/packedfood.jpeg"),id:"3"},
-       {name:"cosmotics",image:require("../../assets/images/cosmotics.jpeg"),id:"4"}];
+     export const standard=[
+        {ProductName:"Soft drink",image:require("../../assets/images/softDrink.jpeg")
+            ,Price:20,DiscountPrice:15,Rating:"4.5 of 5 stars)",NumberofReviews:"200",ShortDescription:"sample discription",id:"0"},
+            {ProductName:"Alcholic drink",image:require("../../assets/images/alcolicDirnk.jpeg")
+            ,Price:20,DiscountPrice:15,Rating:"4.5 of 5 stars)",NumberofReviews:"200",ShortDescription:"sample discription",id:"1"},
+            {ProductName:"Vegetable",image:require("../../assets/images/vegetable.jpeg")
+         ,Price:20,DiscountPrice:15,Rating:"4.5 of 5 stars)",NumberofReviews:"200",ShortDescription:"sample discription",id:"2"},
+     {ProductName:"Pcked food",image:require("../../assets/images/packedfood.jpeg")
+      ,Price:20,DiscountPrice:15,Rating:"4.5 of 5 stars)",NumberofReviews:"200",ShortDescription:"sample discription",id:"3"},
+      {ProductName:"cosmotics",image:require("../../assets/images/cosmotics.jpeg")
+        ,Price:20,DiscountPrice:15,Rating:"4.5 of 5 stars)",NumberofReviews:"200",ShortDescription:"sample discription",id:"4"}
+    ];
        //////////////////////////////////////////////////////////////////////////////
-       export const recomended=[{name:"Soft drink",image:require("../../assets/images/softDrink.jpeg"),id:"0"},
-        {name:"Alcholic drink",image:require("../../assets/images/alcolicDirnk.jpeg"),id:"1"},
-        {name:"Vegetable",image:require("../../assets/images/vegetable.jpeg"),id:"2"},  
-         {name:"Pcked food",image:require("../../assets/images/packedfood.jpeg"),id:"3"},
-         {name:"cosmotics",image:require("../../assets/images/cosmotics.jpeg"),id:"4"}];
+       export const recomended=[
+        {ProductName:"Soft drink",image:require("../../assets/images/softDrink.jpeg")
+        ,Price:20,DiscountPrice:15,Rating:"4.5 of 5 stars)",NumberofReviews:"200",ShortDescription:"sample discription",id:"0"},
+        {ProductName:"Alcholic drink",image:require("../../assets/images/alcolicDirnk.jpeg")
+        ,Price:20,DiscountPrice:15,Rating:"4.5 of 5 stars)",NumberofReviews:"200",ShortDescription:"sample discription",id:"1"},
+        {ProductName:"Vegetable",image:require("../../assets/images/vegetable.jpeg")
+     ,Price:20,DiscountPrice:15,Rating:"4.5 of 5 stars)",NumberofReviews:"200",ShortDescription:"sample discription",id:"2"},
+ {ProductName:"Pcked food",image:require("../../assets/images/packedfood.jpeg")
+  ,Price:20,DiscountPrice:15,Rating:"4.5 of 5 stars)",NumberofReviews:"200",ShortDescription:"sample discription",id:"3"},
+  {ProductName:"cosmotics",image:require("../../assets/images/cosmotics.jpeg")
+    ,Price:20,DiscountPrice:15,Rating:"4.5 of 5 stars)",NumberofReviews:"200",ShortDescription:"sample discription",id:"4"}];
+
+
+
+      

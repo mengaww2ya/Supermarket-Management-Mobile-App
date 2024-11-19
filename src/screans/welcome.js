@@ -14,7 +14,7 @@ export default function Welcome( {navigation}){
     const image7=require("../../assets/images/goods.png");
     return(
 <SafeAreaView style={styles.SafeAreaView}>
-  <ScrollView  style={{flex:1}}
+  <ScrollView 
   showsVerticalScrollIndicator={true}
   >
       <View style={styles.welcMessagView}>
@@ -85,7 +85,6 @@ const styles=StyleSheet.create({
     },
     buttonContainer:{
       marginBottom:10,
-      justifyContent:"flex-end",
       marginHorizontal:10,
 
     },
@@ -104,8 +103,8 @@ const styles=StyleSheet.create({
         fontWeight: 'bold',
       },
       slidImageOnWelcView:{
-      alignItems:"center",
-      // flex:1,
+      // alignItems:"center",
+      flex:1,
        marginHorizontal:10,
       // width:600,
       // height:600,
