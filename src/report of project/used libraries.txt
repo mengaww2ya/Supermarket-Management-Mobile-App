@@ -1,3 +1,4 @@
 react native elements
 react native swiper
  React Native
+  react native navigator
