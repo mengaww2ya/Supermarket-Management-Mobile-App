@@ -1,8 +1,11 @@
 import React, { useState } from "react";
-import { Text, View, Pressable, StyleSheet, TouchableOpacity, ScrollView, FlatList, Image } from "react-native";
+import { Text, View, Pressable, StyleSheet, TouchableOpacity, ScrollView, FlatList, Image, Dimensions } from "react-native";
 import HomeHeader from "../subscrean/home_page_header";
 import { promoCategories, standard, recomended } from "../global/data.js";
 import { colors, Icon } from "react-native-elements";
+import { SafeAreaView } from "react-native-safe-area-context";
+const screenwidth =Dimensions.get("window").width;
+const screenheight=Dimensions.get("window").height;
 export default function Homepage({navigation}){
   const [Delivery,setDelivery]=useState(false);
   const [indexcheck,setindexcheck,]=useState(" ");
@@ -11,14 +14,15 @@ export default function Homepage({navigation}){
 
  
     return(
-    <View style={{flex:1}}>
-        <View>
+   
+        <SafeAreaView style={{height:"100%"}}>
+          <View>
         {/* <Header  type="arrow-left" navigation={navigation}/> */}
          <HomeHeader title="sign in" type="arrow-left" navigation={navigation}/>
          </View>
-          <ScrollView contentContainerStyle={{flexGrow:1,padding:20}}
-showsVerticalScrollIndicator={true}
-stickyHeaderIndices={[0]}>
+           <ScrollView 
+>
+     
      
         <View>
          <View style={styles.container}>
@@ -45,11 +49,11 @@ stickyHeaderIndices={[0]}>
           </TouchableOpacity>
                
           </View>
-        <View style={styles.filterWholContainer}>
+         <View style={styles.filterWholContainer}>
 
-        <View style={styles.mepTimeContainer}>
-       <View style={[{flexDirection:"row" ,padding:5}]}>
-       <Icon
+         <View style={styles.mepTimeContainer}>
+         <View style={[{flexDirection:"row" ,padding:5}]}>
+        <Icon
         type="material-community"
         name="map-marker"
         color="hsl(0, 71%, 58%)"
@@ -81,8 +85,8 @@ stickyHeaderIndices={[0]}>
 
     </View>
     </View>
-   
-       <View>
+  
+       <View >
     <View >
       <Text style={styles.TextHead}>
         Promotion Categories
@@ -172,8 +176,8 @@ stickyHeaderIndices={[0]}>
       </View>
        </View>
        </View>
-          </ScrollView>
-          </View>
+          </ScrollView> 
+        </SafeAreaView>
     )
 }
 
@@ -235,7 +239,8 @@ promotionView:{
   // paddingVertical:5,
   marginTop:10,
   margin:10,
-  padding:10
+  padding:10,
+  
 
   // justifyContent:"center",
 },
@@ -252,14 +257,15 @@ promotionCards:{
   justifyContent:"center",
   alignItems:"center",
   padding:5,
-  width:80,
-  height:80,
+   height:screenheight*0.3,
+  width:screenwidth*0.3,
   paddingVertical:10,
   paddingHorizontal:10,
   marginVertical:10,
   marginHorizontal:10,
 },
 promotionCardsSelected:{
+   
   borderRadius:15,
   backgroundColor:"hsl(27, 88%, 58%)",
   justifyContent:"center",
@@ -269,10 +275,11 @@ promotionCardsSelected:{
   marginVertical:10,
   marginHorizontal:10,
 
-  width:100,
-  height:100,
+  height:screenheight*0.3,
+  width:screenwidth*0.3,
 },
 promotionCardtextSelected:{
+  
   fontWeight:"bold",
   color:colors.grey1,
 },
@@ -286,9 +293,8 @@ standardCards:{
   backgroundColor:colors.grey3,
   justifyContent:"center",
   alignItems:"center",
-  padding:5,
-  width:300,
-  height:300,
+  height:screenheight*0.3,
+  width:screenwidth*0.3,
   paddingVertical:10,
   paddingHorizontal:10,
   marginVertical:10,
@@ -304,8 +310,8 @@ standardCardsSelected:{
   marginVertical:10,
   marginHorizontal:10,
 
-  width:400,
-  height:400,
+  height:screenheight*0.3,
+  width:screenwidth*0.3,
 },
 
   });
