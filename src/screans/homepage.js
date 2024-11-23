@@ -15,16 +15,16 @@ export default function Homepage({navigation}){
  
     return(
    
-        <SafeAreaView style={{height:"100%"}}>
+        <SafeAreaView style={{ flex: 1 }}>
           <View>
-        {/* <Header  type="arrow-left" navigation={navigation}/> */}
          <HomeHeader title="sign in" type="arrow-left" navigation={navigation}/>
          </View>
-           <ScrollView 
->
+             <ScrollView 
+             contentContainerStyle={{ flexGrow: 1 ,paddingBottom: 20 }} 
+             showsVerticalScrollIndicator={true}>
+
      
-     
-        <View>
+     <View  style={{ flex: 1 }}> 
          <View style={styles.container}>
           <TouchableOpacity 
           onPress={()=>{
@@ -84,17 +84,17 @@ export default function Homepage({navigation}){
     </View>
 
     </View>
-    </View>
-  
-       <View >
+  </View>
     <View >
       <Text style={styles.TextHead}>
         Promotion Categories
       </Text>
       <View style={styles.promotionView}>
      <FlatList
-     horizontal={true}
-     showsHorizontalScrollIndicator={false}
+     nestedScrollEnabled
+      horizontal={true}
+        style={{ height: screenheight * 0.3 }} // Fixed height
+     showsHorizontalScrollIndicator={true}
        data={promoCategories}
        keyExtractor={(item)=>item.id}
        extraData={indexcheck}
@@ -122,8 +122,11 @@ export default function Homepage({navigation}){
       </Text>
       <View style={styles.promotionView}>
      <FlatList
-     horizontal={true}
-     showsHorizontalScrollIndicator={false}
+      nestedScrollEnabled
+          horizontal={true}
+          showsHorizontalScrollIndicator={false}
+        style={{ height: screenheight * 0.3 }} // Fixed height
+
        data={standard}
        keyExtractor={(item)=>item.id}
        extraData={sindexcheck}
@@ -150,8 +153,10 @@ export default function Homepage({navigation}){
       </Text>
       <View style={styles.promotionView}>
      <FlatList
-     horizontal={true}
-     showsHorizontalScrollIndicator={false}
+      nestedScrollEnabled
+        style={{ height: screenheight * 0.3 }} // Fixed height
+  horizontal={true}
+  showsHorizontalScrollIndicator={false}
        data={recomended}
        keyExtractor={(item)=>item.id}
        extraData={recoindexcheck}
@@ -174,7 +179,6 @@ export default function Homepage({navigation}){
     )}
      />
       </View>
-       </View>
        </View>
           </ScrollView> 
         </SafeAreaView>
