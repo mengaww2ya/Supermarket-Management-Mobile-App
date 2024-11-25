@@ -1,6 +1,8 @@
 import React from 'react';
-import { View, StyleSheet ,Text} from 'react-native';
+import { View, StyleSheet ,Text, Dimensions} from 'react-native';
 import { Icon,withBadge } from 'react-native-elements';
+const screenwidth=Dimensions.get("window").width;
+const screenheight=Dimensions.get("window").height;
 export default function HomeHeader({title, type,navigation }) {
 const BadgeIcon=withBadge(0)(Icon)
   return (
@@ -47,7 +49,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "hsl(27, 88%, 58%)",
-    height:"100%",
+    height:screenheight*0.05,
     justifyContent:"space-between",
     
   },

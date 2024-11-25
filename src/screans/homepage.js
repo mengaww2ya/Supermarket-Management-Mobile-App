@@ -3,7 +3,6 @@ import { Text, View, Pressable, StyleSheet, TouchableOpacity, ScrollView, FlatLi
 import HomeHeader from "../subscrean/home_page_header";
 import { promoCategories, standard, recomended } from "../global/data.js";
 import { colors, Icon } from "react-native-elements";
-import { SafeAreaView } from "react-native-safe-area-context";
 const screenwidth =Dimensions.get("window").width;
 const screenheight=Dimensions.get("window").height;
 export default function Homepage({navigation}){
@@ -13,18 +12,17 @@ export default function Homepage({navigation}){
   const [recoindexcheck,recosetindexcheck]=useState(" ");
 
  
-    return(
-   
-        <SafeAreaView style={{ flex: 1 }}>
-          <View>
-         <HomeHeader title="sign in" type="arrow-left" navigation={navigation}/>
-         </View>
-             <ScrollView 
-             contentContainerStyle={{ flexGrow: 1 ,paddingBottom: 20 }} 
-             showsVerticalScrollIndicator={true}>
+    return(      <ScrollView
+            stickyHeaderIndices={[0]}
+             showsVerticalScrollIndicator={true}>       
 
+   <View style={{flex:1}}>
+         <HomeHeader/>
+    
+          
      
-     <View  style={{ flex: 1 }}> 
+         
+     <View> 
          <View style={styles.container}>
           <TouchableOpacity 
           onPress={()=>{
@@ -93,21 +91,20 @@ export default function Homepage({navigation}){
      <FlatList
      nestedScrollEnabled
       horizontal={true}
-        style={{ height: screenheight * 0.3 }} // Fixed height
-     showsHorizontalScrollIndicator={true}
+     showsHorizontalScrollIndicator={false}
        data={promoCategories}
        keyExtractor={(item)=>item.id}
        extraData={indexcheck}
        renderItem={({item,index})=>(
       <Pressable style={{padding:10}}
        onPress={()=>{setindexcheck(item.id)}}>
-      <View style={indexcheck === item.id ? styles.promotionCardsSelected:styles.promotionCards} >
+      <View style={indexcheck === item.id ? styles.CardsSelected:styles.Cards} >
          <Image
-         style={{height:"70%",width:"70%",borderRadius:15,padding:10}}
+         style={styles.cardimage}
          source={item.image}
          />
          <View>
-          <Text style={indexcheck === item.id ? styles.promotionCardtextSelected : styles.promotionCardtext}>{item.ProductName}</Text>
+          <Text style={indexcheck === item.id ? styles.CardtextSelected : styles.Cardtext}>{item.ProductName}</Text>
          </View>
         </View>
       </Pressable>
@@ -125,7 +122,6 @@ export default function Homepage({navigation}){
       nestedScrollEnabled
           horizontal={true}
           showsHorizontalScrollIndicator={false}
-        style={{ height: screenheight * 0.3 }} // Fixed height
 
        data={standard}
        keyExtractor={(item)=>item.id}
@@ -133,13 +129,13 @@ export default function Homepage({navigation}){
        renderItem={({item,index})=>(
       <Pressable style={{padding:10}}
        onPress={()=>{ssetindexcheck(item.id)}}>
-      <View style={sindexcheck === item.id ? styles.standardCardsSelected:styles.standardCards} >
+      <View style={sindexcheck === item.id ? styles.CardsSelected:styles.Cards} >
          <Image
-         style={{height:"70%",width:"70%",borderRadius:15,padding:10}}
+         style={styles.cardimage}
          source={item.image}
          />
          <View>
-          <Text style={indexcheck === item.id ? styles.promotionCardtextSelected : styles.promotionCardtext}>{item.name}</Text>
+          <Text style={indexcheck === item.id ? styles.CardtextSelected : styles.Cardtext}>{item.name}</Text>
          </View>
         </View>
       </Pressable>
@@ -154,7 +150,6 @@ export default function Homepage({navigation}){
       <View style={styles.promotionView}>
      <FlatList
       nestedScrollEnabled
-        style={{ height: screenheight * 0.3 }} // Fixed height
   horizontal={true}
   showsHorizontalScrollIndicator={false}
        data={recomended}
@@ -163,13 +158,13 @@ export default function Homepage({navigation}){
        renderItem={({item,index})=>(
       <Pressable style={{padding:10}}
        onPress={()=>{recosetindexcheck(item.id)}}>
-      <View style={recoindexcheck === item.id ? styles.standardCardsSelected:styles.standardCards} >
+      <View style={recoindexcheck === item.id ? styles.CardsSelected:styles.Cards} >
          <Image
-         style={{height:"70%",width:"70%",borderRadius:15,padding:10}}
+         style={styles.cardimage}
          source={item.image}
          />
          <View>
-          <Text style={recoindexcheck === item.id ? styles.promotionCardtextSelected : styles.promotionCardtext}>
+          <Text style={recoindexcheck === item.id ? styles.CardtextSelected : styles.Cardtext}>
             {item.name}
 
           </Text>
@@ -180,8 +175,10 @@ export default function Homepage({navigation}){
      />
       </View>
        </View>
-          </ScrollView> 
-        </SafeAreaView>
+                  
+                  </View>
+                  </ScrollView> 
+
     )
 }
 
@@ -255,56 +252,56 @@ TextHead:{
   paddingLeft:5,
   textAlign:"center",
 },
-promotionCards:{
-  borderRadius:15,
-  backgroundColor:colors.grey3,
-  justifyContent:"center",
-  alignItems:"center",
-  padding:5,
-   height:screenheight*0.3,
-  width:screenwidth*0.3,
-  paddingVertical:10,
-  paddingHorizontal:10,
-  marginVertical:10,
-  marginHorizontal:10,
-},
-promotionCardsSelected:{
+// promotionCards:{
+//   borderRadius:15,
+//   backgroundColor:colors.grey3,
+//   justifyContent:"center",
+//   alignItems:"center",
+//   padding:5,
+//    height:screenheight*0.3,
+//   width:screenwidth*0.3,
+//   paddingVertical:10,
+//   paddingHorizontal:10,
+//   marginVertical:10,
+//   marginHorizontal:10,
+// },
+// promotionCardsSelected:{
    
-  borderRadius:15,
-  backgroundColor:"hsl(27, 88%, 58%)",
-  justifyContent:"center",
-  alignItems:"center",
-  paddingVertical:10,
-  paddingHorizontal:10,
-  marginVertical:10,
-  marginHorizontal:10,
+//   borderRadius:15,
+//   backgroundColor:"hsl(27, 88%, 58%)",
+//   justifyContent:"center",
+//   alignItems:"center",
+//   paddingVertical:10,
+//   paddingHorizontal:10,
+//   marginVertical:10,
+//   marginHorizontal:10,
 
-  height:screenheight*0.3,
-  width:screenwidth*0.3,
-},
-promotionCardtextSelected:{
+//   height:screenheight*0.3,
+//   width:screenwidth*0.3,
+// },
+CardtextSelected:{
   
   fontWeight:"bold",
   color:colors.grey1,
 },
-promotionCardtext:{
+Cardtext:{
   fontWeight:"bold",
   color:colors.grey2,
 },
 
-standardCards:{
+Cards:{
   borderRadius:15,
   backgroundColor:colors.grey3,
   justifyContent:"center",
   alignItems:"center",
   height:screenheight*0.3,
-  width:screenwidth*0.3,
+  width:screenwidth*0.4,
   paddingVertical:10,
   paddingHorizontal:10,
   marginVertical:10,
   marginHorizontal:10,
 },
-standardCardsSelected:{
+CardsSelected:{
   borderRadius:15,
   backgroundColor:"hsl(27, 88%, 58%)",
   justifyContent:"center",
@@ -313,9 +310,15 @@ standardCardsSelected:{
   paddingHorizontal:10,
   marginVertical:10,
   marginHorizontal:10,
-
   height:screenheight*0.3,
-  width:screenwidth*0.3,
+  width:screenwidth*0.4,
 },
+cardimage:{
+  height:"90%",
+  width:"90%",
+  borderRadius:15,
+  padding:10,
+  backgroundColor:colors.white,
+}
 
   });
