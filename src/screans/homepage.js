@@ -184,7 +184,6 @@ export default function Homepage({navigation}){
 
 const styles = StyleSheet.create({
     container: {
-      // flex:1,
       alignItems: "center",
      justifyContent:"space-evenly",   
      flexDirection:"row"
@@ -237,13 +236,11 @@ filterView:{
 },
 promotionView:{
   backgroundColor:colors.grey5,
-  // paddingVertical:5,
   marginTop:10,
   margin:10,
   padding:10,
   
 
-  // justifyContent:"center",
 },
 TextHead:{
   color:colors.grey2,
@@ -252,33 +249,7 @@ TextHead:{
   paddingLeft:5,
   textAlign:"center",
 },
-// promotionCards:{
-//   borderRadius:15,
-//   backgroundColor:colors.grey3,
-//   justifyContent:"center",
-//   alignItems:"center",
-//   padding:5,
-//    height:screenheight*0.3,
-//   width:screenwidth*0.3,
-//   paddingVertical:10,
-//   paddingHorizontal:10,
-//   marginVertical:10,
-//   marginHorizontal:10,
-// },
-// promotionCardsSelected:{
-   
-//   borderRadius:15,
-//   backgroundColor:"hsl(27, 88%, 58%)",
-//   justifyContent:"center",
-//   alignItems:"center",
-//   paddingVertical:10,
-//   paddingHorizontal:10,
-//   marginVertical:10,
-//   marginHorizontal:10,
 
-//   height:screenheight*0.3,
-//   width:screenwidth*0.3,
-// },
 CardtextSelected:{
   
   fontWeight:"bold",
