@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Text, View, Pressable, StyleSheet, TouchableOpacity, ScrollView, FlatList, Image, Dimensions } from "react-native";
+import { Text, View, Pressable, StyleSheet, TouchableOpacity, ScrollView,KeyboardAvoidingView, Platform,FlatList, Image, Dimensions } from "react-native";
 import HomeHeader from "../subscrean/home_page_header";
 import { promoCategories, standard, recomended } from "../global/data.js";
 import { colors, Icon } from "react-native-elements";
@@ -13,18 +13,23 @@ export default function Homepage({navigation}){
 
  
     return(   
-      <ScrollView>
-     <ScrollView
-            // stickyHeaderIndices={[0]}
+      
+        <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      style={{ flex: 1 }}
+    >
+     <ScrollView 
+ style={{ flex: 1 ,paddingBottom:20}}
+             stickyHeaderIndices={[0]}
              showsVerticalScrollIndicator={true}  
              contentContainerStyle={{ flexGrow: 1 }} 
-                    style={{paddingVertical:20}}      >     
-                             <View >
+                     >     
   
 
-         <HomeHeader/>
-    
+                   <HomeHeader/>
+
      <View> 
+
          <View style={styles.container}>
           <TouchableOpacity 
           onPress={()=>{
@@ -100,15 +105,27 @@ export default function Homepage({navigation}){
        renderItem={({item,index})=>(
       <Pressable style={{padding:10}}
        onPress={()=>{setindexcheck(item.id)}}>
-      <View style={indexcheck === item.id ? styles.CardsSelected:styles.Cards} >
+         <Text style={indexcheck === item.id ? styles.CardtextSelected : styles.Cardtext}>
+            {item.ProductName}
+            </Text>
+            <View style={indexcheck === item.id ? styles.CardsSelected:styles.Cards} >
          <Image
          style={styles.cardimage}
          source={item.image}
          />
-         <View>
-          <Text style={indexcheck === item.id ? styles.CardtextSelected : styles.Cardtext}>{item.ProductName}</Text>
-         </View>
+         
         </View>
+        <View>
+       
+        
+            <Text style={indexcheck === item.id ? styles.CardtextSelected : styles.Cardtext}>
+            {item.NumberofReviews} reviews
+            </Text>
+
+            <Text style={indexcheck === item.id ? styles.CardtextSelected : styles.Cardtext}>
+            {item.Rating} 
+            </Text>
+         </View>
       </Pressable>
     )}
      />
@@ -132,15 +149,24 @@ export default function Homepage({navigation}){
        renderItem={({item,index})=>(
       <Pressable style={{padding:10}}
        onPress={()=>{ssetindexcheck(item.id)}}>
-      <View style={sindexcheck === item.id ? styles.CardsSelected:styles.Cards} >
+      <Text style={indexcheck === item.id ? styles.CardtextSelected : styles.Cardtext}>
+            {item.ProductName}</Text><View style={sindexcheck === item.id ? styles.CardsSelected:styles.Cards} >
          <Image
          style={styles.cardimage}
          source={item.image}
          />
-         <View>
-          <Text style={indexcheck === item.id ? styles.CardtextSelected : styles.Cardtext}>{item.name}</Text>
-         </View>
+         
         </View>
+        <View>
+          
+            <Text style={indexcheck === item.id ? styles.CardtextSelected : styles.Cardtext}>
+            {item.NumberofReviews} reviews
+            </Text>
+
+            <Text style={indexcheck === item.id ? styles.CardtextSelected : styles.Cardtext}>
+            {item.Rating} 
+            </Text>
+         </View>
       </Pressable>
     )}
      />
@@ -161,27 +187,34 @@ export default function Homepage({navigation}){
        renderItem={({item,index})=>(
       <Pressable style={{padding:10}}
        onPress={()=>{recosetindexcheck(item.id)}}>
-      <View style={recoindexcheck === item.id ? styles.CardsSelected:styles.Cards} >
+      <Text style={indexcheck === item.id ? styles.CardtextSelected : styles.Cardtext}>
+            {item.ProductName}</Text><View style={recoindexcheck === item.id ? styles.CardsSelected:styles.Cards} >
+        
          <Image
          style={styles.cardimage}
          source={item.image}
          />
-         <View>
-          <Text style={recoindexcheck === item.id ? styles.CardtextSelected : styles.Cardtext}>
-            {item.name}
-
-          </Text>
-         </View>
+         
         </View>
+        <View style={styles.cardTextView} >
+          
+            <Text style={indexcheck === item.id ? styles.CardtextSelected : styles.Cardtext}>
+            {item.NumberofReviews} reviews
+            </Text>
+
+            <Text style={indexcheck === item.id ? styles.CardtextSelected : styles.Cardtext}>
+            {item.Rating} 
+            </Text>
+
+         </View>
       </Pressable>
     )}
      />
       </View>
        </View>
 
-                  </View>
                         </ScrollView> 
-                        </ScrollView>  
+    </KeyboardAvoidingView>
 
 
     )
@@ -256,13 +289,18 @@ TextHead:{
 },
 
 CardtextSelected:{
-  
+  textAlign:"center",
+
+  alignItems:"center",
   fontWeight:"bold",
   color:colors.grey1,
 },
 Cardtext:{
+    textAlign:"center",
+
   fontWeight:"bold",
   color:colors.grey2,
+  
 },
 
 Cards:{
@@ -295,6 +333,10 @@ cardimage:{
   borderRadius:15,
   padding:10,
   backgroundColor:colors.white,
+},
+cardTextView:{
+  justifyContent:"space-between",
+  textAlign:"center",
 }
 
   });
