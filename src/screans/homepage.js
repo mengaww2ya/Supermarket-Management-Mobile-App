@@ -12,16 +12,18 @@ export default function Homepage({navigation}){
   const [recoindexcheck,recosetindexcheck]=useState(" ");
 
  
-    return(      <ScrollView
-            stickyHeaderIndices={[0]}
-             showsVerticalScrollIndicator={true}>       
+    return(   
+      <ScrollView>
+     <ScrollView
+            // stickyHeaderIndices={[0]}
+             showsVerticalScrollIndicator={true}  
+             contentContainerStyle={{ flexGrow: 1 }} 
+                    style={{paddingVertical:20}}      >     
+                             <View >
+  
 
-   <View style={{flex:1}}>
          <HomeHeader/>
     
-          
-     
-         
      <View> 
          <View style={styles.container}>
           <TouchableOpacity 
@@ -121,6 +123,7 @@ export default function Homepage({navigation}){
      <FlatList
       nestedScrollEnabled
           horizontal={true}
+          
           showsHorizontalScrollIndicator={false}
 
        data={standard}
@@ -175,9 +178,11 @@ export default function Homepage({navigation}){
      />
       </View>
        </View>
-                  
+
                   </View>
-                  </ScrollView> 
+                        </ScrollView> 
+                        </ScrollView>  
+
 
     )
 }
@@ -265,8 +270,8 @@ Cards:{
   backgroundColor:colors.grey3,
   justifyContent:"center",
   alignItems:"center",
-  height:screenheight*0.3,
-  width:screenwidth*0.4,
+  // height:screenheight*0.3,
+  // width:screenwidth*0.4,
   paddingVertical:10,
   paddingHorizontal:10,
   marginVertical:10,
@@ -281,12 +286,12 @@ CardsSelected:{
   paddingHorizontal:10,
   marginVertical:10,
   marginHorizontal:10,
-  height:screenheight*0.3,
-  width:screenwidth*0.4,
+  // height:screenheight*0.3,
+  // width:screenwidth*0.4,
 },
 cardimage:{
-  height:"90%",
-  width:"90%",
+  // height:"90%",
+  // width:"90%",
   borderRadius:15,
   padding:10,
   backgroundColor:colors.white,

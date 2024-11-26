@@ -1,11 +1,12 @@
 import React from 'react';
-import { SafeAreaView, StyleSheet } from 'react-native';
-import RootNavigator from '../navigator/RootNavigator.js'
+import { SafeAreaView, StyleSheet, View } from 'react-native';
+import RootNavigator from '../navigator/RootNavigator.js';
+import Homepage from '../screans/homepage.js'
 export default function App() {
   return (
-     <SafeAreaView style={styles.safeContainer}>
-       <RootNavigator />
-    </SafeAreaView>
+     <View style={styles.safeContainer}>
+       <Homepage />
+    </View>
   );
 }
 const styles = StyleSheet.create({
