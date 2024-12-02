@@ -1,5 +1,14 @@
 import React, { useState } from "react";
-import { Text, View, Pressable, StyleSheet, TouchableOpacity, ScrollView,KeyboardAvoidingView, Platform,FlatList, Image, Dimensions } from "react-native";
+import { 
+  Text, 
+  View, 
+  Pressable,
+   StyleSheet, 
+   TouchableOpacity,
+   ScrollView,
+   FlatList, 
+   Image, 
+   Dimensions } from "react-native";
 import HomeHeader from "../subscrean/home_page_header";
 import { promoCategories, standard, recomended } from "../global/data.js";
 import { colors, Icon } from "react-native-elements";
@@ -14,10 +23,7 @@ export default function Homepage({navigation}){
  
     return(   
       
-    //     <KeyboardAvoidingView
-    //   behavior={Platform.OS === "ios" ? "padding" : "height"}
-    //   style={{ flex: 1 }}
-    // >
+ 
      <ScrollView 
  style={{ flex: 1 ,paddingBottom:20}}
              stickyHeaderIndices={[0]}
@@ -214,7 +220,6 @@ export default function Homepage({navigation}){
        </View>
 
                         </ScrollView> 
-    // </KeyboardAvoidingView>
 
 
     )

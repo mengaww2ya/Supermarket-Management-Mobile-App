@@ -7,7 +7,8 @@ export default function HomeHeader({title, type,navigation }) {
 const BadgeIcon=withBadge(0)(Icon)
   return (
     <View style={styles.header}>
-        {/* <View style={{justifyContent:"flex-end"}}>
+        {
+        /* <View style={{justifyContent:"flex-end"}}>
       <Icon
         type="material-community"
         name="arrow-left"

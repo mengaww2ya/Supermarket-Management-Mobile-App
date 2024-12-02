@@ -1,10 +1,16 @@
 import React, { useState, useRef } from 'react';
-import { TouchableOpacity, View, Text, StyleSheet, TextInput ,Image} from 'react-native';
+import {
+   TouchableOpacity,
+   View,
+    Text, 
+    StyleSheet,
+     TextInput 
+     } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Animatable from 'react-native-animatable';
 import { colors, Icon ,SocialIcon} from 'react-native-elements';
 import Header from '../subscrean/header.js';
-import { ScrollView } from 'react-native-web';
+import { ScrollView } from 'react-native';
 export default function Login({navigation}) {
   const [textInput2Focused, setTextInput2Focused] = useState(false);
   const textInput1 = useRef();

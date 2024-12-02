@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, StyleSheet,Text } from 'react-native';
 import { Icon } from 'react-native-elements';
-export default function Header({title, type,navigation }) {
+export default function Header({navigation }) {
   return (
     <View style={styles.header}>
         <View style={styles.menuIconViw}>
