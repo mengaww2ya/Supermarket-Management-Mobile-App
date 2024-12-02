@@ -2,11 +2,11 @@ import { createStackNavigator, TransitionPresets } from "@react-navigation/stack
 import Login from '../screans/login.js';
 import Welcome from '../screans/welcome.js';
 import Homepage from "../screans/homepage.js";
-const authentic=createStackNavigator();
+const Authentic=createStackNavigator();
 export default function AuthicStackNavig(){
     return(
-        <authentic.Navigator>
-        <authentic.Screen
+        <Authentic.Navigator>
+        <Authentic.Screen
         name="Welcome"
         component={Welcome}
         options={{
@@ -14,7 +14,7 @@ export default function AuthicStackNavig(){
         ...TransitionPresets.RevealFromBottomAndroid
         }}
         />
-         <authentic.Screen
+         <Authentic.Screen
         name="Login"
         component={Login}
         options={{
@@ -22,7 +22,7 @@ export default function AuthicStackNavig(){
         ...TransitionPresets.RevealFromBottomAndroid
         }}
         />
-        <authentic.Screen
+        <Authentic.Screen
         name="Homepage"
         component={Homepage}
         options={{
@@ -30,6 +30,6 @@ export default function AuthicStackNavig(){
         ...TransitionPresets.RevealFromBottomAndroid
         }}
         />
-        </authentic.Navigator>
+        </Authentic.Navigator>
     );
 }
