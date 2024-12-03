@@ -8,10 +8,11 @@ export const promoCategories=[
  {ProductName:"Pcked food",image:require("../../assets/images/packedfood.jpeg")
   ,Price:20,DiscountPrice:15,Rating:"4.5 of 5 stars",NumberofReviews:"200",ShortDescription:"sample discription",id:"3"},
   {ProductName:"cosmotics",image:require("../../assets/images/cosmotics.jpeg")
-    ,Price:20,DiscountPrice:15,Rating:"4.5 of 5 stars",NumberofReviews:"200",ShortDescription:"sample discription",id:"4"}]
+    ,Price:20,DiscountPrice:15,Rating:"4.5 of 5 stars",NumberofReviews:"200",ShortDescription:"sample discription",id:"4"},
+{ProductName:"Fruit",image:require("../../assets/images/fruit.jpeg")
+    ,Price:20,DiscountPrice:15,Rating:"4.5 of 5 stars",NumberofReviews:"200",ShortDescription:"sample discription",id:"5"}]
 
 
-     ////////////////////////////////
      export const standard=[
         {ProductName:"Soft drink",image:require("../../assets/images/softDrink.jpeg")
             ,Price:20,DiscountPrice:15,Rating:"4.5 of 5 stars",NumberofReviews:"200",ShortDescription:"sample discription",id:"0"},
@@ -24,7 +25,6 @@ export const promoCategories=[
       {ProductName:"cosmotics",image:require("../../assets/images/cosmotics.jpeg")
         ,Price:20,DiscountPrice:15,Rating:"4.5 of 5 stars",NumberofReviews:"200",ShortDescription:"sample discription",id:"4"}
     ];
-       //////////////////////////////////////////////////////////////////////////////
        export const recomended=[
         {ProductName:"Soft drink",image:require("../../assets/images/softDrink.jpeg")
         ,Price:20,DiscountPrice:15,Rating:"4.5 of 5 stars)",NumberofReviews:"200",ShortDescription:"sample discription",id:"0"},
@@ -39,4 +39,69 @@ export const promoCategories=[
 
 
 
-      
+       export const VegetableCategory=[
+        {VegetableName:"Onions",image:require("../../assets/images/Onions.png")
+        ,Price:20,DiscountPrice:15,Rating:"4.5 of 5 stars)",NumberofReviews:"200",
+        ShortDescription:"sample Onions",id:"0"},
+    {VegetableName:"cabbage",image:require("../../assets/images/Cabbage.jpeg")
+        ,Price:20,DiscountPrice:15,Rating:"4.5 of 5 stars)",NumberofReviews:"200",
+        ShortDescription:"sample cabbage",id:"1"},
+    {VegetableName:"carot",image:require("../../assets/images/carot.jpeg")
+        ,Price:20,DiscountPrice:15,Rating:"4.5 of 5 stars)",NumberofReviews:"200",
+        ShortDescription:"sample carot",id:"2"},
+    {VegetableName:"tomato",image:require("../../assets/images/tomato.jpeg")
+        ,Price:20,DiscountPrice:15,Rating:"4.5 of 5 stars)",NumberofReviews:"200",
+        ShortDescription:"sample tomato",id:"3"},
+    {VegetableName:"potato",image:require("../../assets/images/Potatoes.png")
+        ,Price:20,DiscountPrice:15,Rating:"4.5 of 5 stars)",NumberofReviews:"200",
+        ShortDescription:"sample potato",id:"5"}];
+
+        export const FruitCategiry=[
+        {VegetableName:"mango",image:require("../../assets/images/mango.png")
+        ,Price:20,DiscountPrice:15,Rating:"4.5 of 5 stars)",NumberofReviews:"200",
+        ShortDescription:"sample mango",id:"0"},
+    {VegetableName:"orange",image:require("../../assets/images/orange.png")
+        ,Price:20,DiscountPrice:15,Rating:"4.5 of 5 stars)",NumberofReviews:"200",
+        ShortDescription:"sample orange",id:"1"},
+    {VegetableName:"Lemon",image:require("../../assets/images/lemon.jpeg")
+        ,Price:20,DiscountPrice:15,Rating:"4.5 of 5 stars)",NumberofReviews:"200",
+        ShortDescription:"sample Lemon",id:"2"},
+    {VegetableName:"papaya",image:require("../../assets/images/Papaya.png")
+        ,Price:20,DiscountPrice:15,Rating:"4.5 of 5 stars)",NumberofReviews:"200",
+        ShortDescription:"sample papaya",id:"3"},
+    {VegetableName:"Banana",image:require("../../assets/images/Banana.jpeg")
+        ,Price:20,DiscountPrice:15,Rating:"4.5 of 5 stars)",NumberofReviews:"200",
+        ShortDescription:"sample Banana",id:"4"}]
+
+        export const PackedFoodCategory=[
+        {VegetableName:"Pasta",image:require("../../assets/images/pasta.png")
+        ,Price:20,DiscountPrice:15,Rating:"4.5 of 5 stars)",NumberofReviews:"200",
+        ShortDescription:"sample pasta",id:"0"},
+    {VegetableName:"Biscuit",image:require("../../assets/images/Biscuits.png")
+        ,Price:20,DiscountPrice:15,Rating:"4.5 of 5 stars)",NumberofReviews:"200",
+        ShortDescription:"sample biscuit",id:"1"},
+    {VegetableName:"Energy Bars",image:require("../../assets/images/EnergyBars.png")
+        ,Price:20,DiscountPrice:15,Rating:"4.5 of 5 stars)",NumberofReviews:"200",
+        ShortDescription:"sample Energy Bars",id:"2"},
+    {VegetableName:"Caned Fish",image:require("../../assets/images/CannedFish.png")
+        ,Price:20,DiscountPrice:15,Rating:"4.5 of 5 stars)",NumberofReviews:"200",
+        ShortDescription:"sample Caned fish",id:"3"},
+    {VegetableName:" chocolate chips",image:require("../../assets/images/chocolateChips.png")
+        ,Price:20,DiscountPrice:15,Rating:"4.5 of 5 stars)",NumberofReviews:"200",
+        ShortDescription:"sample  chocolate chips",id:"4"}];
+
+
+
+        export const SoftDrinkCategory=[
+        {VegetableName:"Coca Cola",image:require("../../assets/images/Coca-Cola.png")
+        ,Price:20,DiscountPrice:15,Rating:"4.5 of 5 stars)",NumberofReviews:"200",
+        ShortDescription:"sample coca cola",id:"0"},
+    {VegetableName:"Fanta ",image:require("../../assets/images/Fanta .png")
+        ,Price:20,DiscountPrice:15,Rating:"4.5 of 5 stars)",NumberofReviews:"200",
+        ShortDescription:"sample Fanta ",id:"1"},
+    {VegetableName:"Sprite",image:require("../../assets/images/Sprite.png")
+        ,Price:20,DiscountPrice:15,Rating:"4.5 of 5 stars)",NumberofReviews:"200",
+        ShortDescription:"sample Sprite",id:"2"},
+    {VegetableName:"Pepsi",image:require("../../assets/images/Pepsi.png")
+        ,Price:20,DiscountPrice:15,Rating:"4.5 of 5 stars)",NumberofReviews:"200",
+        ShortDescription:"sample Pepsi ",id:"3"}]

@@ -10,7 +10,7 @@ import {
    Image, 
    Dimensions } from "react-native";
 import HomeHeader from "../subscrean/home_page_header";
-import { promoCategories, standard, recomended } from "../global/data.js";
+import { promoCategories, standard, recomended , VegetableCategory} from "../global/data.js";
 import { colors, Icon } from "react-native-elements";
 const screenwidth =Dimensions.get("window").width;
 const screenheight=Dimensions.get("window").height;
@@ -110,7 +110,23 @@ export default function Homepage({navigation}){
        extraData={indexcheck}
        renderItem={({item,index})=>(
       <Pressable style={{padding:10}}
-       onPress={()=>{setindexcheck(item.id)}}>
+       onPress={()=>{setindexcheck(item.id)
+        if(item.ProductName=='Vegetable'){
+            navigation.navigate('Vegetable')
+        }
+         else if(item.ProductName=='Fruit'){
+            navigation.navigate('Fruit')
+        }
+          else if(item.ProductName=='Pcked food'){
+            navigation.navigate('PckedFood')
+        }
+          else if(item.ProductName=='Soft drink'){
+            navigation.navigate('SoftDrink')
+        }
+        
+        
+        
+       }}>
          <Text style={indexcheck === item.id ? styles.CardtextSelected : styles.Cardtext}>
             {item.ProductName}
             </Text>
