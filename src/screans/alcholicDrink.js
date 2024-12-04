@@ -3,37 +3,40 @@ import {
   Text, 
   View, 
   Pressable,
-   StyleSheet,
+   StyleSheet, 
    FlatList, 
    ScrollView,
-   Image, } from "react-native";
-   import { SoftDrinkCategory } from "../global/data";
+   Image } from "react-native";
+   import { AlcholicDrinkCategory } from "../global/data";
+   import Item from '../screans/Item.js';
 import { colors, Icon } from "react-native-elements";
-import Header from '../subscrean/header'
-import Homepage from "./homepage";
-export default function SoftDrink({navigation}){
+export default function AlcholicDrink({navigation}){
   const [indexcheck,setindexcheck,]=useState(" ");
   const [titem,settitem]=useState("");
       const updateImage = (image) => {
     settitem(image);
   };
+
     return(
         <ScrollView>
+          {/* <View>
+        <Header  />
+      </View> */}
             <View style={styles.vegetableView}>
      <FlatList
      nestedScrollEnabled
     //   horizontal={true}
     //  showsHorizontalScrollIndicator={false}
-       data={SoftDrinkCategory}
+       data={AlcholicDrinkCategory}
        keyExtractor={(item)=>item.id}
        extraData={indexcheck}
        renderItem={({item,index})=>(
       <Pressable style={{padding:10}}
        onPress={()=>{setindexcheck(item.id)
-                  navigation.navigate('Item')
-setindexcheck(item.id);
+          navigation.navigate('Item')
+        setindexcheck(item.id);
           updateImage(item.image);
-         navigation.navigate('Item', { image: item.image });
+         navigation.navigate('Item', { image: item.image });     
        }}>
          <Text style={indexcheck === item.id ? styles.CardtextSelected : styles.Cardtext}>
             {item.VegetableName}

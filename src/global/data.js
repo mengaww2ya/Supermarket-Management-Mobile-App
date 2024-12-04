@@ -104,4 +104,44 @@ export const promoCategories=[
         ShortDescription:"sample Sprite",id:"2"},
     {VegetableName:"Pepsi",image:require("../../assets/images/Pepsi.png")
         ,Price:20,DiscountPrice:15,Rating:"4.5 of 5 stars)",NumberofReviews:"200",
-        ShortDescription:"sample Pepsi ",id:"3"}]
+        ShortDescription:"sample Pepsi ",id:"3"}];
+
+
+
+
+
+export const CosmoticsCategory=[
+        {VegetableName:"Lipstick",image:require("../../assets/images/Lipstick.jpeg")
+        ,Price:20,DiscountPrice:15,Rating:"4.5 of 5 stars)",NumberofReviews:"200",
+        ShortDescription:"sample Lipstick",id:"0"},
+    {VegetableName:"Prilimer ",image:require("../../assets/images/Primer.jpeg")
+        ,Price:20,DiscountPrice:15,Rating:"4.5 of 5 stars)",NumberofReviews:"200",
+        ShortDescription:"sample Prilimer ",id:"1"},
+    {VegetableName:"Foundation",image:require("../../assets/images/Foundation.jpeg")
+        ,Price:20,DiscountPrice:15,Rating:"4.5 of 5 stars)",NumberofReviews:"200",
+        ShortDescription:"sample Foundation",id:"2"},
+    {VegetableName:"Concealer",image:require("../../assets/images/Concealer.jpeg")
+        ,Price:20,DiscountPrice:15,Rating:"4.5 of 5 stars)",NumberofReviews:"200",
+        ShortDescription:"sample Concealer ",id:"3"},
+    {VegetableName:"Mascara",image:require("../../assets/images/Mascara.jpeg")
+        ,Price:20,DiscountPrice:15,Rating:"4.5 of 5 stars)",NumberofReviews:"200",
+        ShortDescription:"sample Mascara ",id:"4"}];
+
+
+        export const AlcholicDrinkCategory=[
+        {VegetableName:"Beer",image:require("../../assets/images/Beer.png")
+        ,Price:20,DiscountPrice:15,Rating:"4.5 of 5 stars)",NumberofReviews:"200",
+        ShortDescription:"sample Beer",id:"0"},
+    {VegetableName:"Wine ",image:require("../../assets/images/Wine.jpeg")
+        ,Price:20,DiscountPrice:15,Rating:"4.5 of 5 stars)",NumberofReviews:"200",
+        ShortDescription:"sample Wine ",id:"1"},
+    {VegetableName:"Vodka",image:require("../../assets/images/Vodka.jpeg")
+        ,Price:20,DiscountPrice:15,Rating:"4.5 of 5 stars)",NumberofReviews:"200",
+        ShortDescription:"sample Vodka",id:"2"},
+    {VegetableName:"Gin",image:require("../../assets/images/Gin.jpeg")
+        ,Price:20,DiscountPrice:15,Rating:"4.5 of 5 stars)",NumberofReviews:"200",
+        ShortDescription:"sample Gin ",id:"3"},
+    {VegetableName:"Whisky",image:require("../../assets/images/Whisky.jpeg")
+        ,Price:20,DiscountPrice:15,Rating:"4.5 of 5 stars)",NumberofReviews:"200",
+        ShortDescription:"sample Whisky ",id:"4"}]
+        

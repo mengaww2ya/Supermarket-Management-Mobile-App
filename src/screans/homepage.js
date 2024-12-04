@@ -123,6 +123,13 @@ export default function Homepage({navigation}){
           else if(item.ProductName=='Soft drink'){
             navigation.navigate('SoftDrink')
         }
+        else if(item.ProductName=='cosmotics'){
+            navigation.navigate('Csmotics')
+        }
+        else if(item.ProductName=='Alcholic drink'){
+            navigation.navigate('AlcholicDrink')
+        }
+        
         
         
         
@@ -170,7 +177,26 @@ export default function Homepage({navigation}){
        extraData={sindexcheck}
        renderItem={({item,index})=>(
       <Pressable style={{padding:10}}
-       onPress={()=>{ssetindexcheck(item.id)}}>
+       onPress={()=>{ssetindexcheck(item.id)
+        if(item.ProductName=='Vegetable'){
+            navigation.navigate('Vegetable')
+        }
+         else if(item.ProductName=='Fruit'){
+            navigation.navigate('Fruit')
+        }
+          else if(item.ProductName=='Pcked food'){
+            navigation.navigate('PckedFood')
+        }
+          else if(item.ProductName=='Soft drink'){
+            navigation.navigate('SoftDrink')
+        }
+        else if(item.ProductName=='cosmotics'){
+            navigation.navigate('Csmotics')
+        }
+        else if(item.ProductName=='Alcholic drink'){
+            navigation.navigate('AlcholicDrink')
+        }
+       }}>
       <Text style={indexcheck === item.id ? styles.CardtextSelected : styles.Cardtext}>
             {item.ProductName}</Text><View style={sindexcheck === item.id ? styles.CardsSelected:styles.Cards} >
          <Image
@@ -208,7 +234,26 @@ export default function Homepage({navigation}){
        extraData={recoindexcheck}
        renderItem={({item,index})=>(
       <Pressable style={{padding:10}}
-       onPress={()=>{recosetindexcheck(item.id)}}>
+       onPress={()=>{recosetindexcheck(item.id)
+        if(item.ProductName=='Vegetable'){
+            navigation.navigate('Vegetable')
+        }
+         else if(item.ProductName=='Fruit'){
+            navigation.navigate('Fruit')
+        }
+          else if(item.ProductName=='Pcked food'){
+            navigation.navigate('PckedFood')
+        }
+          else if(item.ProductName=='Soft drink'){
+            navigation.navigate('SoftDrink')
+        }
+        else if(item.ProductName=='cosmotics'){
+            navigation.navigate('Csmotics')
+        }
+        else if(item.ProductName=='Alcholic drink'){
+            navigation.navigate('AlcholicDrink')
+        }
+       }}>
       <Text style={indexcheck === item.id ? styles.CardtextSelected : styles.Cardtext}>
             {item.ProductName}</Text><View style={recoindexcheck === item.id ? styles.CardsSelected:styles.Cards} >
         

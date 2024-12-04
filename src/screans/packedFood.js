@@ -16,7 +16,10 @@ import Header from '../subscrean/header'
 import Homepage from "./homepage";
 export default function PckedFood({navigation}){
   const [indexcheck,setindexcheck,]=useState(" ");
-  
+  const [titem,settitem]=useState("");
+      const updateImage = (image) => {
+    settitem(image);
+  };
     return(
         <ScrollView>
           {/* <View>
@@ -32,7 +35,12 @@ export default function PckedFood({navigation}){
        extraData={indexcheck}
        renderItem={({item,index})=>(
       <Pressable style={{padding:10}}
-       onPress={()=>{setindexcheck(item.id)}}>
+       onPress={()=>{setindexcheck(item.id)
+                  navigation.navigate('Item')
+                setindexcheck(item.id);
+          updateImage(item.image);
+         navigation.navigate('Item', { image: item.image });
+       }}>
          <Text style={indexcheck === item.id ? styles.CardtextSelected : styles.Cardtext}>
             {item.VegetableName}
             </Text>
