@@ -14,6 +14,8 @@ import {
 import { colors, Icon } from "react-native-elements";
 import Header from '../subscrean/header'
 import Homepage from "./homepage";
+import Footer from '../subscrean/foter.js';
+
 export default function PckedFood({navigation}){
   const [indexcheck,setindexcheck,]=useState(" ");
   const [titem,settitem]=useState("");
@@ -66,6 +68,8 @@ export default function PckedFood({navigation}){
     )}
      />
       </View>
+      <Footer navigation={navigation}/>
+
         </ScrollView>
     );
 }

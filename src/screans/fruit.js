@@ -13,6 +13,8 @@ import {
 import { colors, Icon } from "react-native-elements";
 import Header from '../subscrean/header'
 import Homepage from "./homepage";
+import Footer from '../subscrean/foter.js';
+
 export default function Fruit({navigation}){
   const [indexcheck,setindexcheck,]=useState(" ");
   const [titem,settitem]=useState("");
@@ -62,6 +64,8 @@ export default function Fruit({navigation}){
     )}
      />
       </View>
+      <Footer navigation={navigation}/>
+
         </ScrollView>
     );
 }

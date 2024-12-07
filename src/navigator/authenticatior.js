@@ -9,6 +9,7 @@ import SoftDrink from '../screans/softDrink.js';
 import Csmotics from '../screans/cosmotics.js';
 import AlcholicDrink from '../screans/alcholicDrink.js';
 import Item from '../screans/Item.js';
+import Footer from '../subscrean/foter.js'
 import {createNativeStackNavigator} from "@react-navigation/native-stack"
 const Authentic=createNativeStackNavigator();
 export default function AuthicStackNavig(){
@@ -69,6 +70,12 @@ export default function AuthicStackNavig(){
       <Authentic.Screen name='Item' component={Item} 
       options={{
         headerShown:true,
+      ...TransitionPresets.RevealFromBottomAndroid
+
+      }}/>
+      <Authentic.Screen name='Footer' component={Footer} 
+      options={{
+        headerShown:false,
       ...TransitionPresets.RevealFromBottomAndroid
 
       }}/>

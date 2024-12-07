@@ -1,8 +1,9 @@
 import { Button,Image } from "react-native";
 import { StyleSheet, Text ,ScrollView, View } from "react-native";
 import { colors ,Icon} from "react-native-elements";
+import Footer from '../subscrean/foter.js';
 
-export default function Item({ route }){
+export default function Item({ route,navigation }){
       const { image } = route.params;
     const backwardIcon=<Icon
         name="arrow-back"     
@@ -17,8 +18,13 @@ export default function Item({ route }){
         size={30}
       />
     return(
-        <ScrollView>
-
+        <ScrollView 
+        
+      style={{ flex: 1 ,paddingBottom:20}}
+             showsVerticalScrollIndicator={true}  
+             contentContainerStyle={{ flexGrow: 1 }} 
+        >
+<View style={{flex:1}}>
      <View style={styles.itemInfoContainer} >
         <View>
        <Image
@@ -70,12 +76,15 @@ export default function Item({ route }){
             </View>
        
      </View>
+         <Footer navigation={navigation}/>
 
+</View>
         </ScrollView>
     );
 }
 const styles=StyleSheet.create({
     itemInfoContainer:{
+        flex:1,
         backgroundColor:colors.grey4,
 paddingHorizontal:15,
 
@@ -91,7 +100,7 @@ text:{
 },
 Button:{
     justifyContent:"space-evenly",
-    flexDirection:"row"
+    flexDirection:"row",
 
 },
 cardimage:{

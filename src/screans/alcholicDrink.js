@@ -9,6 +9,8 @@ import {
    Image } from "react-native";
    import { AlcholicDrinkCategory } from "../global/data";
    import Item from '../screans/Item.js';
+   import Footer from '../subscrean/foter.js';
+
 import { colors, Icon } from "react-native-elements";
 export default function AlcholicDrink({navigation}){
   const [indexcheck,setindexcheck,]=useState(" ");
@@ -63,6 +65,8 @@ export default function AlcholicDrink({navigation}){
     )}
      />
       </View>
+      <Footer navigation={navigation}/>
+
         </ScrollView>
     );
 }

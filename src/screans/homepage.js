@@ -12,14 +12,15 @@ import {
 import HomeHeader from "../subscrean/home_page_header";
 import { promoCategories, standard, recomended , VegetableCategory} from "../global/data.js";
 import { colors, Icon } from "react-native-elements";
+import Footer from '../subscrean/foter.js';
 const screenwidth =Dimensions.get("window").width;
 const screenheight=Dimensions.get("window").height;
 export default function Homepage({navigation}){
+   
   const [Delivery,setDelivery]=useState(false);
   const [indexcheck,setindexcheck,]=useState(" ");
   const [sindexcheck,ssetindexcheck]=useState(" ");
   const [recoindexcheck,recosetindexcheck]=useState(" ");
-
  
     return(   
       
@@ -279,7 +280,9 @@ export default function Homepage({navigation}){
      />
       </View>
        </View>
-
+<Footer navigation={navigation}/>
+   {/* { navigation.navigate("Footer")} */}
+   
                         </ScrollView> 
 
 
