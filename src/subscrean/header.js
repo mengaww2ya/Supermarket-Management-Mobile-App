@@ -1,21 +1,27 @@
-import React from 'react';
-import { View, StyleSheet,Text } from 'react-native';
-import { Icon } from 'react-native-elements';
-export default function Header({navigation }) {
+import React from "react";
+import { View, StyleSheet, Text } from "react-native";
+import { Icon } from "react-native-elements";
+export default function Header({ navigation }) {
   return (
     <View style={styles.header}>
-        <View style={styles.menuIconViw}>
+      <View style={styles.menuIconViw}>
         <Icon
-        type="material-community"
-        name="arrow-left"
-        color="white"
-        onPress={() => {navigation.goBack()}} 
-      />
+          type="material-community"
+          name="arrow-left"
+          color="white"
+          onPress={() => {
+            navigation.goBack();
+          }}
+        />
       </View>
-      <View style={{alignItems:"center",justifyContent:"center",flexDirection:"row"}}>
-        <Text style={styles.titleText}>
-            Sign In
-        </Text>
+      <View
+        style={{
+          alignItems: "center",
+          justifyContent: "center",
+          flexDirection: "row",
+        }}
+      >
+        <Text style={styles.titleText}>Sign In</Text>
       </View>
     </View>
   );
@@ -27,20 +33,18 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "hsl(27, 88%, 58%)",
     padding: 10,
-    height:"100%",
-    
+    height: "100%",
   },
-  menuIconViw:{
-    alignContent:"center",
-    justifyContent:"center",
-    marginLeft:15,
+  menuIconViw: {
+    alignContent: "center",
+    justifyContent: "center",
+    marginLeft: 15,
   },
-  titleText:{
-    fontSize:25,
-    fontWeight:"bold",
-    textAlign:"center",
-    marginLeft:50,
-    color:"white",
-
-  }
+  titleText: {
+    fontSize: 25,
+    fontWeight: "bold",
+    textAlign: "center",
+    marginLeft: 50,
+    color: "white",
+  },
 });
