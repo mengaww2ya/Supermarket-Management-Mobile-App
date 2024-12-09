@@ -23,7 +23,7 @@ export default function Login({navigation}) {
     <SafeAreaView style={styles.safeContainer}>
       <ScrollView>
         <View>
-          <Header type="arrow-left" navigation={navigation} />
+          {/* <Header type="arrow-left" navigation={navigation} /> */}
         </View>
         <View style={styles.container}>
           <View>

@@ -34,7 +34,7 @@ export default function Homepage({ navigation }) {
       showsVerticalScrollIndicator={true}
       contentContainerStyle={{ flexGrow: 1 }}
     >
-      <HomeHeader />
+      {/* <HomeHeader /> */}
 
       <View>
         <View style={styles.container}>

@@ -20,24 +20,48 @@ export default function AuthicStackNavig() {
         name="Welcome"
         component={Welcome}
         options={{
-          headerShown: false,
+          headerShown: true,
+          headerTitleStyle: {
+            color: "#2ECE33",
+            fontSize: 25,
+          },
+          title: "Welcome",
           ...TransitionPresets.RevealFromBottomAndroid,
+          headerStyle: {
+            backgroundColor: "#FFDC2B",
+          },
         }}
       />
       <Authentic.Screen
         name="Login"
         component={Login}
         options={{
-          headerShown: false,
+          headerShown: true,
+          headerTitleStyle: {
+            color: "#2ECE33",
+            fontSize: 25,
+          },
+          title: "Log In",
           ...TransitionPresets.RevealFromBottomAndroid,
+          headerStyle: {
+            backgroundColor: "#FFDC2B",
+          },
         }}
       />
       <Authentic.Screen
         name="Homepage"
         component={Homepage}
         options={{
-          headerShown: false,
+          headerShown: true,
+          headerTitleStyle: {
+            color: "#2ECE33",
+            fontSize: 25,
+          },
+          title: "Home Page",
           ...TransitionPresets.RevealFromBottomAndroid,
+          headerStyle: {
+            backgroundColor: "#FFDC2B",
+          },
         }}
       />
       <Authentic.Screen
@@ -45,7 +69,15 @@ export default function AuthicStackNavig() {
         component={Vegetable}
         options={{
           headerShown: true,
+          headerTitleStyle: {
+            color: "#2ECE33",
+            fontSize: 25,
+          },
+          title: "Vegateble",
           ...TransitionPresets.RevealFromBottomAndroid,
+          headerStyle: {
+            backgroundColor: "#FFDC2B",
+          },
         }}
       />
       <Authentic.Screen
@@ -53,7 +85,15 @@ export default function AuthicStackNavig() {
         component={Fruit}
         options={{
           headerShown: true,
+          headerTitleStyle: {
+            color: "#2ECE33",
+            fontSize: 25,
+          },
+          title: "Fruit",
           ...TransitionPresets.RevealFromBottomAndroid,
+          headerStyle: {
+            backgroundColor: "#FFDC2B",
+          },
         }}
       />
       <Authentic.Screen
@@ -61,7 +101,15 @@ export default function AuthicStackNavig() {
         component={PckedFood}
         options={{
           headerShown: true,
+          headerTitleStyle: {
+            color: "#2ECE33",
+            fontSize: 25,
+          },
+          title: "Packed Food",
           ...TransitionPresets.RevealFromBottomAndroid,
+          headerStyle: {
+            backgroundColor: "#FFDC2B",
+          },
         }}
       />
       <Authentic.Screen
@@ -69,7 +117,15 @@ export default function AuthicStackNavig() {
         component={SoftDrink}
         options={{
           headerShown: true,
+          headerTitleStyle: {
+            color: "#2ECE33",
+            fontSize: 25,
+          },
+          title: "Soft Drink",
           ...TransitionPresets.RevealFromBottomAndroid,
+          headerStyle: {
+            backgroundColor: "#FFDC2B",
+          },
         }}
       />
       <Authentic.Screen
@@ -77,7 +133,15 @@ export default function AuthicStackNavig() {
         component={Csmotics}
         options={{
           headerShown: true,
+          headerTitleStyle: {
+            color: "#2ECE33",
+            fontSize: 25,
+          },
+          title: "Cosmotics",
           ...TransitionPresets.RevealFromBottomAndroid,
+          headerStyle: {
+            backgroundColor: "#FFDC2B",
+          },
         }}
       />
       <Authentic.Screen
@@ -85,7 +149,15 @@ export default function AuthicStackNavig() {
         component={AlcholicDrink}
         options={{
           headerShown: true,
+          headerTitleStyle: {
+            color: "#2ECE33",
+            fontSize: 25,
+          },
+          title: "Alcholic Drink",
           ...TransitionPresets.RevealFromBottomAndroid,
+          headerStyle: {
+            backgroundColor: "#FFDC2B",
+          },
         }}
       />
       <Authentic.Screen
@@ -93,23 +165,47 @@ export default function AuthicStackNavig() {
         component={Item}
         options={{
           headerShown: true,
+          headerTitleStyle: {
+            color: "#2ECE33",
+            fontSize: 25,
+          },
+          title: "Item",
           ...TransitionPresets.RevealFromBottomAndroid,
+          headerStyle: {
+            backgroundColor: "#FFDC2B",
+          },
         }}
       />
       <Authentic.Screen
         name="Footer"
         component={Footer}
         options={{
-          headerShown: false,
+          headerShown: true,
+          headerTitleStyle: {
+            color: "#2ECE33",
+            fontSize: 25,
+          },
+          title: "Detail",
           ...TransitionPresets.RevealFromBottomAndroid,
+          headerStyle: {
+            backgroundColor: "#FFDC2B",
+          },
         }}
       />
       <Authentic.Screen
         name="Signup"
         component={Signup}
         options={{
-          headerShown: false,
+          headerShown: true,
+          headerTitleStyle: {
+            color: "#2ECE33",
+            fontSize: 25,
+          },
+          title: "Sign up",
           ...TransitionPresets.RevealFromBottomAndroid,
+          headerStyle: {
+            backgroundColor: "#FFDC2B",
+          },
         }}
       />
     </Authentic.Navigator>
