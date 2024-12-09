@@ -22,63 +22,86 @@ export default function Login({navigation}) {
   return (
     <SafeAreaView style={styles.safeContainer}>
       <ScrollView>
-      <View>
-        <Header  type="arrow-left" navigation={navigation}/>
-      </View>
-      <View style={styles.container}>
-        <View><Text style={styles.welcome}>Welcome to Queen Supermarket System</Text></View>
-        <View style={styles.login}>
-          <TextInput
-            style={styles.textInput}
-            placeholder="Enter your username"
-            ref={textInput1}
-          />
-          <View style={styles.passwordContainer}>
-            <Animatable.View animation={textInput2Focused ? "" : "fadeInLeft"} duration={400}>
-              <Icon name='lock' iconStyle={colors.grey3} type='material' style={styles.icon} />
-            </Animatable.View>
-            <TextInput
-              placeholder="Enter your password"
-              secureTextEntry
-              style={styles.textInputPass}
-              ref={textInput2}
-              onFocus={handleFocus}
-              onBlur={handleBlur}
-            />
-            <Animatable.View animation={textInput2Focused ? "" : "fadeInLeft"} duration={400}>
-              <Icon name='visibility-off' iconStyle={[colors.grey3]} type='material' style={styles.icon} />
-            </Animatable.View>
-          </View>
-
-          <TouchableOpacity style={styles.button} onPress={()=>{navigation.navigate("Homepage")}}
-          >
-            <Text style={styles.buttonText}>Log In</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity onPress={handleForgotPassword}>
-            <Text style={styles.text}>Forgot password?</Text>
-          </TouchableOpacity>             
-           <TouchableOpacity style={styles.googleButton}>
-            <SocialIcon
-              name='Sign In With Google'
-              iconStyle={colors.grey3}
-              type='google'
-              style={styles.SocialIcon}
-            />
-            <Text style={styles.buttonText}>Sign in with Google</Text>
-          </TouchableOpacity>
+        <View>
+          <Header type="arrow-left" navigation={navigation} />
         </View>
-        <View style={styles.dontAcount}>
-      <Text style={styles.text}>
-        Don't have an account?{' '}
-      </Text>
-            <TouchableOpacity style={styles.signup}>
+        <View style={styles.container}>
+          <View>
+            <Text style={styles.welcome}>
+              Welcome to Queen Supermarket System
+            </Text>
+          </View>
+          <View style={styles.login}>
+            <TextInput
+              style={styles.textInput}
+              placeholder="Enter your username"
+              ref={textInput1}
+            />
+            <View style={styles.passwordContainer}>
+              <Animatable.View
+                animation={textInput2Focused ? "" : "fadeInLeft"}
+                duration={400}
+              >
+                <Icon
+                  name="lock"
+                  iconStyle={colors.grey3}
+                  type="material"
+                  style={styles.icon}
+                />
+              </Animatable.View>
+              <TextInput
+                placeholder="Enter your password"
+                secureTextEntry
+                style={styles.textInputPass}
+                ref={textInput2}
+                onFocus={handleFocus}
+                onBlur={handleBlur}
+              />
+              <Animatable.View
+                animation={textInput2Focused ? "" : "fadeInLeft"}
+                duration={400}
+              >
+                <Icon
+                  name="visibility-off"
+                  iconStyle={[colors.grey3]}
+                  type="material"
+                  style={styles.icon}
+                />
+              </Animatable.View>
+            </View>
+
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => {
+                navigation.navigate("Homepage");
+              }}
+            >
+              <Text style={styles.buttonText}>Log In</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity onPress={handleForgotPassword}>
+              <Text style={styles.text}>Forgot password?</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.googleButton}>
+              <SocialIcon
+                name="Sign In With Google"
+                iconStyle={colors.grey3}
+                type="google"
+                style={styles.SocialIcon}
+              />
+              <Text style={styles.buttonText}>Sign in with Google</Text>
+            </TouchableOpacity>
+          </View>
+          <View style={styles.dontAcount}>
+            <Text style={styles.text}>Don't have an account? </Text>
+            <TouchableOpacity
+              style={styles.signup}
+              onPress={() => navigation.navigate("Signup")}
+            >
               <Text style={styles.linkText}>Create Acount</Text>
             </TouchableOpacity>
-       
-      </View>
-      </View>
-      
+          </View>
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
