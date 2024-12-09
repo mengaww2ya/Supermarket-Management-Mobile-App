@@ -1,23 +1,22 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef } from "react";
 import {
-   TouchableOpacity,
-   View,
-    Text, 
-    StyleSheet,
-     TextInput 
-     } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import * as Animatable from 'react-native-animatable';
-import { colors, Icon ,SocialIcon} from 'react-native-elements';
-import { ScrollView } from 'react-native';
-export default function Login({navigation}) {
+  TouchableOpacity,
+  View,
+  Text,
+  StyleSheet,
+  TextInput,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import * as Animatable from "react-native-animatable";
+import { colors, Icon, SocialIcon } from "react-native-elements";
+import { ScrollView } from "react-native";
+export default function Login({ navigation }) {
   const [textInput2Focused, setTextInput2Focused] = useState(false);
   const textInput1 = useRef();
   const textInput2 = useRef();
   const handleFocus = () => setTextInput2Focused(false);
   const handleBlur = () => setTextInput2Focused(true);
-  const handleForgotPassword = () => {
-  };
+  const handleForgotPassword = () => {};
   return (
     <SafeAreaView style={styles.safeContainer}>
       <ScrollView>
