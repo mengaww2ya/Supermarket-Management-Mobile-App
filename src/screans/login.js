@@ -9,7 +9,6 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Animatable from 'react-native-animatable';
 import { colors, Icon ,SocialIcon} from 'react-native-elements';
-import Header from '../subscrean/header.js';
 import { ScrollView } from 'react-native';
 export default function Login({navigation}) {
   const [textInput2Focused, setTextInput2Focused] = useState(false);
@@ -22,9 +21,6 @@ export default function Login({navigation}) {
   return (
     <SafeAreaView style={styles.safeContainer}>
       <ScrollView>
-        <View>
-          {/* <Header type="arrow-left" navigation={navigation} /> */}
-        </View>
         <View style={styles.container}>
           <View>
             <Text style={styles.welcome}>
@@ -82,14 +78,33 @@ export default function Login({navigation}) {
             <TouchableOpacity onPress={handleForgotPassword}>
               <Text style={styles.text}>Forgot password?</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.googleButton}>
-              <SocialIcon
-                name="Sign In With Google"
-                iconStyle={colors.grey3}
-                type="google"
-                style={styles.SocialIcon}
+            <TouchableOpacity
+              onPress={() => {
+                navigation.navigate("Homepage");
+              }}
+              style={styles.googleButton}
+            >
+              <Text style={styles.buttonText}>Sign in with Google </Text>
+              <Icon
+                name="google"
+                type="font-awesome"
+                color="#517fa4"
+                size={30}
               />
-              <Text style={styles.buttonText}>Sign in with Google</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => {
+                navigation.navigate("Homepage");
+              }}
+              style={styles.facebookButton}
+            >
+              <Text style={styles.buttonText}>Sign in with Facebook </Text>
+              <Icon
+                name="facebook"
+                type="font-awesome"
+                color="#517fa4"
+                size={30}
+              />
             </TouchableOpacity>
           </View>
           <View style={styles.dontAcount}>
@@ -113,15 +128,15 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     padding: 16,
   },
   welcome: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 20,
-    textAlign: 'center',
+    textAlign: "center",
   },
   login: {
     width: "90%",
@@ -133,84 +148,94 @@ const styles = StyleSheet.create({
     borderColor: colors.grey4,
     marginBottom: 15,
     padding: 10,
-    backgroundColor: 'white',
+    backgroundColor: "white",
   },
-  textInputPass:{
-    width:"100%",
+  textInputPass: {
+    width: "100%",
     fontSize: 18,
     borderRadius: 5,
     borderWidth: 1,
     borderColor: colors.grey4,
     marginBottom: 15,
     padding: 15,
-    backgroundColor: 'white',
+    backgroundColor: "white",
   },
   passwordContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     borderRadius: 5,
     borderWidth: 1,
     borderColor: colors.grey4,
     marginBottom: 15,
-    backgroundColor: 'white',
+    backgroundColor: "white",
   },
   icon: {
     marginHorizontal: 10,
   },
   button: {
-    backgroundColor: 'hsl(23, 100%, 66%)',
-    padding: 15,
+    backgroundColor: "hsl(23, 100%, 66%)",
+    padding: 10,
     borderRadius: 5,
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: 10,
   },
   buttonText: {
-    color: 'white',
+    color: "white",
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   googleButton: {
-    backgroundColor: 'hsl(261, 87%, 68%)',
+    margin: 5,
+
+    backgroundColor: colors.grey4,
     borderRadius: 5,
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'center',
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "center",
+  },
+  facebookButton: {
+    margin: 5,
+    backgroundColor: "#828ff2",
+    borderRadius: 5,
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "center",
   },
   googleIcon: {
-    marginRight: 10, 
+    marginRight: 10,
   },
   text: {
     fontSize: 16,
-    textAlign: 'center',
+    textAlign: "center",
     marginVertical: 10,
   },
   linkText: {
-    padding:"3%",
-    color: 'white',
-    fontWeight: 'bold',
+    padding: "3%",
+    color: "white",
+    fontWeight: "bold",
   },
-  wellimageContainer:{
-    width:"20%",
-    height:"20%",
-    marginTop:"30%",
-    marginBottom:"0.5%",   
-   },
-  wellimage:{
-    width:"100%",
-    height:"50%",
+  wellimageContainer: {
+    width: "20%",
+    height: "20%",
+    marginTop: "30%",
+    marginBottom: "0.5%",
   },
-  signup:{
-    width:"100%",
-    backgroundColor:"hsl(23, 100%, 66%)",
-    alignItems:"center",
-    marginLeft:"20%",
-    marginBottom:"20%",
-    padding:"5%",
-    borderRadius:"2%",
-    justifyContent:"flex-end"
+  wellimage: {
+    width: "100%",
+    height: "50%",
   },
-  dontAcount:{
-    margin:"5%",
-    alignItems:"center",
-  }
+  signup: {
+    width: "100%",
+    backgroundColor: "hsl(23, 100%, 66%)",
+    alignItems: "center",
+    marginLeft: "20%",
+    marginBottom: "20%",
+    padding: "5%",
+    borderRadius: "2%",
+    justifyContent: "flex-end",
+  },
+  dontAcount: {
+    margin: "5%",
+    alignItems: "center",
+  },
 });

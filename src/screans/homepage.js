@@ -10,7 +10,6 @@ import {
   Image,
   Dimensions,
 } from "react-native";
-import HomeHeader from "../subscrean/home_page_header";
 import {
   promoCategories,
   standard,
@@ -34,7 +33,6 @@ export default function Homepage({ navigation }) {
       showsVerticalScrollIndicator={true}
       contentContainerStyle={{ flexGrow: 1 }}
     >
-      {/* <HomeHeader /> */}
 
       <View>
         <View style={styles.container}>

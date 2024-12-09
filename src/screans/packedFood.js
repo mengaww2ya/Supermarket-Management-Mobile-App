@@ -13,7 +13,6 @@ import {
 } from "react-native";
 import { PackedFoodCategory } from "../global/data";
 import { colors, Icon } from "react-native-elements";
-import Header from "../subscrean/header";
 import Homepage from "./homepage";
 import Footer from "../subscrean/foter.js";
 
@@ -25,9 +24,6 @@ export default function PckedFood({ navigation }) {
   };
   return (
     <ScrollView>
-      {/* <View>
-        <Header  />
-      </View> */}
       <View style={styles.vegetableView}>
         <FlatList
           nestedScrollEnabled

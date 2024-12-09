@@ -10,7 +10,6 @@ import {
 } from "react-native";
 import { SoftDrinkCategory } from "../global/data";
 import { colors, Icon } from "react-native-elements";
-import Header from "../subscrean/header";
 import Homepage from "./homepage";
 import Footer from "../subscrean/foter.js";
 

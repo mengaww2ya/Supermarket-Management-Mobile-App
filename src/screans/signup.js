@@ -11,7 +11,6 @@ import {
 import { colors, Colors, Icon } from "react-native-elements";
 const screenwidth = Dimensions.get("window").width;
 const screenheight = Dimensions.get("window").height;
-import SignupHeader from "../subscrean/signupHeader.js";
 export default function Signup({ navigation }) {
   const [textInput2Focused, setTextInput2Focused] = useState(false);
   const textInput1 = useRef();
@@ -21,7 +20,6 @@ export default function Signup({ navigation }) {
   return (
     <SafeAreaView>
       <View style={styles.container}>
-        {/* <SignupHeader /> */}
         <View style={styles.signupbody}>
           <View style={styles.textInputcontainer}>
             <TextInput
