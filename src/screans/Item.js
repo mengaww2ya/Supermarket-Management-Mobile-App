@@ -20,7 +20,7 @@ export default function Item({ route, navigation }) {
       <View style={{ flex: 1 }}>
         <View style={styles.itemInfoContainer}>
           <View>
-            <Image style={styles.cardimage} source={{ uri: image }} />
+            <Image style={styles.cardimage} source={image} />
           </View>
           <View style={styles.Button}>
             <Button title={backwardIcon} />

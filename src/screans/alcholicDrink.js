@@ -6,19 +6,18 @@ import {
   StyleSheet,
   FlatList,
   ScrollView,
+  useWindowDimensions,
   Image,
 } from "react-native";
 import { AlcholicDrinkCategory } from "../global/data";
 import Item from "../screans/Item.js";
 import Footer from "../subscrean/foter.js";
-
+const screenwidth =useWindowDimensions().width;
+const screenheight = useWindowDimensions().height;
 import { colors, Icon } from "react-native-elements";
 export default function AlcholicDrink({ navigation }) {
   const [indexcheck, setindexcheck] = useState(" ");
   const [titem, settitem] = useState("");
-  const updateImage = (image) => {
-    settitem(image);
-  };
 
   return (
     <ScrollView>
@@ -38,9 +37,6 @@ export default function AlcholicDrink({ navigation }) {
               style={{ padding: 10 }}
               onPress={() => {
                 setindexcheck(item.id);
-                navigation.navigate("Item");
-                setindexcheck(item.id);
-                updateImage(item.image);
                 navigation.navigate("Item", { image: item.image });
               }}
             >
@@ -58,7 +54,11 @@ export default function AlcholicDrink({ navigation }) {
                   indexcheck === item.id ? styles.CardsSelected : styles.Cards
                 }
               >
-                <Image style={styles.cardimage} source={item.image} />
+                <Image
+                  style={styles.cardimage}
+                  source={item.image}
+                  resizeMode="contain"
+                />
               </View>
               <View>
                 <Text
@@ -98,14 +98,12 @@ const styles = StyleSheet.create({
   },
   CardtextSelected: {
     textAlign: "center",
-
     alignItems: "center",
     fontWeight: "bold",
     color: colors.grey1,
   },
   Cardtext: {
     textAlign: "center",
-
     fontWeight: "bold",
     color: colors.grey2,
   },
@@ -115,10 +113,10 @@ const styles = StyleSheet.create({
     backgroundColor: colors.grey3,
     justifyContent: "center",
     alignItems: "center",
-    // height:screenheight*0.3,
-    // width:screenwidth*0.4,
-    paddingVertical: 10,
-    paddingHorizontal: 10,
+    height: screenheight * 0.3,
+    width: screenwidth * 0.8,
+    // paddingVertical: 10,
+    // paddingHorizontal: 10,
     marginVertical: 10,
     marginHorizontal: 10,
   },
@@ -131,8 +129,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     marginVertical: 10,
     marginHorizontal: 10,
-    // height:screenheight*0.3,
-    // width:screenwidth*0.4,
+    height: screenheight * 0.3,
+    width: screenwidth * 0.8,
   },
   cardimage: {
     // height:"90%",
