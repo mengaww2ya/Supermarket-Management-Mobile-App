@@ -8,7 +8,7 @@ import {
   ScrollView,
   FlatList,
   Image,
-  Dimensions,
+  useWindowDimensions,
 } from "react-native";
 import {
   promoCategories,
@@ -16,10 +16,11 @@ import {
   recomended,
   VegetableCategory,
 } from "../global/data.js";
+import DrawNavigator from "../navigator/drawNavigator.js";
 import { colors, Icon } from "react-native-elements";
 import Footer from "../subscrean/foter.js";
-const screenwidth = Dimensions.get("window").width;
-const screenheight = Dimensions.get("window").height;
+const screenwidth =useWindowDimensions().width;
+const screenheight = useWindowDimensions().height;
 export default function Homepage({ navigation }) {
   const [Delivery, setDelivery] = useState(false);
   const [indexcheck, setindexcheck] = useState(" ");
@@ -33,8 +34,8 @@ export default function Homepage({ navigation }) {
       showsVerticalScrollIndicator={true}
       contentContainerStyle={{ flexGrow: 1 }}
     >
-
       <View>
+
         <View style={styles.container}>
           <TouchableOpacity
             onPress={() => {
@@ -128,7 +129,7 @@ export default function Homepage({ navigation }) {
                     navigation.navigate("AlcholicDrink");
                   }
                 }}
-              >
+               >
                 <Text
                   style={
                     indexcheck === item.id
@@ -409,8 +410,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.grey3,
     justifyContent: "center",
     alignItems: "center",
-    // height:screenheight*0.3,
-    // width:screenwidth*0.4,
+    height:screenheight*0.3,
+    width:screenwidth*0.8,
     paddingVertical: 10,
     paddingHorizontal: 10,
     marginVertical: 10,

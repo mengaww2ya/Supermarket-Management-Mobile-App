@@ -12,11 +12,12 @@ import Item from "../screans/Item.js";
 import Footer from "../subscrean/foter.js";
 import Signup from "../screans/signup.js";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-const Authentic = createNativeStackNavigator();
-export default function AuthicStackNavig() {
+import { createDrawerNavigator } from "@react-navigation/drawer";
+const drawNavig = createDrawerNavigator();
+export default function DrawNavigator() {
   return (
-    <Authentic.Navigator initialRouteName="Welcome">
-      <Authentic.Screen
+    <drawNavig.Navigator initialRouteName="Homepage">
+      {/* <drawNavig.Screen
         name="Welcome"
         component={Welcome}
         options={{
@@ -31,8 +32,8 @@ export default function AuthicStackNavig() {
             backgroundColor: "#FFDC2B",
           },
         }}
-      />
-      <Authentic.Screen
+      /> */}
+      {/* <drawNavig.Screen
         name="Login"
         component={Login}
         options={{
@@ -47,8 +48,8 @@ export default function AuthicStackNavig() {
             backgroundColor: "#FFDC2B",
           },
         }}
-      />
-      <Authentic.Screen
+      /> */}
+      <drawNavig.Screen
         name="Homepage"
         component={Homepage}
         options={{
@@ -64,7 +65,7 @@ export default function AuthicStackNavig() {
           },
         }}
       />
-      <Authentic.Screen
+      <drawNavig.Screen
         name="Vegetable"
         component={Vegetable}
         options={{
@@ -80,7 +81,7 @@ export default function AuthicStackNavig() {
           },
         }}
       />
-      <Authentic.Screen
+      <drawNavig.Screen
         name="Fruit"
         component={Fruit}
         options={{
@@ -96,7 +97,7 @@ export default function AuthicStackNavig() {
           },
         }}
       />
-      <Authentic.Screen
+      <drawNavig.Screen
         name="PckedFood"
         component={PckedFood}
         options={{
@@ -112,7 +113,7 @@ export default function AuthicStackNavig() {
           },
         }}
       />
-      <Authentic.Screen
+      <drawNavig.Screen
         name="SoftDrink"
         component={SoftDrink}
         options={{
@@ -128,7 +129,7 @@ export default function AuthicStackNavig() {
           },
         }}
       />
-      <Authentic.Screen
+      <drawNavig.Screen
         name="Csmotics"
         component={Csmotics}
         options={{
@@ -144,7 +145,7 @@ export default function AuthicStackNavig() {
           },
         }}
       />
-      <Authentic.Screen
+      <drawNavig.Screen
         name="AlcholicDrink"
         component={AlcholicDrink}
         options={{
@@ -160,7 +161,7 @@ export default function AuthicStackNavig() {
           },
         }}
       />
-      <Authentic.Screen
+      {/* <drawNavig.Screen
         name="Item"
         component={Item}
         options={{
@@ -175,8 +176,8 @@ export default function AuthicStackNavig() {
             backgroundColor: "#FFDC2B",
           },
         }}
-      />
-      <Authentic.Screen
+      /> */}
+      {/* <drawNavig.Screen
         name="Footer"
         component={Footer}
         options={{
@@ -191,8 +192,8 @@ export default function AuthicStackNavig() {
             backgroundColor: "#FFDC2B",
           },
         }}
-      />
-      <Authentic.Screen
+      /> */}
+      {/* <drawNavig.Screen
         name="Signup"
         component={Signup}
         options={{
@@ -207,7 +208,7 @@ export default function AuthicStackNavig() {
             backgroundColor: "#FFDC2B",
           },
         }}
-      />
-    </Authentic.Navigator>
+      /> */}
+    </drawNavig.Navigator>
   );
 }

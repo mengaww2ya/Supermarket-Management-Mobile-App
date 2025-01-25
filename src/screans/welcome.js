@@ -1,10 +1,10 @@
 import React from 'react';
-import { TouchableOpacity, View, Text, StyleSheet ,Image,ScrollView ,Dimensions} from 'react-native';
+import { TouchableOpacity, View, Text, StyleSheet ,Image,ScrollView ,useWindowDimensions} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Swiper from 'react-native-swiper';
 import { colors } from 'react-native-elements';
-const screenwidth=Dimensions.get("window").width;
-const screenheight=Dimensions.get("window").height;
+const screenwidth =useWindowDimensions().width;
+const screenheight = useWindowDimensions().height;
 
 export default function Welcome( {navigation}){
     const image1=require("../../assets/images/goodinbag.png");
