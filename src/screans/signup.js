@@ -68,33 +68,42 @@ export default function Signup({ navigation }) {
             style={styles.signupbutton}
             onPress={() => navigation.navigate("Homepage")}
           >
-            Sign Up
+            <Text style={styles.textbutton}>Sign Up</Text>
           </Pressable>
         </View>
-        <Text style={styles.text}>Do you have account?</Text>
+        
+      </View>
+      <View style={styles.signInBContainer}>
+         <Text style={styles.text}>Do you have account?</Text>
 
         <Pressable
           style={styles.signinbutton}
           onPress={() => navigation.navigate("Login")}
         >
-          Sign In
-        </Pressable>
-      </View>
+          <Text style={styles.textbutton}>Sign In</Text>
+        </Pressable></View>
+     
     </SafeAreaView>
   );
 }
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    alignItems: "center",
-    // alignContent: "center",
+    backgroundColor: colors.grey5,
+    borderWidth: 1,
+    borderColor: colors.grey4,
+    padding: 10,
+    borderRadius: 5,
+    margin: 10,
+    alignContent: "center",
   },
-  // signupbody: {
-  //   alignSelf: "center",
-  //   alignContent: "center",
-  // },
+
   textInputcontainer: {
     marginVertical: 10,
+    backgroundColor: "white",
+    padding: 10,
+    borderRadius: 5,
+    borderWidth: 1,
+    borderColor: colors.grey4,
   },
   textInputPass: {
     // width: screenwidth * 0.8,
@@ -118,26 +127,36 @@ const styles = StyleSheet.create({
   },
   signinbutton: {
     fontSize: 20,
-    backgroundColor: "#2ECE33",
+    backgroundColor: colors.grey3,
+    borderRadius: 5,
+    borderWidth: 1,
+    width: screenwidth * 0.5,
+    padding: 8,
+    alignSelf: "flex-end",
+  },
+  signupbutton: {
+    fontSize: 20,
+    backgroundColor: colors.grey2,
     borderRadius: 5,
     borderWidth: 1,
     width: screenwidth * 0.5,
     padding: 8,
     textAlign: "center",
-  },
-  signupbutton: {
-    fontSize: 20,
-    backgroundColor: "#FFC107",
-    borderRadius: 5,
-    borderWidth: 1,
-    width: screenwidth * 0.3,
-    marginLeft:"50%",
-    padding: 6,
-    textAlign: "center",
+    alignSelf: "center",
   },
   text: {
     fontSize: 18,
     margin: 3,
     color: colors.grey3,
   },
+  textbutton: {
+    color: "white",
+    fontSize: 18,
+    fontWeight: "bold",
+    textAlign: "center",
+  },
+  signInBContainer:{
+    alignSelf: "center",
+    margin: 10,
+  }
 });
