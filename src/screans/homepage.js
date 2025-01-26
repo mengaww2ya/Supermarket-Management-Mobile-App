@@ -393,7 +393,6 @@ const styles = StyleSheet.create({
 
   CardtextSelected: {
     textAlign: "center",
-
     alignItems: "center",
     fontWeight: "bold",
     color: colors.grey1,
@@ -411,7 +410,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     height:screenheight*0.3,
-    width:screenwidth*0.8,
+    width:screenwidth*0.5,
     paddingVertical: 10,
     paddingHorizontal: 10,
     marginVertical: 10,
@@ -426,8 +425,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     marginVertical: 10,
     marginHorizontal: 10,
-    // height:screenheight*0.3,
-    // width:screenwidth*0.4,
   },
   cardimage: {
     // height:"90%",
