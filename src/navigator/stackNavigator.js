@@ -11,6 +11,7 @@ import AlcholicDrink from "../screans/alcholicDrink.js";
 import Item from "../screans/Item.js";
 import Footer from "../subscrean/foter.js";
 import Signup from "../screans/signup.js";
+import ManagerHomePage from "../manager/homePage.js"
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import DrawNavigator from "../navigator/drawNavigator.js"
 const Authentic = createNativeStackNavigator();
@@ -30,7 +31,6 @@ export default function AuthicStackNavig() {
           ...TransitionPresets.RevealFromBottomAndroid,
           headerStyle: {
             backgroundColor: "#FFDC2B",
-            
           },
         }}
       />
@@ -204,6 +204,22 @@ export default function AuthicStackNavig() {
             fontSize: 25,
           },
           title: "Sign up",
+          ...TransitionPresets.RevealFromBottomAndroid,
+          headerStyle: {
+            backgroundColor: "#FFDC2B",
+          },
+        }}
+      />
+      <Authentic.Screen
+        name="ManagerHomePage"
+        component={ManagerHomePage}
+        options={{
+          headerShown: true,
+          headerTitleStyle: {
+            color: "#2ECE33",
+            fontSize: 25,
+          },
+          title: "Manager Home Page",
           ...TransitionPresets.RevealFromBottomAndroid,
           headerStyle: {
             backgroundColor: "#FFDC2B",

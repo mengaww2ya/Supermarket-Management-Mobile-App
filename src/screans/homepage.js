@@ -427,8 +427,6 @@ const styles = StyleSheet.create({
     marginHorizontal: 10,
   },
   cardimage: {
-    // height:"90%",
-    // width:"90%",
     borderRadius: 15,
     padding: 10,
     backgroundColor: colors.white,

@@ -12,7 +12,7 @@ import {
 import { AlcholicDrinkCategory } from "../global/data";
 import Item from "../screans/Item.js";
 import Footer from "../subscrean/foter.js";
-const screenwidth =useWindowDimensions().width;
+const screenwidth = useWindowDimensions().width;
 const screenheight = useWindowDimensions().height;
 import { colors, Icon } from "react-native-elements";
 export default function AlcholicDrink({ navigation }) {
@@ -113,10 +113,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.grey3,
     justifyContent: "center",
     alignItems: "center",
-    height: screenheight * 0.3,
+    height: screenheight * 0.2,
     width: screenwidth * 0.8,
-    // paddingVertical: 10,
-    // paddingHorizontal: 10,
     marginVertical: 10,
     marginHorizontal: 10,
   },
@@ -129,12 +127,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     marginVertical: 10,
     marginHorizontal: 10,
-    height: screenheight * 0.3,
+    height: screenheight * 0.2,
     width: screenwidth * 0.8,
   },
   cardimage: {
-    // height:"90%",
-    // width:"90%",
+    // height: screenheight * 0.2,
+    // width: screenwidth * 0.8,
     borderRadius: 15,
     padding: 10,
     backgroundColor: colors.white,

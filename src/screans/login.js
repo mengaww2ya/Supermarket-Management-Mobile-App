@@ -11,6 +11,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as Animatable from "react-native-animatable";
 import { colors, Icon } from "react-native-elements";
+import { ScreenWidth } from "react-native-elements/dist/helpers";
 
 export default function Login({ navigation }) {
   const [textInput2Focused, setTextInput2Focused] = useState(false);
@@ -21,81 +22,87 @@ export default function Login({ navigation }) {
 
   return (
     <SafeAreaView style={styles.safeContainer}>
-      <ScrollView>
-        <View style={styles.container}>
-          <View>
-            <Text style={styles.welcome}>Welcome to Queen Supermarket</Text>
-          </View>
-          <View style={styles.login}>
-            <Text style={styles.loginFormText}>
-              Fill the form below to log in
-            </Text>
-            <Text style={styles.inputTitle}>user name</Text>
-            <TextInput
-              style={styles.textInput}
-              placeholder="Enter your username"
-              ref={textInput1}
-            />
-            <Text style={styles.inputTitle}>password</Text>
-            <TextInput
-              placeholder="Enter your password"
-              secureTextEntry
-              style={styles.textInputPass}
-              ref={textInput2}
-              onFocus={handleFocus}
-              onBlur={handleBlur}
-            />
+      <View style={styles.container}>
+        <View>
+          <Text style={styles.welcome}>Welcome to Queen Supermarket</Text>
+        </View>
+        <View style={styles.login}>
+          <Text style={styles.loginFormText}>
+            Fill the form below to log in
+          </Text>
+          <Text style={styles.inputTitle}>user name</Text>
+          <TextInput
+            style={styles.textInput}
+            placeholder="Enter your username"
+            ref={textInput1}
+          />
+          <Text style={styles.inputTitle}>password</Text>
+          <TextInput
+            placeholder="Enter your password"
+            secureTextEntry
+            style={styles.textInputPass}
+            ref={textInput2}
+            onFocus={handleFocus}
+            onBlur={handleBlur}
+          />
 
+          <Pressable
+            style={styles.button}
+            onPress={() => {
+              navigation.navigate("Homepage");
+            }}
+          >
+            <Text style={styles.buttonText}>Log In</Text>
+          </Pressable>
+          <Pressable>
+            <Text style={styles.text}>Forgot password?</Text>
+          </Pressable>
+          <View style={styles.thirdPartyLogin}>
             <Pressable
-              style={styles.button}
               onPress={() => {
                 navigation.navigate("Homepage");
               }}
+              style={styles.googleButton}
             >
-              <Text style={styles.buttonText}>Log In</Text>
+              <Text style={styles.buttonTextgoogle}>Sign by Google</Text>
+              <Icon
+                name="google"
+                type="font-awesome"
+                color="#517fa4"
+                size={30}
+              />
             </Pressable>
-            <Pressable>
-              <Text style={styles.text}>Forgot password?</Text>
-            </Pressable>
-            <View style={styles.thirdPartyLogin}>
-              <Pressable
-                onPress={() => {
-                  navigation.navigate("Homepage");
-                }}
-                style={styles.googleButton}
-              >
-                <Text style={styles.buttonTextgoogle}>Sign by Google</Text>
-                <Icon
-                  name="google"
-                  type="font-awesome"
-                  color="#517fa4"
-                  size={30}
-                />
-              </Pressable>
-              <Pressable
-                onPress={() => {
-                  navigation.navigate("Homepage");
-                }}
-                style={styles.facebookButton}
-              >
-                <Text style={styles.buttonTextFacebook}>Sign by Facebook</Text>
-                <Icon
-                  name="facebook"
-                  type="font-awesome"
-                  color="#517fa4"
-                  size={30}
-                />
-              </Pressable>
-            </View>
             <Pressable
-              style={styles.signup}
-              onPress={() => navigation.navigate("Signup")}
+              onPress={() => {
+                navigation.navigate("Homepage");
+              }}
+              style={styles.facebookButton}
             >
-              <Text style={styles.text}>I don't have an account? </Text>{" "}
+              <Text style={styles.buttonTextFacebook}>Sign by Facebook</Text>
+              <Icon
+                name="facebook"
+                type="font-awesome"
+                color="#517fa4"
+                size={30}
+              />
             </Pressable>
           </View>
+          <Pressable
+            style={styles.signup}
+            onPress={() => navigation.navigate("Signup")}
+          >
+            <Text style={styles.text}>I don't have an account? </Text>{" "}
+          </Pressable>
         </View>
-      </ScrollView>
+      </View>
+      <View>
+        <Pressable
+          onPress={()=>navigation.navigate("ManagerHomePage")}
+          style={styles.developingmodebtn}
+        >
+          <Text style={styles.buttonText}>I am developing not for log in</Text>
+        </Pressable>
+      </View>
     </SafeAreaView>
   );
 }
@@ -106,7 +113,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#f7f9fc",
   },
   container: {
-    flex: 1,
     justifyContent: "center",
     alignItems: "center",
     padding: 16,
@@ -169,6 +175,7 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 18,
     fontWeight: "bold",
+    textAlign:"center",
   },
   googleButton: {
     margin: 5,
@@ -233,8 +240,17 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
   },
-  inputTitle:{
+  inputTitle: {
     fontSize: 18,
     fontWeight: "Italic",
-    color: "black",}
+    color: "black",
+  },
+  developingmodebtn:{
+    backgroundColor:colors.black,
+    width:ScreenWidth*0.8,
+    alignSelf:"center",
+    borderRadius:5,
+    height:30,
+
+  }
 });
