@@ -20,7 +20,7 @@ export default function Footer({ navigation }) {
         type="font-awesome"
         color="#517fa4"
         size={30}
-        onPress={() => alert("Profile icon pressed!")}
+        onPress={() => alert("For now ths button if not functional", "ok")}
         style={styles.footerIcon}
       />
       {/* <Modal>

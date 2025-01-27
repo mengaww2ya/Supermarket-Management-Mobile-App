@@ -1,9 +1,9 @@
-import { Button, Image, useWindowDimensions } from "react-native";
+import { Button, Dimensions, Image, Pressable, useWindowDimensions } from "react-native";
 import { StyleSheet, Text, ScrollView, View } from "react-native";
 import { colors, Icon } from "react-native-elements";
 import Footer from "../subscrean/foter.js";
-const screenwidth = useWindowDimensions().width;
-const screenheight = useWindowDimensions().height;
+const screenwidth = Dimensions.get("window").width;
+const screenheight = Dimensions.get("window").height;
 export default function Item({ route, navigation }) {
   const {
     image,
@@ -30,9 +30,10 @@ export default function Item({ route, navigation }) {
   );
   return (
     <ScrollView
-      style={{ flex: 1, paddingBottom: 20 }}
+      style={{ flex: 1,marginBottom:"15%", paddingBottom: 20,}}
       showsVerticalScrollIndicator={true}
-      contentContainerStyle={{ flexGrow: 1 }}
+      contentContainerStyle={{ flexGrow: 1 }
+    }
     >
       <View>
         <View style={styles.itemInfoContainer}>
@@ -40,11 +41,23 @@ export default function Item({ route, navigation }) {
             <Image style={styles.cardimage} source={image} />
           </View>
           <View style={styles.Button}>
-            <Button title={backwardIcon} onPress={(id)=>{
-              NUM=id-1 
-              id==NUM}} />
+            <Pressable
+              onPress={(id) => {
+                NUM = id - 1;
+                id == NUM;
+              }}
+            >
+              <Text>{backwardIcon}</Text>
+            </Pressable>
 
-            <Button title={forwardIcon} />
+            <Pressable
+              onPress={(id) => {
+                NUM = id + 1;
+                id == NUM;
+              }}
+            >
+              <Text>{forwardIcon}</Text>
+            </Pressable>
           </View>
           <Text style={styles.title}>Basic Information</Text>
           <View>
@@ -105,14 +118,14 @@ const styles = StyleSheet.create({
     flexDirection: "row",
   },
   imageview: {
-    width: screenwidth * 0.8,
+    width: screenwidth ,
     height: screenheight * 0.5,
     alignContent: "center",
     alignItems: "center",
   },
   cardimage: {
     alignContent: "center",
-    width: "50%",
+    width: "100%",
     height: "100%",
     borderRadius: 15,
     padding: 10,

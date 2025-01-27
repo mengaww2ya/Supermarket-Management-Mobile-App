@@ -40,7 +40,24 @@ export default function Vegetable({ navigation }) {
                 navigation.navigate("Item");
                 setindexcheck(item.id);
                 updateImage(item.image);
-                navigation.navigate("Item", { image: item.image });
+                navigation.navigate("Item", {
+                  image: item.image,
+                  ProductName: item.VegetableName,
+                  Price: item.Price,
+                  DiscountPrice: item.DiscountPrice,
+                  Rating: item.Rating,
+                  NumberofReviews: item.NumberofReviews,
+                  ShortDescription: item.ShortDescription,
+                  catagory: item.catagory,
+                  id: item.id,
+                  suplier: item.SupplierName,
+                  ingredients: item.ingredients,
+                  NutritionalInformation: item.nutritionalInformation,
+                  Amount: item.Amount,
+                  packagetype: item.PackageType,
+                  PackagingInformation: item.PackagingInformation,
+                  origin: item.Origin,
+                });
               }}
             >
               <Text

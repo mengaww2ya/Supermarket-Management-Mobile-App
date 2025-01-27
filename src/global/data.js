@@ -176,6 +176,13 @@ export const VegetableCategory = [
     NumberofReviews: "200",
     ShortDescription: "sample Onions",
     id: "0",
+    catagory: "Vegetable",
+    ingredients: "raw onion",
+    nutritionalInformation: "calories: 40, protien: 1.1g, carbs: 9.3g",
+    Amount: "1kg",
+    PackageType: "Bag",
+    SupplierName: "ona",
+    Origin: "ethiopia",
   },
   {
     VegetableName: "cabbage",
@@ -186,6 +193,13 @@ export const VegetableCategory = [
     NumberofReviews: "200",
     ShortDescription: "sample cabbage",
     id: "1",
+    SupplierName: "caba",
+    Origin: "ethiopia",
+    ingredients: "cabbage",
+    nutritionalInformation: "calories: 25, protien: 1.3g, carbs: 5.8g",
+    Amount: "1kg",
+    PackageType: "Bag",
+    catagory: "Vegetable",
   },
   {
     VegetableName: "carot",
@@ -196,6 +210,13 @@ export const VegetableCategory = [
     NumberofReviews: "200",
     ShortDescription: "sample carot",
     id: "2",
+    catagory: "Vegetable",
+    ingredients: "carot",
+    nutritionalInformation: "calories: 41, protien: 0.9g, carbs: 9.6g",
+    Amount: "1kg",
+    PackageType: "Bag",
+    SupplierName: "caro",
+    Origin: "ethiopia",
   },
   {
     VegetableName: "tomato",
@@ -206,6 +227,13 @@ export const VegetableCategory = [
     NumberofReviews: "200",
     ShortDescription: "sample tomato",
     id: "3",
+    catagory: "Vegetable",
+    ingredients: "vegetable",
+    nutritionalInformation: "calories: 18, protien: 0.9g, carbs: 3.9g",
+    Amount: "1kg",
+    PackageType: "Bag",
+    SupplierName: "toma",
+    Origin: "ethiopia",
   },
   {
     VegetableName: "potato",
@@ -216,6 +244,13 @@ export const VegetableCategory = [
     NumberofReviews: "200",
     ShortDescription: "sample potato",
     id: "5",
+    catagory: "Vegetable",
+    ingredients: "potato",
+    nutritionalInformation: "calories: 77, protien: 2g, carbs: 17g",
+    Amount: "1kg",
+    PackageType: "Bag",
+    SupplierName: "pota",
+    Origin: "ethiopia",
   },
 ];
 
@@ -229,6 +264,14 @@ export const FruitCategiry = [
     NumberofReviews: "200",
     ShortDescription: "sample mango",
     id: "0",
+    catagory: "Fruit",
+    ingredients: "mango",
+    nutritionalInformation: "calories: 60, protien: 0.8g, carbs: 15g",
+    Amount: "1kg",
+    PackageType: "Bag",
+    SupplierName: "mang",
+    Origin: "ethiopia",
+
   },
   {
     VegetableName: "orange",
@@ -239,6 +282,14 @@ export const FruitCategiry = [
     NumberofReviews: "200",
     ShortDescription: "sample orange",
     id: "1",
+    catagory: "Fruit",
+    ingredients: "orange",
+    nutritionalInformation: "calories: 43, protien: 1g, carbs: 9g",
+    Amount: "1kg",
+    PackageType: "Bag",
+    SupplierName: "oran",
+    Origin: "ethiopia",
+
   },
   {
     VegetableName: "Lemon",
@@ -249,6 +300,14 @@ export const FruitCategiry = [
     NumberofReviews: "200",
     ShortDescription: "sample Lemon",
     id: "2",
+    catagory: "Fruit",
+    ingredients: "lemon",
+    nutritionalInformation: "calories: 29, protien: 1.1g, carbs: 9.3g",
+    Amount: "1kg",
+    PackageType: "Bag",
+    SupplierName: "lemo",
+    Origin : "ethiopia",
+
   },
   {
     VegetableName: "papaya",
@@ -269,6 +328,14 @@ export const FruitCategiry = [
     NumberofReviews: "200",
     ShortDescription: "sample Banana",
     id: "4",
+    catagory: "Fruit",
+    ingredients: "banana",
+    nutritionalInformation: "calories: 89, protien: 1.1g, carbs: 23g",
+    Amount: "1kg",
+    PackageType: "Bag",
+    SupplierName: "bana",
+    Origin: "ethiopia",
+
   },
 ];
 
@@ -282,6 +349,14 @@ export const PackedFoodCategory = [
     NumberofReviews: "200",
     ShortDescription: "sample pasta",
     id: "0",
+  catagory: "PackedFood",
+  ingredients: "pasta",
+  nutritionalInformation: "calories: 131, protien: 5.5g, carbs: 25g",
+  Amount: "500g",
+  PackageType: "Bag",
+  SupplierName: "past",
+  origin: "ethiopia",
+
   },
   {
     VegetableName: "Biscuit",
@@ -292,6 +367,14 @@ export const PackedFoodCategory = [
     NumberofReviews: "200",
     ShortDescription: "sample biscuit",
     id: "1",
+    catagory: "PackedFood",
+    ingredients: "suagr, flour, butter",
+    nutritionalInformation: "calories: 131, protien: 5.5g, carbs: 25g",
+    Amount: "500g",
+    PackageType: "Bag",
+    SupplierName: "bisc",
+    origin: "ethiopia",
+
   },
   {
     VegetableName: "Energy Bars",
@@ -302,6 +385,14 @@ export const PackedFoodCategory = [
     NumberofReviews: "200",
     ShortDescription: "sample Energy Bars",
     id: "2",
+    catagory: "PackedFood",
+    ingredients: "nuts, honey, oats",
+    nutritionalInformation: "calories: 131, protien: 5.5g, carbs: 25g",
+    Amount: "500g",
+    PackageType: "Bag",
+    SupplierName: "ener",
+    origin: "ethiopia",
+
   },
   {
     VegetableName: "Caned Fish",
@@ -312,6 +403,14 @@ export const PackedFoodCategory = [
     NumberofReviews: "200",
     ShortDescription: "sample Caned fish",
     id: "3",
+    catagory: "PackedFood",
+    ingredients: "fish, oil, salt",
+    nutritionalInformation: "calories: 131, protien: 5.5g, carbs: 25g",
+    Amount: "500g",
+    PackageType: "Bag",
+    SupplierName: "fish",
+    origin: "ethiopia",
+
   },
   {
     VegetableName: " chocolate chips",
@@ -322,6 +421,14 @@ export const PackedFoodCategory = [
     NumberofReviews: "200",
     ShortDescription: "sample  chocolate chips",
     id: "4",
+    catagory: "PackedFood",
+    ingredients: "chocolate, sugar, flour",
+    nutritionalInformation: "calories: 131, protien: 5.5g, carbs: 25g",
+    Amount: "500g",
+    PackageType: "Bag",
+    SupplierName: "choco",
+    origin: "ethiopia",
+
   },
 ];
 
@@ -335,6 +442,14 @@ export const SoftDrinkCategory = [
     NumberofReviews: "200",
     ShortDescription: "sample coca cola",
     id: "0",
+    catagory: "SoftDrink",
+    ingredients: "sugar, water, caramel",
+    nutritionalInformation: "calories: 140, protien: 0g, carbs: 39g",
+    Amount: "500ml",
+    PackageType: "Bottle",
+    SupplierName: "coca",
+    Origin: "ethiopia",
+
   },
   {
     VegetableName: "Fanta ",
@@ -345,6 +460,14 @@ export const SoftDrinkCategory = [
     NumberofReviews: "200",
     ShortDescription: "sample Fanta ",
     id: "1",
+    catagory: "SoftDrink",
+    ingredients: "sugar, water, caramel",
+    nutritionalInformation: "calories: 140, protien: 0g, carbs: 39g",
+    Amount: "500ml",
+    PackageType: "Bottle",
+    SupplierName: "fan",
+    Origin: "ethiopia",
+
   },
   {
     VegetableName: "Sprite",
@@ -355,6 +478,14 @@ export const SoftDrinkCategory = [
     NumberofReviews: "200",
     ShortDescription: "sample Sprite",
     id: "2",
+    catagory: "SoftDrink",
+    ingredients: "sugar, water, caramel",
+    nutritionalInformation: "calories: 140, protien: 0g, carbs: 39g",
+    Amount: "500ml",
+    PackageType: "Bottle",
+    SupplierName: "spir",
+    Origin: "ethiopia",
+
   },
   {
     VegetableName: "Pepsi",
@@ -365,6 +496,14 @@ export const SoftDrinkCategory = [
     NumberofReviews: "200",
     ShortDescription: "sample Pepsi ",
     id: "3",
+    catagory: "SoftDrink",
+    ingredients: "sugar, water, caramel",
+    nutritionalInformation: "calories: 140, protien: 0g, carbs: 39g",
+    Amount: "500ml",
+    PackageType: "Bottle",
+    SupplierName: "peps",
+    Origin: "ethiopia",
+
   },
 ];
 
@@ -378,6 +517,14 @@ export const CosmoticsCategory = [
     NumberofReviews: "200",
     ShortDescription: "sample Lipstick",
     id: "0",
+    catagory: "Cosmotics",
+    ingredients: "wax, oil, pigment",
+    nutritionalInformation: "calories: 0, protien: 0g, carbs: 0g",
+    Amount: "10g",
+    PackageType: "Tube",
+    SupplierName: "lips",
+    Origin: "ethiopia",
+
   },
   {
     VegetableName: "Prilimer ",
@@ -388,6 +535,14 @@ export const CosmoticsCategory = [
     NumberofReviews: "200",
     ShortDescription: "sample Prilimer ",
     id: "1",
+    catagory: "Cosmotics",
+    ingredients: "wax, oil, pigment",
+    nutritionalInformation: "calories: 0, protien: 0g, carbs: 0g",
+    Amount: "10g",
+    PackageType: "Tube",
+    SupplierName: "prim",
+    Origin: "ethiopia",
+
   },
   {
     VegetableName: "Foundation",
@@ -398,6 +553,14 @@ export const CosmoticsCategory = [
     NumberofReviews: "200",
     ShortDescription: "sample Foundation",
     id: "2",
+    catagory: "Cosmotics",
+    ingredients: "wax, oil, pigment",
+    nutritionalInformation: "calories: 0, protien: 0g, carbs: 0g",
+    Amount: "10g",
+    PackageType: "Tube",
+    SupplierName: "foun",
+    Origin: "ethiopia",
+
   },
   {
     VegetableName: "Concealer",
@@ -408,6 +571,14 @@ export const CosmoticsCategory = [
     NumberofReviews: "200",
     ShortDescription: "sample Concealer ",
     id: "3",
+    catagory: "Cosmotics",
+    ingredients: "wax, oil, pigment",
+    nutritionalInformation: "calories: 0, protien: 0g, carbs: 0g",
+    Amount: "10g",
+    PackageType: "Tube",
+    SupplierName: "conc",
+    Origin: "ethiopia",
+
   },
   {
     VegetableName: "Mascara",
@@ -418,6 +589,14 @@ export const CosmoticsCategory = [
     NumberofReviews: "200",
     ShortDescription: "sample Mascara ",
     id: "4",
+    catagory: "Cosmotics",
+    ingredients: "wax, oil, pigment",
+    nutritionalInformation: "calories: 0, protien: 0g, carbs: 0g",
+    Amount: "10g",
+    PackageType: "Tube",
+    SupplierName: "masc",
+    Origin: "ethiopia",
+
   },
 ];
 
@@ -448,6 +627,14 @@ export const AlcholicDrinkCategory = [
     NumberofReviews: "200",
     ShortDescription: "sample Wine ",
     id: "1",
+    catagory: "AlcholicDrink",
+    ingredients: "grapes, yeast",
+    nutritionalInformation: "calories: 83, protien: 0.1g, carbs: 2.6g",
+    Amount: "500ml",
+    PackageType: "Bottle",
+    SupplierName: "wine",
+    Origin: "ethiopia",
+
   },
   {
     VegetableName: "Vodka",
@@ -458,6 +645,13 @@ export const AlcholicDrinkCategory = [
     NumberofReviews: "200",
     ShortDescription: "sample Vodka",
     id: "2",
+    catagory: "AlcholicDrink",
+    ingredients: "grains, water, yeast",
+    nutritionalInformation: "calories: 231, protien: 0g, carbs: 0g",
+    Amount: "500ml",
+    PackageType: "Bottle",
+    SupplierName: "vodka",
+    Origin: "ethiopia",
   },
   {
     VegetableName: "Gin",
@@ -468,6 +662,14 @@ export const AlcholicDrinkCategory = [
     NumberofReviews: "200",
     ShortDescription: "sample Gin ",
     id: "3",
+    catagory: "AlcholicDrink",
+    ingredients: "grains, water, yeast",
+    nutritionalInformation: "calories: 231, protien: 0g, carbs: 0g",
+    Amount: "500ml",
+    PackageType: "Bottle",
+    SupplierName: "gin",
+    Origin: "ethiopia",
+
   },
   {
     VegetableName: "Whisky",
@@ -478,5 +680,13 @@ export const AlcholicDrinkCategory = [
     NumberofReviews: "200",
     ShortDescription: "sample Whisky ",
     id: "4",
+    catagory: "AlcholicDrink",
+    ingredients: "grains, water, yeast",
+    nutritionalInformation: "calories: 231, protien: 0g, carbs: 0g",
+    Amount: "500ml",
+    PackageType: "Bottle",
+    SupplierName: "whis",
+    Origin: "ethiopia",
+    
   },
 ];
