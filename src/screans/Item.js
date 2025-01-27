@@ -1,10 +1,20 @@
-import { Button, Image } from "react-native";
+import { Button, Image, useWindowDimensions } from "react-native";
 import { StyleSheet, Text, ScrollView, View } from "react-native";
 import { colors, Icon } from "react-native-elements";
 import Footer from "../subscrean/foter.js";
-
+const screenwidth = useWindowDimensions().width;
+const screenheight = useWindowDimensions().height;
 export default function Item({ route, navigation }) {
-  const { image } = route.params;
+  const {
+    image,
+    ProductName,
+    Price,
+    DiscountPrice,
+    Rating,
+    NumberofReviews,
+    ShortDescription,
+    id
+  } = route.params;
   const backwardIcon = (
     <Icon name="arrow-back" type="material" color="#000" size={30} />
   );
@@ -17,9 +27,9 @@ export default function Item({ route, navigation }) {
       showsVerticalScrollIndicator={true}
       contentContainerStyle={{ flexGrow: 1 }}
     >
-      <View style={{ flex: 1 }}>
+      <View>
         <View style={styles.itemInfoContainer}>
-          <View>
+          <View style={styles.imageview}>
             <Image style={styles.cardimage} source={image} />
           </View>
           <View style={styles.Button}>
@@ -29,19 +39,19 @@ export default function Item({ route, navigation }) {
           </View>
           <Text style={styles.title}>Basic Information</Text>
           <View>
-            <Text style={styles.text}>Product Name:</Text>
-            <Text style={styles.text}>Product ID:</Text>
+            <Text style={styles.text}>Product Name:{ProductName}</Text>
+            <Text style={styles.text}>Product ID:{id}</Text>
             <Text style={styles.text}>Product Category:</Text>
             <Text style={styles.text}>Product Brand:</Text>
           </View>
           <Text style={styles.title}>Pricing</Text>
           <View>
-            <Text style={styles.text}>Price:</Text>
-            <Text style={styles.text}>Discount:</Text>
+            <Text style={styles.text}>Price:{Price}</Text>
+            <Text style={styles.text}>Discount:{DiscountPrice}</Text>
           </View>
           <Text style={styles.title}>Product Details</Text>
           <View>
-            <Text style={styles.text}>Description:</Text>
+            <Text style={styles.text}>Description:{ShortDescription}</Text>
             <Text style={styles.text}>Ingredients:</Text>
             <Text style={styles.text}>Nutritional Information:</Text>
           </View>
@@ -57,8 +67,8 @@ export default function Item({ route, navigation }) {
           </View>
           <Text style={styles.title}>Customer Reviews and Ratings</Text>
           <View>
-            <Text style={styles.text}>Average Rating:</Text>
-            <Text style={styles.text}>Reviews: </Text>
+            <Text style={styles.text}>Average Rating:{Rating}</Text>
+            <Text style={styles.text}>Reviews: {NumberofReviews}</Text>
           </View>
         </View>
         <Footer navigation={navigation} />
@@ -84,8 +94,15 @@ const styles = StyleSheet.create({
     justifyContent: "space-evenly",
     flexDirection: "row",
   },
+  imageview: {
+    width: screenwidth * 0.8,
+    height: screenheight * 0.5,
+    alignContent: "center",
+    alignItems: "center",
+  },
   cardimage: {
-    width: "100%",
+    alignContent: "center",
+    width: "50%",
     height: "100%",
     borderRadius: 15,
     padding: 10,

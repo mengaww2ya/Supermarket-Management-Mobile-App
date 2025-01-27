@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import { SoftDrinkCategory } from "../global/data";
 import { colors, Icon } from "react-native-elements";
-import Homepage from "./homepage";
+import Homepage from "./homepage.js";
 import Footer from "../subscrean/foter.js";
 
 export default function SoftDrink({ navigation }) {

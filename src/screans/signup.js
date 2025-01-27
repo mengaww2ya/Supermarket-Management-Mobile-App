@@ -20,6 +20,7 @@ export default function Signup({ navigation }) {
   return (
     <SafeAreaView>
       <View style={styles.container}>
+        <Text style={styles.text}>Fill the form to register or press sign in if you have an account</Text>
         <View style={styles.signupbody}>
           <View style={styles.textInputcontainer}>
             <TextInput
@@ -148,6 +149,8 @@ const styles = StyleSheet.create({
     fontSize: 18,
     margin: 3,
     color: colors.grey3,
+    textAlign: "center",
+    fontWeight: "bold",
   },
   textbutton: {
     color: "white",

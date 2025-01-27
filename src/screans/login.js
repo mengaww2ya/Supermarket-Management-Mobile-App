@@ -97,7 +97,7 @@ export default function Login({ navigation }) {
       </View>
       <View>
         <Pressable
-          onPress={()=>navigation.navigate("ManagerHomePage")}
+          onPress={() => navigation.navigate("DeveloperHomePage")}
           style={styles.developingmodebtn}
         >
           <Text style={styles.buttonText}>I am developing not for log in</Text>
