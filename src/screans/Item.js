@@ -13,7 +13,14 @@ export default function Item({ route, navigation }) {
     Rating,
     NumberofReviews,
     ShortDescription,
-    id
+    id,
+    suplier,
+    ingredients,
+    NutritionalInformation,
+    Amount,
+    packagetype,
+    catagory,
+    origin,
   } = route.params;
   const backwardIcon = (
     <Icon name="arrow-back" type="material" color="#000" size={30} />
@@ -33,7 +40,9 @@ export default function Item({ route, navigation }) {
             <Image style={styles.cardimage} source={image} />
           </View>
           <View style={styles.Button}>
-            <Button title={backwardIcon} />
+            <Button title={backwardIcon} onPress={(id)=>{
+              NUM=id-1 
+              id==NUM}} />
 
             <Button title={forwardIcon} />
           </View>
@@ -41,8 +50,7 @@ export default function Item({ route, navigation }) {
           <View>
             <Text style={styles.text}>Product Name:{ProductName}</Text>
             <Text style={styles.text}>Product ID:{id}</Text>
-            <Text style={styles.text}>Product Category:</Text>
-            <Text style={styles.text}>Product Brand:</Text>
+            <Text style={styles.text}>Product Category:{catagory}</Text>
           </View>
           <Text style={styles.title}>Pricing</Text>
           <View>
@@ -52,18 +60,20 @@ export default function Item({ route, navigation }) {
           <Text style={styles.title}>Product Details</Text>
           <View>
             <Text style={styles.text}>Description:{ShortDescription}</Text>
-            <Text style={styles.text}>Ingredients:</Text>
-            <Text style={styles.text}>Nutritional Information:</Text>
+            <Text style={styles.text}>Ingredients:{ingredients}</Text>
+            <Text style={styles.text}>
+              Nutritional Information:{NutritionalInformation}
+            </Text>
           </View>
           <Text style={styles.title}>Packaging Information</Text>
           <View>
-            <Text style={styles.text}>Amount:</Text>
-            <Text style={styles.text}>Package Type:</Text>
+            <Text style={styles.text}>Amount:{Amount}</Text>
+            <Text style={styles.text}>Package Type:{packagetype}</Text>
           </View>
           <Text style={styles.title}>Supplier Information</Text>
           <View>
-            <Text style={styles.text}>Supplier Name:</Text>
-            <Text style={styles.text}>Origin:</Text>
+            <Text style={styles.text}>Supplier Name:{suplier}</Text>
+            <Text style={styles.text}>Origin:{origin}</Text>
           </View>
           <Text style={styles.title}>Customer Reviews and Ratings</Text>
           <View>

@@ -37,7 +37,9 @@ export default function SoftDrink({ navigation }) {
                 navigation.navigate("Item");
                 setindexcheck(item.id);
                 updateImage(item.image);
-                navigation.navigate("Item", { image: item.image });
+                navigation.navigate("Item", { image: item.image,
+                  
+                 });
               }}
             >
               <Text

@@ -423,7 +423,7 @@ export const CosmoticsCategory = [
 
 export const AlcholicDrinkCategory = [
   {
-    VegetableName: "Beer",
+    AlcholName: "Beer",
     image: require("../../assets/images/Beer.png"),
     Price: 20,
     DiscountPrice: 15,
@@ -431,6 +431,13 @@ export const AlcholicDrinkCategory = [
     NumberofReviews: "200",
     ShortDescription: "sample Beer",
     id: "0",
+    catagory: "AlcholicDrink",
+    ingredients: "barley, water, hops, yeast",
+    nutritionalInformation: "calories: 43, protien: 0.5g, carbs: 3.6g",
+    Amount: "500ml",
+    PackageType: "Bottle",
+    SupplierName: "dashen",
+    Origin: "ethiopia",
   },
   {
     VegetableName: "Wine ",
