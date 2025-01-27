@@ -39,8 +39,7 @@ export default function SoftDrink({ navigation }) {
                 updateImage(item.image);
                 navigation.navigate("Item", {
                   image: item.image,
-                  image: item.image,
-                  ProductName: item.AlcholName,
+                  ProductName: item.VegetableName,
                   Price: item.Price,
                   DiscountPrice: item.DiscountPrice,
                   Rating: item.Rating,

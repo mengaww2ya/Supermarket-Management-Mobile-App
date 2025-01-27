@@ -318,6 +318,14 @@ export const FruitCategiry = [
     NumberofReviews: "200",
     ShortDescription: "sample papaya",
     id: "3",
+    catagory: "Fruit",
+    ingredients: "papaya",
+    nutritionalInformation: "calories: 43, protien: 0.5g, carbs: 11g",
+    Amount: "1kg",
+    PackageType: "Bag",
+    SupplierName: "papa",
+    Origin: "ethiopia",
+
   },
   {
     VegetableName: "Banana",
@@ -349,14 +357,13 @@ export const PackedFoodCategory = [
     NumberofReviews: "200",
     ShortDescription: "sample pasta",
     id: "0",
-  catagory: "PackedFood",
-  ingredients: "pasta",
-  nutritionalInformation: "calories: 131, protien: 5.5g, carbs: 25g",
-  Amount: "500g",
-  PackageType: "Bag",
-  SupplierName: "past",
-  origin: "ethiopia",
-
+    catagory: "PackedFood",
+    ingredients: "pasta",
+    nutritionalInformation: "calories: 131, protien: 5.5g, carbs: 25g",
+    Amount: "500g",
+    PackageType: "Bag",
+    SupplierName: "past",
+    Origin: "ethiopia",
   },
   {
     VegetableName: "Biscuit",
@@ -373,8 +380,7 @@ export const PackedFoodCategory = [
     Amount: "500g",
     PackageType: "Bag",
     SupplierName: "bisc",
-    origin: "ethiopia",
-
+    Origin: "ethiopia",
   },
   {
     VegetableName: "Energy Bars",
@@ -391,8 +397,7 @@ export const PackedFoodCategory = [
     Amount: "500g",
     PackageType: "Bag",
     SupplierName: "ener",
-    origin: "ethiopia",
-
+    Origin: "ethiopia",
   },
   {
     VegetableName: "Caned Fish",
@@ -409,8 +414,7 @@ export const PackedFoodCategory = [
     Amount: "500g",
     PackageType: "Bag",
     SupplierName: "fish",
-    origin: "ethiopia",
-
+    Origin: "ethiopia",
   },
   {
     VegetableName: " chocolate chips",
@@ -427,8 +431,7 @@ export const PackedFoodCategory = [
     Amount: "500g",
     PackageType: "Bag",
     SupplierName: "choco",
-    origin: "ethiopia",
-
+    Origin: "ethiopia",
   },
 ];
 
@@ -449,7 +452,6 @@ export const SoftDrinkCategory = [
     PackageType: "Bottle",
     SupplierName: "coca",
     Origin: "ethiopia",
-
   },
   {
     VegetableName: "Fanta ",
@@ -467,7 +469,6 @@ export const SoftDrinkCategory = [
     PackageType: "Bottle",
     SupplierName: "fan",
     Origin: "ethiopia",
-
   },
   {
     VegetableName: "Sprite",
@@ -485,7 +486,6 @@ export const SoftDrinkCategory = [
     PackageType: "Bottle",
     SupplierName: "spir",
     Origin: "ethiopia",
-
   },
   {
     VegetableName: "Pepsi",
@@ -503,7 +503,6 @@ export const SoftDrinkCategory = [
     PackageType: "Bottle",
     SupplierName: "peps",
     Origin: "ethiopia",
-
   },
 ];
 
@@ -524,7 +523,6 @@ export const CosmoticsCategory = [
     PackageType: "Tube",
     SupplierName: "lips",
     Origin: "ethiopia",
-
   },
   {
     VegetableName: "Prilimer ",
@@ -542,7 +540,6 @@ export const CosmoticsCategory = [
     PackageType: "Tube",
     SupplierName: "prim",
     Origin: "ethiopia",
-
   },
   {
     VegetableName: "Foundation",
@@ -560,7 +557,6 @@ export const CosmoticsCategory = [
     PackageType: "Tube",
     SupplierName: "foun",
     Origin: "ethiopia",
-
   },
   {
     VegetableName: "Concealer",
@@ -578,7 +574,6 @@ export const CosmoticsCategory = [
     PackageType: "Tube",
     SupplierName: "conc",
     Origin: "ethiopia",
-
   },
   {
     VegetableName: "Mascara",
@@ -596,7 +591,6 @@ export const CosmoticsCategory = [
     PackageType: "Tube",
     SupplierName: "masc",
     Origin: "ethiopia",
-
   },
 ];
 
