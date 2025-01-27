@@ -132,7 +132,7 @@ export default function Item({ route, navigation }) {
             <Pressable
               style={styles.btns}
               onPress={() =>
-                alert("Hey this button is not functional right now", "ok")
+                alert("Hey! this button is not functional right now.", "ok")
               }
             >
               <Text style={styles.btntext}>Add to cart</Text>
@@ -140,7 +140,7 @@ export default function Item({ route, navigation }) {
             <Pressable
               style={styles.btns}
               onPress={() =>
-                alert("Hey this button is not functional right now", "ok")
+                alert("Hey! this button is not functional right now.", "ok")
               }
             >
               <Text style={styles.btntext}>like</Text>
