@@ -3,7 +3,7 @@ import {Text, View, Pressable, StyleSheet, FlatList, ScrollView, useWindowDimens
 import data from "../global/data";
 import { colors } from "react-native-elements";
 import { ScreenWidth,ScreenHeight } from "react-native-elements/dist/helpers";
-export default function ManagerHomePage(){
+export default function ManagerHomePage({navigation}){
     return (
       <View style={styles.homecontainer}>
         <ScrollView
@@ -13,23 +13,77 @@ export default function ManagerHomePage(){
         >
           <Text style={styles.titlText}>welcome!</Text>
           <View style={styles.buttonview}>
-            <Pressable style={styles.homecard}>
-              <Text style={styles.buttontext}> employee management</Text>
+            <Pressable
+              style={styles.homecard}
+              onPress={() => {
+                navigation.navigate("emplyeeManagement");
+              }}
+            >
+              <Text
+                style={styles.buttontext}
+              >
+                employee management
+              </Text>
             </Pressable>
-            <Pressable style={styles.homecard}>
+            <Pressable
+              style={styles.homecard}
+              onPress={() => {
+                navigation.navigate("customerManagement");
+              }}
+            >
               <Text style={styles.buttontext}> customer management</Text>
             </Pressable>
-            <Pressable style={styles.homecard}>
-              <Text style={styles.buttontext}> product performance matrix</Text>
+            <Pressable
+              style={styles.homecard}
+              onPress={() => {
+                navigation.navigate("promotionManagement");
+              }}
+            >
+              <Text style={styles.buttontext}>
+                promotion and discount management
+              </Text>
             </Pressable>
-            <Pressable style={styles.homecard}>
-              <Text style={styles.buttontext}> management</Text>
+            <Pressable
+              style={styles.homecard}
+              onPress={() => {
+                navigation.navigate("inventoryManagement");
+              }}
+            >
+              <Text style={styles.buttontext}>Inventory Management</Text>
             </Pressable>
-            <Pressable style={styles.homecard}>
-              <Text style={styles.buttontext}> employee management</Text>
+            <Pressable
+              style={styles.homecard}
+              onPress={() => {
+                navigation.navigate("orderManagement");
+              }}
+            >
+              <Text style={styles.buttontext}>Order Management</Text>
             </Pressable>
-            <Pressable style={styles.homecard}>
-              <Text style={styles.buttontext}> employee management</Text>
+            <Pressable
+              style={styles.homecard}
+              onPress={() => {
+                navigation.navigate("saleRevenueManagement");
+              }}
+            >
+              <Text style={styles.buttontext}>
+                Sales and Revenue Management
+              </Text>
+            </Pressable>
+            <Pressable
+              style={styles.homecard}
+              onPress={() => {
+                navigation.navigate("suplierManagement");
+              }}
+            >
+              <Text style={styles.buttontext}>Supplier Management</Text>
+            </Pressable>
+            <Pressable
+              style={styles.homecard}
+              onPress={() => {
+                navigation.navigate("alertNotifManagement");
+              }}
+            >
+              <Text style={styles.buttontext}>Alerts and Notifications</Text>
             </Pressable>
           </View>
         </ScrollView>
@@ -49,6 +103,9 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
     justifyContent: "space-between",
     rowGap: 10,
+    rowGap:20,
+    alignContent:"center",
+    alignSelf:"center",
   },
   homecard: {
     backgroundColor: colors.grey5,

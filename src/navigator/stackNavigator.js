@@ -14,7 +14,15 @@ import Signup from "../screans/signup.js";
 import ManagerHomePage from "../manager/managerHomePage.js";
 import DeveloperHomePage from "../screans/developingHompage.js";  
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import DrawNavigator from "../navigator/drawNavigator.js"
+import DrawNavigator from "../navigator/drawNavigator.js";
+import emplyeeManagement from "../manager/employee management.js";
+import customerManagement from "../manager/customerManagement.js";
+import inventoryManagement from "../manager/inventoryManagement.js";
+import promotionManagement from "../manager/promotionDiscount.js";
+import saleRevenueManagement from "../manager/saleRevenueManagement.js";
+import alertNotifManagement from "../manager/alertNotificationManagement.js";
+import orderManagement from "../manager/orderManagement.js";
+import suplierManagement from "../manager/suplierManagement.js";
 const Authentic = createNativeStackNavigator();
 export default function AuthicStackNavig() {
   return (
@@ -243,6 +251,150 @@ export default function AuthicStackNavig() {
           },
         }}
       />
+      <Authentic.Screen
+        name="emplyeeManagement"
+        component={emplyeeManagement}
+        options={{
+          headerShown: true,
+          headerTitleStyle: {
+            color: "#2ECE33",
+            fontSize: 25,
+          },
+          title: "Employee Management",
+          ...TransitionPresets.RevealFromBottomAndroid,
+          headerStyle: {
+            backgroundColor: "#FFDC2B",
+          },
+        }}
+      />
+      <Authentic.Screen
+        name="customerManagement"
+        component={customerManagement}
+        options={{
+          headerShown: true,
+          headerTitleStyle: {
+            color: "#2ECE33",
+            fontSize: 25,
+          },
+          title: "Customer Management",
+          ...TransitionPresets.RevealFromBottomAndroid,
+          headerStyle: {
+            backgroundColor: "#FFDC2B",
+          },
+        }}
+      />
+      <Authentic.Screen
+        name="inventoryManagement"
+        component={inventoryManagement}
+        options={{
+          headerShown: true,
+          headerTitleStyle: {
+            color: "#2ECE33",
+            fontSize: 25,
+          },
+          title: "Inventory Management",
+          ...TransitionPresets.RevealFromBottomAndroid,
+          headerStyle: {
+            backgroundColor: "#FFDC2B",
+          },
+        }}
+      />
+      <Authentic.Screen
+        name="promotionManagement"
+        component={promotionManagement}
+        options={{
+          headerShown: true,
+          headerTitleStyle: {
+            color: "#2ECE33",
+            fontSize: 25,
+          },
+          title: "Promotion Management",
+          ...TransitionPresets.RevealFromBottomAndroid,
+          headerStyle: {
+            backgroundColor: "#FFDC2B",
+          },
+        }}
+      />
+      <Authentic.Screen
+        name="saleRevenueManagement"
+        component={saleRevenueManagement}
+        options={{
+          headerShown: true,
+          headerTitleStyle: {
+            color: "#2ECE33",
+            fontSize: 25,
+          },
+          title: "Sale and Revenue  Management",
+          ...TransitionPresets.RevealFromBottomAndroid,
+          headerStyle: {
+            backgroundColor: "#FFDC2B",
+          },
+        }}
+      />
+      <Authentic.Screen
+        name="alertNotifManagement"
+        component={alertNotifManagement}
+        options={{
+          headerShown: true,
+          headerTitleStyle: {
+            color: "#2ECE33",
+            fontSize: 25,
+          },
+          title: "Alert And Notification Management",
+          ...TransitionPresets.RevealFromBottomAndroid,
+          headerStyle: {
+            backgroundColor: "#FFDC2B",
+          },
+        }}
+      />
+      <Authentic.Screen
+        name="orderManagement"
+        component={orderManagement}
+        options={{
+          headerShown: true,
+          headerTitleStyle: {
+            color: "#2ECE33",
+            fontSize: 25,
+          },
+          title: "Order  Management",
+          ...TransitionPresets.RevealFromBottomAndroid,
+          headerStyle: {
+            backgroundColor: "#FFDC2B",
+          },
+        }}
+      />
+      <Authentic.Screen
+        name="suplierManagement"
+        component={suplierManagement}
+        options={{
+          headerShown: true,
+          headerTitleStyle: {
+            color: "#2ECE33",
+            fontSize: 25,
+          },
+          title: "Suplier  Management",
+          ...TransitionPresets.RevealFromBottomAndroid,
+          headerStyle: {
+            backgroundColor: "#FFDC2B",
+          },
+        }}
+      />
+      {/* <Authentic.Screen
+        name="orderManagement"
+        component={orderManagement}
+        options={{
+          headerShown: true,
+          headerTitleStyle: {
+            color: "#2ECE33",
+            fontSize: 25,
+          },
+          title: "Order  Management",
+          ...TransitionPresets.RevealFromBottomAndroid,
+          headerStyle: {
+            backgroundColor: "#FFDC2B",
+          },
+        }}
+      /> */}
     </Authentic.Navigator>
   );
 }

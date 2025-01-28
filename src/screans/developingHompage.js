@@ -6,7 +6,7 @@ export default function DeveloperHomePage({navigation}){
     return (
       <ScrollView>
         <Text style={styles.titlText}>
-            Hey! to which role you want to test
+            Hey! which role you want to test
           </Text>
         <View style={styles.container}>
           
@@ -49,7 +49,7 @@ const styles = StyleSheet.create({
     borderColor:colors.grey5,
     borderWidth:0.5,
     alignSelf:"center",
-    rowGap:10,
+    rowGap:20,
   },
   button: {
     backgroundColor: colors.grey5,
