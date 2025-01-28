@@ -4,24 +4,20 @@ import {
   View,
   Pressable,
   StyleSheet,
-  TouchableOpacity,
-  SafeAreaView,
   FlatList,
   ScrollView,
+  useWindowDimensions,
   Image,
-  Dimensions,
 } from "react-native";
-import { CosmoticsCategory } from "../global/data";
-import { colors, Icon } from "react-native-elements";
-import Homepage from "./homepage.js";
+import { AlcholicDrinkCategory } from "../global/data.js";
+import Item from "./Item.js";
 import Footer from "../subscrean/foter.js";
-
-export default function Csmotics({ navigation }) {
+const screenwidth = useWindowDimensions().width;
+const screenheight = useWindowDimensions().height;
+import { colors, Icon } from "react-native-elements";
+export default function AlcholicDrink({ navigation }) {
   const [indexcheck, setindexcheck] = useState(" ");
   const [titem, settitem] = useState("");
-  const updateImage = (image) => {
-    settitem(image);
-  };
 
   return (
     <ScrollView>
@@ -33,7 +29,7 @@ export default function Csmotics({ navigation }) {
           nestedScrollEnabled
           //   horizontal={true}
           //  showsHorizontalScrollIndicator={false}
-          data={CosmoticsCategory}
+          data={AlcholicDrinkCategory}
           keyExtractor={(item) => item.id}
           extraData={indexcheck}
           renderItem={({ item, index }) => (
@@ -41,12 +37,9 @@ export default function Csmotics({ navigation }) {
               style={{ padding: 10 }}
               onPress={() => {
                 setindexcheck(item.id);
-                navigation.navigate("Item");
-                setindexcheck(item.id);
-                updateImage(item.image);
                 navigation.navigate("Item", {
                   image: item.image,
-                  ProductName: item.VegetableName,
+                  ProductName: item.AlcholName,
                   Price: item.Price,
                   DiscountPrice: item.DiscountPrice,
                   Rating: item.Rating,
@@ -78,7 +71,11 @@ export default function Csmotics({ navigation }) {
                   indexcheck === item.id ? styles.CardsSelected : styles.Cards
                 }
               >
-                <Image style={styles.cardimage} source={item.image} />
+                <Image
+                  style={styles.cardimage}
+                  source={item.image}
+                  resizeMode="contain"
+                />
               </View>
               <View>
                 <Text
@@ -118,14 +115,12 @@ const styles = StyleSheet.create({
   },
   CardtextSelected: {
     textAlign: "center",
-
     alignItems: "center",
     fontWeight: "bold",
     color: colors.grey1,
   },
   Cardtext: {
     textAlign: "center",
-
     fontWeight: "bold",
     color: colors.grey2,
   },
@@ -135,10 +130,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.grey3,
     justifyContent: "center",
     alignItems: "center",
-    // height:screenheight*0.3,
-    // width:screenwidth*0.4,
-    paddingVertical: 10,
-    paddingHorizontal: 10,
+    height: screenheight * 0.2,
+    width: screenwidth * 0.8,
     marginVertical: 10,
     marginHorizontal: 10,
   },
@@ -151,12 +144,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     marginVertical: 10,
     marginHorizontal: 10,
-    // height:screenheight*0.3,
-    // width:screenwidth*0.4,
+    height: screenheight * 0.2,
+    width: screenwidth * 0.8,
   },
   cardimage: {
-    // height:"90%",
-    // width:"90%",
+    // height: screenheight * 0.2,
+    // width: screenwidth * 0.8,
     borderRadius: 15,
     padding: 10,
     backgroundColor: colors.white,

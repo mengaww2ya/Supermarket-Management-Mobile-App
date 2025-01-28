@@ -1,14 +1,14 @@
 import { TransitionPresets } from "@react-navigation/stack";
 import Login from "../screans/login.js";
 import Welcome from "../screans/welcome.js";
-import Homepage from "../screans/homepage.js";
-import Vegetable from "../screans/Vegetable.js";
-import Fruit from "../screans/fruit.js";
-import PckedFood from "../screans/packedFood.js";
-import SoftDrink from "../screans/softDrink.js";
-import Csmotics from "../screans/cosmotics.js";
-import AlcholicDrink from "../screans/alcholicDrink.js";
-import Item from "../screans/Item.js";
+import Homepage from "../customer/homepage.js";
+import Vegetable from "../customer/Vegetable.js";
+import Fruit from "../customer/fruit.js";
+import PckedFood from "../customer/packedFood.js";
+import SoftDrink from "../customer/softDrink.js";
+import Csmotics from "../customer/cosmotics.js";
+import AlcholicDrink from "../customer/alcholicDrink.js";
+import Item from "../customer/Item.js";
 import Footer from "../subscrean/foter.js";
 import Signup from "../screans/signup.js";
 import ManagerHomePage from "../manager/managerHomePage.js";
@@ -379,22 +379,6 @@ export default function AuthicStackNavig() {
           },
         }}
       />
-      {/* <Authentic.Screen
-        name="orderManagement"
-        component={orderManagement}
-        options={{
-          headerShown: true,
-          headerTitleStyle: {
-            color: "#2ECE33",
-            fontSize: 25,
-          },
-          title: "Order  Management",
-          ...TransitionPresets.RevealFromBottomAndroid,
-          headerStyle: {
-            backgroundColor: "#FFDC2B",
-          },
-        }}
-      /> */}
     </Authentic.Navigator>
   );
 }

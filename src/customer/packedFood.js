@@ -11,7 +11,7 @@ import {
   Image,
   Dimensions,
 } from "react-native";
-import { PackedFoodCategory } from "../global/data";
+import { PackedFoodCategory } from "../global/data.js";
 import { colors, Icon } from "react-native-elements";
 import Homepage from "./homepage.js";
 import Footer from "../subscrean/foter.js";
