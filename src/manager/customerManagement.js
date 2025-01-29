@@ -2,14 +2,19 @@ import { SafeAreaView, ScrollView, View, Text, StyleSheet, Pressable } from "rea
 import { colors } from "react-native-elements";
 import { ScreenHeight, ScreenWidth } from "react-native-elements/dist/helpers";
 
-export default function customerManagement() {
+export default function customerManagement({navigation}) {
   return (
     <SafeAreaView>
       <ScrollView>
         <Text style={styles.textTitle}>Customer management</Text>
 
         <View style={styles.container}>
-          <Pressable style={styles.btn}>
+          <Pressable
+            style={styles.btn}
+            onPress={() => {
+              navigation.navigate("customerList");
+            }}
+          >
             <Text style={styles.btnText}>customer list</Text>
           </Pressable>
           <Pressable style={styles.btn}>
@@ -52,6 +57,7 @@ const styles = StyleSheet.create({
     borderColor: colors.grey3,
     borderWidth: 1,
     borderRadius: 10,
+    justifyContent:"center",
   },
   btnText: {
     fontSize: 20,

@@ -23,6 +23,7 @@ import saleRevenueManagement from "../manager/saleRevenueManagement.js";
 import alertNotifManagement from "../manager/alertNotificationManagement.js";
 import orderManagement from "../manager/orderManagement.js";
 import suplierManagement from "../manager/suplierManagement.js";
+import customerList from "../manager/customerList.js";
 const Authentic = createNativeStackNavigator();
 export default function AuthicStackNavig() {
   return (
@@ -373,6 +374,22 @@ export default function AuthicStackNavig() {
             fontSize: 25,
           },
           title: "Suplier  Management",
+          ...TransitionPresets.RevealFromBottomAndroid,
+          headerStyle: {
+            backgroundColor: "#FFDC2B",
+          },
+        }}
+      />
+      <Authentic.Screen
+        name="customerList"
+        component={customerList}
+        options={{
+          headerShown: true,
+          headerTitleStyle: {
+            color: "#2ECE33",
+            fontSize: 25,
+          },
+          title: "List Of Customers",
           ...TransitionPresets.RevealFromBottomAndroid,
           headerStyle: {
             backgroundColor: "#FFDC2B",

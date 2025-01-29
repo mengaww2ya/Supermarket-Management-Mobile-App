@@ -686,6 +686,7 @@ export const AlcholicDrinkCategory = [
 ];
 export  const customer = [
   {
+    id: 1,
     userName: "menga",
     firstName: "Mengaw",
     lastName: "Wubetu",
@@ -694,6 +695,7 @@ export  const customer = [
     password: "12345678",
   },
   {
+    id: 2,
     userName: "meng",
     firstName: "Menga",
     lastName: "Wube",
@@ -702,6 +704,7 @@ export  const customer = [
     password: "12345678",
   },
   {
+    id: 3,
     userName: "meski",
     firstName: "Meskerem",
     lastName: "Degu",
@@ -710,6 +713,7 @@ export  const customer = [
     password: "12345678",
   },
   {
+    id: 4,
     userName: "hikma",
     firstName: "Hikma",
     lastName: "Mohamed",
@@ -718,6 +722,7 @@ export  const customer = [
     password: "12345678",
   },
   {
+    id: 5,
     userName: "aby",
     firstName: "Aby",
     lastName: "Andargie",
@@ -726,6 +731,7 @@ export  const customer = [
     password: "12345678",
   },
   {
+    id: 6,
     userName: "yihun",
     firstName: "Yihune",
     lastName: "Tarekegn",
@@ -734,9 +740,28 @@ export  const customer = [
     password: "12345678",
   },
   {
+    id: 7,
     userName: "abe",
     firstName: "Abebe",
     lastName: "Kebede",
+    phone: "0963760376",
+    address: "wku",
+    password: "12345678",
+  },
+  {
+    id: 8,
+    userName: "urag",
+    firstName: "Urague",
+    lastName: "Neberu",
+    phone: "0963760376",
+    address: "wku",
+    password: "12345678",
+  },
+    {
+    id: 9,
+    userName: "mana",
+    firstName: "mengaw",
+    lastName: "Wube",
     phone: "0963760376",
     address: "wku",
     password: "12345678",
