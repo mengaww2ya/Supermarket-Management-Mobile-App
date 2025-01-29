@@ -37,16 +37,12 @@ export default function Welcome({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  safeAreaView:{
-alignItems:"center",
-  },
 container:{
 borderColor:colors.grey2,
 borderWidth:1,
-margin:10,
 padding:10,
-backgroundColor:"white",
-alignContent:"center",
+margin:10,
+justifyContent:"center",
 },
   welcomSlogan: {
     fontSize: 20,
@@ -56,13 +52,9 @@ alignContent:"center",
     // fontVariant: ["small-caps"],
   },
   welcMessagView: {
-    alignItems: "center",
-    justifyContent: "center",
-    margin: "1%",
     backgroundColor: "white",
     marginHorizontal: 10,
     paddingVertical: 5,
-    width: "80%",
   },
   buttonContainer: {
     alignSelf: "center",

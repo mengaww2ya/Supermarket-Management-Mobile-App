@@ -10,7 +10,6 @@ import {
   Image,
 } from "react-native";
 import { AlcholicDrinkCategory } from "../global/data.js";
-import Item from "./Item.js";
 import Footer from "../subscrean/foter.js";
 const screenwidth = useWindowDimensions().width;
 const screenheight = useWindowDimensions().height;
@@ -18,7 +17,6 @@ import { colors, Icon } from "react-native-elements";
 export default function AlcholicDrink({ navigation }) {
   const [indexcheck, setindexcheck] = useState(" ");
   const [titem, settitem] = useState("");
-
   return (
     <ScrollView>
       {/* <View>

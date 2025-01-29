@@ -684,3 +684,61 @@ export const AlcholicDrinkCategory = [
     
   },
 ];
+export  const customer = [
+  {
+    userName: "menga",
+    firstName: "Mengaw",
+    lastName: "Wubetu",
+    phone: "0963760376",
+    address: "wku",
+    password: "12345678",
+  },
+  {
+    userName: "meng",
+    firstName: "Menga",
+    lastName: "Wube",
+    phone: "0963760376",
+    address: "wku",
+    password: "12345678",
+  },
+  {
+    userName: "meski",
+    firstName: "Meskerem",
+    lastName: "Degu",
+    phone: "0963760376",
+    address: "wku",
+    password: "12345678",
+  },
+  {
+    userName: "hikma",
+    firstName: "Hikma",
+    lastName: "Mohamed",
+    phone: "0963760376",
+    address: "wku",
+    password: "12345678",
+  },
+  {
+    userName: "aby",
+    firstName: "Aby",
+    lastName: "Andargie",
+    phone: "0963760376",
+    address: "wku",
+    password: "12345678",
+  },
+  {
+    userName: "yihun",
+    firstName: "Yihune",
+    lastName: "Tarekegn",
+    phone: "0963760376",
+    address: "wku",
+    password: "12345678",
+  },
+  {
+    userName: "abe",
+    firstName: "Abebe",
+    lastName: "Kebede",
+    phone: "0963760376",
+    address: "wku",
+    password: "12345678",
+  },
+];
