@@ -37,7 +37,7 @@ export default function admoneHomePage({ navigation }) {
           >
             <Text style={styles.buttontext}> customer management</Text>
           </Pressable>
-          <Pressable
+          {/* <Pressable
             style={styles.homecard}
             onPress={() => {
               navigation.navigate("promotionManagement");
@@ -46,31 +46,31 @@ export default function admoneHomePage({ navigation }) {
             <Text style={styles.buttontext}>
               promotion and discount management
             </Text>
-          </Pressable>
-          <Pressable
+          </Pressable> */}
+          {/* <Pressable
             style={styles.homecard}
             onPress={() => {
               navigation.navigate("inventoryManagement");
             }}
           >
             <Text style={styles.buttontext}>Inventory Management</Text>
-          </Pressable>
-          <Pressable
+          </Pressable> */}
+          {/* <Pressable
             style={styles.homecard}
             onPress={() => {
               navigation.navigate("orderManagement");
             }}
           >
             <Text style={styles.buttontext}>Order Management</Text>
-          </Pressable>
-          <Pressable
+          </Pressable> */}
+          {/* <Pressable
             style={styles.homecard}
             onPress={() => {
               navigation.navigate("saleRevenueManagement");
             }}
           >
             <Text style={styles.buttontext}>Sales and Revenue Management</Text>
-          </Pressable>
+          </Pressable> */}
           <Pressable
             style={styles.homecard}
             onPress={() => {
@@ -79,14 +79,14 @@ export default function admoneHomePage({ navigation }) {
           >
             <Text style={styles.buttontext}>Supplier Management</Text>
           </Pressable>
-          <Pressable
+          {/* <Pressable
             style={styles.homecard}
             onPress={() => {
               navigation.navigate("alertNotifManagement");
             }}
           >
             <Text style={styles.buttontext}>Alerts and Notifications</Text>
-          </Pressable>
+          </Pressable> */}
         </View>
       </ScrollView>
     </View>

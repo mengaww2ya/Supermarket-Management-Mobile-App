@@ -36,6 +36,8 @@ export default function AlcholicDrink({ navigation }) {
               onPress={() => {
                 setindexcheck(item.id);
                 navigation.navigate("Item", {
+                  products: AlcholicDrinkCategory,
+                  currentIndex: index,
                   image: item.image,
                   ProductName: item.AlcholName,
                   Price: item.Price,
