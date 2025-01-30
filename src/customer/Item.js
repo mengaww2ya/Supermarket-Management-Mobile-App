@@ -32,12 +32,10 @@ export default function Item({ route, navigation }) {
     packagetype,
     catagory,
     origin,
-    products,
-    currentIndex,
   } = route.params;
-  const [index, setIndex] = useState(currentIndex); // Track current product index
-  const [product, setProduct] = useState(products[index]); // Track displayed product
-
+   const { products = [], currentIndex = 0 } = route.params || {};
+   const [index, setIndex] = useState(currentIndex);
+   const [product, setProduct] = useState(products[index] || {});
   useEffect(() => {
     setProduct(products[index]);
   }, [index]);

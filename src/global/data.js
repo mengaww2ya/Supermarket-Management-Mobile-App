@@ -256,7 +256,7 @@ export const VegetableCategory = [
 
 export const FruitCategiry = [
   {
-    VegetableName: "mango",
+    fruitName: "mango",
     image: require("../../assets/images/mango.png"),
     Price: 20,
     DiscountPrice: 15,
@@ -271,10 +271,9 @@ export const FruitCategiry = [
     PackageType: "Bag",
     SupplierName: "mang",
     Origin: "ethiopia",
-
   },
   {
-    VegetableName: "orange",
+    fruitName: "orange",
     image: require("../../assets/images/orange.png"),
     Price: 20,
     DiscountPrice: 15,
@@ -289,10 +288,9 @@ export const FruitCategiry = [
     PackageType: "Bag",
     SupplierName: "oran",
     Origin: "ethiopia",
-
   },
   {
-    VegetableName: "Lemon",
+    fruitName: "Lemon",
     image: require("../../assets/images/lemon.jpeg"),
     Price: 20,
     DiscountPrice: 15,
@@ -306,11 +304,10 @@ export const FruitCategiry = [
     Amount: "1kg",
     PackageType: "Bag",
     SupplierName: "lemo",
-    Origin : "ethiopia",
-
+    Origin: "ethiopia",
   },
   {
-    VegetableName: "papaya",
+    fruitName: "papaya",
     image: require("../../assets/images/Papaya.png"),
     Price: 20,
     DiscountPrice: 15,
@@ -325,10 +322,9 @@ export const FruitCategiry = [
     PackageType: "Bag",
     SupplierName: "papa",
     Origin: "ethiopia",
-
   },
   {
-    VegetableName: "Banana",
+    fruitName: "Banana",
     image: require("../../assets/images/Banana.jpeg"),
     Price: 20,
     DiscountPrice: 15,
@@ -343,13 +339,12 @@ export const FruitCategiry = [
     PackageType: "Bag",
     SupplierName: "bana",
     Origin: "ethiopia",
-
   },
 ];
 
 export const PackedFoodCategory = [
   {
-    VegetableName: "Pasta",
+    foodName: "Pasta",
     image: require("../../assets/images/pasta.png"),
     Price: 20,
     DiscountPrice: 15,
@@ -366,7 +361,7 @@ export const PackedFoodCategory = [
     Origin: "ethiopia",
   },
   {
-    VegetableName: "Biscuit",
+    foodName: "Biscuit",
     image: require("../../assets/images/Biscuits.png"),
     Price: 20,
     DiscountPrice: 15,
@@ -383,7 +378,7 @@ export const PackedFoodCategory = [
     Origin: "ethiopia",
   },
   {
-    VegetableName: "Energy Bars",
+    foodName: "Energy Bars",
     image: require("../../assets/images/EnergyBars.png"),
     Price: 20,
     DiscountPrice: 15,
@@ -400,7 +395,7 @@ export const PackedFoodCategory = [
     Origin: "ethiopia",
   },
   {
-    VegetableName: "Caned Fish",
+    foodName: "Caned Fish",
     image: require("../../assets/images/CannedFish.png"),
     Price: 20,
     DiscountPrice: 15,
@@ -417,7 +412,7 @@ export const PackedFoodCategory = [
     Origin: "ethiopia",
   },
   {
-    VegetableName: " chocolate chips",
+    foodName: " chocolate chips",
     image: require("../../assets/images/chocolateChips.png"),
     Price: 20,
     DiscountPrice: 15,
@@ -437,7 +432,7 @@ export const PackedFoodCategory = [
 
 export const SoftDrinkCategory = [
   {
-    VegetableName: "Coca Cola",
+    drinkName: "Coca Cola",
     image: require("../../assets/images/Coca-Cola.png"),
     Price: 20,
     DiscountPrice: 15,
@@ -454,7 +449,7 @@ export const SoftDrinkCategory = [
     Origin: "ethiopia",
   },
   {
-    VegetableName: "Fanta ",
+    drinkName: "Fanta ",
     image: require("../../assets/images/Fanta .png"),
     Price: 20,
     DiscountPrice: 15,
@@ -471,7 +466,7 @@ export const SoftDrinkCategory = [
     Origin: "ethiopia",
   },
   {
-    VegetableName: "Sprite",
+    drinkName: "Sprite",
     image: require("../../assets/images/Sprite.png"),
     Price: 20,
     DiscountPrice: 15,
@@ -488,7 +483,7 @@ export const SoftDrinkCategory = [
     Origin: "ethiopia",
   },
   {
-    VegetableName: "Pepsi",
+    drinkName: "Pepsi",
     image: require("../../assets/images/Pepsi.png"),
     Price: 20,
     DiscountPrice: 15,
@@ -508,7 +503,7 @@ export const SoftDrinkCategory = [
 
 export const CosmoticsCategory = [
   {
-    VegetableName: "Lipstick",
+    cosmoticsName: "Lipstick",
     image: require("../../assets/images/Lipstick.jpeg"),
     Price: 20,
     DiscountPrice: 15,
@@ -525,7 +520,7 @@ export const CosmoticsCategory = [
     Origin: "ethiopia",
   },
   {
-    VegetableName: "Prilimer ",
+    cosmoticsName: "Prilimer ",
     image: require("../../assets/images/Primer.jpeg"),
     Price: 20,
     DiscountPrice: 15,
@@ -542,7 +537,7 @@ export const CosmoticsCategory = [
     Origin: "ethiopia",
   },
   {
-    VegetableName: "Foundation",
+    cosmoticsName: "Foundation",
     image: require("../../assets/images/Foundation.jpeg"),
     Price: 20,
     DiscountPrice: 15,
@@ -559,7 +554,7 @@ export const CosmoticsCategory = [
     Origin: "ethiopia",
   },
   {
-    VegetableName: "Concealer",
+    cosmoticsName: "Concealer",
     image: require("../../assets/images/Concealer.jpeg"),
     Price: 20,
     DiscountPrice: 15,
@@ -576,7 +571,7 @@ export const CosmoticsCategory = [
     Origin: "ethiopia",
   },
   {
-    VegetableName: "Mascara",
+    cosmoticsName: "Mascara",
     image: require("../../assets/images/Mascara.jpeg"),
     Price: 20,
     DiscountPrice: 15,
@@ -613,7 +608,7 @@ export const AlcholicDrinkCategory = [
     Origin: "ethiopia",
   },
   {
-    VegetableName: "Wine ",
+    AlcholName: "Wine ",
     image: require("../../assets/images/Wine.jpeg"),
     Price: 20,
     DiscountPrice: 15,
@@ -628,10 +623,9 @@ export const AlcholicDrinkCategory = [
     PackageType: "Bottle",
     SupplierName: "wine",
     Origin: "ethiopia",
-
   },
   {
-    VegetableName: "Vodka",
+    AlcholName: "Vodka",
     image: require("../../assets/images/Vodka.jpeg"),
     Price: 20,
     DiscountPrice: 15,
@@ -648,7 +642,7 @@ export const AlcholicDrinkCategory = [
     Origin: "ethiopia",
   },
   {
-    VegetableName: "Gin",
+    AlcholName: "Gin",
     image: require("../../assets/images/Gin.jpeg"),
     Price: 20,
     DiscountPrice: 15,
@@ -663,10 +657,9 @@ export const AlcholicDrinkCategory = [
     PackageType: "Bottle",
     SupplierName: "gin",
     Origin: "ethiopia",
-
   },
   {
-    VegetableName: "Whisky",
+    AlcholName: "Whisky",
     image: require("../../assets/images/Whisky.jpeg"),
     Price: 20,
     DiscountPrice: 15,
@@ -681,7 +674,6 @@ export const AlcholicDrinkCategory = [
     PackageType: "Bottle",
     SupplierName: "whis",
     Origin: "ethiopia",
-    
   },
 ];
 export  const customer = [

@@ -42,7 +42,7 @@ export default function PckedFood({ navigation }) {
                 updateImage(item.image);
                 navigation.navigate("Item", {
                   image: item.image,
-                  ProductName: item.VegetableName,
+                  ProductName: item.foodName,
                   Price: item.Price,
                   DiscountPrice: item.DiscountPrice,
                   Rating: item.Rating,
