@@ -15,7 +15,6 @@ export default function manageStock({ navigation }) {
     <SafeAreaView>
       <ScrollView
         style={{ paddingBottom: 20 }}
-        stickyHeaderIndices={[0]}
         showsVerticalScrollIndicator={true}
         contentContainerStyle={{ flexGrow: 1 }}
       >
@@ -83,13 +82,12 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   titltxt: {
-    marginBottom: 10,
-    padding: 10,
+    margin: 5,
+    padding: 5,
     fontFamily: "new times roman",
     fontSize: 20,
     textAlign: "center",
     backgroundColor: colors.grey5,
     fontWeight: "bold",
-    fontVariant: ["small-caps"],
   },
 });

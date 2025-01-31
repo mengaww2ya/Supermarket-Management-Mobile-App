@@ -218,28 +218,6 @@ export default function Item({ route, navigation }) {
     </ScrollView>
   );
 }
-
-// return (
-//   <View style={styles.likecontainer}>
-//     <Text style={styles.liketitl}>how much you like this Product?</Text>
-//     <Pressable style={styles.stylbtn}>
-//       <Text style={styles.liketxt}>1:-Very poor</Text>
-//     </Pressable>
-//     <Pressable style={styles.stylbtn}>
-//       <Text style={styles.liketxt}>2:Below average</Text>
-//     </Pressable>
-//     <Pressable style={styles.stylbtn}>
-//       <Text style={styles.liketxt}>3:-Average</Text>
-//     </Pressable>
-//     <Pressable style={styles.stylbtn}>
-//       <Text style={styles.liketxt}>4:-Good</Text>
-//     </Pressable>
-//     <Pressable style={styles.stylbtn}>
-//       <Text style={styles.liketxt}>5:-Excellent</Text>
-//     </Pressable>
-//   </View>
-// );
-
 const styles = StyleSheet.create({
   itemInfoContainer: {
     flex: 1,
@@ -252,8 +230,8 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 20,
+    fontWeight:"bold"
     // textAlign:"center",
-    // backgroundColor:colors.grey3,
   },
   text: {
     fontSize: 15,
@@ -310,7 +288,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.grey1,
     borderColor: colors.grey0,
     borderWidth: 1,
-    backgroundColor: "#ddd",
     padding: 10,
     marginVertical: 5,
     borderRadius: 5,
@@ -323,7 +300,7 @@ const styles = StyleSheet.create({
   },
   closeButton: {
     marginTop: 10,
-    backgroundColor: "#ff0000",
+    backgroundColor: colors.warning,
     padding: 10,
     borderRadius: 5,
     width: "100%",

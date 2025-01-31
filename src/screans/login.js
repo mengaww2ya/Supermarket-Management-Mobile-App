@@ -1,106 +1,117 @@
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import {
-  TouchableOpacity,
   View,
   Text,
   StyleSheet,
   TextInput,
-  ScrollView,
   Pressable,
+  TouchableOpacity,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import * as Animatable from "react-native-animatable";
-import { colors, Icon } from "react-native-elements";
+import { Icon } from "react-native-elements";
 import { ScreenWidth } from "react-native-elements/dist/helpers";
 
 export default function Login({ navigation }) {
-  const [textInput2Focused, setTextInput2Focused] = useState(false);
-  const textInput1 = useRef();
-  const textInput2 = useRef();
-  const handleFocus = () => setTextInput2Focused(false);
-  const handleBlur = () => setTextInput2Focused(true);
+  const [passwordVisible, setPasswordVisible] = useState(false);
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
 
   return (
     <SafeAreaView style={styles.safeContainer}>
       <View style={styles.container}>
-        <View>
-          <Text style={styles.welcome}>Welcome to Queen Supermarket</Text>
-        </View>
+        <Text style={styles.welcome}>Welcome to Queen Supermarket</Text>
+
         <View style={styles.login}>
           <Text style={styles.loginFormText}>
             Fill the form below to log in
           </Text>
-          <Text style={styles.inputTitle}>user name</Text>
+
+          <Text style={styles.inputTitle}>Username</Text>
           <TextInput
             style={styles.textInput}
             placeholder="Enter your username"
-            ref={textInput1}
+            value={username}
+            onChangeText={setUsername}
           />
-          <Text style={styles.inputTitle}>password</Text>
-          <TextInput
-            placeholder="Enter your password"
-            secureTextEntry
-            style={styles.textInputPass}
-            ref={textInput2}
-            onFocus={handleFocus}
-            onBlur={handleBlur}
-          />
+
+          <Text style={styles.inputTitle}>Password</Text>
+          <View style={styles.passwordContainer}>
+            <TextInput
+              placeholder="Enter your password"
+              secureTextEntry={!passwordVisible}
+              style={styles.textInputPass}
+              value={password}
+              onChangeText={setPassword}
+            />
+            <TouchableOpacity
+              onPress={() => setPasswordVisible(!passwordVisible)}
+            >
+              <Icon
+                name={passwordVisible ? "eye" : "eye-slash"}
+                type="font-awesome"
+                color="gray"
+                size={20}
+                style={styles.icon}
+              />
+            </TouchableOpacity>
+          </View>
 
           <Pressable
             style={styles.button}
-            onPress={() => {
-              navigation.navigate("Homepage");
-            }}
+            onPress={() => navigation.navigate("Homepage")}
           >
             <Text style={styles.buttonText}>Log In</Text>
           </Pressable>
+
           <Pressable>
             <Text style={styles.text}>Forgot password?</Text>
           </Pressable>
+
           <View style={styles.thirdPartyLogin}>
             <Pressable
-              onPress={() => {
-                navigation.navigate("Homepage");
-              }}
               style={styles.googleButton}
+              onPress={() => alert("Hey! Google Sign-in not omplemented ")}
             >
-              <Text style={styles.buttonTextgoogle}>Sign by Google</Text>
               <Icon
                 name="google"
                 type="font-awesome"
-                color="#517fa4"
-                size={30}
+                color="#DB4437"
+                size={25}
               />
+              <Text style={styles.buttonTextGoogle}>Sign by Google</Text>
             </Pressable>
+
             <Pressable
-              onPress={() => {
-                navigation.navigate("Homepage");
-              }}
               style={styles.facebookButton}
+              onPress={() => alert("Hey! Facebook Sign-in not implemented")}
             >
-              <Text style={styles.buttonTextFacebook}>Sign by Facebook</Text>
               <Icon
                 name="facebook"
                 type="font-awesome"
-                color="#517fa4"
-                size={30}
+                color="#4267B2"
+                size={25}
               />
+              <Text style={styles.buttonTextFacebook}>
+                Sign by Facebook
+              </Text>
             </Pressable>
           </View>
+
           <Pressable
             style={styles.signup}
             onPress={() => navigation.navigate("Signup")}
           >
-            <Text style={styles.text}>I don't have an account? </Text>{" "}
+            <Text style={styles.text}>I don't have an account? Sign up</Text>
           </Pressable>
         </View>
       </View>
+
       <View>
         <Pressable
           onPress={() => navigation.navigate("DeveloperHomePage")}
-          style={styles.developingmodebtn}
+          style={styles.developingModeBtn}
         >
-          <Text style={styles.buttonText}>I am developing not for log in</Text>
+          <Text style={styles.buttonText}>I am developing, not logging in</Text>
         </Pressable>
       </View>
     </SafeAreaView>
@@ -127,46 +138,40 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     padding: 20,
     borderRadius: 10,
-    borderColor: colors.grey0,
     borderWidth: 1,
-    borderColor: colors.grey4,
-
+    borderColor: "#d3d3d3",
     width: "100%",
   },
   textInput: {
     fontSize: 18,
     borderRadius: 5,
     borderWidth: 1,
-    borderColor: colors.grey4,
+    borderColor: "#d3d3d3",
     marginBottom: 15,
     padding: 10,
     backgroundColor: "white",
   },
   textInputPass: {
-    width: "100%",
+    flex: 1,
     fontSize: 18,
-    borderRadius: 5,
-    borderWidth: 1,
-    borderColor: colors.grey4,
-    marginBottom: 15,
-    padding: 15,
-    backgroundColor: "white",
+    padding: 10,
   },
   passwordContainer: {
     flexDirection: "row",
     alignItems: "center",
     borderRadius: 5,
     borderWidth: 1,
-    borderColor: colors.grey4,
+    borderColor: "#d3d3d3",
     marginBottom: 15,
     backgroundColor: "white",
+    paddingHorizontal: 10,
   },
   icon: {
-    marginHorizontal: 10,
+    marginLeft: 10,
   },
   button: {
-    backgroundColor: colors.primary,
-    padding: 10,
+    backgroundColor: "#2ECE33",
+    padding: 12,
     borderRadius: 5,
     alignItems: "center",
     marginBottom: 10,
@@ -175,82 +180,80 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 18,
     fontWeight: "bold",
-    textAlign:"center",
+    textAlign: "center",
   },
   googleButton: {
-    margin: 5,
-    backgroundColor: colors.grey5,
-    borderRadius: 5,
-    height: 40,
-    alignItems: "center",
     flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
+    borderColor: "#DB4437",
+    paddingVertical: 10,
+    borderRadius: 5,
+    marginHorizontal: 5,
+    flex: 1,
     justifyContent: "center",
   },
   facebookButton: {
-    margin: 5,
-    height: 40,
-    backgroundColor: colors.grey5,
-    borderRadius: 5,
-    alignItems: "center",
     flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
+    borderColor: "#4267B2",
+    paddingVertical: 10,
+    borderRadius: 5,
+    marginHorizontal: 5,
+    flex: 1,
     justifyContent: "center",
+  },
+  buttonTextGoogle: {
+    color: "#DB4437",
+    fontSize: 14,
+    fontWeight: "bold",
+    marginLeft: 10,
+  },
+  buttonTextFacebook: {
+    color: "#4267B2",
+    fontSize: 14,
+    fontWeight: "bold",
+    marginLeft: 10,
+  },
+  thirdPartyLogin: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginTop: 10,
   },
   text: {
     fontSize: 16,
     textAlign: "center",
     marginVertical: 10,
   },
-  linkText: {
-    padding: 10,
-    color: "white",
-    fontWeight: "bold",
-  },
   signup: {
-    width: "100%",
     paddingHorizontal: 10,
-    backgroundColor: colors.grey4,
-    marginLeft: 2,
+    backgroundColor: "#d3d3d3",
     borderRadius: 5,
-  },
-  dontAcount: {
-    margin: "5%",
-    alignItems: "center",
+    paddingVertical: 10,
+    marginTop: 10,
   },
   loginFormText: {
     fontSize: 18,
     marginBottom: 10,
     textAlign: "center",
-    fontFamily: "new times roman",
     fontWeight: "bold",
-  },
-  buttonTextgoogle: {
-    color: "black",
-    fontSize: 14,
-    fontWeight: "bold",
-    padding: 10,
-  },
-  buttonTextFacebook: {
-    color: "black",
-    fontSize: 14,
-    fontWeight: "bold",
-    padding: 10,
-  },
-  thirdPartyLogin: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
   },
   inputTitle: {
     fontSize: 18,
-    fontWeight: "Italic",
+    fontStyle: "italic",
     color: "black",
+    marginBottom: 5,
   },
-  developingmodebtn:{
-    backgroundColor:colors.black,
-    width:ScreenWidth*0.8,
-    alignSelf:"center",
-    borderRadius:5,
-    height:30,
-
-  }
+  developingModeBtn: {
+    backgroundColor: "#333",
+    width: ScreenWidth * 0.8,
+    alignSelf: "center",
+    borderRadius: 5,
+    paddingVertical: 10,
+    marginTop: 20,
+  },
 });

@@ -19,14 +19,9 @@ export default function AlcholicDrink({ navigation }) {
   const [titem, settitem] = useState("");
   return (
     <ScrollView>
-      {/* <View>
-        <Header  />
-      </View> */}
       <View style={styles.vegetableView}>
         <FlatList
           nestedScrollEnabled
-          //   horizontal={true}
-          //  showsHorizontalScrollIndicator={false}
           data={AlcholicDrinkCategory}
           keyExtractor={(item) => item.id}
           extraData={indexcheck}
