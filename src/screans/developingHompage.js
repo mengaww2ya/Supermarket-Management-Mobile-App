@@ -1,15 +1,21 @@
 import React from "react";
-import {Text,View,Pressable,SafeAreaView,StyleSheet, ScrollView} from "react-native";
+import {
+  Text,
+  View,
+  Pressable,
+  SafeAreaView,
+  StyleSheet,
+  ScrollView,
+  useWindowDimensions,
+} from "react-native";
 import { colors } from "react-native-elements";
-import { ScreenHeight, ScreenWidth } from "react-native-elements/dist/helpers";
+const ScreenWidth=useWindowDimensions().width;
+const ScreenHeight=useWindowDimensions().height;
 export default function DeveloperHomePage({navigation}){
     return (
       <ScrollView>
-        <Text style={styles.titlText}>
-            Hey! which role you want to test
-          </Text>
+        <Text style={styles.titlText}>Hey! which role you want to test</Text>
         <View style={styles.container}>
-          
           <Pressable
             style={styles.button}
             onPress={() => {
@@ -32,7 +38,10 @@ export default function DeveloperHomePage({navigation}){
           <Pressable style={styles.button}>
             <Text style={styles.buttontext}>Admine</Text>
           </Pressable>
-          <Pressable style={styles.button}>
+          <Pressable
+            style={styles.button}
+            onPress={() => navigation.navigate("stockManagerHome")}
+          >
             <Text style={styles.buttontext}>StockManager</Text>
           </Pressable>
         </View>
@@ -40,16 +49,16 @@ export default function DeveloperHomePage({navigation}){
     );
 }
 const styles = StyleSheet.create({
-  container:{
-    marginHorizontal:10,
-    marginVertical:10,
-    flexDirection:"row",
-    flexWrap:"wrap",
-    justifyContent:"space-between",
-    borderColor:colors.grey5,
-    borderWidth:0.5,
-    alignSelf:"center",
-    rowGap:20,
+  container: {
+    marginHorizontal: 10,
+    marginVertical: 10,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+    borderColor: colors.grey5,
+    borderWidth: 0.5,
+    alignSelf: "center",
+    rowGap: 20,
   },
   button: {
     backgroundColor: colors.grey5,
@@ -64,22 +73,21 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.5,
     shadowRadius: 2,
     // elevation: 10,
-
   },
-  titlText:{
-    padding:10,
-    fontFamily:"new times roman",
-    fontSize:20,
-    textAlign:"center",
-    backgroundColor:colors.grey5,
-    fontWeight:"bold",
+  titlText: {
+    marginBottom: 10,
+    padding: 10,
+    fontFamily: "new times roman",
+    fontSize: 20,
+    textAlign: "center",
+    backgroundColor: colors.grey5,
+    fontWeight: "bold",
     fontVariant: ["small-caps"],
-    
   },
-buttontext:{
-padding:10,
-fontFamily:"new times roman",
-fontSize:20,
-textAlign:"center",
-  }
+  buttontext: {
+    padding: 10,
+    fontFamily: "new times roman",
+    fontSize: 20,
+    textAlign: "center",
+  },
 });

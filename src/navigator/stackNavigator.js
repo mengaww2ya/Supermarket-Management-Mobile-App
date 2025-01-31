@@ -1,7 +1,6 @@
 import { TransitionPresets } from "@react-navigation/stack";
 import Login from "../screans/login.js";
 import Welcome from "../screans/welcome.js";
-import Homepage from "../customer/homepage.js";
 import Vegetable from "../customer/Vegetable.js";
 import Fruit from "../customer/fruit.js";
 import PckedFood from "../customer/packedFood.js";
@@ -24,6 +23,8 @@ import alertNotifManagement from "../manager/alertNotificationManagement.js";
 import orderManagement from "../manager/orderManagement.js";
 import suplierManagement from "../manager/suplierManagement.js";
 import customerList from "../manager/customerList.js";
+import manageStock from "../stockManager/Manage stock levels.js";
+import stockManagerHome from "../stockManager/stockManagerHome.js";
 const Authentic = createNativeStackNavigator();
 export default function AuthicStackNavig() {
   return (
@@ -390,6 +391,38 @@ export default function AuthicStackNavig() {
             fontSize: 25,
           },
           title: "List Of Customers",
+          ...TransitionPresets.RevealFromBottomAndroid,
+          headerStyle: {
+            backgroundColor: "#FFDC2B",
+          },
+        }}
+      />
+      <Authentic.Screen
+        name="manageStock"
+        component={manageStock}
+        options={{
+          headerShown: true,
+          headerTitleStyle: {
+            color: "#2ECE33",
+            fontSize: 25,
+          },
+          title: "Stock Management",
+          ...TransitionPresets.RevealFromBottomAndroid,
+          headerStyle: {
+            backgroundColor: "#FFDC2B",
+          },
+        }}
+      />
+      <Authentic.Screen
+        name="stockManagerHome"
+        component={stockManagerHome}
+        options={{
+          headerShown: true,
+          headerTitleStyle: {
+            color: "#2ECE33",
+            fontSize: 25,
+          },
+          title: "Stock Management Home",
           ...TransitionPresets.RevealFromBottomAndroid,
           headerStyle: {
             backgroundColor: "#FFDC2B",
