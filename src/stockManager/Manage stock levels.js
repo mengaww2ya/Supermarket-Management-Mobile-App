@@ -1,42 +1,59 @@
-import { ScrollView, SafeAreaView,View,Text,StyleSheet, Pressable, useWindowDimensions } from "react-native";
+import {
+  ScrollView,
+  SafeAreaView,
+  View,
+  Text,
+  StyleSheet,
+  Pressable,
+  useWindowDimensions,
+} from "react-native";
 import { colors } from "react-native-elements";
-const ScreenWidth=useWindowDimensions().width;
-const ScreenHeight=useWindowDimensions().height;
-export default function manageStock(){
-    return (
-      <SafeAreaView>
-        <ScrollView>
-          <Text style={styles.titltxt}>Welcome </Text>
-            
-          <View style={styles.container}>
-            <Pressable style={styles.btn}>
-              <Text style={styles.btntxt}>Add product</Text>
-            </Pressable>
-            <Pressable style={styles.btn}>
-              <Text style={styles.btntxt}>remove product</Text>
-            </Pressable>
-            <Pressable style={styles.btn}>
-              <Text style={styles.btntxt}>update product</Text>
-            </Pressable>
-            <Pressable style={styles.btn}>
-              <Text style={styles.btntxt}>view product list</Text>
-            </Pressable>
-            <Pressable style={styles.btn}>
-              <Text style={styles.btntxt}>Add new catagories</Text>
-            </Pressable>
-            <Pressable style={styles.btn}>
-              <Text style={styles.btntxt}>update catagories</Text>
-            </Pressable>
-            <Pressable style={styles.btn}>
-              <Text style={styles.btntxt}>remove catagories</Text>
-            </Pressable>
-            <Pressable style={styles.btn}>
-              <Text style={styles.btntxt}>view catagories list</Text>
-            </Pressable>
-          </View>
-        </ScrollView>
-      </SafeAreaView>
-    );
+const ScreenWidth = useWindowDimensions().width;
+const ScreenHeight = useWindowDimensions().height;
+export default function manageStock({ navigation }) {
+  return (
+    <SafeAreaView>
+      <ScrollView
+        style={{ paddingBottom: 20 }}
+        stickyHeaderIndices={[0]}
+        showsVerticalScrollIndicator={true}
+        contentContainerStyle={{ flexGrow: 1 }}
+      >
+        <Text style={styles.titltxt}>Welcome </Text>
+        <View style={styles.container}>
+          <Pressable style={styles.btn}>
+            <Text
+              style={styles.btntxt}
+              onPress={()=>navigation.navigate("addProduct")}
+            >
+              Add product
+            </Text>
+          </Pressable>
+          <Pressable style={styles.btn}>
+            <Text style={styles.btntxt}>remove product</Text>
+          </Pressable>
+          <Pressable style={styles.btn}>
+            <Text style={styles.btntxt}>update product</Text>
+          </Pressable>
+          <Pressable style={styles.btn}>
+            <Text style={styles.btntxt}>view product list</Text>
+          </Pressable>
+          <Pressable style={styles.btn}>
+            <Text style={styles.btntxt}>Add new catagories</Text>
+          </Pressable>
+          <Pressable style={styles.btn}>
+            <Text style={styles.btntxt}>update catagories</Text>
+          </Pressable>
+          <Pressable style={styles.btn}>
+            <Text style={styles.btntxt}>remove catagories</Text>
+          </Pressable>
+          <Pressable style={styles.btn}>
+            <Text style={styles.btntxt}>view catagories list</Text>
+          </Pressable>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  );
 }
 const styles = StyleSheet.create({
   container: {
@@ -66,7 +83,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   titltxt: {
-    marginBottom:10,
+    marginBottom: 10,
     padding: 10,
     fontFamily: "new times roman",
     fontSize: 20,

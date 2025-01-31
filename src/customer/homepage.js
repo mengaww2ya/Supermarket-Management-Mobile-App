@@ -14,11 +14,10 @@ import {
   promoCategories,
   standard,
   recomended,
-  VegetableCategory,
 } from "../global/data.js";
 import DrawNavigator from "../navigator/drawNavigator.js";
-import { colors, Icon } from "react-native-elements";
 import Footer from "../subscrean/foter.js";
+import { colors,Icon } from "react-native-elements";
 const screenwidth =useWindowDimensions().width;
 const screenheight = useWindowDimensions().height;
 export default function Homepage({ navigation }) {
