@@ -1,6 +1,5 @@
-import React , { useState } from "react";
+import React, { useState } from "react";
 import * as ImagePicker from "expo-image-picker";
-import { colors } from "react-native-elements";
 import {
   Pressable,
   SafeAreaView,
@@ -9,68 +8,151 @@ import {
   View,
   StyleSheet,
   TextInput,
+  Image,
 } from "react-native";
-export default function addProduct() {
+import { colors } from "react-native-elements";
+
+export default function AddProduct({ navigation }) {
   const [image, setImage] = useState(null);
+  const [productName, setProductName] = useState("");
+  const [productId, setProductId] = useState("");
+  const [category, setCategory] = useState("");
+  const [price, setPrice] = useState("");
+  const [discount, setDiscount] = useState("");
+  const [description, setDescription] = useState("");
+  const [ingredients, setIngredients] = useState("");
+  const [nutrition, setNutrition] = useState("");
+  const [packageType, setPackageType] = useState("");
+  const [supplier, setSupplier] = useState("");
+  const [origin, setOrigin] = useState("");
+
+  const clearInput = () => {
+    setProductName("");
+    setProductId("");
+    setCategory("");
+    setPrice("");
+    setDiscount("");
+    setDescription("");
+    setIngredients("");
+    setNutrition("");
+    setPackageType("");
+    setSupplier("");
+    setOrigin("");
+    setImage(null);
+  };
+
   const selectImage = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== "granted") {
+      alert("Permission required to access media library.");
+      return;
+    }
+
     let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ["images"],
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [4, 3],
       quality: 1,
     });
-    console.log(result);
 
     if (!result.canceled) {
       setImage(result.assets[0].uri);
     }
   };
+
   return (
     <SafeAreaView>
-      <ScrollView
-        style={{ flex: 1, paddingBottom: 20 }}
-        stickyHeaderIndices={[0]}
-        showsVerticalScrollIndicator={true}
-        contentContainerStyle={{ flexGrow: 1 }}
-      >
-        <View style={{margin:10,padding:10}}>
-          <Text style={styles.titltxt}>fill product detail</Text>
-          <View style={styles.container}>
-            <TextInput style={styles.textInput} placeholder="Product Name" />
-            <TextInput style={styles.textInput} placeholder="Product Id" />
-            <TextInput
-              style={styles.textInput}
-              placeholder="Product Category"
-            />
-            <TextInput style={styles.textInput} placeholder="Product price" />
-            <TextInput
-              style={styles.textInput}
-              placeholder="Product discount"
-            />
-            <TextInput
-              style={styles.textInput}
-              placeholder="Product discription"
-            />
-            <TextInput
-              style={styles.textInput}
-              placeholder="Product ingridients"
-            />
-            <TextInput
-              style={styles.textInput}
-              placeholder="Product nutration"
-            />
-            <TextInput
-              style={styles.textInput}
-              placeholder="Product package type"
-            />
-            <TextInput
-              style={styles.textInput}
-              placeholder="Product suplier name"
-            />
-            <TextInput style={styles.textInput} placeholder="Product Origin" />
-            <Pressable style={styles.btn} onPress={selectImage}>
-              <Text style={styles.btntxt}>Uload image</Text>
-              {image && <Image source={{ uri: image }} style={styles.image} />}
+      <ScrollView>
+        <View style={styles.container}>
+          <Text style={styles.title}>Fill Product Details</Text>
+
+          <TextInput
+            style={styles.textInput}
+            placeholder="Product Name"
+            value={productName}
+            onChangeText={setProductName}
+          />
+          <TextInput
+            style={styles.textInput}
+            placeholder="Product Id"
+            value={productId}
+            onChangeText={setProductId}
+          />
+          <TextInput
+            style={styles.textInput}
+            placeholder="Product Category"
+            value={category}
+            onChangeText={setCategory}
+          />
+          <TextInput
+            style={styles.textInput}
+            placeholder="Product Price"
+            keyboardType="numeric"
+            value={price}
+            onChangeText={setPrice}
+          />
+          <TextInput
+            style={styles.textInput}
+            placeholder="Product Discount"
+            keyboardType="numeric"
+            value={discount}
+            onChangeText={setDiscount}
+          />
+          <TextInput
+            style={styles.textInput}
+            placeholder="Product Description"
+            value={description}
+            onChangeText={setDescription}
+          />
+          <TextInput
+            style={styles.textInput}
+            placeholder="Product Ingredients"
+            value={ingredients}
+            onChangeText={setIngredients}
+          />
+          <TextInput
+            style={styles.textInput}
+            placeholder="Product Nutrition Info"
+            value={nutrition}
+            onChangeText={setNutrition}
+          />
+          <TextInput
+            style={styles.textInput}
+            placeholder="Product Package Type"
+            value={packageType}
+            onChangeText={setPackageType}
+          />
+          <TextInput
+            style={styles.textInput}
+            placeholder="Product Supplier Name"
+            value={supplier}
+            onChangeText={setSupplier}
+          />
+          <TextInput
+            style={styles.textInput}
+            placeholder="Product Origin"
+            value={origin}
+            onChangeText={setOrigin}
+          />
+
+          <Pressable style={styles.button} onPress={selectImage}>
+            <Text style={styles.buttonText}>Upload Image</Text>
+          </Pressable>
+
+          {image && <Image source={{ uri: image }} style={styles.image} />}
+
+          <View style={styles.buttonContainer}>
+            <Pressable style={styles.button} onPress={() => {}}>
+              <Text style={styles.buttonText}>Add Product</Text>
+            </Pressable>
+            <Pressable
+              style={styles.button}
+              onPress={() => navigation.goBack()}
+            >
+              <Text style={styles.buttonText}>Back</Text>
+            </Pressable>
+            <Pressable style={styles.buttonclear} onPress={clearInput}>
+              <Text style={styles.buttonText}>Clear</Text>
             </Pressable>
           </View>
         </View>
@@ -78,49 +160,57 @@ export default function addProduct() {
     </SafeAreaView>
   );
 }
+
 const styles = StyleSheet.create({
   container: {
-    marginVertical: 10,
-    backgroundColor: "white",
+    margin: 10,
     padding: 10,
+    backgroundColor: "#f5f5f5",
     borderRadius: 5,
     borderWidth: 1,
-    borderColor: colors.grey4,
+    borderColor: "#ddd",
   },
-  btn: {
-    backgroundColor: colors.grey4,
-    borderColor: colors.grey2,
-    borderWidth: 1,
-    borderRadius: 5,
-  },
-  btntxt: {
-    padding: 10,
-    fontFamily: "new times roman",
+  title: {
+    marginBottom: 5,
+    padding: 5,
     fontSize: 20,
     textAlign: "center",
+    fontWeight: "bold",
+  
   },
   textInput: {
-    // width: screenwidth * 0.8,
     padding: 10,
-    fontSize: 18,
-    margin: 3,
-    color: colors.grey4,
-    borderRadius: 5,
+    fontSize: 16,
+    marginVertical: 5,
     borderWidth: 1,
-    borderColor: colors.grey4,
+    borderColor: "#ccc",
+    borderRadius: 5,
   },
-  titltxt: {
-    marginBottom: 10,
+  button: {
+    backgroundColor: colors.grey3,
     padding: 10,
-    fontFamily: "new times roman",
-    fontSize: 20,
-    textAlign: "center",
-    backgroundColor: colors.grey5,
-    fontWeight: "bold",
-    fontVariant: ["small-caps"],
+    marginVertical: 5,
+    borderRadius: 5,
+    alignItems: "center",
+  },
+  buttonText: {
+    color: "white",
+    fontSize: 18,
+  },
+  buttonContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
   },
   image: {
     width: 200,
     height: 200,
+    alignSelf: "center",
+    marginTop: 10,
+  },
+  buttonclear: {
+    backgroundColor: colors.warning,
+    borderRadius: 5,
+    padding: 10,
+    alignItems: "center",
   },
 });

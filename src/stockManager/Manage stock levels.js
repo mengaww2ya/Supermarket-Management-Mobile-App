@@ -19,12 +19,12 @@ export default function manageStock({ navigation }) {
         showsVerticalScrollIndicator={true}
         contentContainerStyle={{ flexGrow: 1 }}
       >
-        <Text style={styles.titltxt}>Welcome </Text>
+        <Text style={styles.titltxt}> Welcome </Text>
         <View style={styles.container}>
           <Pressable style={styles.btn}>
             <Text
               style={styles.btntxt}
-              onPress={()=>navigation.navigate("addProduct")}
+              onPress={()=>{navigation.navigate("addProduct")}}
             >
               Add product
             </Text>

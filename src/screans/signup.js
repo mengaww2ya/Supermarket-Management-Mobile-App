@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -8,158 +8,218 @@ import {
   TextInput,
   SafeAreaView,
 } from "react-native";
-import { colors, Colors, Icon } from "react-native-elements";
+import { colors } from "react-native-elements";
+
 const screenwidth = Dimensions.get("window").width;
-const screenheight = Dimensions.get("window").height;
+
 export default function Signup({ navigation }) {
+  // State for form inputs
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [address, setAddress] = useState("");
+  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
   const [textInput2Focused, setTextInput2Focused] = useState(false);
-  const textInput1 = useRef();
-  const textInput2 = useRef();
-  const handleFocus = () => setTextInput2Focused(false);
-  const handleBlur = () => setTextInput2Focused(true);
+
+  // Function to clear input fields
+  const clearInputs = () => {
+    setFirstName("");
+    setLastName("");
+    setAddress("");
+    setPhone("");
+    setEmail("");
+    setPassword("");
+    setConfirmPassword("");
+  };
+
   return (
-    <SafeAreaView>
+    <SafeAreaView style={styles.safeContainer}>
       <View style={styles.container}>
-        <Text style={styles.text}>Fill the form to register or press sign in if you have an account</Text>
-        <View style={styles.signupbody}>
-          <View style={styles.textInputcontainer}>
+        <Text style={styles.text}>
+          Fill the form to register or press sign in if you have an account
+        </Text>
+        <View style={styles.signupBody}>
+          <View style={styles.textInputContainer}>
             <TextInput
               style={styles.textInput}
               placeholder="Enter your first name"
-              ref={textInput1}
+              value={firstName}
+              onChangeText={setFirstName}
             />
             <TextInput
               style={styles.textInput}
               placeholder="Enter your last name"
-              ref={textInput1}
+              value={lastName}
+              onChangeText={setLastName}
             />
             <TextInput
               style={styles.textInput}
               placeholder="Enter your address"
-              ref={textInput1}
+              value={address}
+              onChangeText={setAddress}
             />
             <TextInput
               style={styles.textInput}
               placeholder="Enter your phone number"
-              ref={textInput1}
+              value={phone}
+              onChangeText={setPhone}
             />
             <TextInput
               style={styles.textInput}
               placeholder="Enter your email"
-              ref={textInput1}
+              value={email}
+              onChangeText={setEmail}
             />
             <TextInput
-              placeholder="Create  password"
+              placeholder="Create password"
               secureTextEntry
-              style={styles.textInputPass}
-              ref={textInput2}
-              onFocus={handleFocus}
-              onBlur={handleBlur}
+              style={[
+                styles.textInputPass,
+                textInput2Focused && styles.focusedInput,
+              ]}
+              value={password}
+              onChangeText={setPassword}
+              onFocus={() => setTextInput2Focused(true)}
+              onBlur={() => setTextInput2Focused(false)}
             />
             <TextInput
               placeholder="Confirm your password"
               secureTextEntry
-              style={styles.textInputPass}
-              ref={textInput2}
-              onFocus={handleFocus}
-              onBlur={handleBlur}
+              style={[
+                styles.textInputPass,
+                textInput2Focused && styles.focusedInput,
+              ]}
+              value={confirmPassword}
+              onChangeText={setConfirmPassword}
+              onFocus={() => setTextInput2Focused(true)}
+              onBlur={() => setTextInput2Focused(false)}
             />
           </View>
-          <Pressable
-            style={styles.signupbutton}
-            onPress={() => navigation.navigate("Homepage")}
-          >
-            <Text style={styles.textbutton}>Sign Up</Text>
-          </Pressable>
+          <View style={styles.buttonContainer}>
+            <Pressable
+              style={styles.signupButton}
+              onPress={() => navigation.navigate("Homepage")}
+            >
+              <Text style={styles.textButton}>Sign Up</Text>
+            </Pressable>
+            <Pressable style={styles.clearButton} onPress={clearInputs}>
+              <Text style={styles.textButton}>Clear</Text>
+            </Pressable>
+            <Pressable style={styles.backButton} onPress={() => navigation.goBack()}>
+              <Text style={styles.textButton}>Back</Text>
+            </Pressable>
+          </View>
         </View>
-        
       </View>
       <View style={styles.signInBContainer}>
-         <Text style={styles.text}>Do you have account?</Text>
-
-        <Pressable
-          style={styles.signinbutton}
-          onPress={() => navigation.navigate("Login")}
-        >
-          <Text style={styles.textbutton}>Sign In</Text>
-        </Pressable></View>
-     
+        <Text style={styles.text}>Do you have an account?</Text>
+        <Pressable style={styles.signinButton} onPress={() => navigation.navigate("Login")}>
+          <Text style={styles.textButton}>Sign In</Text>
+        </Pressable>
+      </View>
     </SafeAreaView>
   );
 }
+
 const styles = StyleSheet.create({
+  safeContainer: {
+    flex: 1,
+    backgroundColor: colors.grey5,
+    justifyContent: "center",
+    paddingHorizontal: 20,
+  },
   container: {
     backgroundColor: colors.grey5,
     borderWidth: 1,
     borderColor: colors.grey4,
-    padding: 10,
+    padding: 15,
     borderRadius: 5,
-    margin: 10,
-    alignContent: "center",
+    alignItems: "center",
   },
-
-  textInputcontainer: {
-    marginVertical: 10,
+  signupBody:{
+    width:screenwidth*0.8
+  },
+  textInputContainer: {
+    width: "100%",
     backgroundColor: "white",
     padding: 10,
     borderRadius: 5,
     borderWidth: 1,
     borderColor: colors.grey4,
   },
-  textInputPass: {
-    // width: screenwidth * 0.8,
-    padding: 10,
-    fontSize: 18,
-    margin: 3,
-    color: colors.grey4,
-    borderRadius: 5,
-    borderWidth: 1,
-    borderColor: colors.grey4,
-  },
   textInput: {
-    // width: screenwidth * 0.8,
-    padding: 10,
-    fontSize: 18,
-    margin: 3,
+    padding: 12,
+    fontSize: 16,
+    marginVertical: 5,
     color: colors.grey4,
     borderRadius: 5,
     borderWidth: 1,
     borderColor: colors.grey4,
   },
-  signinbutton: {
-    fontSize: 20,
-    backgroundColor: colors.grey3,
+  textInputPass: {
+    padding: 12,
+    fontSize: 16,
+    marginVertical: 5,
     borderRadius: 5,
     borderWidth: 1,
-    width: screenwidth * 0.5,
-    padding: 8,
-    alignSelf: "flex-end",
+    borderColor: colors.grey4,
   },
-  signupbutton: {
-    fontSize: 20,
+  focusedInput: {
+    borderColor: colors.primary,
+    borderWidth: 2,
+  },
+  buttonContainer: {
+    flexDirection: "row",
+    justifyContent: "space-evenly",
+    width: "100%",
+    marginTop: 10,
+  },
+  signupButton: {
     backgroundColor: colors.grey2,
     borderRadius: 5,
-    borderWidth: 1,
-    width: screenwidth * 0.5,
-    padding: 8,
-    textAlign: "center",
-    alignSelf: "center",
+    padding: 10,
+    alignItems: "center",
+    width: "30%",
+  },
+  clearButton: {
+    backgroundColor: colors.warning,
+    borderRadius: 5,
+    padding: 10,
+    alignItems: "center",
+    width: "30%",
+  },
+  backButton: {
+    backgroundColor: colors.grey3,
+    borderRadius: 5,
+    padding: 10,
+    alignItems: "center",
+    width: "30%",
+  },
+  signinButton: {
+    backgroundColor: colors.grey3,
+    borderRadius: 5,
+    width: "50%",
+    padding: 10,
+    alignItems: "center",
   },
   text: {
     fontSize: 18,
-    margin: 3,
+    marginVertical: 10,
     color: colors.grey3,
     textAlign: "center",
     fontWeight: "bold",
   },
-  textbutton: {
+  textButton: {
     color: "white",
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: "bold",
-    textAlign: "center",
   },
-  signInBContainer:{
-    alignSelf: "center",
-    margin: 10,
-  }
+  signInBContainer: {
+    alignItems: "center",
+    marginTop: 20,
+  },
 });
+

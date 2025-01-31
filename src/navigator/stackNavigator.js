@@ -436,7 +436,7 @@ export default function AuthicStackNavig() {
         options={{
           headerShown: true,
           headerTitleStyle: {
-            color: "white",
+            color: "#2ECE33",
             fontSize: 25,
           },
           title: "ADD PRODUCT",

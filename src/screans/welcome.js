@@ -49,7 +49,6 @@ justifyContent:"center",
     color: colors.black,
     textAlign: "center",
     fontFamily: "new times roman",
-    // fontVariant: ["small-caps"],
   },
   welcMessagView: {
     backgroundColor: "white",

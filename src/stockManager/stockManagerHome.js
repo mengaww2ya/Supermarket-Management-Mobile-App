@@ -18,7 +18,7 @@ export default function stockManagerHome({navigation}){
             <Text style={styles.titltxt}>Welcome to Stock Management</Text>
             <Pressable
               style={styles.btn}
-              onPress={() => navigation.navigate("manageStock")}
+              onPress={() => {navigation.navigate("manageStock")}}
             >
               <Text style={styles.btntxt}>Stock Management</Text>
             </Pressable>
@@ -49,7 +49,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
     backgroundColor: colors.grey5,
     fontWeight: "bold",
-    fontVariant: ["small-caps"],
   },
   btn: {
     backgroundColor: colors.grey5,
