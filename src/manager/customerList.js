@@ -30,7 +30,7 @@ export default function CustomerList({navigation}) {
         <Text style={styles.headerText}>User Name</Text>
         <Text style={styles.headerText}>First Name</Text>
         <Text style={styles.headerText}>Last Name</Text>
-        <Text style={styles.headerText}>Phone</Text>
+        {/* <Text style={styles.headerText}>Phone</Text> */}
       </View>
 
       {/* List of Customers */}
@@ -43,7 +43,7 @@ export default function CustomerList({navigation}) {
             <Text style={styles.cell}>{item.userName}</Text>
             <Text style={styles.cell}>{item.firstName}</Text>
             <Text style={styles.cell}>{item.lastName}</Text>
-            <Text style={styles.cell}>{item.phone}</Text>
+            {/* <Text style={styles.cell}>{item.phone}</Text> */}
             {/* <Text style={styles.cell}>{item.address}</Text> */}
           </TouchableOpacity>
         )}

@@ -26,7 +26,6 @@ import customerList from "../manager/customerList.js";
 import manageStock from "../stockManager/Manage stock levels.js";
 import stockManagerHome from "../stockManager/stockManagerHome.js";
 import addProduct from "../stockManager/addProduct.js";
-import CustomerDetail from "../manager/customedDetail.js"
 const Authentic = createNativeStackNavigator();
 export default function AuthicStackNavig() {
   return (
@@ -441,22 +440,6 @@ export default function AuthicStackNavig() {
             fontSize: 25,
           },
           title: "ADD PRODUCT",
-          ...TransitionPresets.RevealFromBottomAndroid,
-          headerStyle: {
-            backgroundColor: "#FFDC2B",
-          },
-        }}
-      />
-      <Authentic.Screen
-        name="CustomerDetail"
-        component={CustomerDetail}
-        options={{
-          headerShown: true,
-          headerTitleStyle: {
-            color: "#2ECE33",
-            fontSize: 25,
-          },
-          title: "Customer Detail",
           ...TransitionPresets.RevealFromBottomAndroid,
           headerStyle: {
             backgroundColor: "#FFDC2B",
