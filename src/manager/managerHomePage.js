@@ -1,137 +1,131 @@
 import React from "react";
-import {Text, View, Pressable, StyleSheet, FlatList, ScrollView, useWindowDimensions, Image} from "react-native";
-import data from "../global/data";
+import {
+  Text,
+  View,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  useWindowDimensions,
+} from "react-native";
 import { colors } from "react-native-elements";
-import { ScreenWidth,ScreenHeight } from "react-native-elements/dist/helpers";
-export default function ManagerHomePage({navigation}){
-    return (
-      <View style={styles.homecontainer}>
-        <ScrollView
-          style={{ flex: 1, paddingBottom: 20 }}
-          showsVerticalScrollIndicator={true}
-          contentContainerStyle={{ flexGrow: 1 }}
-        >
-          <Text style={styles.titlText}>welcome!</Text>
-          <View style={styles.buttonview}>
-            <Pressable
-              style={styles.homecard}
-              onPress={() => {
-                navigation.navigate("emplyeeManagement");
-              }}
-            >
-              <Text
-                style={styles.buttontext}
-              >
-                employee management
-              </Text>
-            </Pressable>
-            <Pressable
-              style={styles.homecard}
-              onPress={() => {
-                navigation.navigate("customerManagement");
-              }}
-            >
-              <Text style={styles.buttontext}> customer management</Text>
-            </Pressable>
-            <Pressable
-              style={styles.homecard}
-              onPress={() => {
-                navigation.navigate("promotionManagement");
-              }}
-            >
-              <Text style={styles.buttontext}>
-                promotion and discount management
-              </Text>
-            </Pressable>
-            <Pressable
-              style={styles.homecard}
-              onPress={() => {
-                navigation.navigate("inventoryManagement");
-              }}
-            >
-              <Text style={styles.buttontext}>Inventory Management</Text>
-            </Pressable>
-            <Pressable
-              style={styles.homecard}
-              onPress={() => {
-                navigation.navigate("orderManagement");
-              }}
-            >
-              <Text style={styles.buttontext}>Order Management</Text>
-            </Pressable>
-            <Pressable
-              style={styles.homecard}
-              onPress={() => {
-                navigation.navigate("saleRevenueManagement");
-              }}
-            >
-              <Text style={styles.buttontext}>
-                Sales and Revenue Management
-              </Text>
-            </Pressable>
-            <Pressable
-              style={styles.homecard}
-              onPress={() => {
-                navigation.navigate("suplierManagement");
-              }}
-            >
-              <Text style={styles.buttontext}>Supplier Management</Text>
-            </Pressable>
-            <Pressable
-              style={styles.homecard}
-              onPress={() => {
-                navigation.navigate("alertNotifManagement");
-              }}
-            >
-              <Text style={styles.buttontext}>Alerts and Notifications</Text>
-            </Pressable>
-          </View>
-        </ScrollView>
-      </View>
-    );
+
+export default function ManagerHomePage({ navigation }) {
+  const screenWidth = useWindowDimensions().width;
+  const screenHeight = useWindowDimensions().height;
+
+  return (
+    <View style={styles.homeContainer}>
+      <ScrollView
+        style={{ flex: 1 }}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ flexGrow: 1, paddingBottom: 20 }}
+      >
+        {/* Welcome Message */}
+        <Text style={styles.titleText}>Welcome!</Text>
+
+        {/* Cards Section */}
+        <View style={styles.buttonView}>
+          <TouchableOpacity
+            style={styles.homeCard}
+            onPress={() => navigation.navigate("emplyeeManagement")}
+          >
+            <Text style={styles.buttonText}>Employee Management</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.homeCard}
+            onPress={() => navigation.navigate("customerManagement")}
+          >
+            <Text style={styles.buttonText}>Customer Management</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.homeCard}
+            onPress={() => navigation.navigate("promotionManagement")}
+          >
+            <Text style={styles.buttonText}>Promotion & Discount</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.homeCard}
+            onPress={() => navigation.navigate("inventoryManagement")}
+          >
+            <Text style={styles.buttonText}>Inventory Management</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.homeCard}
+            onPress={() => navigation.navigate("orderManagement")}
+          >
+            <Text style={styles.buttonText}>Order Management</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.homeCard}
+            onPress={() => navigation.navigate("saleRevenueManagement")}
+          >
+            <Text style={styles.buttonText}>Sales & Revenue</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.homeCard}
+            onPress={() => navigation.navigate("suplierManagement")}
+          >
+            <Text style={styles.buttonText}>Supplier Management</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.homeCard}
+            onPress={() => navigation.navigate("alertNotifManagement")}
+          >
+            <Text style={styles.buttonText}>Alerts & Notifications</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+    </View>
+  );
 }
+
+// Styles
 const styles = StyleSheet.create({
-  homecontainer: {
-    justifyContent: "space-evenly",
-    flexDirection: "row",
-    flexWrap: "wrap",
-    marginHorizontal: 10,
-    rowGap: 10,
+  homeContainer: {
+    flex: 1,
+    backgroundColor: "#F5F5F5",
+    paddingHorizontal: 10,
+    paddingTop: 20,
   },
-  buttonview: {
+  titleText: {
+    fontSize: 24,
+    fontWeight: "bold",
+    textAlign: "center",
+    color: "#333",
+    marginBottom: 20,
+  },
+  buttonView: {
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "space-between",
-    rowGap: 10,
-    rowGap:20,
-    alignContent:"center",
-    alignSelf:"center",
   },
-  homecard: {
+  homeCard: {
     backgroundColor: colors.grey5,
-    width: ScreenWidth * 0.3,
-    height: ScreenHeight * 0.2,
+    width: "47%", // Responsive grid layout
+    height: 120,
     justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 10,
     borderColor: colors.grey4,
     borderWidth: 1,
-    borderRadius: 5,
-    bordershadowColor: colors.grey0,
+    marginBottom: 15,
+    shadowColor: "#000",
     shadowOffset: { width: 2, height: 3 },
-    shadowOpacity: 0.5,
-    shadowRadius: 2,
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+    elevation: 4, // For Android shadow
   },
-  buttontext: {
-    fontFamily: "new times roman",
-    fontSize: 20,
-    textAlign: "center",
-  },
-  titlText: {
-    padding: 10,
-    fontFamily: "new times roman",
-    fontSize: 20,
-    textAlign: "center",
-    backgroundColor: colors.grey5,
+  buttonText: {
+    fontSize: 16,
     fontWeight: "bold",
-    fontVariant: ["small-caps"],
+    textAlign: "center",
+    color: "#333",
   },
 });

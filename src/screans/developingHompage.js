@@ -9,85 +9,82 @@ import {
   useWindowDimensions,
 } from "react-native";
 import { colors } from "react-native-elements";
-const ScreenWidth=useWindowDimensions().width;
-const ScreenHeight=useWindowDimensions().height;
-export default function DeveloperHomePage({navigation}){
-    return (
-      <ScrollView>
-        <Text style={styles.titlText}>Hey! which role you want to test</Text>
+
+export default function DeveloperHomePage({ navigation }) {
+  const { width: ScreenWidth, height: ScreenHeight } = useWindowDimensions();
+
+  return (
+    <SafeAreaView style={styles.safeArea}>
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
+        <Text style={styles.titleText}>Hey! Which role do you want to test?</Text>
+        
         <View style={styles.container}>
-          <Pressable
-            style={styles.button}
-            onPress={() => {
-              navigation.navigate("ManagerHomePage");
-            }}
-          >
-            <Text style={styles.buttontext}>manager</Text>
-          </Pressable>
-          <Pressable
-            style={styles.button}
-            onPress={() => {
-              navigation.navigate("Homepage");
-            }}
-          >
-            <Text style={styles.buttontext}>customer</Text>
-          </Pressable>
-          <Pressable style={styles.button}>
-            <Text style={styles.buttontext}>customerSuport</Text>
-          </Pressable>
-          <Pressable style={styles.button}>
-            <Text style={styles.buttontext}>Admine</Text>
-          </Pressable>
-          <Pressable
-            style={styles.button}
-            onPress={() => navigation.navigate("stockManagerHome")}
-          >
-            <Text style={styles.buttontext}>StockManager</Text>
-          </Pressable>
+          {[
+            { name: "Manager", route: "ManagerHomePage" },
+            { name: "Customer", route: "Homepage" },
+            { name: "Customer Support", route: "" },
+            { name: "Admin", route: "" },
+            { name: "Stock Manager", route: "stockManagerHome" },
+          ].map((role, index) => (
+            <Pressable
+              key={index}
+              style={[styles.button, { width: ScreenWidth * 0.4, height: ScreenHeight * 0.12 }]}
+              onPress={() => role.route && navigation.navigate(role.route)}
+            >
+              <Text style={styles.buttonText}>{role.name}</Text>
+            </Pressable>
+          ))}
         </View>
       </ScrollView>
-    );
+    </SafeAreaView>
+  );
 }
+
+// Styles
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: "#F5F5F5",
+  },
+  scrollContainer: {
+    alignItems: "center",
+    paddingVertical: 20,
+  },
+  titleText: {
+    fontSize: 24,
+    fontWeight: "bold",
+    textAlign: "center",
+    color: "#333",
+    marginBottom: 20,
+  },
   container: {
-    marginHorizontal: 10,
-    marginVertical: 10,
     flexDirection: "row",
     flexWrap: "wrap",
-    justifyContent: "space-between",
-    borderColor: colors.grey5,
-    borderWidth: 0.5,
-    alignSelf: "center",
-    rowGap: 20,
+    justifyContent: "center",
+    marginTop: 20,
+    gap: 15,
   },
   button: {
     backgroundColor: colors.grey5,
-    width: ScreenWidth * 0.3,
-    height: ScreenHeight * 0.2,
+    width: "47%", // Responsive grid layout
+    height: 120,
     justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 10,
     borderColor: colors.grey4,
     borderWidth: 1,
-    borderRadius: 5,
-    bordershadowColor: colors.grey0,
+    marginBottom: 15,
+    shadowColor: "#000",
     shadowOffset: { width: 2, height: 3 },
-    shadowOpacity: 0.5,
-    shadowRadius: 2,
-    // elevation: 10,
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+    elevation: 4, //
   },
-  titlText: {
-    marginBottom: 10,
-    padding: 10,
-    fontFamily: "new times roman",
-    fontSize: 20,
-    textAlign: "center",
-    backgroundColor: colors.grey5,
+  buttonText: {
+    fontSize: 16,
     fontWeight: "bold",
-    fontVariant: ["small-caps"],
-  },
-  buttontext: {
-    padding: 10,
-    fontFamily: "new times roman",
-    fontSize: 20,
     textAlign: "center",
+    color: "#333",
   },
 });
+
