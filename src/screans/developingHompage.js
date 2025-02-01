@@ -16,24 +16,65 @@ export default function DeveloperHomePage({ navigation }) {
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <Text style={styles.titleText}>Hey! Which role do you want to test?</Text>
-        
+        <Text style={styles.titleText}>
+          Hey! Which role do you want to test?
+        </Text>
+
         <View style={styles.container}>
-          {[
-            { name: "Manager", route: "ManagerHomePage" },
-            { name: "Customer", route: "Homepage" },
-            { name: "Customer Support", route: "" },
-            { name: "Admin", route: "" },
-            { name: "Stock Manager", route: "stockManagerHome" },
-          ].map((role, index) => (
-            <Pressable
-              key={index}
-              style={[styles.button, { width: ScreenWidth * 0.4, height: ScreenHeight * 0.12 }]}
-              onPress={() => role.route && navigation.navigate(role.route)}
-            >
-              <Text style={styles.buttonText}>{role.name}</Text>
-            </Pressable>
-          ))}
+          {/* Manager Button */}
+          <Pressable
+            style={[
+              styles.button,
+              { width: ScreenWidth * 0.4, height: ScreenHeight * 0.12 },
+            ]}
+            onPress={() => navigation.navigate("ManagerHomePage")}
+          >
+            <Text style={styles.buttonText}>Manager</Text>
+          </Pressable>
+
+          {/* Customer Button */}
+          <Pressable
+            style={[
+              styles.button,
+              { width: ScreenWidth * 0.4, height: ScreenHeight * 0.12 },
+            ]}
+            onPress={() => navigation.navigate("Homepage")}
+          >
+            <Text style={styles.buttonText}>Customer</Text>
+          </Pressable>
+
+          {/* Customer Support Button */}
+          <Pressable
+            style={[
+              styles.button,
+              { width: ScreenWidth * 0.4, height: ScreenHeight * 0.12 },
+            ]}
+            onPress={() => console.log("Customer Support Selected")}
+          >
+            <Text style={styles.buttonText}>Customer Support</Text>
+          </Pressable>
+
+          {/* Admin Button */}
+          <Pressable
+            style={[
+              styles.button,
+              { width: ScreenWidth * 0.4, height: ScreenHeight * 0.12 },
+            ]}
+            onPress={() => navigation.navigate("admineHomePage")}
+          >
+            <Text style={styles.buttonText}>Admin</Text>
+          </Pressable>
+
+          {/* Stock Manager Button */}
+          <Pressable
+            style={[
+              styles.button,
+              { width: ScreenWidth * 0.4, height: ScreenHeight * 0.12 },
+            ]}
+            onPress={() => navigation.navigate("stockManagerHome")}
+          >
+            <Text style={styles.buttonText}>Stock Manager</Text>
+          </Pressable>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -66,7 +107,7 @@ const styles = StyleSheet.create({
   },
   button: {
     backgroundColor: colors.grey5,
-    width: "47%", // Responsive grid layout
+    width: "47%",
     height: 120,
     justifyContent: "center",
     alignItems: "center",
@@ -78,7 +119,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 2, height: 3 },
     shadowOpacity: 0.3,
     shadowRadius: 3,
-    elevation: 4, //
+    elevation: 4,
   },
   buttonText: {
     fontSize: 16,
@@ -87,4 +128,3 @@ const styles = StyleSheet.create({
     color: "#333",
   },
 });
-

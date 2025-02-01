@@ -4,4 +4,5 @@ react native swiper
   react native navigator
   drawer navigator
 react-native-reanimated
-  
+expo-image-picker
+  react-native-dropdown-picker

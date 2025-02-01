@@ -26,6 +26,12 @@ import customerList from "../manager/customerList.js";
 import manageStock from "../stockManager/Manage stock levels.js";
 import stockManagerHome from "../stockManager/stockManagerHome.js";
 import addProduct from "../stockManager/addProduct.js";
+import aemployeeManagement from "../admine/employeeManagement.js";
+import asuplierManagement from "../admine/suplierManagement.js";
+import AddEmployee from "../admine/addEmployee.js";
+import AddSupplier from "../admine/addSuplier.js";
+import admineHomePage from "../admine/adminHompage.js";
+import acustomerManagement from "../admine/customerManagement.js"
 const Authentic = createNativeStackNavigator();
 export default function AuthicStackNavig() {
   return (
@@ -440,6 +446,102 @@ export default function AuthicStackNavig() {
             fontSize: 25,
           },
           title: "ADD PRODUCT",
+          ...TransitionPresets.RevealFromBottomAndroid,
+          headerStyle: {
+            backgroundColor: "#FFDC2B",
+          },
+        }}
+      />
+      <Authentic.Screen
+        name="asuplierManagement"
+        component={asuplierManagement}
+        options={{
+          headerShown: true,
+          headerTitleStyle: {
+            color: "#2ECE33",
+            fontSize: 25,
+          },
+          title: " Suplier management",
+          ...TransitionPresets.RevealFromBottomAndroid,
+          headerStyle: {
+            backgroundColor: "#FFDC2B",
+          },
+        }}
+      />
+      <Authentic.Screen
+        name="aemployeeManagement"
+        component={aemployeeManagement}
+        options={{
+          headerShown: true,
+          headerTitleStyle: {
+            color: "#2ECE33",
+            fontSize: 25,
+          },
+          title: " Employee management",
+          ...TransitionPresets.RevealFromBottomAndroid,
+          headerStyle: {
+            backgroundColor: "#FFDC2B",
+          },
+        }}
+      />
+      <Authentic.Screen
+        name="AddEmployee"
+        component={AddEmployee}
+        options={{
+          headerShown: true,
+          headerTitleStyle: {
+            color: "#2ECE33",
+            fontSize: 25,
+          },
+          title: " Add employee",
+          ...TransitionPresets.RevealFromBottomAndroid,
+          headerStyle: {
+            backgroundColor: "#FFDC2B",
+          },
+        }}
+      />
+      <Authentic.Screen
+        name="AddSupplier"
+        component={AddSupplier}
+        options={{
+          headerShown: true,
+          headerTitleStyle: {
+            color: "#2ECE33",
+            fontSize: 25,
+          },
+          title: " Add suplier",
+          ...TransitionPresets.RevealFromBottomAndroid,
+          headerStyle: {
+            backgroundColor: "#FFDC2B",
+          },
+        }}
+      />
+      <Authentic.Screen
+        name="admineHomePage"
+        component={admineHomePage}
+        options={{
+          headerShown: true,
+          headerTitleStyle: {
+            color: "#2ECE33",
+            fontSize: 25,
+          },
+          title: " Addmin home Page",
+          ...TransitionPresets.RevealFromBottomAndroid,
+          headerStyle: {
+            backgroundColor: "#FFDC2B",
+          },
+        }}
+      />
+      <Authentic.Screen
+        name="acustomerManagement"
+        component={acustomerManagement}
+        options={{
+          headerShown: true,
+          headerTitleStyle: {
+            color: "#2ECE33",
+            fontSize: 25,
+          },
+          title: " Customer Management",
           ...TransitionPresets.RevealFromBottomAndroid,
           headerStyle: {
             backgroundColor: "#FFDC2B",
