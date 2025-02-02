@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import { colors } from "react-native-elements";
 
-export default function CustomerManagement() {
+export default function CustomerManagement({navigation}) {
   const { width: screenWidth } = useWindowDimensions();
 
   return (
@@ -22,25 +22,24 @@ export default function CustomerManagement() {
         <Text style={styles.titleText}>Customer Management</Text>
 
         <View style={styles.container}>
-          {/* Add New Customer */}
-          <Pressable style={[styles.button, { width: screenWidth * 0.9 }]}>
+          <Pressable
+            style={[styles.button, { width: screenWidth * 0.9 }]}
+            onPress={() => navigation.navigate("Signup")}
+          >
             <Text style={styles.buttonTitle}>Add New Customer</Text>
             <Text style={styles.buttonText}>Add Customer</Text>
           </Pressable>
 
-          {/* Delete Customer */}
           <Pressable style={[styles.button, { width: screenWidth * 0.9 }]}>
             <Text style={styles.buttonTitle}>Delete Existing Customer</Text>
             <Text style={styles.buttonText}>Delete Customer</Text>
           </Pressable>
 
-          {/* Update Customer */}
           <Pressable style={[styles.button, { width: screenWidth * 0.9 }]}>
             <Text style={styles.buttonTitle}>Update Existing Customer</Text>
             <Text style={styles.buttonText}>Update Customer</Text>
           </Pressable>
 
-          {/* View Customer List */}
           <Pressable style={[styles.button, { width: screenWidth * 0.9 }]}>
             <Text style={styles.buttonTitle}>Display All Customers</Text>
             <Text style={styles.buttonText}>View Customer List</Text>
@@ -51,7 +50,6 @@ export default function CustomerManagement() {
   );
 }
 
-// 🎨 Styles
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,

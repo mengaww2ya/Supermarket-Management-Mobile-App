@@ -32,10 +32,11 @@ export default function Item({ route, navigation }) {
     packagetype,
     catagory,
     origin,
+    item,
   } = route.params;
-   const { products = [], currentIndex = 0 } = route.params || {};
-   const [index, setIndex] = useState(currentIndex);
-   const [product, setProduct] = useState(products[index] || {});
+  const { products = [], currentIndex = 0 } = route.params || {};
+  const [index, setIndex] = useState(currentIndex);
+  const [product, setProduct] = useState(products[index] || {});
   useEffect(() => {
     setProduct(products[index]);
   }, [index]);
@@ -160,7 +161,12 @@ export default function Item({ route, navigation }) {
             <Pressable
               style={styles.btns}
               onPress={() =>
-                alert("Hey! this button is not functional right now.", "ok")
+                navigation.navigate("addToCart", {
+                  image:image,
+                  ProductName:ProductName,
+                  Price:Price,
+                  DiscountPrice:DiscountPrice,
+                })
               }
             >
               <Text style={styles.btntext}>Add to cart</Text>
@@ -230,7 +236,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 20,
-    fontWeight:"bold"
+    fontWeight: "bold",
     // textAlign:"center",
   },
   text: {

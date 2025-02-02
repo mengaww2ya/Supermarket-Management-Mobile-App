@@ -31,7 +31,8 @@ import asuplierManagement from "../admine/suplierManagement.js";
 import AddEmployee from "../admine/addEmployee.js";
 import AddSupplier from "../admine/addSuplier.js";
 import admineHomePage from "../admine/adminHompage.js";
-import acustomerManagement from "../admine/customerManagement.js"
+import acustomerManagement from "../admine/customerManagement.js";
+import addToCart from "../customer/addToCart.js";
 const Authentic = createNativeStackNavigator();
 export default function AuthicStackNavig() {
   return (
@@ -542,6 +543,22 @@ export default function AuthicStackNavig() {
             fontSize: 25,
           },
           title: " Customer Management",
+          ...TransitionPresets.RevealFromBottomAndroid,
+          headerStyle: {
+            backgroundColor: "#FFDC2B",
+          },
+        }}
+      />
+      <Authentic.Screen
+        name="addToCart"
+        component={addToCart}
+        options={{
+          headerShown: true,
+          headerTitleStyle: {
+            color: "#2ECE33",
+            fontSize: 25,
+          },
+          title: " Add to cart",
           ...TransitionPresets.RevealFromBottomAndroid,
           headerStyle: {
             backgroundColor: "#FFDC2B",
