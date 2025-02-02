@@ -21,7 +21,6 @@ export default function DeveloperHomePage({ navigation }) {
         </Text>
 
         <View style={styles.container}>
-          {/* Manager Button */}
           <Pressable
             style={[
               styles.button,
@@ -32,7 +31,6 @@ export default function DeveloperHomePage({ navigation }) {
             <Text style={styles.buttonText}>Manager</Text>
           </Pressable>
 
-          {/* Customer Button */}
           <Pressable
             style={[
               styles.button,
@@ -43,18 +41,18 @@ export default function DeveloperHomePage({ navigation }) {
             <Text style={styles.buttonText}>Customer</Text>
           </Pressable>
 
-          {/* Customer Support Button */}
           <Pressable
             style={[
               styles.button,
               { width: ScreenWidth * 0.4, height: ScreenHeight * 0.12 },
             ]}
-            onPress={() => {navigation.navigate("CustomerSuport");}}
+            onPress={() => {
+              navigation.navigate("CustomerSuport");
+            }}
           >
             <Text style={styles.buttonText}>Customer Support</Text>
           </Pressable>
 
-          {/* Admin Button */}
           <Pressable
             style={[
               styles.button,
@@ -65,7 +63,6 @@ export default function DeveloperHomePage({ navigation }) {
             <Text style={styles.buttonText}>Admin</Text>
           </Pressable>
 
-          {/* Stock Manager Button */}
           <Pressable
             style={[
               styles.button,
@@ -81,7 +78,6 @@ export default function DeveloperHomePage({ navigation }) {
   );
 }
 
-// Styles
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
