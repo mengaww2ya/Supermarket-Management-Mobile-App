@@ -6,6 +6,7 @@ import {
   ScrollView,
   TouchableOpacity,
   useWindowDimensions,
+  SafeAreaView,
 } from "react-native";
 import { colors } from "react-native-elements";
 
@@ -14,7 +15,7 @@ export default function ManagerHomePage({ navigation }) {
   const screenHeight = useWindowDimensions().height;
 
   return (
-    <View style={styles.homeContainer}>
+    <SafeAreaView style={styles.homeContainer}>
       <ScrollView
         style={{ flex: 1 }}
         showsVerticalScrollIndicator={false}
@@ -82,7 +83,7 @@ export default function ManagerHomePage({ navigation }) {
           </TouchableOpacity>
         </View>
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }
 

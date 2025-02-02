@@ -162,10 +162,11 @@ export default function Item({ route, navigation }) {
               style={styles.btns}
               onPress={() =>
                 navigation.navigate("addToCart", {
-                  image:image,
-                  ProductName:ProductName,
-                  Price:Price,
-                  DiscountPrice:DiscountPrice,
+                  image: image,
+                  ProductName: ProductName,
+                  Price: Price,
+                  DiscountPrice: DiscountPrice,
+                  packagetype: packagetype,
                 })
               }
             >

@@ -15,6 +15,7 @@ export default function AddToCart({ route }) {
     ProductName,
     Price = 0,
     DiscountPrice = 0,
+    packagetype,
   } = route.params || {};
   const [quantity, setQuantity] = useState(1);
   const increaseAmount = () => setQuantity((prev) => prev + 1);
@@ -23,71 +24,71 @@ export default function AddToCart({ route }) {
   const discount = DiscountPrice * quantity;
   const finalPrice = totalPrice - discount;
   return (
-      <SafeAreaView style={styles.safeArea}>
-        <ScrollView
-          style={{paddingBottom: 20 }}
-          showsVerticalScrollIndicator={true}
+    <SafeAreaView style={styles.safeArea}>
+      <ScrollView
+        style={{ paddingBottom: 20 }}
+        showsVerticalScrollIndicator={true}
         //   contentContainerStyle={{ flexGrow: 1 }}
-        >
-          <View style={styles.container}>
-            <Text style={styles.title}>Add {ProductName} to Cart</Text>
-            <View style={styles.imageContainer}>
-              <Image source={image} style={styles.productImage} />
-            </View>
+      >
+        <View style={styles.container}>
+          <Text style={styles.title}>Add {ProductName} to Cart</Text>
+          <View style={styles.imageContainer}>
+            <Image source={image} style={styles.productImage} />
+          </View>
 
-            <Text style={styles.productName}>{ProductName}</Text>
-            <View style={styles.quantityContainer}>
-              <TouchableOpacity
-                style={styles.quantityButton}
-                onPress={decreaseAmount}
-              >
-                <Text style={styles.quantityButtonText}>Decrease</Text>
-              </TouchableOpacity>
-              <Text style={styles.quantityText}>{quantity}</Text>
-              <TouchableOpacity
-                style={styles.quantityButton}
-                onPress={increaseAmount}
-              >
-                <Text style={styles.quantityButtonText}>Increase</Text>
-              </TouchableOpacity>
-            </View>
+          <Text style={styles.productName}>{ProductName}</Text>
+          <View style={styles.quantityContainer}>
+            <TouchableOpacity
+              style={styles.quantityButton}
+              onPress={decreaseAmount}
+            >
+              <Text style={styles.quantityButtonText}>Decrease</Text>
+            </TouchableOpacity>
+            <Text style={styles.quantityText}>{quantity}</Text>
+            <TouchableOpacity
+              style={styles.quantityButton}
+              onPress={increaseAmount}
+            >
+              <Text style={styles.quantityButtonText}>Increase</Text>
+            </TouchableOpacity>
+          </View>
+          <Text style={styles.infoText}>
+            Price for one {packagetype} {ProductName}: {Price.toFixed(2)} Birr
+          </Text>
+          {DiscountPrice > 0 && (
             <Text style={styles.infoText}>
-              Price for one {ProductName}: {Price.toFixed(2)} Birr
+              Discount for one {packagetype} {ProductName}:{" "}
+              {DiscountPrice.toFixed(2)} Birr
+            </Text>
+          )}
+          <Text style={styles.infoText}>
+            You add {quantity} {packagetype} {ProductName}
+          </Text>
+          <View style={styles.priceContainer}>
+            <Text style={styles.priceText}>
+              Total Price: {totalPrice.toFixed(2)} Birr
             </Text>
             {DiscountPrice > 0 && (
-              <Text style={styles.infoText}>
-                Discount for one {ProductName}: {DiscountPrice.toFixed(2)} Birr
+              <Text style={styles.discountText}>
+                Discount: {discount.toFixed(2)} Birr
               </Text>
             )}
-            <Text style={styles.infoText}>
-              You add {quantity} {ProductName}
+            <Text style={styles.finalPriceText}>
+              Final Price: {finalPrice.toFixed(2)} Birr
             </Text>
-            <View style={styles.priceContainer}>
-              <Text style={styles.priceText}>
-                Total Price: {totalPrice.toFixed(2)} Birr
-              </Text>
-              {DiscountPrice > 0 && (
-                <Text style={styles.discountText}>
-                  Discount: {discount.toFixed(2)} Birr
-                </Text>
-              )}
-              <Text style={styles.finalPriceText}>
-                Final Price: {finalPrice.toFixed(2)} Birr
-              </Text>
-            </View>
-
-            <TouchableOpacity
-              style={styles.checkoutButton}
-              onPress={() => {
-                alert("Hey! this button is not functional right now.", "ok");
-              }}
-            >
-              <Text style={styles.checkoutButtonText}>Proceed to Checkout</Text>
-            </TouchableOpacity>
-            
           </View>
-        </ScrollView>
-      </SafeAreaView>
+
+          <TouchableOpacity
+            style={styles.checkoutButton}
+            onPress={() => {
+              alert("Hey! this button is not functional right now.", "ok");
+            }}
+          >
+            <Text style={styles.checkoutButtonText}>Proceed to Checkout</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 

@@ -49,7 +49,7 @@ export default function DeveloperHomePage({ navigation }) {
               styles.button,
               { width: ScreenWidth * 0.4, height: ScreenHeight * 0.12 },
             ]}
-            onPress={() => console.log("Customer Support Selected")}
+            onPress={() => {navigation.navigate("CustomerSuport");}}
           >
             <Text style={styles.buttonText}>Customer Support</Text>
           </Pressable>

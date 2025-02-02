@@ -8,7 +8,7 @@ import {
 } from "react-native";
 import { colors } from "react-native-elements";
 
-export default function handlCustomerComplaint() {
+export default function CustomerSuport() {
   return (
     <SafeAreaView>
       <ScrollView
@@ -17,23 +17,23 @@ export default function handlCustomerComplaint() {
         contentContainerStyle={{ flexGrow: 1 }}
       >
         <View style={styles.container}>
-          <Text style={styles.textTitle}>Employee management</Text>
+          <Text style={styles.textTitle}>Customer Support</Text>
           <View style={styles.buttoncontainer}>
             <TouchableOpacity style={styles.button}>
               <View style={styles.buttonview}>
-                <Text style={styles.buttontxt}>Delivery Agent</Text>
-                <Text style={styles.btnsubtitl}> Manage, asign Delivery</Text>
+                <Text style={styles.buttontxt}>handle customer compliant</Text>
+                <Text style={styles.btnsubtitl}> answer for customer quesion</Text>
               </View>
             </TouchableOpacity>
             <TouchableOpacity style={styles.button}>
               <View style={styles.buttonview}>
-                <Text style={styles.buttontxt}>Customer Assistance</Text>
+                <Text style={styles.buttontxt}>View customer compliants</Text>
                 <Text style={styles.btnsubtitl}>
-                  Manage Customer Assistance
+                  display customer compliants
                 </Text>
               </View>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.button}>
+            {/* <TouchableOpacity style={styles.button}>
               <View style={styles.buttonview}>
                 <Text style={styles.buttontxt}>Customer Assistance</Text>
                 <Text style={styles.btnsubtitl}>
@@ -46,7 +46,7 @@ export default function handlCustomerComplaint() {
                 <Text style={styles.buttontxt}>Stock Manager</Text>
                 <Text style={styles.btnsubtitl}>Manage stock Manager</Text>
               </View>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
           </View>
         </View>
       </ScrollView>

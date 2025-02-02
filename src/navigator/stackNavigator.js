@@ -33,6 +33,7 @@ import AddSupplier from "../admine/addSuplier.js";
 import admineHomePage from "../admine/adminHompage.js";
 import acustomerManagement from "../admine/customerManagement.js";
 import addToCart from "../customer/addToCart.js";
+import CustomerSuport from "../customeAssistance/customerSuport.js";
 const Authentic = createNativeStackNavigator();
 export default function AuthicStackNavig() {
   return (
@@ -559,6 +560,22 @@ export default function AuthicStackNavig() {
             fontSize: 25,
           },
           title: " Add to cart",
+          ...TransitionPresets.RevealFromBottomAndroid,
+          headerStyle: {
+            backgroundColor: "#FFDC2B",
+          },
+        }}
+      />
+      <Authentic.Screen
+        name="CustomerSuport"
+        component={CustomerSuport}
+        options={{
+          headerShown: true,
+          headerTitleStyle: {
+            color: "#2ECE33",
+            fontSize: 25,
+          },
+          title: " Customer Support",
           ...TransitionPresets.RevealFromBottomAndroid,
           headerStyle: {
             backgroundColor: "#FFDC2B",
