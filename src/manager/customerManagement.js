@@ -12,42 +12,89 @@ import { ScreenHeight, ScreenWidth } from "react-native-elements/dist/helpers";
 
 export default function CustomerManagement({ navigation }) {
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
+    <SafeAreaView>
+      <ScrollView
+        style={{ paddingBottom: 20 }}
+        showsVerticalScrollIndicator={true}
+        contentContainerStyle={{ flexGrow: 1 }}
+      >
         {/* Title */}
-        <Text style={styles.textTitle}>Customer Management</Text>
+        <View style={styles.container}>
+          <Text style={styles.textTitle}>Customer Management</Text>
 
-        {/* Buttons */}
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity
-            style={styles.btn}
-            onPress={() => navigation.navigate("customerList")}
-          >
-            <Text style={styles.btnText}>Customer List</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.btn}>
-            <Text style={styles.btnText}>Customer Feedback</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.btn}>
-            <Text style={styles.btnText}>Loyalty Program</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.btn}>
-            <Text style={styles.btnText}>Reports & Insights</Text>
-          </TouchableOpacity>
+          {/* Buttons */}
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => navigation.navigate("customerList")}
+            >
+              <View style={styles.buttonview}>
+                <Text style={styles.buttontxt}>Customer List</Text>
+                <Text style={styles.btnsubtitl}>
+                  {" "}
+                  display registered customer
+                </Text>
+              </View>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => {
+                alert("Hey! this button is not functional right now.", "ok");
+              }}
+            >
+              <View style={styles.buttonview}>
+                <Text style={styles.buttontxt}>Customer Feedback</Text>
+                <Text style={styles.btnsubtitl}> handle Customer Feedback</Text>
+              </View>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => {
+                alert("Hey! this button is not functional right now.", "ok");
+              }}
+            >
+              <View style={styles.buttonview}>
+                <Text style={styles.buttontxt}>Loyalty Program</Text>
+                <Text style={styles.btnsubtitl}> handle Customer Feedback</Text>
+              </View>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => {
+                alert("Hey! this button is not functional right now.", "ok");
+              }}
+            >
+              <View style={styles.buttonview}>
+                <Text style={styles.buttontxt}>Reports & Insights</Text>
+                <Text style={styles.btnsubtitl}> review</Text>
+              </View>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => {
+                alert("Hey! this button is not functional right now.", "ok");
+              }}
+            >
+              <View style={styles.buttonview}>
+                <Text style={styles.buttontxt}>purchase history</Text>
+                <Text style={styles.btnsubtitl}>
+                  Analyze customer purchase history.
+                </Text>
+              </View>
+            </TouchableOpacity>
+          </View>
         </View>
       </ScrollView>
     </SafeAreaView>
   );
 }
 
-// Styles
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: "#F5F5F5", // Light background
+    backgroundColor: "white",
+    borderColor: colors.grey5,
+    borderWidth: 1,
+    alignSelf: "center",
   },
   textTitle: {
     backgroundColor: colors.grey3,
@@ -63,26 +110,32 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "space-between",
-    paddingHorizontal: 10,
   },
-  btn: {
+  button: {
     backgroundColor: colors.grey5,
-    width: "47%", // Responsive grid layout
+    width: "47%",
     height: 120,
     justifyContent: "center",
     alignItems: "center",
     borderRadius: 10,
-    borderWidth: 1,
     borderColor: colors.grey4,
+    borderWidth: 1,
     marginBottom: 15,
     shadowColor: "#000",
     shadowOffset: { width: 2, height: 3 },
     shadowOpacity: 0.3,
     shadowRadius: 3,
-    elevation: 4, // Android shadow
+    elevation: 4, // For Android shadow
   },
-  btnText: {
+  buttontxt: {
     fontSize: 18,
+    fontWeight: "bold",
+    color: "#FFF",
+    marginBottom: 5,
+    color: "#333",
+  },
+  btnsubtitl: {
+    fontSize: 12,
     fontWeight: "bold",
     textAlign: "center",
     color: "#333",

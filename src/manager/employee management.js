@@ -40,6 +40,25 @@ export default function emplyeeManagement(){
                   <Text style={styles.btnsubtitl}>Manage stock Manager</Text>
                 </View>
               </TouchableOpacity>
+              <TouchableOpacity style={styles.button}>
+                <View style={styles.buttonview}>
+                  <Text style={styles.buttontxt}>
+                    Assign roles and permissions
+                  </Text>
+                  <Text style={styles.btnsubtitl}>Manage permissions</Text>
+                </View>
+              </TouchableOpacity>
+
+              <TouchableOpacity style={styles.button}>
+                <View style={styles.buttonview}>
+                  <Text style={styles.buttontxt}>
+                    Schedule
+                  </Text>
+                  <Text style={styles.btnsubtitl}>
+                    Schedule shifts and manage work hours
+                  </Text>
+                </View>
+              </TouchableOpacity>
             </View>
           </View>
         </ScrollView>

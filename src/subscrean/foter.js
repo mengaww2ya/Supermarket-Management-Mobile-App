@@ -21,7 +21,7 @@ export default function Footer({ navigation }) {
         color="#517fa4"
         size={30}
         onPress={() => {
-          // navigation.navigate("Categories")
+        
            alert("Hey! this button is not functional right now.", "ok");
         }}
       />
