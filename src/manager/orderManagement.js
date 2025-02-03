@@ -9,11 +9,8 @@ export default function orderManagement() {
         showsVerticalScrollIndicator={true}
         contentContainerStyle={{ flexGrow: 1 }}
       >
-        {/* Title */}
         <View style={styles.container}>
           <Text style={styles.textTitle}>Order Management</Text>
-
-          {/* Buttons */}
           <View style={styles.buttonContainer}>
             <TouchableOpacity
               style={styles.button}
@@ -122,7 +119,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 2, height: 3 },
     shadowOpacity: 0.3,
     shadowRadius: 3,
-    elevation: 4, // For Android shadow
+    elevation: 4,
   },
   buttontxt: {
     fontSize: 18,
