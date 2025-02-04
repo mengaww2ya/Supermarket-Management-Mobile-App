@@ -35,6 +35,8 @@ import acustomerManagement from "../admine/customerManagement.js";
 import addToCart from "../customer/addToCart.js";
 import CustomerSuport from "../customeAssistance/customerSuport.js";
 import suplierHome from "../suplier/suplierHomePage.js";
+import manageProduct from "../suplier/manageProduct.js";
+import manageDelivery from "../suplier/manageDelivery.js";
 const Authentic = createNativeStackNavigator();
 export default function AuthicStackNavig() {
   return (
@@ -593,6 +595,38 @@ export default function AuthicStackNavig() {
             fontSize: 25,
           },
           title: " Suplier home",
+          ...TransitionPresets.RevealFromBottomAndroid,
+          headerStyle: {
+            backgroundColor: "#FFDC2B",
+          },
+        }}
+      />
+      <Authentic.Screen
+        name="manageProduct"
+        component={manageProduct}
+        options={{
+          headerShown: true,
+          headerTitleStyle: {
+            color: "#2ECE33",
+            fontSize: 25,
+          },
+          title: " Order Management",
+          ...TransitionPresets.RevealFromBottomAndroid,
+          headerStyle: {
+            backgroundColor: "#FFDC2B",
+          },
+        }}
+      />
+      <Authentic.Screen
+        name="manageDelivery"
+        component={manageDelivery}
+        options={{
+          headerShown: true,
+          headerTitleStyle: {
+            color: "#2ECE33",
+            fontSize: 25,
+          },
+          title: " Delivery Management",
           ...TransitionPresets.RevealFromBottomAndroid,
           headerStyle: {
             backgroundColor: "#FFDC2B",

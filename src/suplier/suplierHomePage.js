@@ -7,27 +7,24 @@ import {
   TouchableOpacity,
   useWindowDimensions,
   SafeAreaView,
-  Modal,
 } from "react-native";
 import { colors } from "react-native-elements";
- const screenWidth = useWindowDimensions().width;
+
+export default function suplierHome({navigation}) {
+   const screenWidth = useWindowDimensions().width;
   const screenHeight = useWindowDimensions().height;
-export default function suplierHome() {
   return (
-    <SafeAreaView style={{flex:1}}>
+    <SafeAreaView style={{ flex: 1 }}>
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ flexGrow: 1, paddingBottom: 20 }}
       >
         <View style={styles.container}>
-          {/* Welcome Message */}
           <Text style={styles.textTitle}>Welcome!</Text>
-
-          {/* Cards Section */}
           <View style={styles.buttoncontainer}>
             <TouchableOpacity
               style={styles.button}
-              onPress={() => navigation.navigate("emplyeeManagement")}
+              onPress={() => navigation.navigate("manageProduct")}
             >
               <View style={styles.buttonview}>
                 <Text style={styles.buttontxt}>Manage Product</Text>
@@ -50,7 +47,7 @@ export default function suplierHome() {
 
             <TouchableOpacity
               style={styles.button}
-              onPress={() => navigation.navigate("promotionManagement")}
+              onPress={() => navigation.navigate("manageDelivery")}
             >
               <View style={styles.buttonview}>
                 <Text style={styles.buttontxt}>Manage Deliveries</Text>
@@ -122,9 +119,7 @@ export default function suplierHome() {
           </View>
         </View>
       </ScrollView>
-      <Modal></Modal>
     </SafeAreaView>
-    
   );
 }
 const styles = StyleSheet.create({
@@ -135,6 +130,7 @@ const styles = StyleSheet.create({
     alignSelf: "center",
   },
   buttoncontainer: {
+    margin:10,
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "space-between",
@@ -150,7 +146,7 @@ const styles = StyleSheet.create({
   },
   button: {
     backgroundColor: colors.grey5,
-    width: "47%", // Responsive grid layout
+    width: "47%",
     height: 120,
     justifyContent: "center",
     alignItems: "center",
@@ -162,7 +158,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 2, height: 3 },
     shadowOpacity: 0.3,
     shadowRadius: 3,
-    elevation: 4, // For Android shadow
+    elevation: 4,
   },
   buttontxt: {
     fontSize: 18,

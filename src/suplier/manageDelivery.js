@@ -9,9 +9,9 @@ import {
   SafeAreaView,
 } from "react-native";
 import { colors } from "react-native-elements";
- const screenWidth = useWindowDimensions().width;
+export default function manageDelivery({navigation}) {
+  const screenWidth = useWindowDimensions().width;
   const screenHeight = useWindowDimensions().height;
-export default function manageDelivery() {
   return (
     <SafeAreaView style={styles.homeContainer}>
       <ScrollView
@@ -19,10 +19,7 @@ export default function manageDelivery() {
         contentContainerStyle={{ flexGrow: 1, paddingBottom: 20 }}
       >
         <View style={styles.container}>
-          {/* Welcome Message */}
           <Text style={styles.textTitle}>Manage Delivery</Text>
-
-          {/* Cards Section */}
           <View style={styles.buttoncontainer}>
             <TouchableOpacity
               style={styles.button}
