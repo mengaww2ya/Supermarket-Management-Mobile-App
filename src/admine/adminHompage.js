@@ -55,6 +55,7 @@ const styles = StyleSheet.create({
     paddingTop: 20,
   },
   buttonview: {
+    margin: 10,
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "space-between",
