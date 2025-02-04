@@ -7,15 +7,15 @@ import {
   TouchableOpacity,
   useWindowDimensions,
   SafeAreaView,
+  Modal,
 } from "react-native";
 import { colors } from "react-native-elements";
  const screenWidth = useWindowDimensions().width;
   const screenHeight = useWindowDimensions().height;
-export default function ManagerHomePage({ navigation }) {
+export default function suplierHome() {
   return (
-    <SafeAreaView style={styles.homeContainer}>
+    <SafeAreaView style={{flex:1}}>
       <ScrollView
-        
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ flexGrow: 1, paddingBottom: 20 }}
       >
@@ -30,9 +30,9 @@ export default function ManagerHomePage({ navigation }) {
               onPress={() => navigation.navigate("emplyeeManagement")}
             >
               <View style={styles.buttonview}>
-                <Text style={styles.buttontxt}>Employee Management</Text>
+                <Text style={styles.buttontxt}>Manage Product</Text>
                 <Text style={styles.btnsubtitl}>
-                  manage all employee in the supermarket
+                  Manage Product Supply for supermarket
                 </Text>
               </View>
             </TouchableOpacity>
@@ -41,9 +41,9 @@ export default function ManagerHomePage({ navigation }) {
               onPress={() => navigation.navigate("customerManagement")}
             >
               <View style={styles.buttonview}>
-                <Text style={styles.buttontxt}>Customer Management</Text>
+                <Text style={styles.buttontxt}>Manage Order</Text>
                 <Text style={styles.btnsubtitl}>
-                  manage all registered custoer
+                  Manage Orders from Supermarket
                 </Text>
               </View>
             </TouchableOpacity>
@@ -53,8 +53,10 @@ export default function ManagerHomePage({ navigation }) {
               onPress={() => navigation.navigate("promotionManagement")}
             >
               <View style={styles.buttonview}>
-                <Text style={styles.buttontxt}>Promotion & Discount</Text>
-                <Text style={styles.btnsubtitl}>manage promotions</Text>
+                <Text style={styles.buttontxt}>Manage Deliveries</Text>
+                <Text style={styles.btnsubtitl}>
+                  Schedule,Track,Assign delivery
+                </Text>
               </View>
             </TouchableOpacity>
 
@@ -63,9 +65,9 @@ export default function ManagerHomePage({ navigation }) {
               onPress={() => navigation.navigate("inventoryManagement")}
             >
               <View style={styles.buttonview}>
-                <Text style={styles.buttontxt}>Inventory Management</Text>
+                <Text style={styles.buttontxt}>Payment & Invoicing</Text>
                 <Text style={styles.btnsubtitl}>
-                  Monitor stock levels in real-time
+                  View,Request,Track Outstanding payments
                 </Text>
               </View>
             </TouchableOpacity>
@@ -75,9 +77,9 @@ export default function ManagerHomePage({ navigation }) {
               onPress={() => navigation.navigate("orderManagement")}
             >
               <View style={styles.buttonview}>
-                <Text style={styles.buttontxt}>Order Management</Text>
+                <Text style={styles.buttontxt}>Communication & Alerts</Text>
                 <Text style={styles.btnsubtitl}>
-                  Process and track customer orders
+                  Receive Order,Low-Stock alert
                 </Text>
               </View>
             </TouchableOpacity>
@@ -87,9 +89,9 @@ export default function ManagerHomePage({ navigation }) {
               onPress={() => navigation.navigate("saleRevenueManagement")}
             >
               <View style={styles.buttonview}>
-                <Text style={styles.buttontxt}>Sales & Revenue</Text>
+                <Text style={styles.buttontxt}>Performance & Analytics</Text>
                 <Text style={styles.btnsubtitl}>
-                  Monitor payment , sales reports.
+                  View Sales Reports ,Analytics
                 </Text>
               </View>
             </TouchableOpacity>
@@ -111,20 +113,20 @@ export default function ManagerHomePage({ navigation }) {
               onPress={() => navigation.navigate("alertNotifManagement")}
             >
               <View style={styles.buttonview}>
-                <Text style={styles.buttontxt}>Alerts & Notifications</Text>
-                <Text style={styles.btnsubtitl}>
-                  Set up alerts for low stock, expired items
+                <Text style={styles.buttontxt}>
+                  Manage Profile & Business Info
                 </Text>
+                <Text style={styles.btnsubtitl}>Update Business Details</Text>
               </View>
             </TouchableOpacity>
           </View>
         </View>
       </ScrollView>
+      <Modal></Modal>
     </SafeAreaView>
+    
   );
 }
-
-// Styles
 const styles = StyleSheet.create({
   container: {
     backgroundColor: "white",

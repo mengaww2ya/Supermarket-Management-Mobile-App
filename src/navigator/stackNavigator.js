@@ -34,6 +34,7 @@ import admineHomePage from "../admine/adminHompage.js";
 import acustomerManagement from "../admine/customerManagement.js";
 import addToCart from "../customer/addToCart.js";
 import CustomerSuport from "../customeAssistance/customerSuport.js";
+import suplierHome from "../suplier/suplierHomePage.js";
 const Authentic = createNativeStackNavigator();
 export default function AuthicStackNavig() {
   return (
@@ -576,6 +577,22 @@ export default function AuthicStackNavig() {
             fontSize: 25,
           },
           title: " Customer Support",
+          ...TransitionPresets.RevealFromBottomAndroid,
+          headerStyle: {
+            backgroundColor: "#FFDC2B",
+          },
+        }}
+      />
+      <Authentic.Screen
+        name="suplierHome"
+        component={suplierHome}
+        options={{
+          headerShown: true,
+          headerTitleStyle: {
+            color: "#2ECE33",
+            fontSize: 25,
+          },
+          title: " Suplier home",
           ...TransitionPresets.RevealFromBottomAndroid,
           headerStyle: {
             backgroundColor: "#FFDC2B",

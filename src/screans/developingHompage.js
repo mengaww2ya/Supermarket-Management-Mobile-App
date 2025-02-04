@@ -2,7 +2,7 @@ import React from "react";
 import {
   Text,
   View,
-  Pressable,
+  TouchableOpacity,
   SafeAreaView,
   StyleSheet,
   ScrollView,
@@ -21,7 +21,7 @@ export default function DeveloperHomePage({ navigation }) {
         </Text>
 
         <View style={styles.container}>
-          <Pressable
+          <TouchableOpacity
             style={[
               styles.button,
               { width: ScreenWidth * 0.4, height: ScreenHeight * 0.12 },
@@ -29,9 +29,9 @@ export default function DeveloperHomePage({ navigation }) {
             onPress={() => navigation.navigate("ManagerHomePage")}
           >
             <Text style={styles.buttonText}>Manager</Text>
-          </Pressable>
+          </TouchableOpacity>
 
-          <Pressable
+          <TouchableOpacity
             style={[
               styles.button,
               { width: ScreenWidth * 0.4, height: ScreenHeight * 0.12 },
@@ -39,9 +39,9 @@ export default function DeveloperHomePage({ navigation }) {
             onPress={() => navigation.navigate("Homepage")}
           >
             <Text style={styles.buttonText}>Customer</Text>
-          </Pressable>
+          </TouchableOpacity>
 
-          <Pressable
+          <TouchableOpacity
             style={[
               styles.button,
               { width: ScreenWidth * 0.4, height: ScreenHeight * 0.12 },
@@ -51,9 +51,9 @@ export default function DeveloperHomePage({ navigation }) {
             }}
           >
             <Text style={styles.buttonText}>Customer Support</Text>
-          </Pressable>
+          </TouchableOpacity>
 
-          <Pressable
+          <TouchableOpacity
             style={[
               styles.button,
               { width: ScreenWidth * 0.4, height: ScreenHeight * 0.12 },
@@ -61,9 +61,9 @@ export default function DeveloperHomePage({ navigation }) {
             onPress={() => navigation.navigate("admineHomePage")}
           >
             <Text style={styles.buttonText}>Admin</Text>
-          </Pressable>
+          </TouchableOpacity>
 
-          <Pressable
+          <TouchableOpacity
             style={[
               styles.button,
               { width: ScreenWidth * 0.4, height: ScreenHeight * 0.12 },
@@ -71,7 +71,16 @@ export default function DeveloperHomePage({ navigation }) {
             onPress={() => navigation.navigate("stockManagerHome")}
           >
             <Text style={styles.buttonText}>Stock Manager</Text>
-          </Pressable>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[
+              styles.button,
+              { width: ScreenWidth * 0.4, height: ScreenHeight * 0.12 },
+            ]}
+            onPress={() => navigation.navigate("suplierHome")}
+          >
+            <Text style={styles.buttonText}>Suplier</Text>
+          </TouchableOpacity>
         </View>
       </ScrollView>
     </SafeAreaView>
