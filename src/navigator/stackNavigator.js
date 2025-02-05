@@ -8,10 +8,9 @@ import SoftDrink from "../customer/softDrink.js";
 import Csmotics from "../customer/cosmotics.js";
 import AlcholicDrink from "../customer/alcholicDrink.js";
 import Item from "../customer/Item.js";
-import Footer from "../subscrean/foter.js";
 import Signup from "../screans/signup.js";
 import ManagerHomePage from "../manager/managerHomePage.js";
-import DeveloperHomePage from "../screans/developingHompage.js";  
+import DeveloperHomePage from "../screans/developingHompage.js";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import DrawNavigator from "../navigator/drawNavigator.js";
 import emplyeeManagement from "../manager/employee management.js";
@@ -37,6 +36,8 @@ import CustomerSuport from "../customeAssistance/customerSuport.js";
 import suplierHome from "../suplier/suplierHomePage.js";
 import manageProduct from "../suplier/manageProduct.js";
 import manageDelivery from "../suplier/manageDelivery.js";
+import SmanageOrder from "../suplier/manageOrder.js";
+import SperformanceAnalysis  from "../suplier/SPerformanceAnalytics.js";
 const Authentic = createNativeStackNavigator();
 export default function AuthicStackNavig() {
   return (
@@ -195,22 +196,6 @@ export default function AuthicStackNavig() {
             fontSize: 25,
           },
           title: "Item",
-          ...TransitionPresets.RevealFromBottomAndroid,
-          headerStyle: {
-            backgroundColor: "#FFDC2B",
-          },
-        }}
-      />
-      <Authentic.Screen
-        name="Footer"
-        component={Footer}
-        options={{
-          headerShown: true,
-          headerTitleStyle: {
-            color: "#2ECE33",
-            fontSize: 25,
-          },
-          title: "Detail",
           ...TransitionPresets.RevealFromBottomAndroid,
           headerStyle: {
             backgroundColor: "#FFDC2B",
@@ -627,6 +612,38 @@ export default function AuthicStackNavig() {
             fontSize: 25,
           },
           title: " Delivery Management",
+          ...TransitionPresets.RevealFromBottomAndroid,
+          headerStyle: {
+            backgroundColor: "#FFDC2B",
+          },
+        }}
+      />
+      <Authentic.Screen
+        name="SmanageOrder"
+        component={SmanageOrder}
+        options={{
+          headerShown: true,
+          headerTitleStyle: {
+            color: "#2ECE33",
+            fontSize: 25,
+          },
+          title: " Order Management",
+          ...TransitionPresets.RevealFromBottomAndroid,
+          headerStyle: {
+            backgroundColor: "#FFDC2B",
+          },
+        }}
+      />
+      <Authentic.Screen
+        name="SperformanceAnalysis"
+        component={SperformanceAnalysis}
+        options={{
+          headerShown: true,
+          headerTitleStyle: {
+            color: "#2ECE33",
+            fontSize: 25,
+          },
+          title: " Performance and analysis",
           ...TransitionPresets.RevealFromBottomAndroid,
           headerStyle: {
             backgroundColor: "#FFDC2B",

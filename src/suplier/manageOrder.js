@@ -10,60 +10,50 @@ import {
 } from "react-native";
 import { colors } from "react-native-elements";
 import SupplierFooter from "../subscrean/suplierfooter";
-export default function suplierHome({ navigation }) {
+export default function SmanageOrder({ navigation }) {
   const screenWidth = useWindowDimensions().width;
   const screenHeight = useWindowDimensions().height;
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <SafeAreaView style={styles.homeContainer}>
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ flexGrow: 1, paddingBottom: 20 }}
       >
         <View style={styles.container}>
-          <Text style={styles.textTitle}>Welcome!</Text>
+          {/* Welcome Message */}
+          <Text style={styles.textTitle}>Manage Order</Text>
+
+          {/* Cards Section */}
           <View style={styles.buttoncontainer}>
             <TouchableOpacity
               style={styles.button}
-              onPress={() => navigation.navigate("manageProduct")}
+              onPress={() => navigation.navigate("emplyeeManagement")}
             >
               <View style={styles.buttonview}>
-                <Text style={styles.buttontxt}>Manage Product</Text>
+                <Text style={styles.buttontxt}>View Orders</Text>
                 <Text style={styles.btnsubtitl}>
-                  Manage Product Supply for supermarket
+                  See all orders placed by the supermarket
                 </Text>
               </View>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.button}
-              onPress={() => navigation.navigate("SmanageOrder")}
+              onPress={() => navigation.navigate("customerManagement")}
             >
               <View style={styles.buttonview}>
-                <Text style={styles.buttontxt}>Manage Order</Text>
-                <Text style={styles.btnsubtitl}>
-                  Manage Orders from Supermarket
-                </Text>
+                <Text style={styles.buttontxt}>Accept or Reject Orders</Text>
+                <Text style={styles.btnsubtitl}>Approve or decline orders</Text>
               </View>
             </TouchableOpacity>
 
             <TouchableOpacity
               style={styles.button}
-              onPress={() => navigation.navigate("manageDelivery")}
+              onPress={() => navigation.navigate("promotionManagement")}
             >
               <View style={styles.buttonview}>
-                <Text style={styles.buttontxt}>Manage Deliveries</Text>
+                <Text style={styles.buttontxt}>Estimated Delivery </Text>
                 <Text style={styles.btnsubtitl}>
-                  Schedule,Track,Assign delivery
-                </Text>
-              </View>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.button}
-              onPress={() => navigation.navigate("SperformanceAnalysis")}
-            >
-              <View style={styles.buttonview}>
-                <Text style={styles.buttontxt}>Performance & Analytics</Text>
-                <Text style={styles.btnsubtitl}>
-                  View Sales Reports ,Analytics
+                  Provide Estimated Delivery Time
                 </Text>
               </View>
             </TouchableOpacity>
@@ -75,6 +65,9 @@ export default function suplierHome({ navigation }) {
   );
 }
 const styles = StyleSheet.create({
+  homeContainer: {
+    flex: 1,
+  },
   container: {
     backgroundColor: "white",
     borderColor: colors.grey5,
@@ -98,7 +91,7 @@ const styles = StyleSheet.create({
   },
   button: {
     backgroundColor: colors.grey5,
-    width: "47%",
+    width: "47%", // Responsive grid layout
     height: 120,
     justifyContent: "center",
     alignItems: "center",
@@ -110,7 +103,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 2, height: 3 },
     shadowOpacity: 0.3,
     shadowRadius: 3,
-    elevation: 4,
+    elevation: 4, // For Android shadow
   },
   buttontxt: {
     fontSize: 18,

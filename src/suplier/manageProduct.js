@@ -9,10 +9,11 @@ import {
   SafeAreaView,
 } from "react-native";
 import { colors } from "react-native-elements";
- const screenWidth = useWindowDimensions().width;
+import SupplierFooter from "../subscrean/suplierfooter";
+
+export default function manageProduct({ navigation }) {
+  const screenWidth = useWindowDimensions().width;
   const screenHeight = useWindowDimensions().height;
-export default function manageProduct() {
-    
   return (
     <SafeAreaView style={styles.homeContainer}>
       <ScrollView
@@ -66,18 +67,20 @@ export default function manageProduct() {
             >
               <View style={styles.buttonview}>
                 <Text style={styles.buttontxt}>Delete Product</Text>
-                <Text style={styles.btnsubtitl}>
-                 remove existing product 
-                </Text>
+                <Text style={styles.btnsubtitl}>remove existing product</Text>
               </View>
             </TouchableOpacity>
           </View>
         </View>
       </ScrollView>
+      <SupplierFooter navigation={navigation} />
     </SafeAreaView>
   );
 }
 const styles = StyleSheet.create({
+  homeContainer:{
+    flex:1,
+  },
   container: {
     backgroundColor: "white",
     borderColor: colors.grey5,
