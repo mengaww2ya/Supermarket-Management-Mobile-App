@@ -5,7 +5,7 @@ export default function suplierManagement() {
   return (
     <SafeAreaView>
       <ScrollView
-        style={{ paddingBottom: 20 }}
+        style={{ paddingBottom: 0 }}
         showsVerticalScrollIndicator={true}
         contentContainerStyle={{ flexGrow: 1 }}
       >
@@ -52,7 +52,7 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     borderColor: colors.grey5,
     borderWidth: 1,
-    alignSelf: "center",
+   
   },
   textTitle: {
     backgroundColor: colors.grey3,
@@ -65,6 +65,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
   buttonContainer: {
+    margin: 10,
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "space-between",

@@ -58,7 +58,6 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     borderColor: colors.grey5,
     borderWidth: 1,
-    alignSelf: "center",
   },
   buttoncontainer: {
     flexDirection: "row",

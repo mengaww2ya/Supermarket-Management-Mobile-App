@@ -73,6 +73,7 @@ const styles = StyleSheet.create({
     alignSelf: "center",
   },
   buttoncontainer: {
+    margin:10,
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "space-between",

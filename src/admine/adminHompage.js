@@ -2,7 +2,7 @@ import React from "react";
 import {
   Text,
   View,
-  Pressable,
+TouchableOpacity,
   StyleSheet,
   FlatList,
   ScrollView,
@@ -14,34 +14,54 @@ export default function admineHomePage({ navigation }) {
   return (
     <View style={styles.homecontainer}>
       <ScrollView
-        style={{ flex: 1, paddingBottom: 20 }}
+        style={{ paddingBottom: 20 }}
         showsVerticalScrollIndicator={true}
         contentContainerStyle={{ flexGrow: 1 }}
       >
-        <Text style={styles.titlText}>welcome!</Text>
-        <View style={styles.buttonview}>
-          <Pressable
-            style={styles.homecard}
-            onPress={() => navigation.navigate("aemployeeManagement")}
-          >
-            <Text style={styles.buttontext}>employee management</Text>
-          </Pressable>
-          <Pressable
-            style={styles.homecard}
-            onPress={() => {
-              navigation.navigate("acustomerManagement");
-            }}
-          >
-            <Text style={styles.buttontext}> customer management</Text>
-          </Pressable>
-          <Pressable
-            style={styles.homecard}
-            onPress={() => {
-              navigation.navigate("asuplierManagement");
-            }}
-          >
-            <Text style={styles.buttontext}>Supplier Management</Text>
-          </Pressable>
+        <View style={styles.container}>
+          <Text style={styles.textTitle}>welcome!</Text>
+          <View style={styles.buttoncontainer}>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => navigation.navigate("aemployeeManagement")}
+            >
+              <View style={styles.buttonview}>
+                <Text style={styles.buttontxt}>Employee management</Text>
+                <Text style={styles.btnsubtitl}>
+                  {" "}
+                  add,delet,update employee
+                </Text>
+              </View>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => {
+                navigation.navigate("acustomerManagement");
+              }}
+            >
+              <View style={styles.buttonview}>
+                <Text style={styles.buttontxt}>Customer management</Text>
+                <Text style={styles.btnsubtitl}>
+                  {" "}
+                  add,delet,update Customer
+                </Text>
+              </View>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => {
+                navigation.navigate("asuplierManagement");
+              }}
+            >
+              <View style={styles.buttonview}>
+                <Text style={styles.buttontxt}>Supplier Management</Text>
+                <Text style={styles.btnsubtitl}>
+                  {" "}
+                  add,delet,update Supplier
+                </Text>
+              </View>
+            </TouchableOpacity>
+          </View>
         </View>
       </ScrollView>
     </View>
@@ -49,20 +69,32 @@ export default function admineHomePage({ navigation }) {
 }
 const styles = StyleSheet.create({
   homecontainer: {
-    flex: 1,
-    backgroundColor: "#F5F5F5",
-    paddingHorizontal: 10,
-    paddingTop: 20,
+    margin: 10,
   },
-  buttonview: {
+  container: {
+    backgroundColor: "white",
+    borderColor: colors.grey5,
+    borderWidth: 1,
+  },
+  buttoncontainer: {
     margin: 10,
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "space-between",
   },
-  homecard: {
+  textTitle: {
+    backgroundColor: colors.grey3,
+    color: "white",
+    fontSize: 20,
+    fontWeight: "bold",
+    padding: 10,
+    margin: 10,
+    textAlign: "center",
+    borderRadius:5,
+  },
+  button: {
     backgroundColor: colors.grey5,
-    width: "47%", // Responsive grid layout
+    width: "47%",
     height: 120,
     justifyContent: "center",
     alignItems: "center",
@@ -74,19 +106,19 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 2, height: 3 },
     shadowOpacity: 0.3,
     shadowRadius: 3,
-    elevation: 4, // For Android shadow
+    elevation: 4,
   },
-  buttontext: {
-    fontSize: 16,
+  buttontxt: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#FFF",
+    marginBottom: 5,
+    color: "#333",
+  },
+  btnsubtitl: {
+    fontSize: 12,
     fontWeight: "bold",
     textAlign: "center",
     color: "#333",
-  },
-  titlText: {
-    fontSize: 24,
-    fontWeight: "bold",
-    textAlign: "center",
-    color: "#333",
-    marginBottom: 20,
   },
 });

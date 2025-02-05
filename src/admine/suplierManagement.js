@@ -7,7 +7,7 @@ import {
   View,
 } from "react-native";
 import { colors } from "react-native-elements";
-export default function asuplierManagement({navigation}) {
+export default function asuplierManagement({ navigation }) {
   return (
     <SafeAreaView>
       <ScrollView
@@ -17,28 +17,37 @@ export default function asuplierManagement({navigation}) {
         <View style={styles.container}>
           <Text style={styles.titltxt}>Suplier Management</Text>
           <View style={styles.buttonView}>
-            <TouchableOpacity style={styles.button} onPress={()=>{navigation.navigate("AddSupplier");}} >
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => {
+                navigation.navigate("AddSupplier");
+              }}
+            >
               <View style={styles.btnView}>
-                <Text style={styles.suptxt}>add suplier</Text>
                 <Text style={styles.buttontxt}>Add Suplier</Text>
+
+                <Text style={styles.suptxt}>add suplier</Text>
               </View>
             </TouchableOpacity>
             <TouchableOpacity style={styles.button}>
               <View style={styles.btnView}>
-                <Text style={styles.suptxt}>delete suplier</Text>
                 <Text style={styles.buttontxt}>Delete Suplier</Text>
+
+                <Text style={styles.suptxt}>delete suplier</Text>
               </View>
             </TouchableOpacity>
             <TouchableOpacity style={styles.button}>
               <View style={styles.btnView}>
-                <Text style={styles.suptxt}>update suplier</Text>
                 <Text style={styles.buttontxt}>Update Suplier</Text>
+
+                <Text style={styles.suptxt}>update suplier</Text>
               </View>
             </TouchableOpacity>
             <TouchableOpacity style={styles.button}>
               <View style={styles.btnView}>
-                <Text style={styles.suptxt}>view suplier</Text>
                 <Text style={styles.buttontxt}>View suplier list</Text>
+
+                <Text style={styles.suptxt}>view suplier</Text>
               </View>
             </TouchableOpacity>
           </View>
@@ -55,6 +64,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
   buttonView: {
+    margin:10,
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "space-between",

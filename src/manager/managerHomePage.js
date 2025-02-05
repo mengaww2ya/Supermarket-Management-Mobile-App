@@ -9,9 +9,10 @@ import {
   SafeAreaView,
 } from "react-native";
 import { colors } from "react-native-elements";
- const screenWidth = useWindowDimensions().width;
-  const screenHeight = useWindowDimensions().height;
+ 
 export default function ManagerHomePage({ navigation }) {
+  const screenWidth = useWindowDimensions().width;
+  const screenHeight = useWindowDimensions().height;
   return (
     <SafeAreaView style={styles.homeContainer}>
       <ScrollView
@@ -133,6 +134,7 @@ const styles = StyleSheet.create({
     alignSelf: "center",
   },
   buttoncontainer: {
+    margin:10,
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "space-between",

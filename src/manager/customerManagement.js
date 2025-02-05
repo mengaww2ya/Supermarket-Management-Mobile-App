@@ -107,6 +107,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
   buttonContainer: {
+    margin:10,
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "space-between",

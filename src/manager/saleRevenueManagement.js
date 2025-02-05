@@ -10,7 +10,7 @@ export default function saleRevenueManagement() {
         contentContainerStyle={{ flexGrow: 1 }}
       >
         <View style={styles.container}>
-          <Text style={styles.textTitle}>Order Management</Text>
+          <Text style={styles.textTitle}>Sale and Revenue</Text>
           <View style={styles.buttonContainer}>
             <TouchableOpacity
               style={styles.button}
@@ -76,6 +76,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
   buttonContainer: {
+    margin: 10,
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "space-between",

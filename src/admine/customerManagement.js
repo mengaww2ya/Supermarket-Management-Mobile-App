@@ -3,14 +3,14 @@ import {
   SafeAreaView,
   View,
   Text,
-  Pressable,
+  TouchableOpacity,
   StyleSheet,
   ScrollView,
   useWindowDimensions,
 } from "react-native";
 import { colors } from "react-native-elements";
 
-export default function CustomerManagement({navigation}) {
+export default function CustomerManagement({ navigation }) {
   const { width: screenWidth } = useWindowDimensions();
 
   return (
@@ -19,31 +19,47 @@ export default function CustomerManagement({navigation}) {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContainer}
       >
-        <Text style={styles.titleText}>Customer Management</Text>
-
         <View style={styles.container}>
-          <Pressable
-            style={[styles.button, { width: screenWidth * 0.9 }]}
-            onPress={() => navigation.navigate("Signup")}
-          >
-            <Text style={styles.buttonTitle}>Add New Customer</Text>
-            <Text style={styles.buttonText}>Add Customer</Text>
-          </Pressable>
+          <Text style={styles.titltxt}>Customer Management</Text>
 
-          <Pressable style={[styles.button, { width: screenWidth * 0.9 }]}>
-            <Text style={styles.buttonTitle}>Delete Existing Customer</Text>
-            <Text style={styles.buttonText}>Delete Customer</Text>
-          </Pressable>
+          <View style={styles.buttonView}>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => navigation.navigate("Signup")}
+            >
+              <View style={styles.btnView}>
+                <Text style={styles.buttontxt}>Add Customer</Text>
 
-          <Pressable style={[styles.button, { width: screenWidth * 0.9 }]}>
-            <Text style={styles.buttonTitle}>Update Existing Customer</Text>
-            <Text style={styles.buttonText}>Update Customer</Text>
-          </Pressable>
+                <Text style={styles.suptxt}>Register New Customer </Text>
+              </View>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => navigation.navigate("Signup")}
+            >
+              <View style={styles.btnView}>
+                <Text style={styles.buttontxt}>Delete Customer</Text>
 
-          <Pressable style={[styles.button, { width: screenWidth * 0.9 }]}>
-            <Text style={styles.buttonTitle}>Display All Customers</Text>
-            <Text style={styles.buttonText}>View Customer List</Text>
-          </Pressable>
+                <Text style={styles.suptxt}>Remove Existing Customer </Text>
+              </View>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.button} onPress={() => {}}>
+              <View style={styles.btnView}>
+                <Text style={styles.buttontxt}>Update Customer</Text>
+
+                <Text style={styles.suptxt}>Update Existing Customer </Text>
+              </View>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.button} onPress={() => {}}>
+              <View style={styles.btnView}>
+                <Text style={styles.buttontxt}>View Customers</Text>
+
+                <Text style={styles.suptxt}>Display All Customers </Text>
+              </View>
+            </TouchableOpacity>
+          </View>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -51,24 +67,17 @@ export default function CustomerManagement({navigation}) {
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: "#F5F5F5",
-  },
-  scrollContainer: {
-    alignItems: "center",
-    paddingVertical: 20,
-  },
-  titleText: {
-    fontSize: 26,
-    fontWeight: "bold",
-    textAlign: "center",
-    color: "#333",
-    marginBottom: 25,
-  },
   container: {
-    width: "100%",
-    alignItems: "center",
+    backgroundColor: "white",
+    borderColor: colors.grey5,
+    borderWidth: 1,
+    borderRadius: 5,
+  },
+  buttonView: {
+    margin: 10,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
   },
   button: {
     backgroundColor: colors.grey5,
@@ -86,16 +95,25 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
     elevation: 4,
   },
-  buttonTitle: {
-    fontSize: 18,
+  titltxt: {
+    fontSize: 24,
     fontWeight: "bold",
-    color: "#FFF",
-    marginBottom: 5,
+    textAlign: "center",
+    color: "#333",
+    marginBottom: 20,
+  },
+  buttontxt: {
+    fontSize: 16,
+    fontWeight: "bold",
+    textAlign: "center",
     color: "#333",
   },
-  buttonText: {
-    fontSize: 12,
-    fontWeight: "bold",
+  btnView: {
+    backgroundColor: colors.grey5,
+    justifyContent: "center",
+  },
+  suptxt: {
+    fontSize: 10,
     textAlign: "center",
     color: "#333",
   },
