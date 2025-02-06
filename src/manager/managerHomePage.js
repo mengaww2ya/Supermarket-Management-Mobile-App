@@ -5,119 +5,37 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  useWindowDimensions,
   SafeAreaView,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { colors } from "react-native-elements";
- 
+
 export default function ManagerHomePage({ navigation }) {
-  const screenWidth = useWindowDimensions().width;
-  const screenHeight = useWindowDimensions().height;
   return (
     <SafeAreaView style={styles.homeContainer}>
       <ScrollView
-        
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ flexGrow: 1, paddingBottom: 20 }}
+        contentContainerStyle={styles.scrollContainer}
       >
         <View style={styles.container}>
-          {/* Welcome Message */}
           <Text style={styles.textTitle}>Welcome!</Text>
-
-          {/* Cards Section */}
-          <View style={styles.buttoncontainer}>
-            <TouchableOpacity
-              style={styles.button}
-              onPress={() => navigation.navigate("emplyeeManagement")}
-            >
-              <View style={styles.buttonview}>
-                <Text style={styles.buttontxt}>Employee Management</Text>
-                <Text style={styles.btnsubtitl}>
-                  manage all employee in the supermarket
-                </Text>
-              </View>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.button}
-              onPress={() => navigation.navigate("customerManagement")}
-            >
-              <View style={styles.buttonview}>
-                <Text style={styles.buttontxt}>Customer Management</Text>
-                <Text style={styles.btnsubtitl}>
-                  manage all registered custoer
-                </Text>
-              </View>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.button}
-              onPress={() => navigation.navigate("promotionManagement")}
-            >
-              <View style={styles.buttonview}>
-                <Text style={styles.buttontxt}>Promotion & Discount</Text>
-                <Text style={styles.btnsubtitl}>manage promotions</Text>
-              </View>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.button}
-              onPress={() => navigation.navigate("inventoryManagement")}
-            >
-              <View style={styles.buttonview}>
-                <Text style={styles.buttontxt}>Inventory Management</Text>
-                <Text style={styles.btnsubtitl}>
-                  Monitor stock levels in real-time
-                </Text>
-              </View>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.button}
-              onPress={() => navigation.navigate("orderManagement")}
-            >
-              <View style={styles.buttonview}>
-                <Text style={styles.buttontxt}>Order Management</Text>
-                <Text style={styles.btnsubtitl}>
-                  Process and track customer orders
-                </Text>
-              </View>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.button}
-              onPress={() => navigation.navigate("saleRevenueManagement")}
-            >
-              <View style={styles.buttonview}>
-                <Text style={styles.buttontxt}>Sales & Revenue</Text>
-                <Text style={styles.btnsubtitl}>
-                  Monitor payment , sales reports.
-                </Text>
-              </View>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.button}
-              onPress={() => navigation.navigate("suplierManagement")}
-            >
-              <View style={styles.buttonview}>
-                <Text style={styles.buttontxt}>Supplier Management</Text>
-                <Text style={styles.btnsubtitl}>
-                  Add, update, and remove suppliers
-                </Text>
-              </View>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.button}
-              onPress={() => navigation.navigate("alertNotifManagement")}
-            >
-              <View style={styles.buttonview}>
-                <Text style={styles.buttontxt}>Alerts & Notifications</Text>
-                <Text style={styles.btnsubtitl}>
-                  Set up alerts for low stock, expired items
-                </Text>
-              </View>
-            </TouchableOpacity>
+          <View style={styles.buttonContainer}>
+            {menuOptions.map((option, index) => (
+              <TouchableOpacity
+                key={index}
+                style={styles.button}
+                onPress={() => navigation.navigate(option.navigate)}
+              >
+                <Ionicons
+                  name={option.icon}
+                  size={30}
+                  color="#007bff"
+                  style={styles.icon}
+                />
+                <Text style={styles.buttontxt}>{option.title}</Text>
+                <Text style={styles.btnsubtitl}>{option.subtitle}</Text>
+              </TouchableOpacity>
+            ))}
           </View>
         </View>
       </ScrollView>
@@ -125,56 +43,117 @@ export default function ManagerHomePage({ navigation }) {
   );
 }
 
-// Styles
+const menuOptions = [
+  {
+    title: "Employee Management",
+    subtitle: "Manage all employees",
+    icon: "people-outline",
+    navigate: "emplyeeManagement",
+  },
+  {
+    title: "Customer Management",
+    subtitle: "Manage all customers",
+    icon: "person-outline",
+    navigate: "customerManagement",
+  },
+  {
+    title: "Promotion & Discount",
+    subtitle: "Manage promotions",
+    icon: "pricetag-outline",
+    navigate: "promotionManagement",
+  },
+  {
+    title: "Inventory Management",
+    subtitle: "Monitor stock levels",
+    icon: "cube-outline",
+    navigate: "inventoryManagement",
+  },
+  {
+    title: "Order Management",
+    subtitle: "Track customer orders",
+    icon: "cart-outline",
+    navigate: "orderManagement",
+  },
+  {
+    title: "Sales & Revenue",
+    subtitle: "Monitor sales reports",
+    icon: "bar-chart-outline",
+    navigate: "saleRevenueManagement",
+  },
+  {
+    title: "Supplier Management",
+    subtitle: "Manage suppliers",
+    icon: "business-outline",
+    navigate: "suplierManagement",
+  },
+  {
+    title: "Alerts & Notifications",
+    subtitle: "Set up alerts",
+    icon: "notifications-outline",
+    navigate: "alertNotifManagement",
+  },
+];
+
 const styles = StyleSheet.create({
+  homeContainer: {
+    flex: 1,
+    backgroundColor: "#f8f9fa",
+  },
+  scrollContainer: {
+    flexGrow: 1,
+    paddingBottom: 20,
+  },
   container: {
     backgroundColor: "white",
-    borderColor: colors.grey5,
-    borderWidth: 1,
-    alignSelf: "center",
+    borderRadius: 15,
+    padding: 20,
+    // margin: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+    elevation: 4,
   },
-  buttoncontainer: {
-    margin:10,
+  textTitle: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#333",
+    textAlign: "center",
+    marginBottom: 20,
+  },
+  buttonContainer: {
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "space-between",
   },
-  textTitle: {
-    backgroundColor: colors.grey3,
-    color: "white",
-    fontSize: 20,
-    fontWeight: "bold",
-    padding: 10,
-    margin: 10,
-    textAlign: "center",
-  },
   button: {
-    backgroundColor: colors.grey5,
-    width: "47%", // Responsive grid layout
-    height: 120,
+    backgroundColor: "#fff",
+    width: "48%",
+    height: 130,
     justifyContent: "center",
     alignItems: "center",
-    borderRadius: 10,
-    borderColor: colors.grey4,
+    borderRadius: 12,
     borderWidth: 1,
+    borderColor: "#ddd",
     marginBottom: 15,
     shadowColor: "#000",
     shadowOffset: { width: 2, height: 3 },
     shadowOpacity: 0.3,
-    shadowRadius: 3,
-    elevation: 4, // For Android shadow
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  icon: {
+    marginBottom: 10,
   },
   buttontxt: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#FFF",
-    marginBottom: 5,
     color: "#333",
+    textAlign: "center",
   },
   btnsubtitl: {
     fontSize: 12,
-    fontWeight: "bold",
+    color: "#555",
     textAlign: "center",
-    color: "#333",
   },
 });

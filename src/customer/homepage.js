@@ -10,17 +10,14 @@ import {
   Image,
   useWindowDimensions,
 } from "react-native";
-import {
-  promoCategories,
-  standard,
-  recomended,
-} from "../global/data.js";
+import { promoCategories, standard, recomended } from "../global/data.js";
 import DrawNavigator from "../navigator/drawNavigator.js";
 import Footer from "../subscrean/foter.js";
-import { colors,Icon } from "react-native-elements";
-const screenwidth =useWindowDimensions().width;
-const screenheight = useWindowDimensions().height;
+import { colors, Icon } from "react-native-elements";
+
 export default function Homepage({ navigation }) {
+  const screenwidth = useWindowDimensions().width;
+  const screenheight = useWindowDimensions().height;
   const [Delivery, setDelivery] = useState(false);
   const [indexcheck, setindexcheck] = useState(" ");
   const [sindexcheck, ssetindexcheck] = useState(" ");
@@ -34,7 +31,6 @@ export default function Homepage({ navigation }) {
       contentContainerStyle={{ flexGrow: 1 }}
     >
       <View>
-
         <View style={styles.container}>
           <TouchableOpacity
             onPress={() => {
@@ -109,9 +105,9 @@ export default function Homepage({ navigation }) {
             data={promoCategories}
             keyExtractor={(item) => item.id}
             extraData={indexcheck}
-            renderItem={({ item, index }) => (
+            renderItem={({ item }) => (
               <Pressable
-                style={{ padding: 10 }}
+                style={[styles.cardContainer]}
                 onPress={() => {
                   setindexcheck(item.id);
                   if (item.ProductName == "Vegetable") {
@@ -128,44 +124,13 @@ export default function Homepage({ navigation }) {
                     navigation.navigate("AlcholicDrink");
                   }
                 }}
-               >
-                <Text
-                  style={
-                    indexcheck === item.id
-                      ? styles.CardtextSelected
-                      : styles.Cardtext
-                  }
-                >
-                  {item.ProductName}
+              >
+                <Image style={styles.cardImage} source={item.image} />
+                <Text style={styles.cardText}>{item.ProductName}</Text>
+                {/* <Text style={styles.reviewText}>
+                  {item.NumberofReviews} reviews
                 </Text>
-                <View
-                  style={
-                    indexcheck === item.id ? styles.CardsSelected : styles.Cards
-                  }
-                >
-                  <Image style={styles.cardimage} source={item.image} />
-                </View>
-                <View>
-                  <Text
-                    style={
-                      indexcheck === item.id
-                        ? styles.CardtextSelected
-                        : styles.Cardtext
-                    }
-                  >
-                    {item.NumberofReviews} reviews
-                  </Text>
-
-                  <Text
-                    style={
-                      indexcheck === item.id
-                        ? styles.CardtextSelected
-                        : styles.Cardtext
-                    }
-                  >
-                    {item.Rating}
-                  </Text>
-                </View>
+                <Text style={styles.ratingText}>⭐ {item.Rating}</Text> */}
               </Pressable>
             )}
           />
@@ -177,14 +142,14 @@ export default function Homepage({ navigation }) {
         <View style={styles.promotionView}>
           <FlatList
             nestedScrollEnabled
-            horizontal={true}
+            horizontal
             showsHorizontalScrollIndicator={false}
             data={standard}
             keyExtractor={(item) => item.id}
             extraData={sindexcheck}
-            renderItem={({ item, index }) => (
+            renderItem={({ item }) => (
               <Pressable
-                style={{ padding: 10 }}
+                style={[styles.cardContainer]}
                 onPress={() => {
                   ssetindexcheck(item.id);
                   if (item.ProductName == "Vegetable") {
@@ -202,45 +167,12 @@ export default function Homepage({ navigation }) {
                   }
                 }}
               >
-                <Text
-                  style={
-                    indexcheck === item.id
-                      ? styles.CardtextSelected
-                      : styles.Cardtext
-                  }
-                >
-                  {item.ProductName}
+                <Image style={styles.cardImage} source={item.image} />
+                <Text style={styles.cardText}>{item.ProductName}</Text>
+                {/* <Text style={styles.reviewText}>
+                  {item.NumberofReviews} reviews
                 </Text>
-                <View
-                  style={
-                    sindexcheck === item.id
-                      ? styles.CardsSelected
-                      : styles.Cards
-                  }
-                >
-                  <Image style={styles.cardimage} source={item.image} />
-                </View>
-                <View>
-                  <Text
-                    style={
-                      indexcheck === item.id
-                        ? styles.CardtextSelected
-                        : styles.Cardtext
-                    }
-                  >
-                    {item.NumberofReviews} reviews
-                  </Text>
-
-                  <Text
-                    style={
-                      indexcheck === item.id
-                        ? styles.CardtextSelected
-                        : styles.Cardtext
-                    }
-                  >
-                    {item.Rating}
-                  </Text>
-                </View>
+                <Text style={styles.ratingText}>⭐ {item.Rating}</Text> */}
               </Pressable>
             )}
           />
@@ -251,14 +183,14 @@ export default function Homepage({ navigation }) {
         <View style={styles.promotionView}>
           <FlatList
             nestedScrollEnabled
-            horizontal={true}
+            horizontal
             showsHorizontalScrollIndicator={false}
             data={recomended}
             keyExtractor={(item) => item.id}
             extraData={recoindexcheck}
-            renderItem={({ item, index }) => (
+            renderItem={({ item }) => (
               <Pressable
-                style={{ padding: 10 }}
+                style={[styles.cardContainer]}
                 onPress={() => {
                   recosetindexcheck(item.id);
                   if (item.ProductName == "Vegetable") {
@@ -276,45 +208,14 @@ export default function Homepage({ navigation }) {
                   }
                 }}
               >
-                <Text
-                  style={
-                    indexcheck === item.id
-                      ? styles.CardtextSelected
-                      : styles.Cardtext
-                  }
-                >
-                  {item.ProductName}
-                </Text>
-                <View
-                  style={
-                    recoindexcheck === item.id
-                      ? styles.CardsSelected
-                      : styles.Cards
-                  }
-                >
-                  <Image style={styles.cardimage} source={item.image} />
-                </View>
-                <View style={styles.cardTextView}>
-                  <Text
-                    style={
-                      indexcheck === item.id
-                        ? styles.CardtextSelected
-                        : styles.Cardtext
-                    }
-                  >
+                <Image style={styles.cardImage} source={item.image} />
+                <Text style={styles.cardText}>{item.ProductName}</Text>
+                {/* <View style={styles.cardTextView}>
+                  <Text style={styles.reviewText}>
                     {item.NumberofReviews} reviews
                   </Text>
-
-                  <Text
-                    style={
-                      indexcheck === item.id
-                        ? styles.CardtextSelected
-                        : styles.Cardtext
-                    }
-                  >
-                    {item.Rating}
-                  </Text>
-                </View>
+                  <Text style={styles.ratingText}>⭐ {item.Rating}</Text>
+                </View> */}
               </Pressable>
             )}
           />
@@ -390,48 +291,51 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
 
-  CardtextSelected: {
-    textAlign: "center",
-    alignItems: "center",
-    fontWeight: "bold",
-    color: colors.grey1,
-  },
-  Cardtext: {
-    textAlign: "center",
-
-    fontWeight: "bold",
-    color: colors.grey2,
-  },
-
-  Cards: {
+  cardContainer: {
+    backgroundColor: "#fff",
     borderRadius: 15,
-    backgroundColor: colors.grey3,
-    justifyContent: "center",
-    alignItems: "center",
-    height:screenheight*0.3,
-    width:screenwidth*0.5,
-    paddingVertical: 10,
-    paddingHorizontal: 10,
-    marginVertical: 10,
+    padding: 15,
     marginHorizontal: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    width: 150,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+    elevation: 5,
+    transform: [{ scale: 1 }],
   },
-  CardsSelected: {
-    borderRadius: 15,
+  selectedCard: {
     backgroundColor: "hsl(27, 88%, 58%)",
-    justifyContent: "center",
-    alignItems: "center",
-    paddingVertical: 10,
-    paddingHorizontal: 10,
-    marginVertical: 10,
-    marginHorizontal: 10,
+    transform: [{ scale: 1.05 }],
   },
-  cardimage: {
-    borderRadius: 15,
-    padding: 10,
-    backgroundColor: colors.white,
+  cardImage: {
+    width: "100%",
+    height:100,
+    marginBottom: 10,
   },
-  cardTextView: {
-    justifyContent: "space-between",
+  cardText: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#333",
     textAlign: "center",
+  },
+  cardTextSelected: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#fff",
+    textAlign: "center",
+  },
+  reviewText: {
+    fontSize: 12,
+    color: "#666",
+    marginTop: 5,
+  },
+  ratingText: {
+    fontSize: 14,
+    fontWeight: "bold",
+    color: "#FFA500",
+    marginTop: 3,
   },
 });
