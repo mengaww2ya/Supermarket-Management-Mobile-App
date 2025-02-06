@@ -7,8 +7,7 @@ import {
   StyleSheet,
 } from "react-native";
 import { deliveryAgents } from "../global/data";
-
-export default function DeliveryAgentManagement({ navigation }) {
+export default function mDeliveryAgentManagement({ navigation }) {
   return (
     <View style={styles.container}>
       <Text style={styles.header}>Manage Delivery Agents</Text>
@@ -25,7 +24,7 @@ export default function DeliveryAgentManagement({ navigation }) {
               <TouchableOpacity
                 style={styles.assignButton}
                 onPress={() =>
-                  navigation.navigate("OrderSelectionScreen", {
+                  navigation.navigate("mdeliveryOrders", {
                     agentId: item.id,
                   })
                 }

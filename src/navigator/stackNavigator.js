@@ -39,7 +39,7 @@ import manageDelivery from "../suplier/manageDelivery.js";
 import SmanageOrder from "../suplier/manageOrder.js";
 import SperformanceAnalysis  from "../suplier/SPerformanceAnalytics.js";
 import MDeliveryAgentManagement from "../manager/deliveryManagement.js";
-import mdeliveryOrders from "../global/data.js";
+import mdeliveryOrders from "../manager/deliveryOrders.js";
 const Authentic = createNativeStackNavigator();
 export default function AuthicStackNavig() {
   return (
@@ -676,7 +676,6 @@ export default function AuthicStackNavig() {
           headerTitleStyle: {
             color: "#2ECE33",
             fontSize: 25,
-            DeliveryAgentManagement,
           },
           title: " all orders",
           ...TransitionPresets.RevealFromBottomAndroid,
