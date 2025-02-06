@@ -676,7 +676,7 @@ export const AlcholicDrinkCategory = [
     Origin: "ethiopia",
   },
 ];
-export  const customer = [
+export const customer = [
   {
     id: 1,
     userName: "menga",
@@ -749,7 +749,7 @@ export  const customer = [
     address: "wku",
     password: "12345678",
   },
-    {
+  {
     id: 9,
     userName: "mana",
     firstName: "mengaw",
@@ -758,4 +758,99 @@ export  const customer = [
     address: "wku",
     password: "12345678",
   },
+];
+export const deliveryAgents = [
+  {
+    id: "1",
+    firstName: "Mengaw",
+    lastName: "Wubetu",
+    phone: "0963760376",
+    status: "available",
+    rating: 4.8,
+    completedOrders: 120,
+  },
+  {
+    id: "2",
+    firstName: "Menga",
+    lastName: "Wubetu",
+    phone: "0963760376",
+    status: "busy",
+    rating: 4.5,
+    completedOrders: 98,
+  },
+  {
+    id: "3",
+    firstName: "Meng",
+    lastName: "Wube",
+    phone: "0963760376",
+    status: "unavailable",
+    rating: 4.2,
+    completedOrders: 76,
+  },
+  {
+    id: "4",
+    firstName: "Meskerem",
+    lastName: "Degu",
+    phone: "0963760376",
+    status: "available",
+    rating: 4.9,
+    completedOrders: 150,
+  },
+  {
+    id: "5",
+    firstName: "Hikma",
+    lastName: "Mohamed",
+    phone: "0963760376",
+    status: "busy",
+    rating: 4.6,
+    completedOrders: 110,
+  },
+  {
+    id: "6",
+    firstName: "Abebe",
+    lastName: "Lama",
+    phone: "0963760376",
+    status: "unavailable",
+    rating: 4.0,
+    completedOrders: 67,
+  },
+  {
+    id: "7",
+    firstName: "Kebade",
+    lastName: "Abebe",
+    phone: "0963760376",
+    status: "available",
+    rating: 4.7,
+    completedOrders: 135,
+  },
+  {
+    id: "8",
+    firstName: "Alemitu",
+    lastName: "Alemu",
+    phone: "0963760376",
+    status: "busy",
+    rating: 4.3,
+    completedOrders: 90,
+  },
+];
+export const deliveryOrders = [
+  {
+    id: "101",
+    customer: "John Doe",
+    address: "Addis Ababa",
+    status: "pending",
+  },
+  {
+    id: "102",
+    customer: "Jane Smith",
+    address: "Bahir Dar",
+    status: "pending",
+  },
+  {
+    id: "103",
+    customer: "Michael Tesfaye",
+    address: "Adama",
+    status: "pending",
+  },
+  { id: "104", customer: "Sarah Ali", address: "Hawassa", status: "pending" },
 ];

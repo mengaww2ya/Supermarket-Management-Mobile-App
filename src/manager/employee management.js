@@ -1,7 +1,7 @@
 import { SafeAreaView, ScrollView, View,Text, StyleSheet, TouchableOpacity } from "react-native";
 import { colors } from "react-native-elements";
 
-export default function emplyeeManagement(){
+export default function emplyeeManagement({navigation}){
     return (
       <SafeAreaView>
         <ScrollView
@@ -12,9 +12,9 @@ export default function emplyeeManagement(){
           <View style={styles.container}>
             <Text style={styles.textTitle}>Employee management</Text>
             <View style={styles.buttoncontainer}>
-              <TouchableOpacity style={styles.button}>
+              <TouchableOpacity style={styles.button} onPress={()=>{navigation.navigate("MDeliveryAgentManagement");}}>
                 <View style={styles.buttonview}>
-                  <Text style={styles.buttontxt}>Delivery Agent</Text>
+                  <Text style={styles.buttontxt} >Delivery Agent</Text>
                   <Text style={styles.btnsubtitl}> Manage, asign Delivery</Text>
                 </View>
               </TouchableOpacity>

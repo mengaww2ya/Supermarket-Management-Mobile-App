@@ -38,6 +38,8 @@ import manageProduct from "../suplier/manageProduct.js";
 import manageDelivery from "../suplier/manageDelivery.js";
 import SmanageOrder from "../suplier/manageOrder.js";
 import SperformanceAnalysis  from "../suplier/SPerformanceAnalytics.js";
+import MDeliveryAgentManagement from "../manager/deliveryManagement.js";
+import mdeliveryOrders from "../global/data.js";
 const Authentic = createNativeStackNavigator();
 export default function AuthicStackNavig() {
   return (
@@ -644,6 +646,39 @@ export default function AuthicStackNavig() {
             fontSize: 25,
           },
           title: " Performance and analysis",
+          ...TransitionPresets.RevealFromBottomAndroid,
+          headerStyle: {
+            backgroundColor: "#FFDC2B",
+          },
+        }}
+      />
+      <Authentic.Screen
+        name="MDeliveryAgentManagement"
+        component={MDeliveryAgentManagement}
+        options={{
+          headerShown: true,
+          headerTitleStyle: {
+            color: "#2ECE33",
+            fontSize: 25,
+          },
+          title: " Delivery agent management",
+          ...TransitionPresets.RevealFromBottomAndroid,
+          headerStyle: {
+            backgroundColor: "#FFDC2B",
+          },
+        }}
+      />
+      <Authentic.Screen
+        name="mdeliveryOrders"
+        component={mdeliveryOrders}
+        options={{
+          headerShown: true,
+          headerTitleStyle: {
+            color: "#2ECE33",
+            fontSize: 25,
+            DeliveryAgentManagement,
+          },
+          title: " all orders",
           ...TransitionPresets.RevealFromBottomAndroid,
           headerStyle: {
             backgroundColor: "#FFDC2B",
