@@ -43,6 +43,7 @@ import mdeliveryOrders from "../manager/deliveryOrders.js";
 import McustomerAssistance from "../manager/customerAssistance.js";
 import MonitorCustomerAssistance from "../manager/monitorCustomerAssistance.js";
 import handleEscalatedIssues from "../manager/HandlingEscalatedIssues.js";
+import MCustomerServicePerformance from "../manager/customerServicePerformance.js";
 const Authentic = createNativeStackNavigator();
 export default function AuthicStackNavig() {
   return (
@@ -729,6 +730,22 @@ export default function AuthicStackNavig() {
             fontSize: 20,
           },
           title: " Escalated issues",
+          ...TransitionPresets.RevealFromBottomAndroid,
+          headerStyle: {
+            backgroundColor: "#FFDC2B",
+          },
+        }}
+      />
+      <Authentic.Screen
+        name="MCustomerServicePerformance"
+        component={MCustomerServicePerformance}
+        options={{
+          headerShown: true,
+          headerTitleStyle: {
+            color: "#2ECE33",
+            fontSize: 20,
+          },
+          title: "Customer Service performance",
           ...TransitionPresets.RevealFromBottomAndroid,
           headerStyle: {
             backgroundColor: "#FFDC2B",

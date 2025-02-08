@@ -42,7 +42,13 @@ export default function McustomerAssistance({ navigation }) {
               </Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.button} activeOpacity={0.7}>
+            <TouchableOpacity
+              style={styles.button}
+              activeOpacity={0.7}
+              onPress={() => {
+                navigation.navigate("MCustomerServicePerformance");
+              }}
+            >
               <Text style={styles.buttonText}>
                 Customer Service Performance
               </Text>
@@ -108,17 +114,16 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 4,
     elevation: 5,
-    justifyContent:"center",
+    justifyContent: "center",
   },
   buttonText: {
     fontSize: 18,
     fontWeight: "bold",
     marginBottom: 5,
-    textAlign:"center",
+    textAlign: "center",
   },
   buttonSubtitle: {
-    fontSize: 14,
-    color: "#ecf0f1",
+    fontSize: 12,
     textAlign: "center",
   },
 });

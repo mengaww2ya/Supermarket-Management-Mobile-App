@@ -1032,3 +1032,47 @@ export const escalatedIssues = [
   },
 ];
 
+export const customerSatisfactionData = [
+  {
+    id: "1",
+    customerName: "Alice",
+    rating: 5,
+    feedbackComment: "Great service!",
+    satisfactionType: "Customer Satisfaction Score",
+  },
+  {
+    id: "2",
+    customerName: "Bob",
+    rating: 8,
+    feedbackComment: "Good experience.",
+    satisfactionType: "Net Promoter Score",
+  },
+  {
+    id: "3",
+    customerName: "Charlie",
+    rating: 3,
+    feedbackComment: "Support took too long.",
+    satisfactionType: "Customer Effort Score",
+  },
+  {
+    id: "4",
+    customerName: "David",
+    rating: 7,
+    feedbackComment: "Helpful support.",
+    satisfactionType: "Net Promoter Score",
+  },
+  {
+    id: "5",
+    customerName: "Eve",
+    rating: 2,
+    feedbackComment: "Confusing process.",
+    satisfactionType: "Customer Effort Score",
+  },
+];
+export const responseTimes = [
+  { id: "1", responseTime: 5 }, // 5 minutes
+  { id: "2", responseTime: 12 }, // 12 minutes
+  { id: "3", responseTime: 8 }, // 8 minutes
+  { id: "4", responseTime: 15 }, // 15 minutes
+  { id: "5", responseTime: 3 }, // 3 minutes
+];

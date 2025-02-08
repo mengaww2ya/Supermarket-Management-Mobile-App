@@ -6,3 +6,5 @@ react native swiper
 react-native-reanimated
 expo-image-picker
   react-native-dropdown-picker
+  react-native-chart-kit
+  react-native-svg
