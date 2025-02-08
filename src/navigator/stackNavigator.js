@@ -37,9 +37,12 @@ import suplierHome from "../suplier/suplierHomePage.js";
 import manageProduct from "../suplier/manageProduct.js";
 import manageDelivery from "../suplier/manageDelivery.js";
 import SmanageOrder from "../suplier/manageOrder.js";
-import SperformanceAnalysis  from "../suplier/SPerformanceAnalytics.js";
+import SperformanceAnalysis from "../suplier/SPerformanceAnalytics.js";
 import MDeliveryAgentManagement from "../manager/deliveryManagement.js";
 import mdeliveryOrders from "../manager/deliveryOrders.js";
+import McustomerAssistance from "../manager/customerAssistance.js";
+import MonitorCustomerAssistance from "../manager/monitorCustomerAssistance.js";
+import handleEscalatedIssues from "../manager/HandlingEscalatedIssues.js";
 const Authentic = createNativeStackNavigator();
 export default function AuthicStackNavig() {
   return (
@@ -678,6 +681,54 @@ export default function AuthicStackNavig() {
             fontSize: 25,
           },
           title: " all orders",
+          ...TransitionPresets.RevealFromBottomAndroid,
+          headerStyle: {
+            backgroundColor: "#FFDC2B",
+          },
+        }}
+      />
+      <Authentic.Screen
+        name="McustomerAssistance"
+        component={McustomerAssistance}
+        options={{
+          headerShown: true,
+          headerTitleStyle: {
+            color: "#2ECE33",
+            fontSize: 20,
+          },
+          title: " Customer assistance",
+          ...TransitionPresets.RevealFromBottomAndroid,
+          headerStyle: {
+            backgroundColor: "#FFDC2B",
+          },
+        }}
+      />
+      <Authentic.Screen
+        name="MonitorCustomerAssistance"
+        component={MonitorCustomerAssistance}
+        options={{
+          headerShown: true,
+          headerTitleStyle: {
+            color: "#2ECE33",
+            fontSize: 20,
+          },
+          title: "Track customer assistance",
+          ...TransitionPresets.RevealFromBottomAndroid,
+          headerStyle: {
+            backgroundColor: "#FFDC2B",
+          },
+        }}
+      />
+      <Authentic.Screen
+        name="handleEscalatedIssues"
+        component={handleEscalatedIssues}
+        options={{
+          headerShown: true,
+          headerTitleStyle: {
+            color: "#2ECE33",
+            fontSize: 20,
+          },
+          title: " Escalated issues",
           ...TransitionPresets.RevealFromBottomAndroid,
           headerStyle: {
             backgroundColor: "#FFDC2B",

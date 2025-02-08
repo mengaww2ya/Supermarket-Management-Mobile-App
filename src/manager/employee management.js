@@ -8,6 +8,7 @@ import {
 } from "react-native";
 import { colors } from "react-native-elements";
 import { Ionicons } from "@expo/vector-icons";
+import { navigate } from "expo-router/build/global-state/routing";
 
 export default function EmployeeManagement({ navigation }) {
   return (
@@ -56,16 +57,12 @@ const menuOptions = [
     title: "Customer Assistance",
     subtitle: "Manage Customer Support",
     icon: "people-outline",
+    navigate: "McustomerAssistance",
   },
   {
     title: "Stock Manager",
     subtitle: "Manage Stock & Inventory",
     icon: "cube-outline",
-  },
-  {
-    title: "Roles & Permissions",
-    subtitle: "Assign and Manage Roles",
-    icon: "key-outline",
   },
   {
     title: "Schedule",
@@ -104,6 +101,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   buttonContainer: {
+    margin:10,
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "space-between",
@@ -131,6 +129,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
     color: "#333",
+    
   },
   buttonSubtitle: {
     fontSize: 12,

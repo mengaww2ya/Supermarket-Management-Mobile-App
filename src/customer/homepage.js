@@ -11,10 +11,8 @@ import {
   useWindowDimensions,
 } from "react-native";
 import { promoCategories, standard, recomended } from "../global/data.js";
-import DrawNavigator from "../navigator/drawNavigator.js";
 import Footer from "../subscrean/foter.js";
 import { colors, Icon } from "react-native-elements";
-
 export default function Homepage({ navigation }) {
   const screenwidth = useWindowDimensions().width;
   const screenheight = useWindowDimensions().height;
