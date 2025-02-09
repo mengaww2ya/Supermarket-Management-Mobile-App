@@ -1076,3 +1076,25 @@ export const responseTimes = [
   { id: "4", responseTime: 15 }, // 15 minutes
   { id: "5", responseTime: 3 }, // 3 minutes
 ];
+export const channels = [
+  {
+    id: "1",
+    name: "Phone Support",
+    status: "Active",
+    lastActivity: "10 mins ago",
+  },
+  {
+    id: "2",
+    name: "Email Support",
+    status: "Inactive",
+    lastActivity: "1 hour ago",
+  },
+  { id: "3", name: "Live Chat", status: "Active", lastActivity: "5 mins ago" },
+  { id: "4", name: "WhatsApp", status: "Active", lastActivity: "20 mins ago" },
+  {
+    id: "5",
+    name: "Social Media",
+    status: "Under Maintenance",
+    lastActivity: "3 hours ago",
+  },
+];

@@ -44,6 +44,8 @@ import McustomerAssistance from "../manager/customerAssistance.js";
 import MonitorCustomerAssistance from "../manager/monitorCustomerAssistance.js";
 import handleEscalatedIssues from "../manager/HandlingEscalatedIssues.js";
 import MCustomerServicePerformance from "../manager/customerServicePerformance.js";
+import ChannelOverview from "../manager/ChannelOverview.js";
+import ManageChannels from "../manager/ManageChannels.js";
 const Authentic = createNativeStackNavigator();
 export default function AuthicStackNavig() {
   return (
@@ -746,6 +748,38 @@ export default function AuthicStackNavig() {
             fontSize: 20,
           },
           title: "Customer Service performance",
+          ...TransitionPresets.RevealFromBottomAndroid,
+          headerStyle: {
+            backgroundColor: "#FFDC2B",
+          },
+        }}
+      />
+      <Authentic.Screen
+        name="ManageChannels"
+        component={ManageChannels}
+        options={{
+          headerShown: true,
+          headerTitleStyle: {
+            color: "#2ECE33",
+            fontSize: 20,
+          },
+          title: "Manage Chanals",
+          ...TransitionPresets.RevealFromBottomAndroid,
+          headerStyle: {
+            backgroundColor: "#FFDC2B",
+          },
+        }}
+      />
+      <Authentic.Screen
+        name="ChannelOverview"
+        component={ChannelOverview}
+        options={{
+          headerShown: true,
+          headerTitleStyle: {
+            color: "#2ECE33",
+            fontSize: 20,
+          },
+          title: "Chanals Overview",
           ...TransitionPresets.RevealFromBottomAndroid,
           headerStyle: {
             backgroundColor: "#FFDC2B",

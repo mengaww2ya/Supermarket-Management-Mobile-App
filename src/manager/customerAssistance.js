@@ -57,7 +57,13 @@ export default function McustomerAssistance({ navigation }) {
               </Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.button} activeOpacity={0.7}>
+            <TouchableOpacity
+              style={styles.button}
+              activeOpacity={0.7}
+              onPress={() => {
+                navigation.navigate("ManageChannels");
+              }}
+            >
               <Text style={styles.buttonText}>Manage Channels</Text>
               <Text style={styles.buttonSubtitle}>
                 Customer Support Tools & Communication Channels
