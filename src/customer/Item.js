@@ -9,6 +9,7 @@ import {
   Text,
   Modal,
   ScrollView,
+  Alert,
   View,
 } from "react-native";
 import { colors, Icon } from "react-native-elements";
@@ -73,6 +74,21 @@ export default function Item({ route, navigation }) {
       size={30}
     />
   );
+  const [selectedLike, setSelectedLike] = useState(null);
+
+  const handleLikePress = (likeValue) => {
+    Alert.alert(
+      `Confirm Rating`,
+      `Would you like to give ${likeValue} star${likeValue > 1 ? "s" : ""}?`,
+      [
+        {
+          text: "Yes",
+          onPress: () => setSelectedLike(likeValue),
+        },
+        { text: "No", style: "cancel" },
+      ]
+    );
+  };
   return (
     <ScrollView
       style={{ flex: 1, marginBottom: "15%", paddingBottom: 20 }}
@@ -187,30 +203,25 @@ export default function Item({ route, navigation }) {
       >
         <View style={styles.modalBackground}>
           <View style={styles.modalContainer}>
-            <Text style={styles.liketitl}>
-              How much do you like this{" "}
-              <Text
-                styele={{
-                  fontStyle: "italic",
-                  fontSize: 20,
-                  fontWeight: "bold",
-                }}
-              >
-                {ProductName}
-              </Text>
+            <Text style={styles.likeTitle}>
+              How much do you like{" "}
+              <Text style={styles.productName}>{ProductName}</Text>?
             </Text>
 
-            {[
-              "1: Very poor",
-              "2: Below average",
-              "3: Average",
-              "4: Good",
-              "5: Excellent",
-            ].map((text, index) => (
-              <Pressable key={index} style={styles.stylbtn}>
-                <Text style={styles.liketxt}>{text}</Text>
-              </Pressable>
-            ))}
+            {["1: *", "2: **", "3: ***", "4: ****", "5: *****"].map(
+              (text, index) => {
+                const likeValue = index + 1;
+                return (
+                  <Pressable
+                    key={likeValue}
+                    style={styles.stylbtn}
+                    onPress={() => handleLikePress(likeValue)}
+                  >
+                    <Text style={styles.liketxt}>{text}</Text>
+                  </Pressable>
+                );
+              }
+            )}
 
             {/* Close Button */}
             <Pressable
@@ -330,5 +341,53 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     width: "80%",
     alignItems: "center",
+  },
+  modalBackground: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalContainer: {
+    backgroundColor: "#fff",
+    padding: 20,
+    borderRadius: 10,
+    width: "80%",
+    alignItems: "center",
+  },
+  likeTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    textAlign: "center",
+    marginBottom: 10,
+  },
+  productName: {
+    fontStyle: "italic",
+    fontSize: 20,
+    fontWeight: "bold",
+  },
+  stylbtn: {
+    backgroundColor: "#3498db",
+    padding: 10,
+    marginVertical: 5,
+    borderRadius: 5,
+    width: "100%",
+    alignItems: "center",
+  },
+  liketxt: {
+    color: "#fff",
+    fontWeight: "bold",
+  },
+  closeButton: {
+    marginTop: 10,
+    backgroundColor: "#e74c3c",
+    padding: 10,
+    borderRadius: 5,
+    width: "100%",
+    alignItems: "center",
+  },
+  closeText: {
+    color: "#fff",
+    fontWeight: "bold",
   },
 });
