@@ -1,339 +1,142 @@
 import React, { useState } from "react";
 import {
-  Text,
   View,
-  Pressable,
-  StyleSheet,
-  TouchableOpacity,
-  ScrollView,
+  Text,
   FlatList,
   Image,
+  TouchableOpacity,
+  StyleSheet,
   useWindowDimensions,
+  ScrollView,
 } from "react-native";
-import { promoCategories, standard, recomended } from "../global/data.js";
-import Footer from "../subscrean/foter.js";
-import { colors, Icon } from "react-native-elements";
+import { categories } from "../global/data.js";
+import { SafeAreaView } from "react-native-web";
+
+// Category Navigation Mapping
+const categoryNavigationMap = {
+  "Fruit & Vegetable": "FreshProducts",
+  "Dairy & Eggs": "DairyProducts",
+  "Meat & Seafood": "Meatproducts",
+  Bakery: "Bakeryproducts",
+  Beverages: "Beveragesproducts",
+  "Pantry Essentials": "Pantryproducts",
+  "Frozen Foods": "Frozenproducts",
+  "Personal Care": "PersonalCareproducts",
+};
+
 export default function Homepage({ navigation }) {
-  const screenwidth = useWindowDimensions().width;
-  const screenheight = useWindowDimensions().height;
-  const [Delivery, setDelivery] = useState(false);
-  const [indexcheck, setindexcheck] = useState(" ");
-  const [sindexcheck, ssetindexcheck] = useState(" ");
-  const [recoindexcheck, recosetindexcheck] = useState(" ");
+  const ScreenWidth=useWindowDimensions().width;
+  const ScreenHeight=useWindowDimensions().height;
+  const [selectedCategory, setSelectedCategory] = useState(null);
+
+  // Filter categories based on status and discount availability
+  const promoCategories = categories.filter(
+    (item) => item.status === "Active" && item.discountAvailable
+  );
+  const standardCategories = categories.filter(
+    (item) => item.status === "Active" && !item.discountAvailable
+  );
+
+  // Handle Category Selection & Navigation
+  const handleCategoryPress = (item) => {
+    setSelectedCategory(item.categoryId);
+    const screenName = categoryNavigationMap[item.categoryName];
+    if (screenName) {
+      navigation.navigate(screenName);
+    }
+  };
+
+  // Reusable Category Card
+  const renderCategoryItem = ({ item }) => (
+    <TouchableOpacity
+      style={[styles.cardContainer,{width:ScreenWidth*0.3,height:ScreenHeight*0.3}]}
+      onPress={() => handleCategoryPress(item)}
+    >
+            <Text style={styles.cardText}>{item.categoryName}</Text>
+
+      <Image style={[styles.cardImage,{width:ScreenWidth*0.26,height:ScreenHeight*0.2}]} source={item.image} />
+      <Text style={styles.cardDescription}>{item.description}</Text>
+    </TouchableOpacity>
+  );
 
   return (
-    <ScrollView
-      style={{ flex: 1, paddingBottom: 20 }}
-      stickyHeaderIndices={[0]}
-      showsVerticalScrollIndicator={true}
-      contentContainerStyle={{ flexGrow: 1 }}
-    >
-      <View>
+    <SafeAreaView style={{flex:1}}>
+      <ScrollView
+        style={{paddingBottom: 20 }}
+        showsVerticalScrollIndicator={true}
+        contentContainerStyle={{ flexGrow: 1 }}
+      >
         <View style={styles.container}>
-          <TouchableOpacity
-            onPress={() => {
-              setDelivery(true);
-            }}
-          >
-            <View
-              style={{
-                ...styles.deliveryButon,
-                backgroundColor: Delivery ? "hsl(27, 88%, 58%)" : colors.grey5,
-              }}
-            >
-              <Text style={styles.deliveryText}>Delivery</Text>
-            </View>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => {
-              setDelivery(false);
-            }}
-          >
-            <View
-              style={{
-                ...styles.setDeliveryButon,
-                backgroundColor: Delivery ? colors.grey5 : "hsl(27, 88%, 58%)",
-              }}
-            >
-              <Text style={styles.deliveryText}>pick up</Text>
-            </View>
-          </TouchableOpacity>
-        </View>
-        <View style={styles.filterWholContainer}>
-          <View style={styles.mepTimeContainer}>
-            <View style={[{ flexDirection: "row", padding: 5 }]}>
-              <Icon
-                type="material-community"
-                name="map-marker"
-                color="hsl(0, 71%, 58%)"
-                // onPress={() => {navigation.menu()}}
-                size={32}
+          {/* Promotion Categories */}
+          {promoCategories.length > 0 && (
+            <View>
+              <Text style={styles.TextHead}>Promotion Categories</Text>
+              <FlatList
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                data={promoCategories}
+                keyExtractor={(item) => item.categoryId.toString()}
+                renderItem={renderCategoryItem}
+                contentContainerStyle={styles.listContainer}
               />
-              <Text>gurd shola</Text>
             </View>
-            <View style={styles.timeIconCntainer}>
-              <Icon
-                type="material-community"
-                name="clock-time-four"
-                color={colors.grey3}
-                // onPress={() => {navigation.menu()}}
-                size={32}
-              />
-              <Text style={{ paddingRight: 5 }}>now</Text>
-            </View>
-          </View>
-          <View style={styles.filterView}>
-            <Icon
-              type="material-community"
-              name="tune"
-              color={colors.grey2}
-              // onPress={() => {navigation.menu()}}
-              size={32}
-            />
-          </View>
-        </View>
-      </View>
-      <View>
-        <Text style={styles.TextHead}>Promotion Categories</Text>
-        <View style={styles.promotionView}>
-          <FlatList
-            nestedScrollEnabled
-            horizontal={true}
-            showsHorizontalScrollIndicator={false}
-            data={promoCategories}
-            keyExtractor={(item) => item.id}
-            extraData={indexcheck}
-            renderItem={({ item }) => (
-              <Pressable
-                style={[styles.cardContainer]}
-                onPress={() => {
-                  setindexcheck(item.id);
-                  if (item.ProductName == "Vegetable") {
-                    navigation.navigate("Vegetable");
-                  } else if (item.ProductName == "Fruit") {
-                    navigation.navigate("Fruit");
-                  } else if (item.ProductName == "Pcked food") {
-                    navigation.navigate("PckedFood");
-                  } else if (item.ProductName == "Soft drink") {
-                    navigation.navigate("SoftDrink");
-                  } else if (item.ProductName == "cosmotics") {
-                    navigation.navigate("Csmotics");
-                  } else if (item.ProductName == "Alcholic drink") {
-                    navigation.navigate("AlcholicDrink");
-                  }
-                }}
-              >
-                <Image style={styles.cardImage} source={item.image} />
-                <Text style={styles.cardText}>{item.ProductName}</Text>
-                {/* <Text style={styles.reviewText}>
-                  {item.NumberofReviews} reviews
-                </Text>
-                <Text style={styles.ratingText}>⭐ {item.Rating}</Text> */}
-              </Pressable>
-            )}
-          />
-        </View>
-      </View>
+          )}
 
-      <View>
-        <Text style={styles.TextHead}>standard Categories</Text>
-        <View style={styles.promotionView}>
-          <FlatList
-            nestedScrollEnabled
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            data={standard}
-            keyExtractor={(item) => item.id}
-            extraData={sindexcheck}
-            renderItem={({ item }) => (
-              <Pressable
-                style={[styles.cardContainer]}
-                onPress={() => {
-                  ssetindexcheck(item.id);
-                  if (item.ProductName == "Vegetable") {
-                    navigation.navigate("Vegetable");
-                  } else if (item.ProductName == "Fruit") {
-                    navigation.navigate("Fruit");
-                  } else if (item.ProductName == "Pcked food") {
-                    navigation.navigate("PckedFood");
-                  } else if (item.ProductName == "Soft drink") {
-                    navigation.navigate("SoftDrink");
-                  } else if (item.ProductName == "cosmotics") {
-                    navigation.navigate("Csmotics");
-                  } else if (item.ProductName == "Alcholic drink") {
-                    navigation.navigate("AlcholicDrink");
-                  }
-                }}
-              >
-                <Image style={styles.cardImage} source={item.image} />
-                <Text style={styles.cardText}>{item.ProductName}</Text>
-                {/* <Text style={styles.reviewText}>
-                  {item.NumberofReviews} reviews
-                </Text>
-                <Text style={styles.ratingText}>⭐ {item.Rating}</Text> */}
-              </Pressable>
-            )}
-          />
+          {/* Standard Categories */}
+          {standardCategories.length > 0 && (
+            <View>
+              <Text style={styles.TextHead}>Standard Categories</Text>
+              <FlatList
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                data={standardCategories}
+                keyExtractor={(item) => item.categoryId.toString()}
+                renderItem={renderCategoryItem}
+                contentContainerStyle={styles.listContainer}
+              />
+            </View>
+          )}
         </View>
-      </View>
-      <View>
-        <Text style={styles.TextHead}>recomended Categories</Text>
-        <View style={styles.promotionView}>
-          <FlatList
-            nestedScrollEnabled
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            data={recomended}
-            keyExtractor={(item) => item.id}
-            extraData={recoindexcheck}
-            renderItem={({ item }) => (
-              <Pressable
-                style={[styles.cardContainer]}
-                onPress={() => {
-                  recosetindexcheck(item.id);
-                  if (item.ProductName == "Vegetable") {
-                    navigation.navigate("Vegetable");
-                  } else if (item.ProductName == "Fruit") {
-                    navigation.navigate("Fruit");
-                  } else if (item.ProductName == "Pcked food") {
-                    navigation.navigate("PckedFood");
-                  } else if (item.ProductName == "Soft drink") {
-                    navigation.navigate("SoftDrink");
-                  } else if (item.ProductName == "cosmotics") {
-                    navigation.navigate("Csmotics");
-                  } else if (item.ProductName == "Alcholic drink") {
-                    navigation.navigate("AlcholicDrink");
-                  }
-                }}
-              >
-                <Image style={styles.cardImage} source={item.image} />
-                <Text style={styles.cardText}>{item.ProductName}</Text>
-                {/* <View style={styles.cardTextView}>
-                  <Text style={styles.reviewText}>
-                    {item.NumberofReviews} reviews
-                  </Text>
-                  <Text style={styles.ratingText}>⭐ {item.Rating}</Text>
-                </View> */}
-              </Pressable>
-            )}
-          />
-        </View>
-      </View>
-      <Footer navigation={navigation} />
-      {/* { navigation.navigate("Footer")} */}
-    </ScrollView>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    alignItems: "center",
-    justifyContent: "space-evenly",
-    flexDirection: "row",
-  },
-  deliveryButon: {
-    paddingHorizontal: 20,
-    borderRadius: 15,
-    paddingVertical: 15,
-    marginVertical: 20,
-  },
-  setDeliveryButon: {
-    paddingHorizontal: 20,
-    borderRadius: 15,
-    paddingVertical: 15,
-    marginVertical: 20,
-  },
-  deliveryText: {
-    marginLeft: 15,
-    fontSize: 16,
-    color: "black",
-  },
-  filterWholContainer: {
-    flexDirection: "row",
-    paddingLeft: 10,
-    justifyContent: "space-evenly",
-    alignItems: "center",
-  },
-  mepTimeContainer: {
-    flexDirection: "row",
-    borderRadius: 15,
-    backgroundColor: colors.grey5,
-    paddingVertical: 5,
-    paddingHorizontal: 20,
-
-    justifyContent: "space-evenly",
-  },
-  timeIconCntainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 5,
-    backgroundColor: "white",
-    marginHorizontal: 20,
-    borderRadius: 15,
-  },
-  filterView: {
-    alignItems: "center",
-    marginRight: 5,
-  },
-  promotionView: {
-    backgroundColor: colors.grey5,
-    marginTop: 10,
-    margin: 10,
     padding: 10,
+    backgroundColor: "#f8f8f8",
   },
   TextHead: {
-    color: colors.grey2,
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: "bold",
-    paddingLeft: 5,
-    textAlign: "center",
+    marginVertical: 10,
+    color: "#333",
+    textAlign:"center",
   },
-
+  listContainer: {
+    paddingVertical: 10,
+  },
   cardContainer: {
     backgroundColor: "#fff",
-    borderRadius: 15,
-    padding: 15,
-    marginHorizontal: 10,
+    borderRadius: 10,
+    padding: 10,
+    marginRight: 10,
     alignItems: "center",
-    justifyContent: "center",
-    width: 150,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 5,
-    elevation: 5,
-    transform: [{ scale: 1 }],
-  },
-  selectedCard: {
-    backgroundColor: "hsl(27, 88%, 58%)",
-    transform: [{ scale: 1.05 }],
+    elevation: 3,
   },
   cardImage: {
-    width: "100%",
-    height:100,
-    marginBottom: 10,
+    borderRadius: 10,
+    padding:5,
   },
   cardText: {
     fontSize: 16,
     fontWeight: "bold",
-    color: "#333",
     textAlign: "center",
   },
-  cardTextSelected: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#fff",
-    textAlign: "center",
-  },
-  reviewText: {
-    fontSize: 12,
-    color: "#666",
-    marginTop: 5,
-  },
-  ratingText: {
+  cardDescription: {
     fontSize: 14,
-    fontWeight: "bold",
-    color: "#FFA500",
+    color: "#66",
     marginTop: 3,
   },
 });

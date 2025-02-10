@@ -1,18 +1,20 @@
 import { TransitionPresets } from "@react-navigation/stack";
+import {createNativeStackNavigator } from "@react-navigation/native-stack";
 import Login from "../screans/login.js";
 import Welcome from "../screans/welcome.js";
-import Vegetable from "../customer/Vegetable.js";
-import Fruit from "../customer/fruit.js";
-import PckedFood from "../customer/packedFood.js";
-import SoftDrink from "../customer/softDrink.js";
-import Csmotics from "../customer/cosmotics.js";
-import AlcholicDrink from "../customer/alcholicDrink.js";
+import BakeryproductsList from "../customer/Bakeryproducts.js";
+import PersonalCareproductsList from "../customer/PersonalCareproducts.js";
+import DairyProductsList from "../customer/Dairyproducts.js";
+import FreshProductsList from "../customer/Freshproducts.js";
+import FrozenproductsList from "../customer/Frozenproducts.js";
+import MeatproductsList from "../customer//Meatproducts.js";
+import PantryproductsList from "../customer/Pantryproducts.js";
+import BeveragesproductsList from "../customer/Beveragesproducts.js";
+import Homepage from "../customer/homepage.js";
 import Item from "../customer/Item.js";
 import Signup from "../screans/signup.js";
 import ManagerHomePage from "../manager/managerHomePage.js";
 import DeveloperHomePage from "../screans/developingHompage.js";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import DrawNavigator from "../navigator/drawNavigator.js";
 import emplyeeManagement from "../manager/employee management.js";
 import customerManagement from "../manager/customerManagement.js";
 import inventoryManagement from "../manager/inventoryManagement.js";
@@ -49,7 +51,7 @@ import ManageChannels from "../manager/ManageChannels.js";
 const Authentic = createNativeStackNavigator();
 export default function AuthicStackNavig() {
   return (
-    <Authentic.Navigator>
+    <Authentic.Navigator initialRouteName="Homepage">
       <Authentic.Screen
         name="Welcome"
         component={Welcome}
@@ -83,15 +85,15 @@ export default function AuthicStackNavig() {
         }}
       />
       <Authentic.Screen
-        name="Homepage"
-        component={DrawNavigator}
+        name="Bakeryproducts"
+        component={BakeryproductsList}
         options={{
-          headerShown: false,
+          headerShown: true,
           headerTitleStyle: {
             color: "#2ECE33",
             fontSize: 25,
           },
-          title: "Home Page",
+          title: "Bakery Food",
           ...TransitionPresets.RevealFromBottomAndroid,
           headerStyle: {
             backgroundColor: "#FFDC2B",
@@ -99,15 +101,15 @@ export default function AuthicStackNavig() {
         }}
       />
       <Authentic.Screen
-        name="Vegetable"
-        component={Vegetable}
+        name="PersonalCareproducts"
+        component={PersonalCareproductsList}
         options={{
           headerShown: true,
           headerTitleStyle: {
             color: "#2ECE33",
             fontSize: 25,
           },
-          title: "Vegateble",
+          title: "Personal Care",
           ...TransitionPresets.RevealFromBottomAndroid,
           headerStyle: {
             backgroundColor: "#FFDC2B",
@@ -115,15 +117,15 @@ export default function AuthicStackNavig() {
         }}
       />
       <Authentic.Screen
-        name="Fruit"
-        component={Fruit}
+        name="DairyProducts"
+        component={DairyProductsList}
         options={{
           headerShown: true,
           headerTitleStyle: {
             color: "#2ECE33",
             fontSize: 25,
           },
-          title: "Fruit",
+          title: "Dairy Product",
           ...TransitionPresets.RevealFromBottomAndroid,
           headerStyle: {
             backgroundColor: "#FFDC2B",
@@ -131,15 +133,15 @@ export default function AuthicStackNavig() {
         }}
       />
       <Authentic.Screen
-        name="PckedFood"
-        component={PckedFood}
+        name="FreshProducts"
+        component={FreshProductsList}
         options={{
           headerShown: true,
           headerTitleStyle: {
             color: "#2ECE33",
             fontSize: 25,
           },
-          title: "Packed Food",
+          title: "Fresh Produce",
           ...TransitionPresets.RevealFromBottomAndroid,
           headerStyle: {
             backgroundColor: "#FFDC2B",
@@ -147,15 +149,15 @@ export default function AuthicStackNavig() {
         }}
       />
       <Authentic.Screen
-        name="SoftDrink"
-        component={SoftDrink}
+        name="Frozenproducts"
+        component={FrozenproductsList}
         options={{
           headerShown: true,
           headerTitleStyle: {
             color: "#2ECE33",
             fontSize: 25,
           },
-          title: "Soft Drink",
+          title: "Frozen Foods",
           ...TransitionPresets.RevealFromBottomAndroid,
           headerStyle: {
             backgroundColor: "#FFDC2B",
@@ -163,31 +165,15 @@ export default function AuthicStackNavig() {
         }}
       />
       <Authentic.Screen
-        name="Csmotics"
-        component={Csmotics}
+        name="Meatproducts"
+        component={MeatproductsList}
         options={{
           headerShown: true,
           headerTitleStyle: {
             color: "#2ECE33",
             fontSize: 25,
           },
-          title: "Cosmotics",
-          ...TransitionPresets.RevealFromBottomAndroid,
-          headerStyle: {
-            backgroundColor: "#FFDC2B",
-          },
-        }}
-      />
-      <Authentic.Screen
-        name="AlcholicDrink"
-        component={AlcholicDrink}
-        options={{
-          headerShown: true,
-          headerTitleStyle: {
-            color: "#2ECE33",
-            fontSize: 25,
-          },
-          title: "Alcholic Drink",
+          title: "Meat Product See food",
           ...TransitionPresets.RevealFromBottomAndroid,
           headerStyle: {
             backgroundColor: "#FFDC2B",
@@ -780,6 +766,55 @@ export default function AuthicStackNavig() {
             fontSize: 20,
           },
           title: "Chanals Overview",
+          ...TransitionPresets.RevealFromBottomAndroid,
+          headerStyle: {
+            backgroundColor: "#FFDC2B",
+          },
+        }}
+      />
+      {/* /////////////////////////////////////////////////////// */}
+      <Authentic.Screen
+        name="Pantryproducts"
+        component={PantryproductsList}
+        options={{
+          headerShown: true,
+          headerTitleStyle: {
+            color: "#2ECE33",
+            fontSize: 20,
+          },
+          title: "Pantry Essentials",
+          ...TransitionPresets.RevealFromBottomAndroid,
+          headerStyle: {
+            backgroundColor: "#FFDC2B",
+          },
+        }}
+      />
+      <Authentic.Screen
+        name="Beveragesproducts"
+        component={BeveragesproductsList}
+        options={{
+          headerShown: true,
+          headerTitleStyle: {
+            color: "#2ECE33",
+            fontSize: 20,
+          },
+          title: "Beverage Food",
+          ...TransitionPresets.RevealFromBottomAndroid,
+          headerStyle: {
+            backgroundColor: "#FFDC2B",
+          },
+        }}
+      />
+      <Authentic.Screen
+        name="Homepage"
+        component={Homepage}
+        options={{
+          headerShown: true,
+          headerTitleStyle: {
+            color: "#2ECE33",
+            fontSize: 20,
+          },
+          title: "Home Page",
           ...TransitionPresets.RevealFromBottomAndroid,
           headerStyle: {
             backgroundColor: "#FFDC2B",

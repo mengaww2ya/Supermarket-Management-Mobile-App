@@ -1,393 +1,141 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import {
-  Button,
+  Pressable,
   Dimensions,
   Image,
-  Pressable,
-  useWindowDimensions,
   StyleSheet,
   Text,
-  Modal,
   ScrollView,
-  Alert,
   View,
 } from "react-native";
-import { colors, Icon } from "react-native-elements";
+import { Icon } from "react-native-elements";
 import Footer from "../subscrean/foter.js";
-const screenwidth = Dimensions.get("window").width;
-const screenheight = Dimensions.get("window").height;
+
+const screenWidth = Dimensions.get("window").width;
+const screenHeight = Dimensions.get("window").height;
+
 export default function Item({ route, navigation }) {
   const {
+    productId,
+    productName,
+    price,
+    discountPrice,
+    description,
     image,
-    ProductName,
-    Price,
-    DiscountPrice,
-    Rating,
-    NumberofReviews,
-    ShortDescription,
-    id,
-    suplier,
-    ingredients,
-    NutritionalInformation,
-    Amount,
-    packagetype,
-    catagory,
-    origin,
-    item,
-  } = route.params;
-  const { products = [], currentIndex = 0 } = route.params || {};
-  const [index, setIndex] = useState(currentIndex);
-  const [product, setProduct] = useState(products[index] || {});
-  useEffect(() => {
-    setProduct(products[index]);
-  }, [index]);
+    supplier,
+    categoryName,
+    stockQuantity,
+    unitType,
+    brand,
+    status,
+    bestSeller,
+    ratings,
+    numberOfReviews,
+  } = route.params || {};
 
-  const handleNext = () => {
-    if (index < products.length - 1) {
-      setIndex(index + 1);
-    }
-  };
-
-  const handlePrev = () => {
-    if (index > 0) {
-      setIndex(index - 1);
-    }
-  };
-  const [modalVisible, setModalVisible] = useState(false);
-  const likeItem = () => {
-    setModalVisible(true);
-  };
-
-  const backwardIcon = (
-    <Icon
-      name="arrow-back"
-      type="material"
-      color={index === 0 ? "gray" : "black"}
-      size={30}
-    />
-  );
-  const forwardIcon = (
-    <Icon
-      name="arrow-forward"
-      type="material"
-      color={index === products.length - 1 ? "gray" : "black"}
-      size={30}
-    />
-  );
-  const [selectedLike, setSelectedLike] = useState(null);
-
-  const handleLikePress = (likeValue) => {
-    Alert.alert(
-      `Confirm Rating`,
-      `Would you like to give ${likeValue} star${likeValue > 1 ? "s" : ""}?`,
-      [
-        {
-          text: "Yes",
-          onPress: () => setSelectedLike(likeValue),
-        },
-        { text: "No", style: "cancel" },
-      ]
-    );
-  };
   return (
-    <ScrollView
-      style={{ flex: 1, marginBottom: "15%", paddingBottom: 20 }}
-      showsVerticalScrollIndicator={true}
-      contentContainerStyle={{ flexGrow: 1 }}
-    >
-      <View>
-        <View style={styles.itemInfoContainer}>
-          <View style={styles.imageview}>
-            <Image style={styles.cardimage} source={image} />
-          </View>
-          <View style={styles.Button}>
-            <Pressable onPress={handlePrev}>
-              <Text>{backwardIcon}</Text>
-            </Pressable>
-
-            <Pressable onPress={handleNext}>
-              <Text>{forwardIcon}</Text>
-            </Pressable>
-          </View>
-          <Text style={styles.title}>Basic Information</Text>
-          <View>
-            <Text style={styles.text}>
-              Product Name:{" "}
-              <Text style={styles.recievedMsg}>{ProductName}</Text>
-            </Text>
-            <Text style={styles.text}>
-              Product ID:<Text style={styles.recievedMsg}>{id}</Text>{" "}
-            </Text>
-            <Text style={styles.text}>
-              Product Category:
-              <Text style={styles.recievedMsg}>{catagory}</Text>
-            </Text>
-          </View>
-          <Text style={styles.title}>Pricing</Text>
-          <View>
-            <Text style={styles.text}>
-              Price: <Text style={styles.recievedMsg}>{Price}</Text>
-            </Text>
-            <Text style={styles.text}>
-              Discount:<Text style={styles.recievedMsg}>{DiscountPrice}</Text>
-            </Text>
-          </View>
-          <Text style={styles.title}>Product Details </Text>
-          <View>
-            <Text style={styles.text}>
-              Description:
-              <Text style={styles.recievedMsg}>{ShortDescription}</Text>
-            </Text>
-            <Text style={styles.text}>
-              Ingredients: <Text style={styles.recievedMsg}>{ingredients}</Text>
-            </Text>
-            <Text style={styles.text}>
-              Nutritional Info:
-              <Text style={styles.recievedMsg}>{NutritionalInformation}</Text>
-            </Text>
-          </View>
-          <Text style={styles.title}>Packaging Information</Text>
-          <View>
-            <Text style={styles.text}>
-              Amount:<Text style={styles.recievedMsg}>{Amount}</Text>
-            </Text>
-            <Text style={styles.text}>
-              Package Type:<Text style={styles.recievedMsg}>{packagetype}</Text>
-            </Text>
-          </View>
-          <Text style={styles.title}>Supplier Information</Text>
-          <View>
-            <Text style={styles.text}>
-              Supplier Name:<Text style={styles.recievedMsg}>{suplier}</Text>
-            </Text>
-            <Text style={styles.text}>
-              Origin:<Text style={styles.recievedMsg}>{origin}</Text>
-            </Text>
-          </View>
-          <Text style={styles.title}>Customer Reviews and Ratings</Text>
-          <View>
-            <Text style={styles.text}>
-              Average Rating: <Text style={styles.recievedMsg}>{Rating}</Text>
-            </Text>
-            <Text style={styles.text}>
-              Reviews: <Text style={styles.recievedMsg}>{NumberofReviews}</Text>
-            </Text>
-          </View>
-          <View>
-            <Pressable
-              style={styles.btns}
-              onPress={() =>
-                navigation.navigate("addToCart", {
-                  image: image,
-                  ProductName: ProductName,
-                  Price: Price,
-                  DiscountPrice: DiscountPrice,
-                  packagetype: packagetype,
-                })
-              }
-            >
-              <Text style={styles.btntext}>Add to cart</Text>
-            </Pressable>
-            <Pressable style={styles.btns} onPress={likeItem}>
-              <Text style={styles.btntext}>like</Text>
-            </Pressable>
-          </View>
+    <ScrollView contentContainerStyle={styles.container}>
+      <View style={styles.itemInfoContainer}>
+        <View style={styles.imageView}>
+          <Image
+            style={[styles.productImage, { width: screenWidth * 0.7 }]}
+            source={image}
+          />
         </View>
-        <Footer navigation={navigation} />
+        <Text style={styles.title}>Basic Information</Text>
+        <Text style={styles.text}>
+          Product Name: <Text style={styles.boldText}>{productName}</Text>
+        </Text>
+        <Text style={styles.text}>
+          Product ID: <Text style={styles.boldText}>{productId}</Text>
+        </Text>
+        <Text style={styles.text}>
+          Category: <Text style={styles.boldText}>{categoryName}</Text>
+        </Text>
+        <Text style={styles.title}>Pricing</Text>
+        <Text style={styles.text}>
+          Price: <Text style={styles.boldText}>{price}</Text>
+        </Text>
+        <Text style={styles.text}>
+          Discount:{" "}
+          <Text style={styles.boldText}>{discountPrice || "N/A"}</Text>
+        </Text>
+        <Text style={styles.title}>Product Details</Text>
+        <Text style={styles.text}>
+          Description: <Text style={styles.boldText}>{description}</Text>
+        </Text>
+        <Text style={styles.text}>
+          Stock Quantity: <Text style={styles.boldText}>{stockQuantity}</Text>
+        </Text>
+        <Text style={styles.text}>
+          Unit Type: <Text style={styles.boldText}>{unitType}</Text>
+        </Text>
+        <Text style={styles.text}>
+          Brand: <Text style={styles.boldText}>{brand}</Text>
+        </Text>
+        <Text style={styles.text}>
+          Status: <Text style={styles.boldText}>{status}</Text>
+        </Text>
+        <Text style={styles.text}>
+          Best Seller:{" "}
+          <Text style={styles.boldText}>{bestSeller ? "Yes" : "No"}</Text>
+        </Text>
+        <Text style={styles.title}>Supplier Information</Text>
+        <Text style={styles.text}>
+          Supplier: <Text style={styles.boldText}>{supplier}</Text>
+        </Text>
+        <Text style={styles.title}>Customer Reviews and Ratings</Text>
+        <Text style={styles.text}>
+          Average Rating: <Text style={styles.boldText}>{ratings}</Text>
+        </Text>
+        <Text style={styles.text}>
+          Reviews: <Text style={styles.boldText}>{numberOfReviews}</Text>
+        </Text>
+        <View>
+          <Pressable
+            style={styles.button}
+            onPress={() =>
+              navigation.navigate("addToCart", {
+                image,
+                productName,
+                price,
+                discountPrice,
+                unitType,
+              })
+            }
+          >
+            <Text style={styles.buttonText}>Add to Cart</Text>
+          </Pressable>
+        </View>
       </View>
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
-      >
-        <View style={styles.modalBackground}>
-          <View style={styles.modalContainer}>
-            <Text style={styles.likeTitle}>
-              How much do you like{" "}
-              <Text style={styles.productName}>{ProductName}</Text>?
-            </Text>
-
-            {["1: *", "2: **", "3: ***", "4: ****", "5: *****"].map(
-              (text, index) => {
-                const likeValue = index + 1;
-                return (
-                  <Pressable
-                    key={likeValue}
-                    style={styles.stylbtn}
-                    onPress={() => handleLikePress(likeValue)}
-                  >
-                    <Text style={styles.liketxt}>{text}</Text>
-                  </Pressable>
-                );
-              }
-            )}
-
-            {/* Close Button */}
-            <Pressable
-              style={styles.closeButton}
-              onPress={() => setModalVisible(false)}
-            >
-              <Text style={styles.closeText}>Close</Text>
-            </Pressable>
-          </View>
-        </View>
-      </Modal>
+      <Footer navigation={navigation} />
     </ScrollView>
   );
 }
+
 const styles = StyleSheet.create({
+  container: { flexGrow: 1, paddingBottom: 20 },
   itemInfoContainer: {
-    flex: 1,
     backgroundColor: "white",
-    paddingHorizontal: 15,
-    paddingVertical: 10,
+    padding: 15,
     margin: 10,
-    borderColor: colors.grey5,
     borderWidth: 1,
+    borderColor: "gray",
   },
-  title: {
-    fontSize: 20,
-    fontWeight: "bold",
-    // textAlign:"center",
-  },
-  text: {
-    fontSize: 15,
-  },
-  recievedMsg: {
-    fontWeight: "bold",
-    fontStyle: "italic",
-  },
-  Button: {
-    justifyContent: "space-evenly",
-    flexDirection: "row",
-  },
-  imageview: {
-    width: screenwidth,
-    height: screenheight * 0.5,
-    alignContent: "center",
-    alignItems: "center",
-  },
-  cardimage: {
-    alignContent: "center",
-    width: "100%",
-    height: "100%",
-    borderRadius: 15,
-    padding: 10,
-    backgroundColor: colors.white,
-  },
-  btns: {
-    backgroundColor: colors.grey4,
-    padding: 10,
-    justifyContent: "center",
-    margin: 5,
-    alignItems: "center",
-    borderRadius: 5,
-  },
-  btntext: {
-    textAlign: "center",
-    fontFamily: "new times roman",
-    fontWeight: "bold",
-    fontSize: 20,
-  },
-  likecontainer: {
-    backgroundColor: "white",
-    borderColor: colors.grey4,
-    borderWidth: 1,
-    justifyContent: "center",
-    padding: 10,
-  },
-  liketitl: {
-    fontSize: 20,
-    fontWeight: "bold",
-    fontVariant: ["small-caps"],
-  },
-  stylbtn: {
-    backgroundColor: colors.grey1,
-    borderColor: colors.grey0,
-    borderWidth: 1,
-    padding: 10,
-    marginVertical: 5,
-    borderRadius: 5,
-    width: "100%",
-    alignItems: "center",
-  },
-  liketxt: {
-    fontSize: 18,
-    color: "white",
-  },
-  closeButton: {
-    marginTop: 10,
-    backgroundColor: colors.warning,
-    padding: 10,
-    borderRadius: 5,
-    width: "100%",
-    alignItems: "center",
-  },
-  closeText: {
-    color: "white",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  modalBackground: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0,0,0,0.5)",
-  },
-  modalContainer: {
-    backgroundColor: "white",
-    padding: 20,
+  productImage: {
+    height: 180,
     borderRadius: 10,
-    width: "80%",
-    alignItems: "center",
-  },
-  modalBackground: {
-    flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  modalContainer: {
-    backgroundColor: "#fff",
-    padding: 20,
-    borderRadius: 10,
-    width: "80%",
-    alignItems: "center",
-  },
-  likeTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    textAlign: "center",
     marginBottom: 10,
   },
-  productName: {
-    fontStyle: "italic",
-    fontSize: 20,
-    fontWeight: "bold",
-  },
-  stylbtn: {
-    backgroundColor: "#3498db",
+  title: { fontSize: 20, fontWeight: "bold" },
+  text: { fontSize: 15 },
+  boldText: { fontWeight: "bold" },
+  button: {
+    backgroundColor: "gray",
     padding: 10,
-    marginVertical: 5,
-    borderRadius: 5,
-    width: "100%",
     alignItems: "center",
-  },
-  liketxt: {
-    color: "#fff",
-    fontWeight: "bold",
-  },
-  closeButton: {
-    marginTop: 10,
-    backgroundColor: "#e74c3c",
-    padding: 10,
     borderRadius: 5,
-    width: "100%",
-    alignItems: "center",
+    margin: 5,
   },
-  closeText: {
-    color: "#fff",
-    fontWeight: "bold",
-  },
+  buttonText: { fontWeight: "bold", fontSize: 16 },
 });

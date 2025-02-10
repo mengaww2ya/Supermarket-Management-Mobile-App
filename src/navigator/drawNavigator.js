@@ -1,5 +1,4 @@
 import { TransitionPresets } from "@react-navigation/stack";
-import Homepage from "../customer/homepage.js";
 import Vegetable from "../customer/Vegetable.js";
 import Fruit from "../customer/fruit.js";
 import PckedFood from "../customer/packedFood.js";
