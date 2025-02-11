@@ -12,16 +12,16 @@ import {
 export default function AddToCart({ route }) {
   const {
     image,
-    ProductName,
-    Price = 0,
-    DiscountPrice = 0,
-    packagetype,
+    productName,
+    price = 0,
+    discountPrice = 0,
+    unitType,
   } = route.params || {};
   const [quantity, setQuantity] = useState(1);
   const increaseAmount = () => setQuantity((prev) => prev + 1);
   const decreaseAmount = () => setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
-  const totalPrice = Price * quantity;
-  const discount = DiscountPrice * quantity;
+  const totalPrice = price * quantity;
+  const discount = discountPrice * quantity;
   const finalPrice = totalPrice - discount;
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -31,12 +31,12 @@ export default function AddToCart({ route }) {
         //   contentContainerStyle={{ flexGrow: 1 }}
       >
         <View style={styles.container}>
-          <Text style={styles.title}>Add {ProductName} to Cart</Text>
+          <Text style={styles.title}>Add {productName} to Cart</Text>
           <View style={styles.imageContainer}>
             <Image source={image} style={styles.productImage} />
           </View>
 
-          <Text style={styles.productName}>{ProductName}</Text>
+          <Text style={styles.productName}>{productName}</Text>
           <View style={styles.quantityContainer}>
             <TouchableOpacity
               style={styles.quantityButton}
@@ -53,22 +53,22 @@ export default function AddToCart({ route }) {
             </TouchableOpacity>
           </View>
           <Text style={styles.infoText}>
-            Price for one {packagetype} {ProductName}: {Price.toFixed(2)} Birr
+            Price for one {unitType} {productName}: {price.toFixed(2)} Birr
           </Text>
-          {DiscountPrice > 0 && (
+          {discountPrice > 0 && (
             <Text style={styles.infoText}>
-              Discount for one {packagetype} {ProductName}:{" "}
-              {DiscountPrice.toFixed(2)} Birr
+              Discount for one {unitType} {productName}:{" "}
+              {discountPrice.toFixed(2)} Birr
             </Text>
           )}
           <Text style={styles.infoText}>
-            You add {quantity} {packagetype} {ProductName}
+            You add {quantity} {unitType} {productName}
           </Text>
           <View style={styles.priceContainer}>
             <Text style={styles.priceText}>
               Total Price: {totalPrice.toFixed(2)} Birr
             </Text>
-            {DiscountPrice > 0 && (
+            {discountPrice > 0 && (
               <Text style={styles.discountText}>
                 Discount: {discount.toFixed(2)} Birr
               </Text>

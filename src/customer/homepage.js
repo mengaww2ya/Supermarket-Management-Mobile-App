@@ -8,11 +8,12 @@ import {
   StyleSheet,
   useWindowDimensions,
   ScrollView,
+  SafeAreaView,
 } from "react-native";
 import { categories } from "../global/data.js";
-import { SafeAreaView } from "react-native-web";
+import Footer from "../subscrean/foter.js";
+import { colors } from "react-native-elements";
 
-// Category Navigation Mapping
 const categoryNavigationMap = {
   "Fruit & Vegetable": "FreshProducts",
   "Dairy & Eggs": "DairyProducts",
@@ -25,19 +26,16 @@ const categoryNavigationMap = {
 };
 
 export default function Homepage({ navigation }) {
-  const ScreenWidth=useWindowDimensions().width;
-  const ScreenHeight=useWindowDimensions().height;
+  const ScreenWidth = useWindowDimensions().width;
   const [selectedCategory, setSelectedCategory] = useState(null);
 
-  // Filter categories based on status and discount availability
   const promoCategories = categories.filter(
-    (item) => item.status === "Active" && item.discountAvailable
+    (item) => item.status === "Active" && item.discountAvailable === true
   );
   const standardCategories = categories.filter(
-    (item) => item.status === "Active" && !item.discountAvailable
+    (item) => item.status === "Active" && item.discountAvailable === false
   );
 
-  // Handle Category Selection & Navigation
   const handleCategoryPress = (item) => {
     setSelectedCategory(item.categoryId);
     const screenName = categoryNavigationMap[item.categoryName];
@@ -46,28 +44,21 @@ export default function Homepage({ navigation }) {
     }
   };
 
-  // Reusable Category Card
   const renderCategoryItem = ({ item }) => (
     <TouchableOpacity
-      style={[styles.cardContainer,{width:ScreenWidth*0.3,height:ScreenHeight*0.3}]}
+      style={[styles.cardContainer, { width: ScreenWidth * 0.42 }]}
       onPress={() => handleCategoryPress(item)}
     >
-            <Text style={styles.cardText}>{item.categoryName}</Text>
-
-      <Image style={[styles.cardImage,{width:ScreenWidth*0.26,height:ScreenHeight*0.2}]} source={item.image} />
-      <Text style={styles.cardDescription}>{item.description}</Text>
+      <Text style={styles.cardText}>{item.categoryName}</Text>
+      <Image style={styles.cardImage} source={item.image} />
+      <Text style={styles.carddiscription}>{item.description}</Text>
     </TouchableOpacity>
   );
 
   return (
-    <SafeAreaView style={{flex:1}}>
-      <ScrollView
-        style={{paddingBottom: 20 }}
-        showsVerticalScrollIndicator={true}
-        contentContainerStyle={{ flexGrow: 1 }}
-      >
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#f4f4f4" }}>
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
         <View style={styles.container}>
-          {/* Promotion Categories */}
           {promoCategories.length > 0 && (
             <View>
               <Text style={styles.TextHead}>Promotion Categories</Text>
@@ -81,8 +72,6 @@ export default function Homepage({ navigation }) {
               />
             </View>
           )}
-
-          {/* Standard Categories */}
           {standardCategories.length > 0 && (
             <View>
               <Text style={styles.TextHead}>Standard Categories</Text>
@@ -98,45 +87,54 @@ export default function Homepage({ navigation }) {
           )}
         </View>
       </ScrollView>
+      <Footer navigation={navigation} />
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    padding: 10,
-    backgroundColor: "#f8f8f8",
+    padding: 15,
   },
   TextHead: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: "bold",
-    marginVertical: 10,
+    marginVertical: 12,
     color: "#333",
-    textAlign:"center",
+    textAlign: "center",
   },
   listContainer: {
     paddingVertical: 10,
   },
   cardContainer: {
     backgroundColor: "#fff",
-    borderRadius: 10,
+    borderRadius: 12,
     padding: 10,
-    marginRight: 10,
+    marginHorizontal: 10,
     alignItems: "center",
-    elevation: 3,
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 5,
+    borderWidth: 1,
+    borderColor: colors.grey4,
   },
   cardImage: {
-    borderRadius: 10,
-    padding:5,
+    width: 100,
+    height: 100,
+    borderRadius: 12,
+    marginBottom: 10,
+    resizeMode: "contain",
   },
   cardText: {
     fontSize: 16,
     fontWeight: "bold",
     textAlign: "center",
   },
-  cardDescription: {
-    fontSize: 14,
-    color: "#66",
-    marginTop: 3,
-  },
+  carddiscription:{
+    fontSize:12,
+    color:colors.grey3,
+    fontWeight:"bold"
+  }
 });

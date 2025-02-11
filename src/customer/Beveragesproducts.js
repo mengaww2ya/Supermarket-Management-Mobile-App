@@ -10,6 +10,8 @@ import {
   SafeAreaView,
 } from "react-native";
 import { Beveragesproducts } from "../global/data.js";
+import Footer from "../subscrean/foter.js";
+import { colors } from "react-native-elements";
 
 export default function BeveragesproductsList({ navigation }) {
   const { width: screenWidth } = useWindowDimensions();
@@ -50,16 +52,18 @@ export default function BeveragesproductsList({ navigation }) {
       }
     >
       <View style={styles.productCard}>
+        <Text style={styles.productName}>{item.productName}</Text>
+
         <Image
           source={item.image}
           style={[styles.productImage, { width: screenWidth * 0.7 }]}
           resizeMode="contain"
         />
-        <Text style={styles.productName}>{item.productName}</Text>
         <Text style={styles.productPrice}>
           Price: ${item.discountPrice ? item.discountPrice : item.price} /{" "}
           {item.unitType}
         </Text>
+        <Text style={styles.productdiscription}>{item.description}</Text>
       </View>
     </TouchableOpacity>
   );
@@ -73,6 +77,7 @@ export default function BeveragesproductsList({ navigation }) {
         contentContainerStyle={styles.listContainer}
         showsVerticalScrollIndicator={false}
       />
+      <Footer navigation={navigation} />
     </SafeAreaView>
   );
 }
@@ -95,6 +100,8 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     elevation: 3,
     alignItems: "center",
+    borderColor: colors.grey4,
+    borderWidth: 1,
   },
   productCard: {
     alignItems: "center",
@@ -108,6 +115,11 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
     textAlign: "center",
+  },
+  productdiscription: {
+    fontSize: 13,
+    color: colors.grey3,
+    fontWeight: "bold",
   },
   productPrice: {
     fontSize: 16,

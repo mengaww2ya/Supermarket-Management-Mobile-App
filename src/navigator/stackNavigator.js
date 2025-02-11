@@ -51,7 +51,7 @@ import ManageChannels from "../manager/ManageChannels.js";
 const Authentic = createNativeStackNavigator();
 export default function AuthicStackNavig() {
   return (
-    <Authentic.Navigator initialRouteName="Homepage">
+    <Authentic.Navigator initialRouteName="Welcome">
       <Authentic.Screen
         name="Welcome"
         component={Welcome}

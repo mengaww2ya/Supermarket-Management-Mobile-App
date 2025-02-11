@@ -8,9 +8,11 @@ import {
   TouchableOpacity,
   useWindowDimensions,
   SafeAreaView,
+  ScrollView,
 } from "react-native";
 import { Bakeryproducts } from "../global/data.js";
-
+import Footer from "../subscrean/foter.js";
+import { colors } from "react-native-elements";
 export default function BakeryProductsList({ navigation }) {
   const { width: screenWidth } = useWindowDimensions();
 
@@ -50,29 +52,33 @@ export default function BakeryProductsList({ navigation }) {
       }
     >
       <View style={styles.productCard}>
+        <Text style={styles.productName}>{item.productName}</Text>
+
         <Image
           source={item.image} // Ensure it's a valid image source
           style={[styles.productImage, { width: screenWidth * 0.7 }]}
           resizeMode="contain"
         />
-        <Text style={styles.productName}>{item.productName}</Text>
         <Text style={styles.productPrice}>
           Price: ${item.discountPrice ? item.discountPrice : item.price} /{" "}
           {item.unitType}
         </Text>
+        <Text style={styles.productdiscription}>{item.description}</Text>
       </View>
     </TouchableOpacity>
   );
 
   return (
     <SafeAreaView style={styles.container}>
-      <FlatList
-        data={activeProducts}
-        keyExtractor={(item) => item.productId.toString()}
-        renderItem={renderItem}
-        contentContainerStyle={styles.listContainer}
-        showsVerticalScrollIndicator={false}
-      />
+        <FlatList
+          data={activeProducts}
+          keyExtractor={(item) => item.productId.toString()}
+          renderItem={renderItem}
+          contentContainerStyle={styles.listContainer}
+          showsVerticalScrollIndicator={false}
+        />
+            <Footer navigation={navigation} />
+      
     </SafeAreaView>
   );
 }
@@ -86,6 +92,7 @@ const styles = StyleSheet.create({
   listContainer: {
     paddingBottom: 20,
     alignItems: "center",
+    backgroundColor:"white",
   },
   cardContainer: {
     width: "95%",
@@ -95,6 +102,9 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     elevation: 3,
     alignItems: "center",
+    borderColor:colors.grey4,
+    borderWidth: 1,
+    
   },
   productCard: {
     alignItems: "center",
@@ -108,6 +118,12 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
     textAlign: "center",
+  },
+  productdiscription:{
+   fontSize:13,
+   color:colors.grey3,
+   fontWeight:"bold",
+
   },
   productPrice: {
     fontSize: 16,

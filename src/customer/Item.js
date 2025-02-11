@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Pressable,
   Dimensions,
@@ -7,12 +7,13 @@ import {
   Text,
   ScrollView,
   View,
+  SafeAreaView,
+  Modal,
+  Alert,
 } from "react-native";
-import { Icon } from "react-native-elements";
 import Footer from "../subscrean/foter.js";
 
 const screenWidth = Dimensions.get("window").width;
-const screenHeight = Dimensions.get("window").height;
 
 export default function Item({ route, navigation }) {
   const {
@@ -28,114 +29,186 @@ export default function Item({ route, navigation }) {
     unitType,
     brand,
     status,
-    bestSeller,
     ratings,
     numberOfReviews,
   } = route.params || {};
 
+  const [modalVisible, setModalVisible] = useState(false);
+
+  const handleLikePress = (likeValue) => {
+    Alert.alert(
+      "Confirm Rating",
+      `Would you like to give ${likeValue} star${likeValue > 1 ? "s" : ""}?`,
+      [
+        { text: "Yes", onPress: () => {} },
+        { text: "No", style: "cancel" },
+      ]
+    );
+  };
+
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <View style={styles.itemInfoContainer}>
-        <View style={styles.imageView}>
-          <Image
-            style={[styles.productImage, { width: screenWidth * 0.7 }]}
-            source={image}
-          />
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#f9f9f9" }}>
+      <ScrollView contentContainerStyle={styles.container}>
+        <View style={styles.card}>
+          <Image style={styles.productImage} source={image} />
+          <Text style={styles.title}>{productName}</Text>
+          <Text style={styles.category}>{categoryName}</Text>
+
+          <Text style={styles.price}>${price}</Text>
+          {discountPrice && (
+            <Text style={styles.discount}>Discount: ${discountPrice}</Text>
+          )}
+
+          <Text style={styles.sectionTitle}>Description</Text>
+          <Text style={styles.description}>{description}</Text>
+
+          <Text style={styles.sectionTitle}>Product Details</Text>
+          <Text style={styles.detail}>Stock: {stockQuantity}</Text>
+          <Text style={styles.detail}>Unit: {unitType}</Text>
+          <Text style={styles.detail}>Brand: {brand}</Text>
+          <Text style={styles.detail}>Status: {status}</Text>
+
+          <Text style={styles.sectionTitle}>Supplier</Text>
+          <Text style={styles.detail}>{supplier}</Text>
+
+          <Text style={styles.sectionTitle}>Ratings & Reviews</Text>
+          <Text style={styles.detail}>
+            Average Rating: {ratings} ({numberOfReviews} Reviews)
+          </Text>
+
+          <View style={styles.buttonContainer}>
+            <Pressable
+              style={styles.button}
+              onPress={() =>
+                navigation.navigate("addToCart", {
+                  image,
+                  productName,
+                  price,
+                  discountPrice,
+                  unitType,
+                })
+              }
+            >
+              <Text style={styles.buttonText}>Add to Cart</Text>
+            </Pressable>
+            <Pressable
+              style={[styles.button, styles.likeButton]}
+              onPress={() => setModalVisible(true)}
+            >
+              <Text style={styles.buttonText}>Like</Text>
+            </Pressable>
+          </View>
         </View>
-        <Text style={styles.title}>Basic Information</Text>
-        <Text style={styles.text}>
-          Product Name: <Text style={styles.boldText}>{productName}</Text>
-        </Text>
-        <Text style={styles.text}>
-          Product ID: <Text style={styles.boldText}>{productId}</Text>
-        </Text>
-        <Text style={styles.text}>
-          Category: <Text style={styles.boldText}>{categoryName}</Text>
-        </Text>
-        <Text style={styles.title}>Pricing</Text>
-        <Text style={styles.text}>
-          Price: <Text style={styles.boldText}>{price}</Text>
-        </Text>
-        <Text style={styles.text}>
-          Discount:{" "}
-          <Text style={styles.boldText}>{discountPrice || "N/A"}</Text>
-        </Text>
-        <Text style={styles.title}>Product Details</Text>
-        <Text style={styles.text}>
-          Description: <Text style={styles.boldText}>{description}</Text>
-        </Text>
-        <Text style={styles.text}>
-          Stock Quantity: <Text style={styles.boldText}>{stockQuantity}</Text>
-        </Text>
-        <Text style={styles.text}>
-          Unit Type: <Text style={styles.boldText}>{unitType}</Text>
-        </Text>
-        <Text style={styles.text}>
-          Brand: <Text style={styles.boldText}>{brand}</Text>
-        </Text>
-        <Text style={styles.text}>
-          Status: <Text style={styles.boldText}>{status}</Text>
-        </Text>
-        <Text style={styles.text}>
-          Best Seller:{" "}
-          <Text style={styles.boldText}>{bestSeller ? "Yes" : "No"}</Text>
-        </Text>
-        <Text style={styles.title}>Supplier Information</Text>
-        <Text style={styles.text}>
-          Supplier: <Text style={styles.boldText}>{supplier}</Text>
-        </Text>
-        <Text style={styles.title}>Customer Reviews and Ratings</Text>
-        <Text style={styles.text}>
-          Average Rating: <Text style={styles.boldText}>{ratings}</Text>
-        </Text>
-        <Text style={styles.text}>
-          Reviews: <Text style={styles.boldText}>{numberOfReviews}</Text>
-        </Text>
-        <View>
-          <Pressable
-            style={styles.button}
-            onPress={() =>
-              navigation.navigate("addToCart", {
-                image,
-                productName,
-                price,
-                discountPrice,
-                unitType,
-              })
-            }
-          >
-            <Text style={styles.buttonText}>Add to Cart</Text>
-          </Pressable>
+      </ScrollView>
+
+      <Modal animationType="slide" transparent={true} visible={modalVisible}>
+        <View style={styles.modalBackground}>
+          <View style={styles.modalContainer}>
+            <Text style={styles.modalTitle}>
+              How much do you like {productName}?
+            </Text>
+            {[1, 2, 3, 4, 5].map((likeValue) => (
+              <Pressable
+                key={likeValue}
+                style={styles.modalButton}
+                onPress={() => handleLikePress(likeValue)}
+              >
+                <Text style={styles.modalText}>
+                  {likeValue} Star{likeValue > 1 ? "s" : ""}
+                </Text>
+              </Pressable>
+            ))}
+            <Pressable
+              style={styles.modalCloseButton}
+              onPress={() => setModalVisible(false)}
+            >
+              <Text style={styles.modalCloseText}>Close</Text>
+            </Pressable>
+          </View>
         </View>
-      </View>
+      </Modal>
+
       <Footer navigation={navigation} />
-    </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flexGrow: 1, paddingBottom: 20 },
-  itemInfoContainer: {
+  card: {
     backgroundColor: "white",
-    padding: 15,
     margin: 10,
-    borderWidth: 1,
-    borderColor: "gray",
+    padding: 15,
+    borderRadius: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
   },
   productImage: {
-    height: 180,
+    width: "100%",
+    height: 220,
     borderRadius: 10,
     marginBottom: 10,
+    resizeMode: "contain",
   },
-  title: { fontSize: 20, fontWeight: "bold" },
-  text: { fontSize: 15 },
-  boldText: { fontWeight: "bold" },
+  title: {
+    fontSize: 22,
+    fontWeight: "bold",
+    textAlign: "center",
+    marginBottom: 5,
+  },
+  category: { fontSize: 16, textAlign: "center", color: "#555" },
+  price: {
+    fontSize: 20,
+    color: "#28a745",
+    fontWeight: "bold",
+    textAlign: "center",
+  },
+  discount: { fontSize: 16, color: "#dc3545", textAlign: "center" },
+  sectionTitle: { fontSize: 18, fontWeight: "bold", marginTop: 10 },
+  description: { fontSize: 15, color: "#666" },
+  detail: { fontSize: 15, marginVertical: 2 },
+  buttonContainer: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    marginTop: 15,
+  },
   button: {
-    backgroundColor: "gray",
-    padding: 10,
+    backgroundColor: "#007bff",
+    padding: 12,
+    borderRadius: 8,
+    flex: 1,
     alignItems: "center",
-    borderRadius: 5,
-    margin: 5,
+    marginHorizontal: 5,
   },
-  buttonText: { fontWeight: "bold", fontSize: 16 },
+  likeButton: { backgroundColor: "#ffc107" },
+  buttonText: { color: "white", fontSize: 16, fontWeight: "bold" },
+  modalBackground: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.5)",
+  },
+  modalContainer: {
+    backgroundColor: "white",
+    padding: 20,
+    borderRadius: 10,
+    alignItems: "center",
+  },
+  modalTitle: { fontSize: 18, fontWeight: "bold", marginBottom: 10 },
+  modalButton: {
+    padding: 10,
+    backgroundColor: "#f8d7da",
+    borderRadius: 5,
+    marginVertical: 5,
+  },
+  modalText: { fontSize: 16, color: "#721c24" },
+  modalCloseButton: {
+    backgroundColor: "red",
+    padding: 10,
+    borderRadius: 5,
+    marginTop: 10,
+  },
+  modalCloseText: { color: "white", fontWeight: "bold" },
 });
