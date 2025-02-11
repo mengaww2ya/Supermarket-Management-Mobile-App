@@ -1,5 +1,6 @@
+import Ionicons from "react-native-vector-icons/Ionicons";
 import { TransitionPresets } from "@react-navigation/stack";
-import {createNativeStackNavigator } from "@react-navigation/native-stack";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import Login from "../screans/login.js";
 import Welcome from "../screans/welcome.js";
 import BakeryproductsList from "../customer/Bakeryproducts.js";
@@ -88,7 +89,7 @@ export default function AuthicStackNavig() {
         name="Bakeryproducts"
         component={BakeryproductsList}
         options={{
-          headerShown: true,
+          headerShown: false,
           headerTitleStyle: {
             color: "#2ECE33",
             fontSize: 25,
@@ -104,7 +105,7 @@ export default function AuthicStackNavig() {
         name="PersonalCareproducts"
         component={PersonalCareproductsList}
         options={{
-          headerShown: true,
+          headerShown: false,
           headerTitleStyle: {
             color: "#2ECE33",
             fontSize: 25,
@@ -120,7 +121,7 @@ export default function AuthicStackNavig() {
         name="DairyProducts"
         component={DairyProductsList}
         options={{
-          headerShown: true,
+          headerShown: false,
           headerTitleStyle: {
             color: "#2ECE33",
             fontSize: 25,
@@ -136,7 +137,7 @@ export default function AuthicStackNavig() {
         name="FreshProducts"
         component={FreshProductsList}
         options={{
-          headerShown: true,
+          headerShown: false,
           headerTitleStyle: {
             color: "#2ECE33",
             fontSize: 25,
@@ -152,7 +153,7 @@ export default function AuthicStackNavig() {
         name="Frozenproducts"
         component={FrozenproductsList}
         options={{
-          headerShown: true,
+          headerShown: false,
           headerTitleStyle: {
             color: "#2ECE33",
             fontSize: 25,
@@ -168,7 +169,7 @@ export default function AuthicStackNavig() {
         name="Meatproducts"
         component={MeatproductsList}
         options={{
-          headerShown: true,
+          headerShown: false,
           headerTitleStyle: {
             color: "#2ECE33",
             fontSize: 25,
@@ -200,7 +201,7 @@ export default function AuthicStackNavig() {
         name="Signup"
         component={Signup}
         options={{
-          headerShown: true,
+          headerShown: false,
           headerTitleStyle: {
             color: "#2ECE33",
             fontSize: 25,
@@ -777,7 +778,7 @@ export default function AuthicStackNavig() {
         name="Pantryproducts"
         component={PantryproductsList}
         options={{
-          headerShown: true,
+          headerShown: false,
           headerTitleStyle: {
             color: "#2ECE33",
             fontSize: 20,
@@ -793,7 +794,7 @@ export default function AuthicStackNavig() {
         name="Beveragesproducts"
         component={BeveragesproductsList}
         options={{
-          headerShown: true,
+          headerShown: false,
           headerTitleStyle: {
             color: "#2ECE33",
             fontSize: 20,
@@ -808,8 +809,8 @@ export default function AuthicStackNavig() {
       <Authentic.Screen
         name="Homepage"
         component={Homepage}
-        options={{
-          headerShown: true,
+        options={({ navigation }) => ({
+          headerShown: false,
           headerTitleStyle: {
             color: "#2ECE33",
             fontSize: 20,
@@ -819,7 +820,25 @@ export default function AuthicStackNavig() {
           headerStyle: {
             backgroundColor: "#FFDC2B",
           },
-        }}
+          headerLeft: () => (
+            <Ionicons
+              name="menu"
+              size={30}
+              color="black"
+              style={{ marginLeft: 15 }}
+              onPress={() => navigation.openDrawer()} // Open sidebar/drawer
+            />
+          ),
+          headerRight: () => (
+            <Ionicons
+              name="cart-outline"
+              size={30}
+              color="black"
+              style={{ marginRight: 15 }}
+              onPress={() => navigation.navigate("Cart")} // Navigate to Cart screen
+            />
+          ),
+        })}
       />
     </Authentic.Navigator>
   );

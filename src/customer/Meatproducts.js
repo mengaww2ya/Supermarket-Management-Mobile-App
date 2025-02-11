@@ -12,6 +12,7 @@ import {
 import { Meatproducts } from "../global/data.js";
 import Footer from "../subscrean/foter.js";
 import { colors } from "react-native-elements";
+import Ionicons from "react-native-vector-icons/Ionicons";
 
 export default function MeatProductsList({ navigation }) {
   const { width: screenWidth } = useWindowDimensions();
@@ -63,14 +64,24 @@ export default function MeatProductsList({ navigation }) {
           Price: ${item.discountPrice ? item.discountPrice : item.price} /{" "}
           {item.unitType}
         </Text>
-                <Text style={styles.productdiscription}>{item.description}</Text>
-        
+        <Text style={styles.productdiscription}>{item.description}</Text>
       </View>
     </TouchableOpacity>
   );
 
   return (
     <SafeAreaView style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>Meat Product</Text>
+
+        {/* Cart Button */}
+        <TouchableOpacity
+          onPress={() => navigation.navigate("CartPage")}
+          style={styles.iconButton}
+        >
+          <Ionicons name="cart" size={30} color="blue" />
+        </TouchableOpacity>
+      </View>
       <FlatList
         data={activeProducts}
         keyExtractor={(item) => item.productId.toString()}
@@ -92,6 +103,7 @@ const styles = StyleSheet.create({
   listContainer: {
     paddingBottom: 20,
     alignItems: "center",
+    marginHorizontal: 10,
   },
   cardContainer: {
     width: "95%",
@@ -128,4 +140,19 @@ const styles = StyleSheet.create({
     marginTop: 5,
     fontWeight: "600",
   },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: "#FFDC2B",
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#2ECE33",
+    textAlign: "center",
+  },
+  iconButton: { padding: 5 },
 });

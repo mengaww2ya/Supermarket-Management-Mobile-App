@@ -543,7 +543,7 @@ export const Meatproducts = [
     unitType: "kg",
     brand: "Farm Fresh",
     supplier: "AgroMeat Suppliers",
-    status: "Inactive",
+    status: "Active",
     dateAdded: "2025-02-08T13:00:00Z",
     lastUpdated: "2025-02-11T10:00:00Z",
     productionDate: "2025-02-07",
@@ -567,7 +567,7 @@ export const Meatproducts = [
     unitType: "kg",
     brand: "Ocean Delight",
     supplier: "SeaHarvest Ltd.",
-    status: "Inactive",
+    status: "Active",
     dateAdded: "2025-02-08T14:30:00Z",
     lastUpdated: "2025-02-11T10:20:00Z",
     productionDate: "2025-02-06",
@@ -591,7 +591,7 @@ export const Meatproducts = [
     unitType: "kg",
     brand: "Prime Cuts",
     supplier: "Farm Fresh Meats",
-    status: "Inactive",
+    status: "Active",
     dateAdded: "2025-02-08T15:00:00Z",
     lastUpdated: "2025-02-11T10:40:00Z",
     productionDate: "2025-02-05",
@@ -616,7 +616,7 @@ export const Meatproducts = [
     unitType: "kg",
     brand: "Farm Fresh",
     supplier: "AgroMeat Suppliers",
-    status: "Inactive",
+    status: "Active",
     dateAdded: "2025-02-08T17:00:00Z",
     lastUpdated: "2025-02-11T11:20:00Z",
     productionDate: "2025-02-07",
@@ -640,7 +640,7 @@ export const Meatproducts = [
     unitType: "kg",
     brand: "Prime Cuts",
     supplier: "Farm Fresh Meats",
-    status: "Inactive",
+    status: "Active",
     dateAdded: "2025-02-08T18:00:00Z",
     lastUpdated: "2025-02-11T11:40:00Z",
     productionDate: "2025-02-04",
@@ -651,7 +651,6 @@ export const Meatproducts = [
     specialOffers: "10% Off",
     addedBy: "Stock Manager",
   },
-
 ];
 ///////////////////////////////////////////////////////////////////
 export const Bakeryproducts = [
