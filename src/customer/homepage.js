@@ -65,14 +65,20 @@ export default function Homepage({ navigation }) {
       {/* Header Section */}
       <View style={styles.header}>
         {/* Menu Button */}
-        <TouchableOpacity onPress={() => setMenuVisible(true)} style={styles.iconButton}>
+        <TouchableOpacity
+          onPress={() => setMenuVisible(true)}
+          style={styles.iconButton}
+        >
           <Ionicons name="menu" size={30} color="black" />
         </TouchableOpacity>
 
         <Text style={styles.headerTitle}>Home Page</Text>
 
         {/* Cart Button */}
-        <TouchableOpacity onPress={() => navigation.navigate("CartPage")} style={styles.iconButton}>
+        <TouchableOpacity
+          onPress={() => navigation.navigate("CartPage")}
+          style={styles.iconButton}
+        >
           <Ionicons name="cart" size={30} color="blue" />
         </TouchableOpacity>
       </View>
@@ -81,7 +87,7 @@ export default function Homepage({ navigation }) {
         <View style={styles.container}>
           {promoCategories.length > 0 && (
             <View>
-              <Text style={styles.TextHead}>Promotion Categories</Text>
+              <Text style={styles.TextHeadPromo}>Promotion Categories</Text>
               <FlatList
                 horizontal
                 showsHorizontalScrollIndicator={false}
@@ -114,7 +120,12 @@ export default function Homepage({ navigation }) {
       {/* Category Menu Modal */}
       <Modal visible={menuVisible} transparent={false} animationType="slide">
         <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent,{width:ScreenWidth*0.98,height:ScreenHeight*0.98}]}>
+          <View
+            style={[
+              styles.modalContent,
+              { width: ScreenWidth * 0.98, height: ScreenHeight * 0.98 },
+            ]}
+          >
             <Text style={styles.modalTitle}>Categories</Text>
             <FlatList
               data={Object.keys(categoryNavigationMap)}
@@ -128,7 +139,10 @@ export default function Homepage({ navigation }) {
                 </TouchableOpacity>
               )}
             />
-            <TouchableOpacity style={styles.closeButton} onPress={() => setMenuVisible(false)}>
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => setMenuVisible(false)}
+            >
               <Text style={styles.closeButtonText}>Close</Text>
             </TouchableOpacity>
           </View>
@@ -137,7 +151,6 @@ export default function Homepage({ navigation }) {
     </SafeAreaView>
   );
 }
-
 const styles = StyleSheet.create({
   container: { padding: 15 },
   TextHead: {
@@ -146,6 +159,13 @@ const styles = StyleSheet.create({
     marginVertical: 12,
     color: "#333",
     textAlign: "center",
+  },
+  TextHeadPromo: {
+    fontSize: 22,
+    fontWeight: "bold",
+    textAlign: "center",
+    marginVertical: 12,
+    color: "blue",
   },
   listContainer: { paddingVertical: 10 },
   cardContainer: {
@@ -171,8 +191,6 @@ const styles = StyleSheet.create({
   },
   cardText: { fontSize: 16, fontWeight: "bold", textAlign: "center" },
   cardDescription: { fontSize: 12, color: colors.grey3, fontWeight: "bold" },
-  
-  /* Header */
   header: {
     flexDirection: "row",
     alignItems: "center",
@@ -209,5 +227,3 @@ const styles = StyleSheet.create({
   },
   closeButtonText: { color: "white", fontWeight: "bold" },
 });
-
-
