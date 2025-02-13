@@ -10,6 +10,7 @@ import {
   ScrollView,
   SafeAreaView,
   Modal,
+  TextInput,
 } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { categories } from "../global/data.js";
@@ -32,6 +33,7 @@ export default function Homepage({ navigation }) {
   const ScreenWidth = useWindowDimensions().width;
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [menuVisible, setMenuVisible] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const promoCategories = categories.filter(
     (item) => item.status === "Active" && item.discountAvailable === true
@@ -45,7 +47,7 @@ export default function Homepage({ navigation }) {
     const screenName = categoryNavigationMap[item.categoryName];
     if (screenName) {
       navigation.navigate(screenName);
-      setMenuVisible(false); // Close menu after selection
+      setMenuVisible(false);
     }
   };
 
@@ -79,12 +81,23 @@ export default function Homepage({ navigation }) {
           onPress={() => navigation.navigate("CartPage")}
           style={styles.iconButton}
         >
-          <Ionicons name="cart" size={30} color="blue" />
+          <Ionicons name="cart" size={30} color="black" />
         </TouchableOpacity>
       </View>
 
       <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
         <View style={styles.container}>
+          {/* Search Bar */}
+          <View style={styles.searchContainer}>
+            <Ionicons name="search" size={24} color="gray" style={styles.searchIcon} />
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Search categories..."
+              value={searchQuery}
+              onChangeText={(text) => setSearchQuery(text)}
+            />
+          </View>
+
           {promoCategories.length > 0 && (
             <View>
               <Text style={styles.TextHeadPromo}>Promotion Categories</Text>
@@ -116,43 +129,25 @@ export default function Homepage({ navigation }) {
 
       {/* Footer */}
       <Footer navigation={navigation} />
-
-      {/* Category Menu Modal */}
-      <Modal visible={menuVisible} transparent={false} animationType="slide">
-        <View style={styles.modalOverlay}>
-          <View
-            style={[
-              styles.modalContent,
-              { width: ScreenWidth * 0.98, height: ScreenHeight * 0.98 },
-            ]}
-          >
-            <Text style={styles.modalTitle}>Categories</Text>
-            <FlatList
-              data={Object.keys(categoryNavigationMap)}
-              keyExtractor={(item) => item}
-              renderItem={({ item }) => (
-                <TouchableOpacity
-                  style={styles.categoryItem}
-                  onPress={() => handleCategoryPress({ categoryName: item })}
-                >
-                  <Text style={styles.categoryText}>{item}</Text>
-                </TouchableOpacity>
-              )}
-            />
-            <TouchableOpacity
-              style={styles.closeButton}
-              onPress={() => setMenuVisible(false)}
-            >
-              <Text style={styles.closeButtonText}>Close</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
     </SafeAreaView>
   );
 }
+
 const styles = StyleSheet.create({
   container: { padding: 15 },
+  searchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#fff",
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    marginHorizontal: 15,
+    marginVertical: 10,
+    elevation: 3,
+  },
+  searchIcon: { marginRight: 8 },
+  searchInput: { flex: 1, fontSize: 16 },
   TextHead: {
     fontSize: 22,
     fontWeight: "bold",
@@ -165,7 +160,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     textAlign: "center",
     marginVertical: 12,
-    color: "blue",
+    color: "black",
   },
   listContainer: { paddingVertical: 10 },
   cardContainer: {
@@ -199,31 +194,6 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 15,
   },
-  headerTitle: { fontSize: 20, fontWeight: "bold", color: "#2ECE33" },
+  headerTitle: { fontSize: 20, fontWeight: "bold", color: "black" },
   iconButton: { padding: 5 },
-
-  /* Modal */
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  modalContent: {
-    backgroundColor: "white",
-    // width: 300,
-    borderRadius: 10,
-    padding: 20,
-    alignItems: "center",
-  },
-  modalTitle: { fontSize: 20, fontWeight: "bold", marginBottom: 15 },
-  categoryItem: { padding: 10, borderBottomWidth: 1, borderColor: "#ccc" },
-  categoryText: { fontSize: 18 },
-  closeButton: {
-    marginTop: 15,
-    backgroundColor: "#FF5733",
-    padding: 10,
-    borderRadius: 5,
-  },
-  closeButtonText: { color: "white", fontWeight: "bold" },
 });

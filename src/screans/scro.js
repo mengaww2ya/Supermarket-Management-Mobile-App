@@ -92,7 +92,7 @@ const styles = StyleSheet.create({
     infoContainer: {
         width: '100%',
         minHeight: 250,
-        backgroundColor: 'yellow',
+        backgroundColor: '#FFDC2B',
         borderTopLeftRadius: 30,
         borderTopRightRadius: 30,
         paddingVertical: 40,

@@ -13,7 +13,7 @@ const SplashScreen = ({ navigation }) => {
 
     return (
         <View style={styles.container}>
-            <MaterialIcons name="shopping-cart" size={100} color="green" />
+            <MaterialIcons name="shopping-cart" size={100} color="black" />
         </View>
     );
 };
@@ -23,7 +23,7 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: 'white', // Dark Green Color
+        backgroundColor: '#FFDC2B', // Dark Green Color
     },
 });
 
