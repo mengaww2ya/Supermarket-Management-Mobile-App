@@ -13,8 +13,8 @@ const screenwidth = useWindowDimensions().width;
 const screenheight = useWindowDimensions().height;
 export default function Footer({ navigation }) {
   const [viewProfile, setviewProfile] = useState(false);
-  const [viewFvorite, setviewFvorte]=useState(false)
-   
+  const [viewFvorite, setviewFvorte] = useState(false)
+
   return (
     <View style={styles.footerContainer}>
       {/* Home */}
@@ -132,7 +132,7 @@ const styles = StyleSheet.create({
   modalview: {
     backgroundColor: "white",
   },
-  container:{
+  container: {
   },
   titltxt: {
     fontSize: 20,

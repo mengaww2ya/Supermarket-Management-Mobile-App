@@ -4,9 +4,9 @@ import { View, Text, FlatList, Dimensions, StyleSheet, Image, TouchableOpacity }
 const { width, height } = Dimensions.get('window');
 
 const slides = [
-    { id: '1', text: 'Discover Great Products', image: require('../../assets/images/mn.jpg') },
+    { id: '1', text: 'Discover Great Products', image: require('../../assets/images/mg.jpg') },
     { id: '2', text: 'Get a delivery service', image: require('../../assets/images/h2.jpg') },
-    { id: '3', text: 'Let’s Get Started', image: require('../../assets/images/g1.jpg') },
+    { id: '3', text: 'Let’s Get Started', image: require('../../assets/images/mes.png') },
 ];
 
 const WelcomeScreen = ({ navigation }) => {

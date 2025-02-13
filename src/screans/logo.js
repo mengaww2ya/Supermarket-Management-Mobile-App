@@ -6,14 +6,14 @@ const SplashScreen = ({ navigation }) => {
     useEffect(() => {
         const timer = setTimeout(() => {
             navigation.replace('Splashscreen');
-        }, 8000);
+        }, 4000);
 
         return () => clearTimeout(timer);
     }, [navigation]);
 
     return (
         <View style={styles.container}>
-            <MaterialIcons name="shopping-cart" size={100} color="black" />
+            <MaterialIcons name="shopping-cart" size={100} color="white" />
         </View>
     );
 };
