@@ -9,15 +9,16 @@ import {
   useWindowDimensions,
 } from "react-native";
 import { colors } from "react-native-elements";
+
 export default function ManageStock({ navigation }) {
   const { width: ScreenWidth, height: ScreenHeight } = useWindowDimensions();
 
   const options = [
-    { title: "Add Product", route: "addProduct" },
+    { title: "Add Product", route: "AddProduct" }, // Ensure correct casing
     { title: "Remove Product", route: "" },
-    { title: "Update Product", route: "" },
-    { title: "View Product List", route: "" },
-    { title: "Add New Categories", route: "" },
+    { title: "Update Product", route: "UpdateProduct" },
+    { title: "View Product List", route: "ViewProductList" },
+    { title: "Add New Categories", route: "AddCategory" }, 
     { title: "Update Categories", route: "" },
     { title: "Remove Categories", route: "" },
     { title: "View Categories List", route: "" },
@@ -36,7 +37,14 @@ export default function ManageStock({ navigation }) {
                 styles.button,
                 { width: ScreenWidth * 0.4, height: ScreenHeight * 0.1 },
               ]}
-              onPress={() => item.route && navigation.navigate(item.route)}
+              onPress={() => {
+                if (item.route) {
+                  navigation.navigate(item.route); 
+                } else {
+                  // Optional: Alert if route is empty
+                  Alert.alert("Feature not implemented", "This feature is coming soon!");
+                }
+              }}
             >
               <Text style={styles.buttonText}>{item.title}</Text>
             </Pressable>
@@ -73,7 +81,7 @@ const styles = StyleSheet.create({
   },
   button: {
     backgroundColor: colors.grey5,
-    width: "47%", // Responsive grid layout
+    width: "47%",
     height: 120,
     justifyContent: "center",
     alignItems: "center",
@@ -85,7 +93,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 2, height: 3 },
     shadowOpacity: 0.3,
     shadowRadius: 3,
-    elevation: 4, //
+    elevation: 4,
   },
   buttonText: {
     fontSize: 16,

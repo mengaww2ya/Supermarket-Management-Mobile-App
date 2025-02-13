@@ -5,7 +5,7 @@ const { width, height } = Dimensions.get('window');
 
 const slides = [
     { id: '1', text: 'Discover Great Products', image: require('../../assets/images/mg.jpg') },
-    { id: '2', text: 'Get a delivery service', image: require('../../assets/images/h2.jpg') },
+    { id: '2', text: 'Get a delivery service', image: require('../../assets/images/hk2.png') },
     { id: '3', text: 'Let’s Get Started', image: require('../../assets/images/mes.png') },
 ];
 

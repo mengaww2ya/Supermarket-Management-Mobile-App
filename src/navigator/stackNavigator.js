@@ -28,7 +28,10 @@ import suplierManagement from "../manager/suplierManagement.js";
 import customerList from "../manager/customerList.js";
 import manageStock from "../stockManager/Manage stock levels.js";
 import stockManagerHome from "../stockManager/stockManagerHome.js";
-import addProduct from "../stockManager/addProduct.js";
+import AddProduct from "../stockManager/addProduct.js";
+import AddCategory from "../stockManager/addCategory.js";
+import ViewProductList from "../stockManager/viewProduct.js";
+import UpdateProduct from "../stockManager/updateproduct.js";
 import aemployeeManagement from "../admine/employeeManagement.js";
 import asuplierManagement from "../admine/suplierManagement.js";
 import AddEmployee from "../admine/addEmployee.js";
@@ -459,8 +462,8 @@ export default function AuthicStackNavig() {
         }}
       />
       <Authentic.Screen
-        name="addProduct"
-        component={addProduct}
+        name="AddProduct"
+        component={AddProduct}
         options={{
           headerShown: true,
           headerTitleStyle: {
@@ -474,6 +477,56 @@ export default function AuthicStackNavig() {
           },
         }}
       />
+      <Authentic.Screen
+  name="AddCategory"
+  component={AddCategory} // Make sure AddCategory is imported
+  options={{
+    headerShown: true,
+    headerTitleStyle: {
+      color: "#2ECE33",
+      fontSize: 25,
+    },
+    title: "ADD CATEGORY",
+    ...TransitionPresets.RevealFromBottomAndroid,
+    headerStyle: {
+      backgroundColor: "#FFDC2B",
+    },
+  }}
+/>
+
+      <Authentic.Screen
+  name="UpdateProduct"
+  component={UpdateProduct}
+  options={{
+    headerShown: true,
+    headerTitleStyle: {
+      color: "#2ECE33",
+      fontSize: 25,
+    },
+    title: "UPDATE PRODUCT",
+    ...TransitionPresets.RevealFromBottomAndroid,
+    headerStyle: {
+      backgroundColor: "#FFDC2B",
+    },
+  }}
+/>
+<Authentic.Screen
+  name="ViewProductList"
+  component={ViewProductList}
+  options={{
+    headerShown: true,
+    headerTitleStyle: {
+      color: "#2ECE33",
+      fontSize: 25,
+    },
+    title: "Product List",
+    ...TransitionPresets.RevealFromBottomAndroid,
+    headerStyle: {
+      backgroundColor: "#FFDC2B",
+    },
+  }}
+/>
+
       <Authentic.Screen
         name="asuplierManagement"
         component={asuplierManagement}

@@ -67,36 +67,6 @@ export default function Login({ navigation }) {
             <Text style={styles.text}>Forgot password?</Text>
           </Pressable>
 
-          <View style={styles.thirdPartyLogin}>
-            <Pressable
-              style={styles.googleButton}
-              onPress={() => alert("Hey! Google Sign-in not omplemented ")}
-            >
-              <Icon
-                name="google"
-                type="font-awesome"
-                color="#DB4437"
-                size={25}
-              />
-              <Text style={styles.buttonTextGoogle}>Sign by Google</Text>
-            </Pressable>
-
-            <Pressable
-              style={styles.facebookButton}
-              onPress={() => alert("Hey! Facebook Sign-in not implemented")}
-            >
-              <Icon
-                name="facebook"
-                type="font-awesome"
-                color="#4267B2"
-                size={25}
-              />
-              <Text style={styles.buttonTextFacebook}>
-                Sign by Facebook
-              </Text>
-            </Pressable>
-          </View>
-
           <Pressable
             style={styles.signup}
             onPress={() => navigation.navigate("Signup")}
@@ -181,18 +151,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
     textAlign: "center",
-  },
-  googleButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#FFFFFF",
-    borderWidth: 1,
-    borderColor: "#DB4437",
-    paddingVertical: 10,
-    borderRadius: 5,
-    marginHorizontal: 5,
-    flex: 1,
-    justifyContent: "center",
   },
   facebookButton: {
     flexDirection: "row",
