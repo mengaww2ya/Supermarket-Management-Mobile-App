@@ -1,6 +1,7 @@
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { TransitionPresets } from "@react-navigation/stack";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import logo from "../screans/logo.js";
 import Login from "../screans/login.js";
 import Welcome from "../screans/welcome.js";
 import BakeryproductsList from "../customer/Bakeryproducts.js";
@@ -49,10 +50,46 @@ import handleEscalatedIssues from "../manager/HandlingEscalatedIssues.js";
 import MCustomerServicePerformance from "../manager/customerServicePerformance.js";
 import ChannelOverview from "../manager/ChannelOverview.js";
 import ManageChannels from "../manager/ManageChannels.js";
+import ScroScreen from "../screans/scro.js";
+import SplashScreen from "../screans/logo.js";
+import WelcomeScreen from "../screans/scro.js";
+
 const Authentic = createNativeStackNavigator();
 export default function AuthicStackNavig() {
   return (
-    <Authentic.Navigator initialRouteName="Welcome">
+    <Authentic.Navigator initialRouteName="logo">
+      <Authentic.Screen
+        name="logo"
+        component={logo}
+        options={{
+          headerShown: false,
+
+        }}
+      />
+      <Authentic.Screen
+        name="Splashscreen"
+        component={WelcomeScreen}
+        options={{
+          headerShown: false,
+
+        }}
+      />
+      <Authentic.Screen
+        name="Splash"
+        component={SplashScreen}
+        options={{
+          headerShown: false,
+
+        }}
+      />
+      <Authentic.Screen
+        name="scro"
+        component={ScroScreen}
+        options={{
+          headerShown: false,
+
+        }}
+      />
       <Authentic.Screen
         name="Welcome"
         component={Welcome}
