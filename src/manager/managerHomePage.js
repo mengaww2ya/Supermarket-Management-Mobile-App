@@ -10,6 +10,7 @@ import {
   ImageBackground,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { PieChart } from "react-native-chart-kit";
 
 const dashboardData = {
   employees: {
@@ -45,64 +46,78 @@ export default function ManagerHomePage({ navigation }) {
           <Text style={styles.textTitle}>Welcome, Manager!</Text>
 
           {/* Employee Management */}
-          <TouchableOpacity
+          <View
             style={[
-              styles.button,
-              { width: screenWidth * 0.85, height: screenHeight * 0.25 },
+              styles.buttonview,
+              { width: screenWidth * 0.85, height: screenHeight * 0.4 },
             ]}
-            onPress={() => navigation.navigate("emplyeeManagement")}
           >
             <View style={styles.buttonContent}>
-              <Ionicons
-                name="people-outline"
-                size={50}
-                color="#007bff"
-                style={styles.icon}
-              />
-              <Text style={styles.buttontxt}>Employee Management</Text>
               <Text style={styles.metricText}>
                 Total Employees:{" "}
                 <Text style={styles.metricValue}>
                   {dashboardData.employees.total}
                 </Text>
               </Text>
-              <Text style={styles.metricText}>
-                Stock Managers:{" "}
-                <Text style={styles.metricValue}>
-                  {dashboardData.employees.stockManagers}
-                </Text>
-              </Text>
-              <Text style={styles.metricText}>
-                Customer Assistants:{" "}
-                <Text style={styles.metricValue}>
-                  {dashboardData.employees.customerAssistants}
-                </Text>
-              </Text>
-              <Text style={styles.metricText}>
-                Delivery Agents:{" "}
-                <Text style={styles.metricValue}>
-                  {dashboardData.employees.deliveryAgents}
-                </Text>
-              </Text>
+
+              {/* Pie Chart for Employee Distribution */}
+              <PieChart
+                data={[
+                  {
+                    name: "Stock Managers",
+                    population: dashboardData.employees.stockManagers,
+                    color: "#FF6384",
+                    legendFontColor: "#333",
+                    legendFontSize: 12,
+                  },
+                  {
+                    name: "Customer Assistants",
+                    population: dashboardData.employees.customerAssistants,
+                    color: "#36A2EB",
+                    legendFontColor: "#333",
+                    legendFontSize: 12,
+                  },
+                  {
+                    name: "Delivery Agents",
+                    population: dashboardData.employees.deliveryAgents,
+                    color: "#FFCE56",
+                    legendFontColor: "#333",
+                    legendFontSize: 12,
+                  },
+                ]}
+                width={screenWidth * 0.8}
+                height={100}
+                chartConfig={{
+                  backgroundColor: "#fff",
+                  decimalPlaces: 0,
+                  color: (opacity = 1) => `rgba(0, 123, 255, ${opacity})`,
+                }}
+                accessor="population"
+                backgroundColor="transparent"
+                paddingLeft="15"
+                absolute
+              />
             </View>
-          </TouchableOpacity>
+            <TouchableOpacity style={styles.button}>
+              <Text style={styles.buttontxt}>Employee Management</Text>
+            </TouchableOpacity>
+          </View>
 
           {/* Customer Management */}
-          <TouchableOpacity
+          <View
             style={[
-              styles.button,
-              { width: screenWidth * 0.85, height: screenHeight * 0.25 },
+              styles.buttonview,
+              { width: screenWidth * 0.85, height: screenHeight * 0.4 },
             ]}
-            onPress={() => navigation.navigate("customerManagement")}
+            // onPress={() => navigation.navigate("customerManagement")}
           >
             <View style={styles.buttonContent}>
-              <Ionicons
+              {/* <Ionicons
                 name="person-outline"
                 size={50}
                 color="#007bff"
                 style={styles.icon}
-              />
-              <Text style={styles.buttontxt}>Customer Management</Text>
+              /> */}
               <Text style={styles.metricText}>
                 Total Customers:{" "}
                 <Text style={styles.metricValue}>
@@ -116,24 +131,26 @@ export default function ManagerHomePage({ navigation }) {
                 </Text>
               </Text>
             </View>
-          </TouchableOpacity>
+            <TouchableOpacity style={styles.button}>
+              <Text style={styles.buttontxt}>Customer Management</Text>
+            </TouchableOpacity>
+          </View>
 
           {/* Promotion & Discount */}
-          <TouchableOpacity
+          <View
             style={[
-              styles.button,
-              { width: screenWidth * 0.85, height: screenHeight * 0.25 },
+              styles.buttonview,
+              { width: screenWidth * 0.85, height: screenHeight * 0.4 },
             ]}
-            onPress={() => navigation.navigate("promotionManagement")}
+            // onPress={() => navigation.navigate("promotionManagement")}
           >
             <View style={styles.buttonContent}>
-              <Ionicons
+              {/* <Ionicons
                 name="pricetag-outline"
                 size={50}
                 color="#007bff"
                 style={styles.icon}
-              />
-              <Text style={styles.buttontxt}>Promotion & Discount</Text>
+              /> */}
               <Text style={styles.metricText}>
                 Discount Categories:{" "}
                 <Text style={styles.metricValue}>
@@ -147,24 +164,26 @@ export default function ManagerHomePage({ navigation }) {
                 </Text>
               </Text>
             </View>
-          </TouchableOpacity>
+            <TouchableOpacity style={styles.button}>
+              <Text style={styles.buttontxt}>Promotion & Discount</Text>
+            </TouchableOpacity>
+          </View>
 
           {/* Inventory Management */}
-          <TouchableOpacity
+          <View
             style={[
-              styles.button,
-              { width: screenWidth * 0.85, height: screenHeight * 0.25 },
+              styles.buttonview,
+              { width: screenWidth * 0.85, height: screenHeight * 0.4 },
             ]}
-            onPress={() => navigation.navigate("inventoryManagement")}
+            // onPress={() => navigation.navigate("inventoryManagement")}
           >
             <View style={styles.buttonContent}>
-              <Ionicons
+              {/* <Ionicons
                 name="cube-outline"
                 size={50}
                 color="#007bff"
                 style={styles.icon}
-              />
-              <Text style={styles.buttontxt}>Inventory Management</Text>
+              /> */}
               <Text style={styles.metricText}>
                 Total Products:{" "}
                 <Text style={styles.metricValue}>
@@ -178,24 +197,26 @@ export default function ManagerHomePage({ navigation }) {
                 </Text>
               </Text>
             </View>
-          </TouchableOpacity>
+            <TouchableOpacity style={styles.button}>
+              <Text style={styles.buttontxt}>Inventory Management</Text>
+            </TouchableOpacity>
+          </View>
 
           {/* Order Management */}
-          <TouchableOpacity
+          <View
             style={[
-              styles.button,
-              { width: screenWidth * 0.85, height: screenHeight * 0.25 },
+              styles.buttonview,
+              { width: screenWidth * 0.85, height: screenHeight * 0.4 },
             ]}
-            onPress={() => navigation.navigate("orderManagement")}
+            // onPress={() => navigation.navigate("orderManagement")}
           >
             <View style={styles.buttonContent}>
-              <Ionicons
+              {/* <Ionicons
                 name="cart-outline"
                 size={50}
                 color="#007bff"
                 style={styles.icon}
-              />
-              <Text style={styles.buttontxt}>Order Management</Text>
+              /> */}
               <Text style={styles.metricText}>
                 Incoming Orders:{" "}
                 <Text style={styles.metricValue}>
@@ -215,24 +236,26 @@ export default function ManagerHomePage({ navigation }) {
                 </Text>
               </Text>
             </View>
-          </TouchableOpacity>
+            <TouchableOpacity style={styles.button}>
+              <Text style={styles.buttontxt}>Order Management</Text>
+            </TouchableOpacity>
+          </View>
 
           {/* Sales & Revenue */}
-          <TouchableOpacity
+          <View
             style={[
-              styles.button,
-              { width: screenWidth * 0.85, height: screenHeight * 0.25 },
+              styles.buttonview,
+              { width: screenWidth * 0.85, height: screenHeight * 0.4 },
             ]}
-            onPress={() => navigation.navigate("saleRevenueManagement")}
+            // onPress={() => navigation.navigate("saleRevenueManagement")}
           >
             <View style={styles.buttonContent}>
-              <Ionicons
+              {/* <Ionicons
                 name="bar-chart-outline"
                 size={50}
                 color="#007bff"
                 style={styles.icon}
-              />
-              <Text style={styles.buttontxt}>Sales & Revenue</Text>
+              /> */}
               <Text style={styles.metricText}>
                 Total Revenue:{" "}
                 <Text style={styles.metricValue}>
@@ -252,24 +275,26 @@ export default function ManagerHomePage({ navigation }) {
                 </Text>
               </Text>
             </View>
-          </TouchableOpacity>
+            <TouchableOpacity style={styles.button}>
+              <Text style={styles.buttontxt}>Sales & Revenue</Text>
+            </TouchableOpacity>
+          </View>
 
           {/* Supplier Management */}
-          <TouchableOpacity
+          <View
             style={[
-              styles.button,
-              { width: screenWidth * 0.85, height: screenHeight * 0.25 },
+              styles.buttonview,
+              { width: screenWidth * 0.85, height: screenHeight * 0.4 },
             ]}
-            onPress={() => navigation.navigate("supplierManagement")}
+            // onPress={() => navigation.navigate("supplierManagement")}
           >
             <View style={styles.buttonContent}>
-              <Ionicons
+              {/* <Ionicons
                 name="business-outline"
                 size={50}
                 color="#007bff"
                 style={styles.icon}
-              />
-              <Text style={styles.buttontxt}>Supplier Management</Text>
+              /> */}
               <Text style={styles.metricText}>
                 Total Suppliers:{" "}
                 <Text style={styles.metricValue}>
@@ -283,23 +308,25 @@ export default function ManagerHomePage({ navigation }) {
                 </Text>
               </Text>
             </View>
-          </TouchableOpacity>
+            <TouchableOpacity style={styles.button}>
+              <Text style={styles.buttontxt}>Supplier Management</Text>
+            </TouchableOpacity>
+          </View>
           {/* Alerts & Notifications */}
-          <TouchableOpacity
+          <View
             style={[
-              styles.button,
-              { width: screenWidth * 0.85, height: screenHeight * 0.25 },
+              styles.buttonview,
+              { width: screenWidth * 0.85, height: screenHeight * 0.4 },
             ]}
-            onPress={() => navigation.navigate("alertManagement")}
+            // onPress={() => navigation.navigate("alertManagement")}
           >
             <View style={styles.buttonContent}>
-              <Ionicons
+              {/* <Ionicons
                 name="notifications-circle-outline"
                 size={50}
                 color="#ff4444"
                 style={styles.icon}
-              />
-              <Text style={styles.buttontxt}>Alerts & Notifications</Text>
+              /> */}
               <Text style={styles.metricText}>
                 Low Stock Alerts:{" "}
                 <Text style={styles.metricValue}>
@@ -319,7 +346,10 @@ export default function ManagerHomePage({ navigation }) {
                 </Text>
               </Text>
             </View>
-          </TouchableOpacity>
+            <TouchableOpacity style={styles.button}>
+              <Text style={styles.buttontxt}>Alerts & Notifications</Text>
+            </TouchableOpacity>
+          </View>
         </ImageBackground>
       </ScrollView>
     </SafeAreaView>
@@ -350,20 +380,14 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginBottom: 20,
   },
-  button: {
+  buttonview: {
     backgroundColor: "#fff",
     justifyContent: "center",
     alignItems: "center",
     borderRadius: 12,
-    borderWidth: 2,
-    borderColor: "#007bff",
     marginBottom: 15,
     shadowColor: "#000",
-    shadowOffset: { width: 2, height: 5 },
-    shadowOpacity: 0.3,
-    shadowRadius: 3,
-    elevation: 5,
-    padding: 15,
+    
   },
   buttonContent: {
     alignItems: "center",
@@ -372,7 +396,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   buttontxt: {
-    fontSize: 22,
+    fontSize: 15,
     fontWeight: "bold",
     color: "#333",
     textAlign: "center",
@@ -387,4 +411,12 @@ const styles = StyleSheet.create({
     color: "#007bff",
     fontWeight: "bold",
   },
+  button:{
+    borderWidth:1,
+    padding:5,
+    borderRadius:5,
+
+
+    
+  }
 });
