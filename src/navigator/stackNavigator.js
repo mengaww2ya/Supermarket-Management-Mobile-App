@@ -15,6 +15,7 @@ import BeveragesproductsList from "../customer/Beveragesproducts.js";
 import Homepage from "../customer/homepage.js";
 import Item from "../customer/Item.js";
 import Signup from "../screans/signup.js";
+import ProfileScreen from "../screans/EditProfile.js";
 import ManagerHomePage from "../manager/managerHomePage.js";
 import DeveloperHomePage from "../screans/developingHompage.js";
 import emplyeeManagement from "../manager/employee management.js";
@@ -56,8 +57,38 @@ import ManageChannels from "../manager/ManageChannels.js";
 import ScroScreen from "../screans/scro.js";
 import SplashScreen from "../screans/logo.js";
 import WelcomeScreen from "../screans/scro.js";
-
+const ProfileStack = createStackNavigator();
 const Authentic = createNativeStackNavigator();
+
+const ProfileStackScreen = ({ navigation }) => {
+  return (
+    <ProfileStack.Navigator
+      screenOptions={{
+        headerStyle: { backgroundColor: '#1f65ff' },
+        headerTintColor: '#fff',
+        headerTitleStyle: { fontWeight: 'bold' },
+      }}
+    >
+      <ProfileStack.Screen
+        name="Profile"
+        component={ProfileScreen}
+        options={{
+          headerLeft: () => (
+            <View style={{ marginLeft: 10 }}>
+              <Icon
+                name="menu"
+                type="ionicon"
+                size={25}
+                color="#fff"
+                onPress={() => navigation.openDrawer()}
+              />
+            </View>
+          ),
+        }}
+      />
+    </ProfileStack.Navigator>
+  );
+};
 export default function AuthicStackNavig() {
   return (
     <Authentic.Navigator initialRouteName="logo">
@@ -253,6 +284,25 @@ export default function AuthicStackNavig() {
           },
         }}
       />
+            <Authentic.Screen
+        name="ProfileScreen"
+        component={ProfileScreen}
+        options={{
+          tapBarLabel:'Profile',
+          tapBarColor:"#694fad",
+          tapBarIcon:({color})=>(
+            <Icon name="ios-person" color={color} size={26}></Icon>
+          ),
+         
+          title: "Profile",
+          ...TransitionPresets.RevealFromBottomAndroid,
+          headerStyle: {
+            backgroundColor: "#FFDC2B",
+          },
+        }}
+      />
+
+      
       <Authentic.Screen
         name="ManagerHomePage"
         component={ManagerHomePage}

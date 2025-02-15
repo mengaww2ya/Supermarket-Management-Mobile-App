@@ -36,7 +36,14 @@ export default function Welcome({ navigation }) {
             >
               <Text style={styles.buttonText}>Create Account</Text>
             </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => navigation.navigate("ProfileScreen")}
+            >
+              <Text style={styles.buttonText}>Check</Text>
+            </TouchableOpacity>
           </View>
+        
         </View>
       </ScrollView>
     </SafeAreaView>
