@@ -30,6 +30,7 @@ const dashboardData = {
 };
 
 export default function ManagerHomePage({ navigation }) {
+  const homeBackground=require("../../assets/background/city.jpg");
   const screenWidth = useWindowDimensions().width;
   const screenHeight = useWindowDimensions().height;
   const totalProducts = dashboardData.inventory.totalProducts;
@@ -64,7 +65,7 @@ export default function ManagerHomePage({ navigation }) {
         contentContainerStyle={styles.scrollContainer}
       >
         <ImageBackground
-          source={require("../../assets/background/city.jpg")}
+          source={homeBackground}
           style={styles.container}
           resizeMode="cover"
         >
@@ -173,7 +174,7 @@ export default function ManagerHomePage({ navigation }) {
                   backgroundGradientTo: "#ffffff",
                   decimalPlaces: 0,
                   color: (opacity = 1) => `rgba(0, 123, 255, ${opacity})`,
-                  labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                  labelColor: (opacity = 1) => `rgba(0, 200, 150, ${opacity})`,
                   barPercentage: 0.6,
                 }}
                 style={{ marginVertical: 10, borderRadius: 10 }}
@@ -359,7 +360,7 @@ export default function ManagerHomePage({ navigation }) {
                   backgroundGradientTo: "#f3f3f3",
                   decimalPlaces: 0,
                   color: (opacity = 1) => `rgba(0, 123, 255, ${opacity})`,
-                  labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                  labelColor: (opacity = 1) => `rgba(0, 200, 150, ${opacity})`,
                   barPercentage: 0.5,
                 }}
                 style={{ marginVertical: 10, borderRadius: 10 }}
@@ -416,8 +417,8 @@ export default function ManagerHomePage({ navigation }) {
                   backgroundGradientFrom: "#f3f3f3",
                   backgroundGradientTo: "#f3f3f3",
                   decimalPlaces: 0,
-                  color: (opacity = 1) => `rgba(34, 193, 195, ${opacity})`,
-                  labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                  color: (opacity = 1) => `rgba(0, 123, 255, ${opacity})`,
+                  labelColor: (opacity = 1) => `rgba(0, 200, 150, ${opacity})`,
                   barPercentage: 0.5,
                 }}
                 style={{ marginVertical: 10, borderRadius: 10 }}
@@ -545,8 +546,8 @@ export default function ManagerHomePage({ navigation }) {
                   backgroundGradientFrom: "#f3f3f3",
                   backgroundGradientTo: "#f3f3f3",
                   decimalPlaces: 0,
-                  color: (opacity = 1) => `rgba(255, 69, 0, ${opacity})`,
-                  labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                  color: (opacity = 1) => `rgba(0, 123, 255, ${opacity})`,
+                  labelColor: (opacity = 1) => `rgba(0, 200, 150, ${opacity})`,
                 }}
                 style={{ marginVertical: 8, borderRadius: 10 }}
                 verticalLabelRotation={0}
