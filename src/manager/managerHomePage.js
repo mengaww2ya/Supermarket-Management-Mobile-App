@@ -11,6 +11,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { PieChart } from "react-native-chart-kit";
+import { BarChart } from "react-native-chart-kit";
 
 const dashboardData = {
   employees: {
@@ -31,7 +32,31 @@ const dashboardData = {
 export default function ManagerHomePage({ navigation }) {
   const screenWidth = useWindowDimensions().width;
   const screenHeight = useWindowDimensions().height;
+  const totalProducts = dashboardData.inventory.totalProducts;
+  const discountedProducts = dashboardData.promotions.discountedProducts;
+  const nonDiscountedProducts = totalProducts - discountedProducts;
+  const totalCategories = dashboardData.inventory.totalCategories;
+  const orderLabels = ["Incoming", "Pending", "Transit"];
+  const orderValues = [
+    dashboardData.orders.incoming,
+    dashboardData.orders.pending,
+    dashboardData.orders.transit,
+  ];
+  const productsPerCategory = Math.round(totalProducts / totalCategories);
+  const totalRevenue =
+    parseFloat(
+      dashboardData.sales.totalRevenue.replace("$", "").replace("K", "")
+    ) * 1000;
+  const totalProfit =
+    parseFloat(
+      dashboardData.sales.totalProfit.replace("$", "").replace("K", "")
+    ) * 1000;
+  const totalSales = dashboardData.sales.totalSales;
 
+  const salesLabels = ["Revenue", "Sales", "Profit"];
+  const salesValues = [totalRevenue, totalSales, totalProfit];
+  const totalSuppliers = dashboardData.suppliers.total;
+  const pendingOrders = dashboardData.suppliers.pendingOrders;
   return (
     <SafeAreaView style={styles.homeContainer}>
       <ScrollView
@@ -44,7 +69,6 @@ export default function ManagerHomePage({ navigation }) {
           resizeMode="cover"
         >
           <Text style={styles.textTitle}>Welcome, Manager!</Text>
-
           {/* Employee Management */}
           <View
             style={[
@@ -98,40 +122,88 @@ export default function ManagerHomePage({ navigation }) {
                 absolute
               />
             </View>
-            <TouchableOpacity style={styles.button}>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => {
+                navigation.navigate("EmployeeManagement");
+              }}
+            >
               <Text style={styles.buttontxt}>Employee Management</Text>
             </TouchableOpacity>
           </View>
-
           {/* Customer Management */}
           <View
             style={[
               styles.buttonview,
-              { width: screenWidth * 0.85, height: screenHeight * 0.4 },
+              { width: screenWidth * 0.85, height: screenHeight * 0.45 },
             ]}
-            // onPress={() => navigation.navigate("customerManagement")}
           >
             <View style={styles.buttonContent}>
-              {/* <Ionicons
-                name="person-outline"
-                size={50}
-                color="#007bff"
-                style={styles.icon}
-              /> */}
               <Text style={styles.metricText}>
                 Total Customers:{" "}
                 <Text style={styles.metricValue}>
                   {dashboardData.customers.total}
                 </Text>
               </Text>
+
               <Text style={styles.metricText}>
                 Total Feedback:{" "}
                 <Text style={styles.metricValue}>
                   {dashboardData.customers.feedback}
                 </Text>
               </Text>
+
+              {/* Customer Feedback Bar Chart */}
+              <BarChart
+                data={{
+                  labels: ["Total", "Feedback"],
+                  datasets: [
+                    {
+                      data: [
+                        dashboardData.customers.total,
+                        dashboardData.customers.feedback,
+                      ],
+                    },
+                  ],
+                }}
+                width={screenWidth * 0.55}
+                height={130}
+                chartConfig={{
+                  backgroundGradientFrom: "#f4f4f4",
+                  backgroundGradientTo: "#ffffff",
+                  decimalPlaces: 0,
+                  color: (opacity = 1) => `rgba(0, 123, 255, ${opacity})`,
+                  labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                  barPercentage: 0.6,
+                }}
+                style={{ marginVertical: 10, borderRadius: 10 }}
+                yAxisSuffix=""
+                fromZero
+              />
+
+              {/* Feedback Percentage */}
+              <Text
+                style={[
+                  styles.metricText,
+                  { fontSize: 16, fontWeight: "bold", color: "#007bff" },
+                ]}
+              >
+                Feedback Engagement:{" "}
+                {(
+                  (dashboardData.customers.feedback /
+                    dashboardData.customers.total) *
+                  100
+                ).toFixed(2)}
+                %
+              </Text>
             </View>
-            <TouchableOpacity style={styles.button}>
+
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => {
+                navigation.navigate("CustomerManagement");
+              }}
+            >
               <Text style={styles.buttontxt}>Customer Management</Text>
             </TouchableOpacity>
           </View>
@@ -142,15 +214,8 @@ export default function ManagerHomePage({ navigation }) {
               styles.buttonview,
               { width: screenWidth * 0.85, height: screenHeight * 0.4 },
             ]}
-            // onPress={() => navigation.navigate("promotionManagement")}
           >
             <View style={styles.buttonContent}>
-              {/* <Ionicons
-                name="pricetag-outline"
-                size={50}
-                color="#007bff"
-                style={styles.icon}
-              /> */}
               <Text style={styles.metricText}>
                 Discount Categories:{" "}
                 <Text style={styles.metricValue}>
@@ -163,27 +228,54 @@ export default function ManagerHomePage({ navigation }) {
                   {dashboardData.promotions.discountedProducts}
                 </Text>
               </Text>
+
+              {/* Pie Chart for Discounted vs Non-Discounted Products */}
+              <PieChart
+                data={[
+                  {
+                    name: "Discounted",
+                    population: discountedProducts,
+                    color: "#007bff",
+                    legendFontColor: "#007bff",
+                    legendFontSize: 12,
+                  },
+                  {
+                    name: "Non-Discounted",
+                    population: nonDiscountedProducts,
+                    color: "#ffcc00",
+                    legendFontColor: "#00cc00",
+                    legendFontSize: 12,
+                  },
+                ]}
+                width={screenWidth * 0.55}
+                height={130}
+                chartConfig={{
+                  color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                }}
+                accessor="population"
+                backgroundColor="transparent"
+                paddingLeft="15"
+                style={{ marginVertical: 10 }}
+              />
             </View>
-            <TouchableOpacity style={styles.button}>
+
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => {
+                navigation.navigate("promotionManagement");
+              }}
+            >
               <Text style={styles.buttontxt}>Promotion & Discount</Text>
             </TouchableOpacity>
           </View>
-
           {/* Inventory Management */}
           <View
             style={[
               styles.buttonview,
-              { width: screenWidth * 0.85, height: screenHeight * 0.4 },
+              { width: screenWidth * 0.85, height: screenHeight * 0.45 },
             ]}
-            // onPress={() => navigation.navigate("inventoryManagement")}
           >
             <View style={styles.buttonContent}>
-              {/* <Ionicons
-                name="cube-outline"
-                size={50}
-                color="#007bff"
-                style={styles.icon}
-              /> */}
               <Text style={styles.metricText}>
                 Total Products:{" "}
                 <Text style={styles.metricValue}>
@@ -196,27 +288,44 @@ export default function ManagerHomePage({ navigation }) {
                   {dashboardData.inventory.totalCategories}
                 </Text>
               </Text>
+
+              {/* Bar Chart for Products per Category */}
+              <BarChart
+                data={{
+                  labels: ["Categories"],
+                  datasets: [{ data: [productsPerCategory] }],
+                }}
+                width={screenWidth * 0.55}
+                height={130}
+                yAxisLabel=""
+                chartConfig={{
+                  backgroundGradientFrom: "#f3f3f3",
+                  backgroundGradientTo: "#f3f3f3",
+                  color: (opacity = 1) => `rgba(0, 123, 255, ${opacity})`,
+                  barPercentage: 0.5,
+                }}
+                style={{ marginVertical: 10, borderRadius: 10 }}
+                verticalLabelRotation={0}
+              />
             </View>
-            <TouchableOpacity style={styles.button}>
+
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => {
+                navigation.navigate("inventoryManagement");
+              }}
+            >
               <Text style={styles.buttontxt}>Inventory Management</Text>
             </TouchableOpacity>
           </View>
-
           {/* Order Management */}
           <View
             style={[
               styles.buttonview,
-              { width: screenWidth * 0.85, height: screenHeight * 0.4 },
+              { width: screenWidth * 0.85, height: screenHeight * 0.5 },
             ]}
-            // onPress={() => navigation.navigate("orderManagement")}
           >
             <View style={styles.buttonContent}>
-              {/* <Ionicons
-                name="cart-outline"
-                size={50}
-                color="#007bff"
-                style={styles.icon}
-              /> */}
               <Text style={styles.metricText}>
                 Incoming Orders:{" "}
                 <Text style={styles.metricValue}>
@@ -235,27 +344,46 @@ export default function ManagerHomePage({ navigation }) {
                   {dashboardData.orders.transit}
                 </Text>
               </Text>
+
+              {/* Bar Graph for Order Status */}
+              <BarChart
+                data={{
+                  labels: orderLabels,
+                  datasets: [{ data: orderValues }],
+                }}
+                width={screenWidth * 0.6}
+                height={150}
+                yAxisLabel=""
+                chartConfig={{
+                  backgroundGradientFrom: "#f3f3f3",
+                  backgroundGradientTo: "#f3f3f3",
+                  decimalPlaces: 0,
+                  color: (opacity = 1) => `rgba(0, 123, 255, ${opacity})`,
+                  labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                  barPercentage: 0.5,
+                }}
+                style={{ marginVertical: 10, borderRadius: 10 }}
+                fromZero
+              />
             </View>
-            <TouchableOpacity style={styles.button}>
+
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => {
+                navigation.navigate("orderManagement");
+              }}
+            >
               <Text style={styles.buttontxt}>Order Management</Text>
             </TouchableOpacity>
           </View>
-
           {/* Sales & Revenue */}
           <View
             style={[
               styles.buttonview,
-              { width: screenWidth * 0.85, height: screenHeight * 0.4 },
+              { width: screenWidth * 0.85, height: screenHeight * 0.5 },
             ]}
-            // onPress={() => navigation.navigate("saleRevenueManagement")}
           >
             <View style={styles.buttonContent}>
-              {/* <Ionicons
-                name="bar-chart-outline"
-                size={50}
-                color="#007bff"
-                style={styles.icon}
-              /> */}
               <Text style={styles.metricText}>
                 Total Revenue:{" "}
                 <Text style={styles.metricValue}>
@@ -274,27 +402,46 @@ export default function ManagerHomePage({ navigation }) {
                   {dashboardData.sales.totalProfit}
                 </Text>
               </Text>
+
+              {/* Bar Graph for Sales & Revenue */}
+              <BarChart
+                data={{
+                  labels: salesLabels,
+                  datasets: [{ data: salesValues }],
+                }}
+                width={screenWidth * 0.65}
+                height={150}
+                yAxisLabel="$"
+                chartConfig={{
+                  backgroundGradientFrom: "#f3f3f3",
+                  backgroundGradientTo: "#f3f3f3",
+                  decimalPlaces: 0,
+                  color: (opacity = 1) => `rgba(34, 193, 195, ${opacity})`,
+                  labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                  barPercentage: 0.5,
+                }}
+                style={{ marginVertical: 10, borderRadius: 10 }}
+                fromZero
+              />
             </View>
-            <TouchableOpacity style={styles.button}>
+
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => {
+                navigation.navigate("saleRevenueManagement");
+              }}
+            >
               <Text style={styles.buttontxt}>Sales & Revenue</Text>
             </TouchableOpacity>
           </View>
-
           {/* Supplier Management */}
           <View
             style={[
               styles.buttonview,
-              { width: screenWidth * 0.85, height: screenHeight * 0.4 },
+              { width: screenWidth * 0.85, height: screenHeight * 0.5 },
             ]}
-            // onPress={() => navigation.navigate("supplierManagement")}
           >
             <View style={styles.buttonContent}>
-              {/* <Ionicons
-                name="business-outline"
-                size={50}
-                color="#007bff"
-                style={styles.icon}
-              /> */}
               <Text style={styles.metricText}>
                 Total Suppliers:{" "}
                 <Text style={styles.metricValue}>
@@ -307,8 +454,46 @@ export default function ManagerHomePage({ navigation }) {
                   {dashboardData.suppliers.pendingOrders}
                 </Text>
               </Text>
+
+              {/* Pie Chart for Supplier Data */}
+              <PieChart
+                data={[
+                  {
+                    name: "Active Suppliers",
+                    population: totalSuppliers - pendingOrders,
+                    color: "#4CAF50",
+                    legendFontColor: "#000",
+                    legendFontSize: 14,
+                  },
+                  {
+                    name: "Pending Orders",
+                    population: pendingOrders,
+                    color: "#FF9800",
+                    legendFontColor: "#000",
+                    legendFontSize: 14,
+                  },
+                ]}
+                width={screenWidth * 0.75}
+                height={160}
+                chartConfig={{
+                  backgroundColor: "#f3f3f3",
+                  backgroundGradientFrom: "#f3f3f3",
+                  backgroundGradientTo: "#f3f3f3",
+                  color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                }}
+                accessor="population"
+                backgroundColor="transparent"
+                paddingLeft="15"
+                absolute
+              />
             </View>
-            <TouchableOpacity style={styles.button}>
+
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => {
+                navigation.navigate("suplierManagement");
+              }}
+            >
               <Text style={styles.buttontxt}>Supplier Management</Text>
             </TouchableOpacity>
           </View>
@@ -316,17 +501,10 @@ export default function ManagerHomePage({ navigation }) {
           <View
             style={[
               styles.buttonview,
-              { width: screenWidth * 0.85, height: screenHeight * 0.4 },
+              { width: screenWidth * 0.85, height: screenHeight * 0.5 },
             ]}
-            // onPress={() => navigation.navigate("alertManagement")}
           >
             <View style={styles.buttonContent}>
-              {/* <Ionicons
-                name="notifications-circle-outline"
-                size={50}
-                color="#ff4444"
-                style={styles.icon}
-              /> */}
               <Text style={styles.metricText}>
                 Low Stock Alerts:{" "}
                 <Text style={styles.metricValue}>
@@ -345,8 +523,42 @@ export default function ManagerHomePage({ navigation }) {
                   {dashboardData.alerts.expiryWarnings}
                 </Text>
               </Text>
+
+              {/* Bar Chart for Alert Data */}
+              <BarChart
+                data={{
+                  labels: ["Low Stock", "Pending Orders", "Expiry Warnings"],
+                  datasets: [
+                    {
+                      data: [
+                        dashboardData.alerts.lowStock,
+                        dashboardData.alerts.pendingOrders,
+                        dashboardData.alerts.expiryWarnings,
+                      ],
+                    },
+                  ],
+                }}
+                width={screenWidth * 0.65}
+                height={150}
+                yAxisLabel=""
+                chartConfig={{
+                  backgroundGradientFrom: "#f3f3f3",
+                  backgroundGradientTo: "#f3f3f3",
+                  decimalPlaces: 0,
+                  color: (opacity = 1) => `rgba(255, 69, 0, ${opacity})`,
+                  labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                }}
+                style={{ marginVertical: 8, borderRadius: 10 }}
+                verticalLabelRotation={0}
+              />
             </View>
-            <TouchableOpacity style={styles.button}>
+
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => {
+                navigation.navigate("alertNotifManagement");
+              }}
+            >
               <Text style={styles.buttontxt}>Alerts & Notifications</Text>
             </TouchableOpacity>
           </View>
@@ -357,9 +569,11 @@ export default function ManagerHomePage({ navigation }) {
 }
 
 // Styles remain the same as in your original code.
-
 const styles = StyleSheet.create({
-  homeContainer: { flex: 1 },
+  homeContainer: {
+    flex: 1,
+    backgroundColor: "#F4F6F9", // Light background for a modern look
+  },
   scrollContainer: {
     flexGrow: 1,
     paddingBottom: 20,
@@ -376,47 +590,56 @@ const styles = StyleSheet.create({
   textTitle: {
     fontSize: 26,
     fontWeight: "bold",
-    color: "#333",
-    textAlign: "center",
     marginBottom: 20,
+    textAlign: "center",
+    color: "#333",
   },
   buttonview: {
-    backgroundColor: "#fff",
-    justifyContent: "center",
+    backgroundColor: "#FFFFFF", // Clean white cards
+    borderRadius: 15,
+    padding: 25,
     alignItems: "center",
-    borderRadius: 12,
-    marginBottom: 15,
-    shadowColor: "#000",
-    
+    justifyContent: "center",
+    elevation: 5, // Shadow for Android
+    shadowColor: "#000", // Shadow for iOS
+    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 3 },
+    shadowRadius: 5,
+    marginBottom: 20,
   },
   buttonContent: {
     alignItems: "center",
+    width: "100%",
+  },
+  metricText: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#34495E",
+    marginBottom: 5,
+    textAlign: "center",
+  },
+  metricValue: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#007bff",
+  },
+  button: {
+    backgroundColor: "green",
+    borderRadius: 10,
+    paddingVertical: 12,
+    paddingHorizontal: 25,
+    marginTop: 10,
+    width: "90%",
+    alignItems: "center",
+  },
+  buttontxt: {
+    color: "#FFF",
+    fontSize: 16,
+    fontWeight: "bold",
+    // color: "#333",
+    textAlign: "center",
   },
   icon: {
     marginBottom: 10,
   },
-  buttontxt: {
-    fontSize: 15,
-    fontWeight: "bold",
-    color: "#333",
-    textAlign: "center",
-  },
-  metricText: {
-    fontSize: 14,
-    color: "#555",
-    fontWeight: "600",
-    textAlign: "center",
-  },
-  metricValue: {
-    color: "#007bff",
-    fontWeight: "bold",
-  },
-  button:{
-    borderWidth:1,
-    padding:5,
-    borderRadius:5,
-
-
-    
-  }
 });

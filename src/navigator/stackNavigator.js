@@ -18,8 +18,8 @@ import Signup from "../screans/signup.js";
 import ProfileScreen from "../screans/EditProfile.js";
 import ManagerHomePage from "../manager/managerHomePage.js";
 import DeveloperHomePage from "../screans/developingHompage.js";
-import emplyeeManagement from "../manager/employee management.js";
-import customerManagement from "../manager/customerManagement.js";
+import EmployeeManagement from "../manager/employee management.js";
+import CustomerManagement from "../manager/customerManagement.js";
 import inventoryManagement from "../manager/inventoryManagement.js";
 import promotionManagement from "../manager/promotionDiscount.js";
 import saleRevenueManagement from "../manager/saleRevenueManagement.js";
@@ -97,7 +97,6 @@ export default function AuthicStackNavig() {
         component={logo}
         options={{
           headerShown: false,
-
         }}
       />
       <Authentic.Screen
@@ -105,7 +104,6 @@ export default function AuthicStackNavig() {
         component={WelcomeScreen}
         options={{
           headerShown: false,
-
         }}
       />
       <Authentic.Screen
@@ -113,7 +111,6 @@ export default function AuthicStackNavig() {
         component={SplashScreen}
         options={{
           headerShown: false,
-
         }}
       />
       <Authentic.Screen
@@ -121,7 +118,6 @@ export default function AuthicStackNavig() {
         component={ScroScreen}
         options={{
           headerShown: false,
-
         }}
       />
       <Authentic.Screen
@@ -336,8 +332,8 @@ export default function AuthicStackNavig() {
         }}
       />
       <Authentic.Screen
-        name="emplyeeManagement"
-        component={emplyeeManagement}
+        name="EmployeeManagement"
+        component={EmployeeManagement}
         options={{
           headerShown: true,
           headerTitleStyle: {
@@ -352,8 +348,8 @@ export default function AuthicStackNavig() {
         }}
       />
       <Authentic.Screen
-        name="customerManagement"
-        component={customerManagement}
+        name="CustomerManagement"
+        component={CustomerManagement}
         options={{
           headerShown: true,
           headerTitleStyle: {
