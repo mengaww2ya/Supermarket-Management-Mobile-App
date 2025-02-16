@@ -1,9 +1,14 @@
-import Ionicons from "react-native-vector-icons/Ionicons";
+import Icon from "react-native-vector-icons/Ionicons";
+import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
+import { Ionicons } from '@expo/vector-icons';
+
 import { TransitionPresets } from "@react-navigation/stack";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
 import logo from "../screans/logo.js";
 import Login from "../screans/login.js";
 import Welcome from "../screans/welcome.js";
+import EditProfileScreen from "../screans/EditProfileScreen.js";
 import BakeryproductsList from "../customer/Bakeryproducts.js";
 import PersonalCareproductsList from "../customer/PersonalCareproducts.js";
 import DairyProductsList from "../customer/Dairyproducts.js";
@@ -57,40 +62,49 @@ import ManageChannels from "../manager/ManageChannels.js";
 import ScroScreen from "../screans/scro.js";
 import SplashScreen from "../screans/logo.js";
 import WelcomeScreen from "../screans/scro.js";
-const ProfileStack = createStackNavigator();
+// const ProfileStack = createNativeStackNavigator();
 const Authentic = createNativeStackNavigator();
 
-const ProfileStackScreen = ({ navigation }) => {
-  return (
-    <ProfileStack.Navigator
-      screenOptions={{
-        headerStyle: { backgroundColor: '#1f65ff' },
-        headerTintColor: '#fff',
-        headerTitleStyle: { fontWeight: 'bold' },
-      }}
-    >
-      <ProfileStack.Screen
-        name="Profile"
-        component={ProfileScreen}
-        options={{
-          headerLeft: () => (
-            <View style={{ marginLeft: 10 }}>
-              <Icon
-                name="menu"
-                type="ionicon"
-                size={25}
-                color="#fff"
-                onPress={() => navigation.openDrawer()}
-              />
-            </View>
-          ),
-        }}
-      />
-    </ProfileStack.Navigator>
-  );
-};
+// const Tab = createMaterialBottomTabNavigator();
+
+//  const MyTabs = () => {
+//   return (
+//     <Tab.Navigator
+//       initialRouteName="Profile"
+//       activeColor="#fff"
+//       shifting={true} // Enables tabBarColor effect
+//     >
+//       <Tab.Screen
+//         name="Profile"
+//         component={ProfileStackScreen}
+//         options={{
+//           tabBarLabel: 'Profile',
+//           tabBarColor: '#694fad',
+//           tabBarIcon: ({ color }) => (
+//             <Icon name="ios-person" type="ionicon" color={color} size={26} />
+//           ),
+//         }}
+//       />
+
+//       {/* <Tab.Screen
+//         name="Explore"
+//         component={ExploreScreen}
+//         options={{
+//           tabBarLabel: 'Explore',
+//           tabBarColor: '#d02860',
+//           tabBarIcon: ({ color }) => (
+//             <Icon name="ios-aperture" type="ionicon" color={color} size={26} />
+//           ),
+//         }}
+//       /> */}
+//     </Tab.Navigator>
+//   );
+// };
+
+
 export default function AuthicStackNavig() {
   return (
+    
     <Authentic.Navigator initialRouteName="logo">
       <Authentic.Screen
         name="logo"
@@ -284,23 +298,14 @@ export default function AuthicStackNavig() {
           },
         }}
       />
-            <Authentic.Screen
-        name="ProfileScreen"
-        component={ProfileScreen}
-        options={{
-          tapBarLabel:'Profile',
-          tapBarColor:"#694fad",
-          tapBarIcon:({color})=>(
-            <Icon name="ios-person" color={color} size={26}></Icon>
-          ),
-         
-          title: "Profile",
-          ...TransitionPresets.RevealFromBottomAndroid,
-          headerStyle: {
-            backgroundColor: "#FFDC2B",
-          },
-        }}
-      />
+            
+<Authentic.Screen
+  name="EditProfile"
+  component={EditProfileScreen} 
+  options={{
+    title: 'Edit Profile', 
+  }}
+/>
 
       
       <Authentic.Screen
@@ -980,6 +985,46 @@ export default function AuthicStackNavig() {
           ),
         })}
       />
+      <Authentic.Screen
+        name="EditProfileScreen"
+        component={EditProfileScreen}
+        options={{
+          title: "Profile",
+          ...TransitionPresets.RevealFromBottomAndroid,
+          headerStyle: { backgroundColor: "#FFDC2B" },
+
+        }}
+        />
+
+<Authentic.Screen
+        name="ProfileScreen"
+        component={ProfileScreen}
+        options={{
+          title: "Profile",
+          ...TransitionPresets.RevealFromBottomAndroid,
+          headerStyle: { backgroundColor: "#FFDC2B" },
+          // headerLeft: () => (
+          //   <Icon.Button
+          //     name="menu"
+          //     type="ionicon"
+          //     size={25}
+          //     backgroundColor="#FFDC2B"
+          //     color="#fff"
+          //     onPress={() => navigation.navigate('EditProfileScreen')}
+          //   />
+          // ),
+          headerRight: () => (
+            <MaterialCommunityIcons.Button
+              name="account-edit"
+              size={25}
+              backgroundColor="#FFDC2B"
+              color="#000"
+              onPress={() => navigation.navigate("EditProfileScreen")}
+            />
+          ),
+        }}
+        />
     </Authentic.Navigator>
+
   );
 }

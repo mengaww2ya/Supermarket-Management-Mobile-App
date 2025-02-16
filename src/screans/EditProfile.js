@@ -6,8 +6,10 @@ import {
   Caption,
   Text,
   TouchableRipple,
+
 } from 'react-native-paper';
 import { Icon } from 'react-native-elements';
+import { Ionicons } from '@expo/vector-icons';
 const ProfileScreen = () => {
   return (
     <SafeAreaView style={styles.container}>
