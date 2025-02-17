@@ -1,5 +1,6 @@
 import React from "react";
 import { SafeAreaView, StyleSheet, View } from "react-native";
+import "../../global.css";
 import AuthicStackNavig from "../navigator/stackNavigator.js";
 export default function App() {
   return (
