@@ -59,7 +59,7 @@ export default function ManagerHomePage({ navigation }) {
   const totalSuppliers = dashboardData.suppliers.total;
   const pendingOrders = dashboardData.suppliers.pendingOrders;
   return (
-    <SafeAreaView style={styles.homeContainer}>
+    <SafeAreaView  style={styles.homeContainer}>
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContainer}
@@ -71,7 +71,8 @@ export default function ManagerHomePage({ navigation }) {
         >
           <Text style={styles.textTitle}>Welcome, Manager!</Text>
           {/* Employee Management */}
-          <View
+          <View 
+           
             style={[
               styles.buttonview,
               { width: screenWidth * 0.85, height: screenHeight * 0.4 },
