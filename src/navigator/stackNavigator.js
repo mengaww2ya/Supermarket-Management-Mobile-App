@@ -10,7 +10,7 @@ import Login from "../screans/login.js";
 import Welcome from "../screans/welcome.js";
 import EditProfileScreen from "../screans/EditProfileScreen.js";
 import BakeryproductsList from "../customer/Bakeryproducts.js";
-import PersonalCareproductsList from "../customer/PersonalCareproducts.js";
+import PersonalCareproductsList from "../customer/PersonalCareproducts.js"; 
 import DairyProductsList from "../customer/Dairyproducts.js";
 import FreshProductsList from "../customer/Freshproducts.js";
 import FrozenproductsList from "../customer/Frozenproducts.js";
@@ -953,26 +953,8 @@ export default function AuthicStackNavig() {
         options={{
           title: "Profile",
           ...TransitionPresets.RevealFromBottomAndroid,
-          headerStyle: { backgroundColor: "#FFDC2B" },
-          // headerLeft: () => (
-          //   <Icon.Button
-          //     name="menu"
-          //     type="ionicon"
-          //     size={25}
-          //     backgroundColor="#FFDC2B"
-          //     color="#fff"
-          //     onPress={() => navigation.navigate('EditProfileScreen')}
-          //   />
-          // ),
-          headerRight: () => (
-            <MaterialCommunityIcons.Button
-              name="account-edit"
-              size={25}
-              backgroundColor="#FFDC2B"
-              color="#000"
-              onPress={() => navigation.navigate("EditProfileScreen")}
-            />
-          ),
+          headerStyle: { backgroundColor: "#FFDC2B" }
+         
         }}
         />
     </Authentic.Navigator>

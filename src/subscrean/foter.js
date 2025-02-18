@@ -68,11 +68,11 @@ export default function Footer({ navigation }) {
         color="#517fa4"
         size={30}
         onPress={() => {
-          // navigation.navigate("Profile");
+          navigation.navigate("ProfileScreen");
           setviewProfile(true);
         }}
       />
-      <Modal
+      {/* <Modal
         visible={viewProfile}
         onRequestClose={() => {
           setviewProfile(false);
@@ -94,7 +94,7 @@ export default function Footer({ navigation }) {
             </TouchableOpacity>
           </View>
         </View>
-      </Modal>
+      </Modal> */}
       <Modal
         visible={viewFvorite}
         onRequestClose={() => {
