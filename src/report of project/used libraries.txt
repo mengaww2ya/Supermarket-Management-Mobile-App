@@ -8,3 +8,4 @@ expo-image-picker
   react-native-dropdown-picker
   react-native-chart-kit
   react-native-svg
+  react-native-paper

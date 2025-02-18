@@ -23,8 +23,8 @@ import Signup from "../screans/signup.js";
 import ProfileScreen from "../screans/EditProfile.js";
 import ManagerHomePage from "../manager/managerHomePage.js";
 import DeveloperHomePage from "../screans/developingHompage.js";
-import emplyeeManagement from "../manager/employee management.js";
-import customerManagement from "../manager/customerManagement.js";
+import EmployeeManagement from "../manager/employee management.js";
+import CustomerManagement from "../manager/customerManagement.js";
 import inventoryManagement from "../manager/inventoryManagement.js";
 import promotionManagement from "../manager/promotionDiscount.js";
 import saleRevenueManagement from "../manager/saleRevenueManagement.js";
@@ -62,56 +62,17 @@ import ManageChannels from "../manager/ManageChannels.js";
 import ScroScreen from "../screans/scro.js";
 import SplashScreen from "../screans/logo.js";
 import WelcomeScreen from "../screans/scro.js";
-// const ProfileStack = createNativeStackNavigator();
 const Authentic = createNativeStackNavigator();
-
-// const Tab = createMaterialBottomTabNavigator();
-
-//  const MyTabs = () => {
-//   return (
-//     <Tab.Navigator
-//       initialRouteName="Profile"
-//       activeColor="#fff"
-//       shifting={true} // Enables tabBarColor effect
-//     >
-//       <Tab.Screen
-//         name="Profile"
-//         component={ProfileStackScreen}
-//         options={{
-//           tabBarLabel: 'Profile',
-//           tabBarColor: '#694fad',
-//           tabBarIcon: ({ color }) => (
-//             <Icon name="ios-person" type="ionicon" color={color} size={26} />
-//           ),
-//         }}
-//       />
-
-//       {/* <Tab.Screen
-//         name="Explore"
-//         component={ExploreScreen}
-//         options={{
-//           tabBarLabel: 'Explore',
-//           tabBarColor: '#d02860',
-//           tabBarIcon: ({ color }) => (
-//             <Icon name="ios-aperture" type="ionicon" color={color} size={26} />
-//           ),
-//         }}
-//       /> */}
-//     </Tab.Navigator>
-//   );
-// };
 
 
 export default function AuthicStackNavig() {
   return (
-    
     <Authentic.Navigator initialRouteName="logo">
       <Authentic.Screen
         name="logo"
         component={logo}
         options={{
           headerShown: false,
-
         }}
       />
       <Authentic.Screen
@@ -119,7 +80,6 @@ export default function AuthicStackNavig() {
         component={WelcomeScreen}
         options={{
           headerShown: false,
-
         }}
       />
       <Authentic.Screen
@@ -127,7 +87,6 @@ export default function AuthicStackNavig() {
         component={SplashScreen}
         options={{
           headerShown: false,
-
         }}
       />
       <Authentic.Screen
@@ -135,7 +94,6 @@ export default function AuthicStackNavig() {
         component={ScroScreen}
         options={{
           headerShown: false,
-
         }}
       />
       <Authentic.Screen
@@ -298,14 +256,23 @@ export default function AuthicStackNavig() {
           },
         }}
       />
-            
-<Authentic.Screen
-  name="EditProfile"
-  component={EditProfileScreen} 
-  options={{
-    title: 'Edit Profile', 
-  }}
-/>
+            <Authentic.Screen
+        name="ProfileScreen"
+        component={ProfileScreen}
+        options={{
+          tapBarLabel:'Profile',
+          tapBarColor:"#694fad",
+          tapBarIcon:({color})=>(
+            <Icon name="ios-person" color={color} size={26}></Icon>
+          ),
+         
+          title: "Profile",
+          ...TransitionPresets.RevealFromBottomAndroid,
+          headerStyle: {
+            backgroundColor: "#FFDC2B",
+          },
+        }}
+      />
 
       
       <Authentic.Screen
@@ -341,8 +308,8 @@ export default function AuthicStackNavig() {
         }}
       />
       <Authentic.Screen
-        name="emplyeeManagement"
-        component={emplyeeManagement}
+        name="EmployeeManagement"
+        component={EmployeeManagement}
         options={{
           headerShown: true,
           headerTitleStyle: {
@@ -357,8 +324,8 @@ export default function AuthicStackNavig() {
         }}
       />
       <Authentic.Screen
-        name="customerManagement"
-        component={customerManagement}
+        name="CustomerManagement"
+        component={CustomerManagement}
         options={{
           headerShown: true,
           headerTitleStyle: {
@@ -533,54 +500,54 @@ export default function AuthicStackNavig() {
         }}
       />
       <Authentic.Screen
-  name="AddCategory"
-  component={AddCategory} // Make sure AddCategory is imported
-  options={{
-    headerShown: true,
-    headerTitleStyle: {
-      color: "#2ECE33",
-      fontSize: 25,
-    },
-    title: "ADD CATEGORY",
-    ...TransitionPresets.RevealFromBottomAndroid,
-    headerStyle: {
-      backgroundColor: "#FFDC2B",
-    },
-  }}
-/>
+        name="AddCategory"
+        component={AddCategory} // Make sure AddCategory is imported
+        options={{
+          headerShown: true,
+          headerTitleStyle: {
+            color: "#2ECE33",
+            fontSize: 25,
+          },
+          title: "ADD CATEGORY",
+          ...TransitionPresets.RevealFromBottomAndroid,
+          headerStyle: {
+            backgroundColor: "#FFDC2B",
+          },
+        }}
+      />
 
       <Authentic.Screen
-  name="UpdateProduct"
-  component={UpdateProduct}
-  options={{
-    headerShown: true,
-    headerTitleStyle: {
-      color: "#2ECE33",
-      fontSize: 25,
-    },
-    title: "UPDATE PRODUCT",
-    ...TransitionPresets.RevealFromBottomAndroid,
-    headerStyle: {
-      backgroundColor: "#FFDC2B",
-    },
-  }}
-/>
-<Authentic.Screen
-  name="ViewProductList"
-  component={ViewProductList}
-  options={{
-    headerShown: true,
-    headerTitleStyle: {
-      color: "#2ECE33",
-      fontSize: 25,
-    },
-    title: "Product List",
-    ...TransitionPresets.RevealFromBottomAndroid,
-    headerStyle: {
-      backgroundColor: "#FFDC2B",
-    },
-  }}
-/>
+        name="UpdateProduct"
+        component={UpdateProduct}
+        options={{
+          headerShown: true,
+          headerTitleStyle: {
+            color: "#2ECE33",
+            fontSize: 25,
+          },
+          title: "UPDATE PRODUCT",
+          ...TransitionPresets.RevealFromBottomAndroid,
+          headerStyle: {
+            backgroundColor: "#FFDC2B",
+          },
+        }}
+      />
+      <Authentic.Screen
+        name="ViewProductList"
+        component={ViewProductList}
+        options={{
+          headerShown: true,
+          headerTitleStyle: {
+            color: "#2ECE33",
+            fontSize: 25,
+          },
+          title: "Product List",
+          ...TransitionPresets.RevealFromBottomAndroid,
+          headerStyle: {
+            backgroundColor: "#FFDC2B",
+          },
+        }}
+      />
 
       <Authentic.Screen
         name="asuplierManagement"
