@@ -256,23 +256,7 @@ export default function AuthicStackNavig() {
           },
         }}
       />
-            <Authentic.Screen
-        name="ProfileScreen"
-        component={ProfileScreen}
-        options={{
-          tapBarLabel:'Profile',
-          tapBarColor:"#694fad",
-          tapBarIcon:({color})=>(
-            <Icon name="ios-person" color={color} size={26}></Icon>
-          ),
-         
-          title: "Profile",
-          ...TransitionPresets.RevealFromBottomAndroid,
-          headerStyle: {
-            backgroundColor: "#FFDC2B",
-          },
-        }}
-      />
+          
 
       
       <Authentic.Screen
