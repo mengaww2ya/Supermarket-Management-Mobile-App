@@ -7,8 +7,9 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { colors } from "react-native-elements";
+import Icon from "react-native-vector-icons/MaterialIcons"; // Import Material Icons
 
-export default function CustomerSuport() {
+export default function CustomerSupport() {
   return (
     <SafeAreaView>
       <ScrollView
@@ -17,47 +18,37 @@ export default function CustomerSuport() {
         contentContainerStyle={{ flexGrow: 1 }}
       >
         <View style={styles.container}>
-          <Text style={styles.textTitle}>Customer Support</Text>
+
           <View style={styles.buttoncontainer}>
             <TouchableOpacity style={styles.button}>
               <View style={styles.buttonview}>
-                <Text style={styles.buttontxt}>handle customer compliant</Text>
-                <Text style={styles.btnsubtitl}> answer for customer quesion</Text>
+                <Icon name="star" size={30} color="#006400" />
+                <Text style={styles.buttontxt}>Review</Text>
+                <Text style={styles.btnsubtitl}></Text>
               </View>
             </TouchableOpacity>
+
             <TouchableOpacity style={styles.button}>
               <View style={styles.buttonview}>
-                <Text style={styles.buttontxt}>View customer compliants</Text>
-                <Text style={styles.btnsubtitl}>
-                  display customer compliants
-                </Text>
+                <Icon name="feedback" size={30} color="#006400" />
+                <Text style={styles.buttontxt}>Feedback</Text>
+                <Text style={styles.btnsubtitl}></Text>
               </View>
             </TouchableOpacity>
-            {/* <TouchableOpacity style={styles.button}>
-              <View style={styles.buttonview}>
-                <Text style={styles.buttontxt}>Customer Assistance</Text>
-                <Text style={styles.btnsubtitl}>
-                  Manage Customer Assistance
-                </Text>
-              </View>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.button}>
-              <View style={styles.buttonview}>
-                <Text style={styles.buttontxt}>Stock Manager</Text>
-                <Text style={styles.btnsubtitl}>Manage stock Manager</Text>
-              </View>
-            </TouchableOpacity> */}
           </View>
         </View>
       </ScrollView>
     </SafeAreaView>
   );
 }
+
 const styles = StyleSheet.create({
   container: {
     backgroundColor: "white",
     borderColor: colors.grey5,
     borderWidth: 1,
+    padding: 15,
+
   },
   buttoncontainer: {
     flexDirection: "row",
@@ -74,6 +65,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   button: {
+
     backgroundColor: colors.grey5,
     width: "47%", // Responsive grid layout
     height: 120,
@@ -89,12 +81,14 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
     elevation: 4, // For Android shadow
   },
+  buttonview: {
+    alignItems: "center",
+  },
   buttontxt: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#FFF",
-    marginBottom: 5,
     color: "#333",
+    marginTop: 5,
   },
   btnsubtitl: {
     fontSize: 12,

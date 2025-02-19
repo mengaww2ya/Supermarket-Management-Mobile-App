@@ -10,7 +10,7 @@ import Login from "../screans/login.js";
 import Welcome from "../screans/welcome.js";
 import EditProfileScreen from "../screans/EditProfileScreen.js";
 import BakeryproductsList from "../customer/Bakeryproducts.js";
-import PersonalCareproductsList from "../customer/PersonalCareproducts.js"; 
+import PersonalCareproductsList from "../customer/PersonalCareproducts.js";
 import DairyProductsList from "../customer/Dairyproducts.js";
 import FreshProductsList from "../customer/Freshproducts.js";
 import FrozenproductsList from "../customer/Frozenproducts.js";
@@ -256,9 +256,9 @@ export default function AuthicStackNavig() {
           },
         }}
       />
-          
 
-      
+
+
       <Authentic.Screen
         name="ManagerHomePage"
         component={ManagerHomePage}
@@ -945,18 +945,18 @@ export default function AuthicStackNavig() {
           headerStyle: { backgroundColor: "#FFDC2B" },
 
         }}
-        />
+      />
 
-<Authentic.Screen
+      <Authentic.Screen
         name="ProfileScreen"
         component={ProfileScreen}
         options={{
           title: "Profile",
           ...TransitionPresets.RevealFromBottomAndroid,
           headerStyle: { backgroundColor: "#FFDC2B" }
-         
+
         }}
-        />
+      />
     </Authentic.Navigator>
 
   );
