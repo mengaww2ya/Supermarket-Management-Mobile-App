@@ -59,29 +59,33 @@ export default function ManagerHomePage({ navigation }) {
   const totalSuppliers = dashboardData.suppliers.total;
   const pendingOrders = dashboardData.suppliers.pendingOrders;
   return (
-    <SafeAreaView  style={styles.homeContainer}>
+    <SafeAreaView className="flex-1 bg-gray-100">
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContainer}
+      contentContainerStyle={{
+    paddingBottom: 20,
+            alignItems: "center",
+  }}
       >
         <ImageBackground
+        className="w-full  items-center py-5 flex-1 justify-start"
           source={homeBackground}
-          style={styles.container}
+          
           resizeMode="cover"
         >
-          <Text style={styles.textTitle}>Welcome, Manager!</Text>
+          <Text className="text-2xl font-bold text-gray-800 mb-5 text-center">Welcome, Manager!</Text>
           {/* Employee Management */}
           <View 
-           
+           className="flex-1 bg-white rounded-2xl p-6 items-center justify-center shadow-md mb-5"
             style={[
-              styles.buttonview,
+              
               { width: screenWidth * 0.85, height: screenHeight * 0.4 },
             ]}
           >
-            <View style={styles.buttonContent}>
-              <Text style={styles.metricText}>
+            <View className="items-center w-full">
+              <Text className="text-base font-bold text-gray-700 mb-1 text-center">
                 Total Employees:{" "}
-                <Text style={styles.metricValue}>
+                <Text className="text-lg font-bold text-blue-500">
                   {dashboardData.employees.total}
                 </Text>
               </Text>
@@ -125,32 +129,33 @@ export default function ManagerHomePage({ navigation }) {
               />
             </View>
             <TouchableOpacity
-              style={styles.button}
+             className="bg-green-500 rounded-lg py-3 px-6 mt-2 w-11/12 items-center"
               onPress={() => {
                 navigation.navigate("EmployeeManagement");
               }}
             >
-              <Text style={styles.buttontxt}>Employee Management</Text>
+              <Text  className="text-white text-base font-bold text-center">Employee Management</Text>
             </TouchableOpacity>
           </View>
           {/* Customer Management */}
           <View
+          className="bg-white rounded-2xl p-6 items-center justify-center shadow-md mb-5"
             style={[
-              styles.buttonview,
+              
               { width: screenWidth * 0.85, height: screenHeight * 0.45 },
             ]}
           >
-            <View style={styles.buttonContent}>
-              <Text style={styles.metricText}>
+            <View className="items-center w-full">
+              <Text className="text-base font-bold text-gray-700 mb-1 text-center">
                 Total Customers:{" "}
-                <Text style={styles.metricValue}>
+                <Text className="text-lg font-bold text-blue-500">
                   {dashboardData.customers.total}
                 </Text>
               </Text>
 
-              <Text style={styles.metricText}>
+              <Text className="text-base font-bold text-gray-700 mb-1 text-center">
                 Total Feedback:{" "}
-                <Text style={styles.metricValue}>
+                <Text className="text-lg font-bold text-blue-500">
                   {dashboardData.customers.feedback}
                 </Text>
               </Text>
@@ -185,8 +190,9 @@ export default function ManagerHomePage({ navigation }) {
 
               {/* Feedback Percentage */}
               <Text
+              className="text-base font-bold text-gray-700 mb-1 text-center"
                 style={[
-                  styles.metricText,
+                  
                   { fontSize: 16, fontWeight: "bold", color: "#007bff" },
                 ]}
               >
@@ -201,32 +207,33 @@ export default function ManagerHomePage({ navigation }) {
             </View>
 
             <TouchableOpacity
-              style={styles.button}
+             className="bg-green-500 rounded-lg py-3 px-6 mt-2 w-11/12 items-center"
               onPress={() => {
                 navigation.navigate("CustomerManagement");
               }}
             >
-              <Text style={styles.buttontxt}>Customer Management</Text>
+              <Text  className="text-white text-base font-bold text-center">Customer Management</Text>
             </TouchableOpacity>
           </View>
 
           {/* Promotion & Discount */}
           <View
+          className="bg-white rounded-2xl p-6 items-center justify-center shadow-md mb-5"
             style={[
-              styles.buttonview,
+              
               { width: screenWidth * 0.85, height: screenHeight * 0.4 },
             ]}
           >
-            <View style={styles.buttonContent}>
-              <Text style={styles.metricText}>
+            <View className="items-center w-full">
+              <Text className="text-base font-bold text-gray-700 mb-1 text-center">
                 Discount Categories:{" "}
-                <Text style={styles.metricValue}>
+                <Text className="text-lg font-bold text-blue-500">
                   {dashboardData.promotions.discountCategories}
                 </Text>
               </Text>
-              <Text style={styles.metricText}>
+              <Text className="text-base font-bold text-gray-700 mb-1 text-center">
                 Discounted Products:{" "}
-                <Text style={styles.metricValue}>
+                <Text className="text-lg font-bold text-blue-500">
                   {dashboardData.promotions.discountedProducts}
                 </Text>
               </Text>
@@ -262,31 +269,32 @@ export default function ManagerHomePage({ navigation }) {
             </View>
 
             <TouchableOpacity
-              style={styles.button}
+             className="bg-green-500 rounded-lg py-3 px-6 mt-2 w-11/12 items-center"
               onPress={() => {
                 navigation.navigate("promotionManagement");
               }}
             >
-              <Text style={styles.buttontxt}>Promotion & Discount</Text>
+              <Text  className="text-white text-base font-bold text-center">Promotion & Discount</Text>
             </TouchableOpacity>
           </View>
           {/* Inventory Management */}
           <View
+          className="bg-white rounded-2xl p-6 items-center justify-center shadow-md mb-5"
             style={[
-              styles.buttonview,
+              
               { width: screenWidth * 0.85, height: screenHeight * 0.45 },
             ]}
           >
-            <View style={styles.buttonContent}>
-              <Text style={styles.metricText}>
+            <View className="items-center w-full">
+              <Text className="text-base font-bold text-gray-700 mb-1 text-center">
                 Total Products:{" "}
-                <Text style={styles.metricValue}>
+                <Text className="text-lg font-bold text-blue-500">
                   {dashboardData.inventory.totalProducts}
                 </Text>
               </Text>
-              <Text style={styles.metricText}>
+              <Text className="text-base font-bold text-gray-700 mb-1 text-center">
                 Total Categories:{" "}
-                <Text style={styles.metricValue}>
+                <Text className="text-lg font-bold text-blue-500">
                   {dashboardData.inventory.totalCategories}
                 </Text>
               </Text>
@@ -312,37 +320,38 @@ export default function ManagerHomePage({ navigation }) {
             </View>
 
             <TouchableOpacity
-              style={styles.button}
+             className="bg-green-500 rounded-lg py-3 px-6 mt-2 w-11/12 items-center"
               onPress={() => {
                 navigation.navigate("inventoryManagement");
               }}
             >
-              <Text style={styles.buttontxt}>Inventory Management</Text>
+              <Text  className="text-white text-base font-bold text-center">Inventory Management</Text>
             </TouchableOpacity>
           </View>
           {/* Order Management */}
           <View
+          className="bg-white rounded-2xl p-6 items-center justify-center shadow-md mb-5"
             style={[
-              styles.buttonview,
+              
               { width: screenWidth * 0.85, height: screenHeight * 0.5 },
             ]}
           >
-            <View style={styles.buttonContent}>
-              <Text style={styles.metricText}>
+            <View className="items-center w-full">
+              <Text className="text-base font-bold text-gray-700 mb-1 text-center">
                 Incoming Orders:{" "}
-                <Text style={styles.metricValue}>
+                <Text className="text-lg font-bold text-blue-500">
                   {dashboardData.orders.incoming}
                 </Text>
               </Text>
-              <Text style={styles.metricText}>
+              <Text className="text-base font-bold text-gray-700 mb-1 text-center">
                 Pending Orders:{" "}
-                <Text style={styles.metricValue}>
+                <Text className="text-lg font-bold text-blue-500">
                   {dashboardData.orders.pending}
                 </Text>
               </Text>
-              <Text style={styles.metricText}>
+              <Text className="text-base font-bold text-gray-700 mb-1 text-center">
                 Transit Orders:{" "}
-                <Text style={styles.metricValue}>
+                <Text className="text-lg font-bold text-blue-500">
                   {dashboardData.orders.transit}
                 </Text>
               </Text>
@@ -370,37 +379,38 @@ export default function ManagerHomePage({ navigation }) {
             </View>
 
             <TouchableOpacity
-              style={styles.button}
+             className="bg-green-500 rounded-lg py-3 px-6 mt-2 w-11/12 items-center"
               onPress={() => {
                 navigation.navigate("orderManagement");
               }}
             >
-              <Text style={styles.buttontxt}>Order Management</Text>
+              <Text  className="text-white text-base font-bold text-center">Order Management</Text>
             </TouchableOpacity>
           </View>
           {/* Sales & Revenue */}
           <View
+          className="bg-white rounded-2xl p-6 items-center justify-center shadow-md mb-5"
             style={[
-              styles.buttonview,
+              
               { width: screenWidth * 0.85, height: screenHeight * 0.5 },
             ]}
           >
-            <View style={styles.buttonContent}>
-              <Text style={styles.metricText}>
+            <View className="items-center w-full">
+              <Text className="text-base font-bold text-gray-700 mb-1 text-center">
                 Total Revenue:{" "}
-                <Text style={styles.metricValue}>
+                <Text className="text-lg font-bold text-blue-500">
                   {dashboardData.sales.totalRevenue}
                 </Text>
               </Text>
-              <Text style={styles.metricText}>
+              <Text className="text-base font-bold text-gray-700 mb-1 text-center">
                 Total Sales:{" "}
-                <Text style={styles.metricValue}>
+                <Text className="text-lg font-bold text-blue-500">
                   {dashboardData.sales.totalSales}
                 </Text>
               </Text>
-              <Text style={styles.metricText}>
+              <Text className="text-base font-bold text-gray-700 mb-1 text-center">
                 Total Profit:{" "}
-                <Text style={styles.metricValue}>
+                <Text className="text-lg font-bold text-blue-500">
                   {dashboardData.sales.totalProfit}
                 </Text>
               </Text>
@@ -428,31 +438,32 @@ export default function ManagerHomePage({ navigation }) {
             </View>
 
             <TouchableOpacity
-              style={styles.button}
+             className="bg-green-500 rounded-lg py-3 px-6 mt-2 w-11/12 items-center"
               onPress={() => {
                 navigation.navigate("saleRevenueManagement");
               }}
             >
-              <Text style={styles.buttontxt}>Sales & Revenue</Text>
+              <Text  className="text-white text-base font-bold text-center">Sales & Revenue</Text>
             </TouchableOpacity>
           </View>
           {/* Supplier Management */}
           <View
+          className="bg-white rounded-2xl p-6 items-center justify-center shadow-md mb-5"
             style={[
-              styles.buttonview,
+              
               { width: screenWidth * 0.85, height: screenHeight * 0.5 },
             ]}
           >
-            <View style={styles.buttonContent}>
-              <Text style={styles.metricText}>
+            <View className="items-center w-full">
+              <Text className="text-base font-bold text-gray-700 mb-1 text-center">
                 Total Suppliers:{" "}
-                <Text style={styles.metricValue}>
+                <Text className="text-lg font-bold text-blue-500">
                   {dashboardData.suppliers.total}
                 </Text>
               </Text>
-              <Text style={styles.metricText}>
+              <Text className="text-base font-bold text-gray-700 mb-1 text-center">
                 Pending Orders:{" "}
-                <Text style={styles.metricValue}>
+                <Text className="text-lg font-bold text-blue-500">
                   {dashboardData.suppliers.pendingOrders}
                 </Text>
               </Text>
@@ -491,37 +502,37 @@ export default function ManagerHomePage({ navigation }) {
             </View>
 
             <TouchableOpacity
-              style={styles.button}
+             className="bg-green-500 rounded-lg py-3 px-6 mt-2 w-11/12 items-center"
               onPress={() => {
                 navigation.navigate("suplierManagement");
               }}
             >
-              <Text style={styles.buttontxt}>Supplier Management</Text>
+              <Text  className="text-white text-base font-bold text-center">Supplier Management</Text>
             </TouchableOpacity>
           </View>
           {/* Alerts & Notifications */}
           <View
+          className="bg-white rounded-2xl p-6 items-center justify-center shadow-md mb-5"
             style={[
-              styles.buttonview,
               { width: screenWidth * 0.85, height: screenHeight * 0.5 },
             ]}
           >
-            <View style={styles.buttonContent}>
-              <Text style={styles.metricText}>
+            <View className="items-center w-full">
+              <Text className="text-base font-bold text-gray-700 mb-1 text-center">
                 Low Stock Alerts:{" "}
-                <Text style={styles.metricValue}>
+                <Text className="text-lg font-bold text-blue-500">
                   {dashboardData.alerts.lowStock}
                 </Text>
               </Text>
-              <Text style={styles.metricText}>
+              <Text className="text-base font-bold text-gray-700 mb-1 text-center">
                 Pending Order Alerts:{" "}
-                <Text style={styles.metricValue}>
+                <Text className="text-lg font-bold text-blue-500">
                   {dashboardData.alerts.pendingOrders}
                 </Text>
               </Text>
-              <Text style={styles.metricText}>
+              <Text className="text-base font-bold text-gray-700 mb-1 text-center">
                 Expiry Warnings:{" "}
-                <Text style={styles.metricValue}>
+                <Text className="text-lg font-bold text-blue-500">
                   {dashboardData.alerts.expiryWarnings}
                 </Text>
               </Text>
@@ -556,12 +567,12 @@ export default function ManagerHomePage({ navigation }) {
             </View>
 
             <TouchableOpacity
-              style={styles.button}
+             className="bg-green-500 rounded-lg py-3 px-6 mt-2 w-11/12 items-center"
               onPress={() => {
                 navigation.navigate("alertNotifManagement");
               }}
             >
-              <Text style={styles.buttontxt}>Alerts & Notifications</Text>
+              <Text  className="text-white text-base font-bold text-center">Alerts & Notifications</Text>
             </TouchableOpacity>
           </View>
         </ImageBackground>
@@ -569,79 +580,3 @@ export default function ManagerHomePage({ navigation }) {
     </SafeAreaView>
   );
 }
-
-// Styles remain the same as in your original code.
-const styles = StyleSheet.create({
-  homeContainer: {
-    flex: 1,
-    backgroundColor: "#F4F6F9", // Light background for a modern look
-  },
-  scrollContainer: {
-    flexGrow: 1,
-    paddingBottom: 20,
-    alignItems: "center",
-  },
-  container: {
-    flex: 1,
-    width: "100%",
-    height: "100%",
-    justifyContent: "center",
-    alignItems: "center",
-    paddingVertical: 20,
-  },
-  textTitle: {
-    fontSize: 26,
-    fontWeight: "bold",
-    marginBottom: 20,
-    textAlign: "center",
-    color: "#333",
-  },
-  buttonview: {
-    backgroundColor: "#FFFFFF", // Clean white cards
-    borderRadius: 15,
-    padding: 25,
-    alignItems: "center",
-    justifyContent: "center",
-    elevation: 5, // Shadow for Android
-    shadowColor: "#000", // Shadow for iOS
-    shadowOpacity: 0.1,
-    shadowOffset: { width: 0, height: 3 },
-    shadowRadius: 5,
-    marginBottom: 20,
-  },
-  buttonContent: {
-    alignItems: "center",
-    width: "100%",
-  },
-  metricText: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#34495E",
-    marginBottom: 5,
-    textAlign: "center",
-  },
-  metricValue: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#007bff",
-  },
-  button: {
-    backgroundColor: "green",
-    borderRadius: 10,
-    paddingVertical: 12,
-    paddingHorizontal: 25,
-    marginTop: 10,
-    width: "90%",
-    alignItems: "center",
-  },
-  buttontxt: {
-    color: "#FFF",
-    fontSize: 16,
-    fontWeight: "bold",
-    // color: "#333",
-    textAlign: "center",
-  },
-  icon: {
-    marginBottom: 10,
-  },
-});
