@@ -1,142 +1,49 @@
-import { SafeAreaView, ScrollView, View, Text, StyleSheet,TouchableOpacity } from "react-native";
-import { colors } from "react-native-elements";
+import { SafeAreaView, ScrollView, View, Text, TouchableOpacity } from "react-native";
+import { useState } from "react";
 
-export default function inventoryManagement() {
+export default function InventoryManagement() {
+  const [pressed, setPressed] = useState(null);
+
+  const menuItems = [
+    { title: "Stock Level", subtitle: "Monitor stock levels in real-time" },
+    { title: "Product Detail", subtitle: "Update product details like price" },
+    { title: "Stock Thresholds", subtitle: "Set minimum stock thresholds and reorder levels" },
+    { title: "Expiry Date", subtitle: "Track expiration dates for perishable items" },
+    { title: "Stock Report", subtitle: "Generate stock reports and analytics" },
+  ];
+
   return (
-    <SafeAreaView>
-      <ScrollView
-        style={{ paddingBottom: 20 }}
-        showsVerticalScrollIndicator={true}
-        contentContainerStyle={{ flexGrow: 1 }}
-      >
+    <SafeAreaView className="flex-1 bg-gray-100">
+      <ScrollView className="px-4 py-6">
         {/* Title */}
-        <View style={styles.container}>
-          <Text style={styles.textTitle}>Inventory Management</Text>
+        <View className="bg-blue-600 p-5 rounded-lg shadow-lg">
+          <Text className="text-2xl font-bold text-white text-center">Inventory Management</Text>
+        </View>
 
-          {/* Buttons */}
-          <View style={styles.buttonContainer}>
+        {/* Button Grid */}
+        <View className="flex-row flex-wrap justify-between mt-6">
+          {menuItems.map((item, index) => (
             <TouchableOpacity
-              style={styles.button}
-              onPress={() => {
-                alert("Hey! this button is not functional right now.", "ok");
+              key={index}
+              className={`w-[48%] bg-white p-5 rounded-xl shadow-lg mb-4 ${
+                pressed === index ? "bg-blue-100 scale-95" : "active:bg-gray-200"
+              }`}
+              style={{
+                minHeight: 120,
+                justifyContent: "center",
+                alignItems: "center",
+                elevation: 5,
               }}
+              onPressIn={() => setPressed(index)}
+              onPressOut={() => setPressed(null)}
+              onPress={() => alert(`🚀 ${item.title} coming soon!`)}
             >
-              <View style={styles.buttonview}>
-                <Text style={styles.buttontxt}>Stock level</Text>
-                <Text style={styles.btnsubtitl}>
-                  Monitor stock levels in real-time
-                </Text>
-              </View>
+              <Text className="text-lg font-semibold text-gray-800 text-center">{item.title}</Text>
+              <Text className="text-gray-500 text-center text-sm mt-1">{item.subtitle}</Text>
             </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.button}
-              onPress={() => {
-                alert("Hey! this button is not functional right now.", "ok");
-              }}
-            >
-              <View style={styles.buttonview}>
-                <Text style={styles.buttontxt}>Product Detail</Text>
-                <Text style={styles.btnsubtitl}>
-                  Update product details like price
-                </Text>
-              </View>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.button}
-              onPress={() => {
-                alert("Hey! this button is not functional right now.", "ok");
-              }}
-            >
-              <View style={styles.buttonview}>
-                <Text style={styles.buttontxt}>Stock thresholds</Text>
-                <Text style={styles.btnsubtitl}>
-                  Set minimum stock thresholds and reorder levels
-                </Text>
-              </View>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.button}
-              onPress={() => {
-                alert("Hey! this button is not functional right now.", "ok");
-              }}
-            >
-              <View style={styles.buttonview}>
-                <Text style={styles.buttontxt}>Expiry date</Text>
-                <Text style={styles.btnsubtitl}>
-                  Track expiration dates for perishable items
-                </Text>
-              </View>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.button}
-              onPress={() => {
-                alert("Hey! this button is not functional right now.", "ok");
-              }}
-            >
-              <View style={styles.buttonview}>
-                <Text style={styles.buttontxt}>Stock report</Text>
-                <Text style={styles.btnsubtitl}>
-                  Generate stock reports and analytics
-                </Text>
-              </View>
-            </TouchableOpacity>
-          </View>
+          ))}
         </View>
       </ScrollView>
     </SafeAreaView>
   );
 }
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: "white",
-    borderColor: colors.grey5,
-    borderWidth: 1,
-    alignSelf: "center",
-  },
-  textTitle: {
-    backgroundColor: colors.grey3,
-    color: "white",
-    fontSize: 24,
-    fontWeight: "bold",
-    textAlign: "center",
-    padding: 15,
-    marginBottom: 20,
-    borderRadius: 5,
-  },
-  buttonContainer: {
-    margin: 10,
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
-  },
-  button: {
-    backgroundColor: colors.grey5,
-    width: "47%",
-    height: 120,
-    justifyContent: "center",
-    alignItems: "center",
-    borderRadius: 10,
-    borderColor: colors.grey4,
-    borderWidth: 1,
-    marginBottom: 15,
-    shadowColor: "#000",
-    shadowOffset: { width: 2, height: 3 },
-    shadowOpacity: 0.3,
-    shadowRadius: 3,
-    elevation: 4, // For Android shadow
-  },
-  buttontxt: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#FFF",
-    marginBottom: 5,
-    color: "#333",
-  },
-  btnsubtitl: {
-    fontSize: 12,
-    fontWeight: "bold",
-    textAlign: "center",
-    color: "#333",
-  },
-});
-

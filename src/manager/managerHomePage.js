@@ -2,7 +2,6 @@ import React from "react";
 import {
   Text,
   View,
-  StyleSheet,
   ScrollView,
   TouchableOpacity,
   SafeAreaView,
@@ -67,20 +66,14 @@ export default function ManagerHomePage({ navigation }) {
             alignItems: "center",
   }}
       >
-        <ImageBackground
-        className="w-full  items-center py-5 flex-1 justify-start"
-          source={homeBackground}
-          
-          resizeMode="cover"
+        <View
+        className="w-full  items-center py-5 flex-1 justify-start"          
         >
           <Text className="text-2xl font-bold text-gray-800 mb-5 text-center">Welcome, Manager!</Text>
-          {/* Employee Management */}
+          {/* Employee Management view */}
           <View 
-           className="flex-1 bg-white rounded-2xl p-6 items-center justify-center shadow-md mb-5"
-            style={[
-              
-              { width: screenWidth * 0.85, height: screenHeight * 0.4 },
-            ]}
+           className="bg-white rounded-2xl p-6 items-center justify-center shadow-md mb-5"
+            
           >
             <View className="items-center w-full">
               <Text className="text-base font-bold text-gray-700 mb-1 text-center">
@@ -115,7 +108,7 @@ export default function ManagerHomePage({ navigation }) {
                     legendFontSize: 12,
                   },
                 ]}
-                width={screenWidth * 0.8}
+                width={screenWidth * 0.62}
                 height={100}
                 chartConfig={{
                   backgroundColor: "#fff",
@@ -129,7 +122,7 @@ export default function ManagerHomePage({ navigation }) {
               />
             </View>
             <TouchableOpacity
-             className="bg-green-500 rounded-lg py-3 px-6 mt-2 w-11/12 items-center"
+             className="bg-green-500 rounded-lg py-3 px-6 mt-2  items-center"
               onPress={() => {
                 navigation.navigate("EmployeeManagement");
               }}
@@ -140,10 +133,7 @@ export default function ManagerHomePage({ navigation }) {
           {/* Customer Management */}
           <View
           className="bg-white rounded-2xl p-6 items-center justify-center shadow-md mb-5"
-            style={[
-              
-              { width: screenWidth * 0.85, height: screenHeight * 0.45 },
-            ]}
+         
           >
             <View className="items-center w-full">
               <Text className="text-base font-bold text-gray-700 mb-1 text-center">
@@ -191,10 +181,7 @@ export default function ManagerHomePage({ navigation }) {
               {/* Feedback Percentage */}
               <Text
               className="text-base font-bold text-gray-700 mb-1 text-center"
-                style={[
-                  
-                  { fontSize: 16, fontWeight: "bold", color: "#007bff" },
-                ]}
+            
               >
                 Feedback Engagement:{" "}
                 {(
@@ -207,7 +194,7 @@ export default function ManagerHomePage({ navigation }) {
             </View>
 
             <TouchableOpacity
-             className="bg-green-500 rounded-lg py-3 px-6 mt-2 w-11/12 items-center"
+             className="bg-green-500 rounded-lg py-3 px-6 mt-2 items-center"
               onPress={() => {
                 navigation.navigate("CustomerManagement");
               }}
@@ -219,10 +206,6 @@ export default function ManagerHomePage({ navigation }) {
           {/* Promotion & Discount */}
           <View
           className="bg-white rounded-2xl p-6 items-center justify-center shadow-md mb-5"
-            style={[
-              
-              { width: screenWidth * 0.85, height: screenHeight * 0.4 },
-            ]}
           >
             <View className="items-center w-full">
               <Text className="text-base font-bold text-gray-700 mb-1 text-center">
@@ -269,7 +252,7 @@ export default function ManagerHomePage({ navigation }) {
             </View>
 
             <TouchableOpacity
-             className="bg-green-500 rounded-lg py-3 px-6 mt-2 w-11/12 items-center"
+             className="bg-green-500 rounded-lg py-3 px-6 mt-2  items-center"
               onPress={() => {
                 navigation.navigate("promotionManagement");
               }}
@@ -280,10 +263,7 @@ export default function ManagerHomePage({ navigation }) {
           {/* Inventory Management */}
           <View
           className="bg-white rounded-2xl p-6 items-center justify-center shadow-md mb-5"
-            style={[
-              
-              { width: screenWidth * 0.85, height: screenHeight * 0.45 },
-            ]}
+            
           >
             <View className="items-center w-full">
               <Text className="text-base font-bold text-gray-700 mb-1 text-center">
@@ -320,7 +300,7 @@ export default function ManagerHomePage({ navigation }) {
             </View>
 
             <TouchableOpacity
-             className="bg-green-500 rounded-lg py-3 px-6 mt-2 w-11/12 items-center"
+             className="bg-green-500 rounded-lg py-3 px-6 mt-2 items-center"
               onPress={() => {
                 navigation.navigate("inventoryManagement");
               }}
@@ -331,10 +311,7 @@ export default function ManagerHomePage({ navigation }) {
           {/* Order Management */}
           <View
           className="bg-white rounded-2xl p-6 items-center justify-center shadow-md mb-5"
-            style={[
-              
-              { width: screenWidth * 0.85, height: screenHeight * 0.5 },
-            ]}
+           
           >
             <View className="items-center w-full">
               <Text className="text-base font-bold text-gray-700 mb-1 text-center">
@@ -379,7 +356,7 @@ export default function ManagerHomePage({ navigation }) {
             </View>
 
             <TouchableOpacity
-             className="bg-green-500 rounded-lg py-3 px-6 mt-2 w-11/12 items-center"
+             className="bg-green-500 rounded-lg py-3 px-6 mt-2  items-center"
               onPress={() => {
                 navigation.navigate("orderManagement");
               }}
@@ -390,10 +367,7 @@ export default function ManagerHomePage({ navigation }) {
           {/* Sales & Revenue */}
           <View
           className="bg-white rounded-2xl p-6 items-center justify-center shadow-md mb-5"
-            style={[
-              
-              { width: screenWidth * 0.85, height: screenHeight * 0.5 },
-            ]}
+            
           >
             <View className="items-center w-full">
               <Text className="text-base font-bold text-gray-700 mb-1 text-center">
@@ -438,7 +412,7 @@ export default function ManagerHomePage({ navigation }) {
             </View>
 
             <TouchableOpacity
-             className="bg-green-500 rounded-lg py-3 px-6 mt-2 w-11/12 items-center"
+             className="bg-green-500 rounded-lg py-3 px-6 mt-2  items-center"
               onPress={() => {
                 navigation.navigate("saleRevenueManagement");
               }}
@@ -449,10 +423,7 @@ export default function ManagerHomePage({ navigation }) {
           {/* Supplier Management */}
           <View
           className="bg-white rounded-2xl p-6 items-center justify-center shadow-md mb-5"
-            style={[
-              
-              { width: screenWidth * 0.85, height: screenHeight * 0.5 },
-            ]}
+            
           >
             <View className="items-center w-full">
               <Text className="text-base font-bold text-gray-700 mb-1 text-center">
@@ -486,7 +457,7 @@ export default function ManagerHomePage({ navigation }) {
                     legendFontSize: 14,
                   },
                 ]}
-                width={screenWidth * 0.75}
+                width={screenWidth * 0.63}
                 height={160}
                 chartConfig={{
                   backgroundColor: "#f3f3f3",
@@ -502,7 +473,7 @@ export default function ManagerHomePage({ navigation }) {
             </View>
 
             <TouchableOpacity
-             className="bg-green-500 rounded-lg py-3 px-6 mt-2 w-11/12 items-center"
+             className="bg-green-500 rounded-lg py-3 px-6 mt-2 items-center"
               onPress={() => {
                 navigation.navigate("suplierManagement");
               }}
@@ -513,9 +484,7 @@ export default function ManagerHomePage({ navigation }) {
           {/* Alerts & Notifications */}
           <View
           className="bg-white rounded-2xl p-6 items-center justify-center shadow-md mb-5"
-            style={[
-              { width: screenWidth * 0.85, height: screenHeight * 0.5 },
-            ]}
+            
           >
             <View className="items-center w-full">
               <Text className="text-base font-bold text-gray-700 mb-1 text-center">
@@ -567,7 +536,7 @@ export default function ManagerHomePage({ navigation }) {
             </View>
 
             <TouchableOpacity
-             className="bg-green-500 rounded-lg py-3 px-6 mt-2 w-11/12 items-center"
+             className="bg-green-500 rounded-lg py-3 px-6 mt-2  items-center"
               onPress={() => {
                 navigation.navigate("alertNotifManagement");
               }}
@@ -575,7 +544,7 @@ export default function ManagerHomePage({ navigation }) {
               <Text  className="text-white text-base font-bold text-center">Alerts & Notifications</Text>
             </TouchableOpacity>
           </View>
-        </ImageBackground>
+        </View>
       </ScrollView>
     </SafeAreaView>
   );

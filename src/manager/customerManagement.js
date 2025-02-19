@@ -1,144 +1,41 @@
 import React from "react";
-import {
-  SafeAreaView,
-  ScrollView,
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-} from "react-native";
-import { colors } from "react-native-elements";
-import { ScreenHeight, ScreenWidth } from "react-native-elements/dist/helpers";
+import { SafeAreaView, FlatList, View, Text, Pressable } from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import Icon from "react-native-vector-icons/Feather";
 
-export default function CustomerManagement({ navigation }) {
+export default function CustomerManagement() {
+  const navigation = useNavigation();
+
+  const menuItems = [
+    { title: "Customer List", subtitle: "View customers", icon: "users", onPress: () => navigation.navigate("customerList") },
+    { title: "Customer Feedback", subtitle: "Handle feedback", icon: "message-square", onPress: () => alert("Feature coming soon!") },
+    { title: "Loyalty Program", subtitle: "Manage rewards", icon: "gift", onPress: () => alert("Feature coming soon!") },
+    { title: "Reports & Insights", subtitle: "Analyze trends", icon: "bar-chart", onPress: () => alert("Feature coming soon!") },
+    { title: "Purchase History", subtitle: "Track purchases", icon: "clipboard", onPress: () => alert("Feature coming soon!") },
+  ];
+
   return (
-    <SafeAreaView>
-      <ScrollView
-        style={{ paddingBottom: 20 }}
-        showsVerticalScrollIndicator={true}
-        contentContainerStyle={{ flexGrow: 1 }}
-      >
-        {/* Title */}
-        <View style={styles.container}>
-          <Text style={styles.textTitle}>Customer Management</Text>
+    <SafeAreaView className="flex-1 bg-gray-100 px-4 py-6">
+      <Text className="text-2xl font-bold text-gray-800 mb-6">Customer Management</Text>
 
-          {/* Buttons */}
-          <View style={styles.buttonContainer}>
-            <TouchableOpacity
-              style={styles.button}
-              onPress={() => navigation.navigate("customerList")}
-            >
-              <View style={styles.buttonview}>
-                <Text style={styles.buttontxt}>Customer List</Text>
-                <Text style={styles.btnsubtitl}>
-                  {" "}
-                  display registered customer
-                </Text>
-              </View>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.button}
-              onPress={() => {
-                alert("Hey! this button is not functional right now.", "ok");
-              }}
-            >
-              <View style={styles.buttonview}>
-                <Text style={styles.buttontxt}>Customer Feedback</Text>
-                <Text style={styles.btnsubtitl}> handle Customer Feedback</Text>
-              </View>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.button}
-              onPress={() => {
-                alert("Hey! this button is not functional right now.", "ok");
-              }}
-            >
-              <View style={styles.buttonview}>
-                <Text style={styles.buttontxt}>Loyalty Program</Text>
-                <Text style={styles.btnsubtitl}> handle Customer Feedback</Text>
-              </View>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.button}
-              onPress={() => {
-                alert("Hey! this button is not functional right now.", "ok");
-              }}
-            >
-              <View style={styles.buttonview}>
-                <Text style={styles.buttontxt}>Reports & Insights</Text>
-                <Text style={styles.btnsubtitl}> review</Text>
-              </View>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.button}
-              onPress={() => {
-                alert("Hey! this button is not functional right now.", "ok");
-              }}
-            >
-              <View style={styles.buttonview}>
-                <Text style={styles.buttontxt}>purchase history</Text>
-                <Text style={styles.btnsubtitl}>
-                  Analyze customer purchase history.
-                </Text>
-              </View>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </ScrollView>
+      {/* 2-Column Grid Layout with Spacing */}
+      <FlatList
+        data={menuItems}
+        keyExtractor={(item, index) => index.toString()}
+        numColumns={2}
+        columnWrapperStyle={{ justifyContent: "space-between", gap: 10 }}
+        contentContainerStyle={{ paddingBottom: 20 }}
+        renderItem={({ item }) => (
+          <Pressable
+            className="bg-white p-6 rounded-2xl shadow-md w-[48%] items-center justify-center active:bg-gray-200 mx-1 my-2"
+            onPress={item.onPress}
+          >
+            <Icon name={item.icon} size={30} color="#4A90E2" />
+            <Text className="text-lg font-semibold text-gray-800 mt-2">{item.title}</Text>
+            <Text className="text-gray-500 text-sm text-center mt-1">{item.subtitle}</Text>
+          </Pressable>
+        )}
+      />
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: "white",
-    borderColor: colors.grey5,
-    borderWidth: 1,
-    alignSelf: "center",
-  },
-  textTitle: {
-    backgroundColor: colors.grey3,
-    color: "white",
-    fontSize: 24,
-    fontWeight: "bold",
-    textAlign: "center",
-    padding: 15,
-    marginBottom: 20,
-    borderRadius: 5,
-  },
-  buttonContainer: {
-    margin:10,
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
-  },
-  button: {
-    backgroundColor: colors.grey5,
-    width: "47%",
-    height: 120,
-    justifyContent: "center",
-    alignItems: "center",
-    borderRadius: 10,
-    borderColor: colors.grey4,
-    borderWidth: 1,
-    marginBottom: 15,
-    shadowColor: "#000",
-    shadowOffset: { width: 2, height: 3 },
-    shadowOpacity: 0.3,
-    shadowRadius: 3,
-    elevation: 4, // For Android shadow
-  },
-  buttontxt: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#FFF",
-    marginBottom: 5,
-    color: "#333",
-  },
-  btnsubtitl: {
-    fontSize: 12,
-    fontWeight: "bold",
-    textAlign: "center",
-    color: "#333",
-  },
-});

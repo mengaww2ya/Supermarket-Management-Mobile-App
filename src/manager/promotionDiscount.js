@@ -1,141 +1,62 @@
-import { SafeAreaView, ScrollView, View, Text, StyleSheet,TouchableOpacity } from "react-native";
-import { colors } from "react-native-elements";
+import { SafeAreaView, ScrollView, View, Text, TouchableOpacity } from "react-native";
 
-export default function promotionManagement({navigation}) {
+export default function PromotionManagement({ navigation }) {
+  const menuItems = [
+    {
+      title: "Special Event Discounts",
+      subtitle: "Integrate seasonal or special event discounts",
+      onPress: () => alert("Hey! This button is not functional right now."),
+    },
+    {
+      title: "Product Discounts",
+      subtitle: "Set up product discounts and offers",
+      onPress: () => alert("Hey! This button is not functional right now."),
+    },
+    {
+      title: "Discount Based on Customer",
+      subtitle: "Apply discount rules based on customer categories",
+      onPress: () => alert("Hey! This button is not functional right now."),
+    },
+    {
+      title: "Review Discounts",
+      subtitle: "Display all applied discounts",
+      onPress: () => alert("Hey! This button is not functional right now."),
+    },
+    {
+      title: "Remove Discounts",
+      subtitle: "Remove all applied discounts",
+      onPress: () => alert("Hey! This button is not functional right now."),
+    },
+  ];
+
   return (
-    <SafeAreaView>
-      <ScrollView
-        style={{ paddingBottom: 20 }}
-        showsVerticalScrollIndicator={true}
-        contentContainerStyle={{ flexGrow: 1 }}
-      >
+    <SafeAreaView className="flex-1 bg-gray-100">
+      <ScrollView className="px-4 py-6">
         {/* Title */}
-        <View style={styles.container}>
-          <Text style={styles.textTitle}>Promotion Management</Text>
+        <View className="bg-gray-800 p-4 rounded-lg shadow-md">
+          <Text className="text-2xl font-bold text-white text-center">Promotion Management</Text>
+        </View>
 
-          {/* Buttons */}
-          <View style={styles.buttonContainer}>
+        {/* Button Grid */}
+        <View className="flex-row flex-wrap justify-between mt-6">
+          {menuItems.map((item, index) => (
             <TouchableOpacity
-              style={styles.button}
-              onPress={() => {
-                alert("Hey! this button is not functional right now.", "ok");
+              key={index}
+              className="w-[48%] bg-white p-5 rounded-xl shadow-md mb-4 active:bg-gray-200"
+              style={{
+                minHeight: 110, // Ensures text wraps
+                justifyContent: "center",
+                alignItems: "center",
+                elevation: 5, // For better shadow on Android
               }}
+              onPress={item.onPress}
             >
-              <View style={styles.buttonview}>
-                <Text style={styles.buttontxt}>special event discounts</Text>
-                <Text style={styles.btnsubtitl}>
-                  Integrate seasonal or special event discounts
-                </Text>
-              </View>
+              <Text className="text-lg font-semibold text-gray-800 text-center">{item.title}</Text>
+              <Text className="text-gray-500 text-center text-sm mt-1">{item.subtitle}</Text>
             </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.button}
-              onPress={() => {
-                alert("Hey! this button is not functional right now.", "ok");
-              }}
-            >
-              <View style={styles.buttonview}>
-                <Text style={styles.buttontxt}>product discounts</Text>
-                <Text style={styles.btnsubtitl}>
-                  Set up product discounts and offers
-                </Text>
-              </View>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.button}
-              onPress={() => {
-                alert("Hey! this button is not functional right now.", "ok");
-              }}
-            >
-              <View style={styles.buttonview}>
-                <Text style={styles.buttontxt}>discount based on customer</Text>
-                <Text style={styles.btnsubtitl}>
-                  Apply discount rules based on customer categories
-                </Text>
-              </View>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.button}
-              onPress={() => {
-                alert("Hey! this button is not functional right now.", "ok");
-              }}
-            >
-              <View style={styles.buttonview}>
-                <Text style={styles.buttontxt}>review discounts</Text>
-                <Text style={styles.btnsubtitl}>
-                  display all aplied discounts
-                </Text>
-              </View>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.button}
-              onPress={() => {
-                alert("Hey! this button is not functional right now.", "ok");
-              }}
-            >
-              <View style={styles.buttonview}>
-                <Text style={styles.buttontxt}>remove discounts</Text>
-                <Text style={styles.btnsubtitl}>
-                  remove all aplied discounts
-                </Text>
-              </View>
-            </TouchableOpacity>
-          </View>
+          ))}
         </View>
       </ScrollView>
     </SafeAreaView>
   );
 }
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: "white",
-    borderColor: colors.grey5,
-    borderWidth: 1,
-    alignSelf: "center",
-  },
-  textTitle: {
-    backgroundColor: colors.grey3,
-    color: "white",
-    fontSize: 24,
-    fontWeight: "bold",
-    textAlign: "center",
-    padding: 15,
-    marginBottom: 20,
-    borderRadius: 5,
-  },
-  buttonContainer: {
-    margin: 10,
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
-  },
-  button: {
-    backgroundColor: colors.grey5,
-    width: "47%",
-    height: 120,
-    justifyContent: "center",
-    alignItems: "center",
-    borderRadius: 10,
-    borderColor: colors.grey4,
-    borderWidth: 1,
-    marginBottom: 15,
-    shadowColor: "#000",
-    shadowOffset: { width: 2, height: 3 },
-    shadowOpacity: 0.3,
-    shadowRadius: 3,
-    elevation: 4, // For Android shadow
-  },
-  buttontxt: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#FFF",
-    marginBottom: 5,
-    color: "#333",
-  },
-  btnsubtitl: {
-    fontSize: 12,
-    fontWeight: "bold",
-    textAlign: "center",
-    color: "#333",
-  },
-});

@@ -1,114 +1,47 @@
-import { SafeAreaView, ScrollView, View, Text, StyleSheet,TouchableOpacity } from "react-native";
-import { colors } from "react-native-elements";
+import { SafeAreaView, ScrollView, View, Text, TouchableOpacity } from "react-native";
+import { useState } from "react";
 
-export default function saleRevenueManagement() {
+export default function SaleRevenueManagement() {
+  const [pressed, setPressed] = useState(null);
+
+  const menuItems = [
+    { title: "Sales Reports", subtitle: "View daily, weekly, and monthly sales reports" },
+    { title: "Revenue & Profit", subtitle: "Track revenue trends and profitability" },
+    { title: "Payment Transactions", subtitle: "Monitor payment transactions" },
+  ];
+
   return (
-    <SafeAreaView>
-      <ScrollView
-        style={{ paddingBottom: 20 }}
-        showsVerticalScrollIndicator={true}
-        contentContainerStyle={{ flexGrow: 1 }}
-      >
-        <View style={styles.container}>
-          <Text style={styles.textTitle}>Sale and Revenue</Text>
-          <View style={styles.buttonContainer}>
+    <SafeAreaView className="flex-1 bg-gray-100">
+      <ScrollView className="px-4 py-6">
+        {/* Title Section */}
+        <View className="bg-green-600 p-5 rounded-lg shadow-lg">
+          <Text className="text-2xl font-bold text-white text-center">Sale and Revenue</Text>
+        </View>
+
+        {/* Buttons Grid */}
+        <View className="flex-row flex-wrap justify-between mt-6">
+          {menuItems.map((item, index) => (
             <TouchableOpacity
-              style={styles.button}
-              onPress={() => {
-                alert("Hey! this button is not functional right now.", "ok");
+              key={index}
+              className={`w-[48%] bg-white p-5 rounded-xl shadow-lg mb-4 ${
+                pressed === index ? "bg-green-100 scale-95" : "active:bg-gray-200"
+              }`}
+              style={{
+                minHeight: 120,
+                justifyContent: "center",
+                alignItems: "center",
+                elevation: 5,
               }}
+              onPressIn={() => setPressed(index)}
+              onPressOut={() => setPressed(null)}
+              onPress={() => alert(`📊 ${item.title} feature coming soon!`)}
             >
-              <View style={styles.buttonview}>
-                <Text style={styles.buttontxt}>Sales reports</Text>
-                <Text style={styles.btnsubtitl}>
-                  View daily, weekly, and monthly sales reports
-                </Text>
-              </View>
+              <Text className="text-lg font-semibold text-gray-800 text-center">{item.title}</Text>
+              <Text className="text-gray-500 text-center text-sm mt-1">{item.subtitle}</Text>
             </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.button}
-              onPress={() => {
-                alert("Hey! this button is not functional right now.", "ok");
-              }}
-            >
-              <View style={styles.buttonview}>
-                <Text style={styles.buttontxt}>Revenue $ profit</Text>
-                <Text style={styles.btnsubtitl}>
-                  Track revenue trends and profitability
-                </Text>
-              </View>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.button}
-              onPress={() => {
-                alert("Hey! this button is not functional right now.", "ok");
-              }}
-            >
-              <View style={styles.buttonview}>
-                <Text style={styles.buttontxt}>Payment transactions</Text>
-                <Text style={styles.btnsubtitl}>
-                  Monitor payment transactions 
-                </Text>
-              </View>
-            </TouchableOpacity>
-            
-          </View>
+          ))}
         </View>
       </ScrollView>
     </SafeAreaView>
   );
 }
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: "white",
-    borderColor: colors.grey5,
-    borderWidth: 1,
-    alignSelf: "center",
-  },
-  textTitle: {
-    backgroundColor: colors.grey3,
-    color: "white",
-    fontSize: 24,
-    fontWeight: "bold",
-    textAlign: "center",
-    padding: 15,
-    marginBottom: 20,
-    borderRadius: 5,
-  },
-  buttonContainer: {
-    margin: 10,
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
-  },
-  button: {
-    backgroundColor: colors.grey5,
-    width: "47%",
-    height: 120,
-    justifyContent: "center",
-    alignItems: "center",
-    borderRadius: 10,
-    borderColor: colors.grey4,
-    borderWidth: 1,
-    marginBottom: 15,
-    shadowColor: "#000",
-    shadowOffset: { width: 2, height: 3 },
-    shadowOpacity: 0.3,
-    shadowRadius: 3,
-    elevation: 4, // For Android shadow
-  },
-  buttontxt: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#FFF",
-    marginBottom: 5,
-    color: "#333",
-  },
-  btnsubtitl: {
-    fontSize: 12,
-    fontWeight: "bold",
-    textAlign: "center",
-    color: "#333",
-  },
-});
-
