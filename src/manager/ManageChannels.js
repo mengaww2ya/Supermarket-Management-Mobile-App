@@ -1,47 +1,30 @@
 import React from "react";
-import {
-  SafeAreaView,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { SafeAreaView, ScrollView, Text, TouchableOpacity, View } from "react-native";
 
 export default function ManageChannels({ navigation }) {
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <ScrollView contentContainerStyle={styles.scrollView}>
-        <View style={styles.container}>
-          <Text style={styles.title}>Manage Channels</Text>
+    <SafeAreaView className="flex-1 bg-gray-100">
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }} className="p-5">
+        <View className="bg-white p-6 rounded-2xl shadow-md">
+          <Text className="text-xl font-bold text-center text-gray-800 mb-6">Manage Channels</Text>
 
-          <View style={styles.buttonContainer}>
+          <View className="grid grid-cols-2 gap-4">
             <TouchableOpacity
-              style={styles.button}
-              onPress={() => {
-                navigation.navigate("ChannelOverview");
-              }}
+              className="bg-white p-5 rounded-xl border border-gray-300 shadow-md active:bg-gray-200"
+              onPress={() => navigation.navigate("ChannelOverview")}
             >
-              <Text style={styles.buttonTitle}>Channel Overview</Text>
-              <Text style={styles.buttonSubtitle}>
-                List communication channels
-              </Text>
+              <Text className="text-lg font-bold text-center mb-2">Channel Overview</Text>
+              <Text className="text-sm text-center text-gray-600">List communication channels</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.button}>
-              <Text style={styles.buttonTitle}>Manage Channels</Text>
-              <Text style={styles.buttonSubtitle}>
-                Add, Edit, or Remove Channels
-              </Text>
+            <TouchableOpacity className="bg-white p-5 rounded-xl border border-gray-300 shadow-md active:bg-gray-200">
+              <Text className="text-lg font-bold text-center mb-2">Manage Channels</Text>
+              <Text className="text-sm text-center text-gray-600">Add, Edit, or Remove Channels</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.button}>
-              <Text style={styles.buttonTitle}>
-                Customer Assistant Assignment
-              </Text>
-              <Text style={styles.buttonSubtitle}>
-                Assign assistants to channels
-              </Text>
+            <TouchableOpacity className="bg-white p-5 rounded-xl border border-gray-300 shadow-md active:bg-gray-200 col-span-2">
+              <Text className="text-lg font-bold text-center mb-2">Customer Assistant Assignment</Text>
+              <Text className="text-sm text-center text-gray-600">Assign assistants to channels</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -49,62 +32,3 @@ export default function ManageChannels({ navigation }) {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: "#f8f9fa",
-  },
-  scrollView: {
-    flexGrow: 1,
-    alignItems: "center",
-    paddingVertical: 20,
-  },
-  container: {
-    width: "90%",
-    backgroundColor: "#fff",
-    padding: 20,
-    borderRadius: 10,
-    elevation: 3,
-  },
-  title: {
-    fontSize: 22,
-    fontWeight: "bold",
-    textAlign: "center",
-    marginBottom: 20,
-    color: "#2c3e50",
-  },
-  buttonContainer: {
-    margin: 10,
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
-  },
-  button: {
-    backgroundColor: "#fff",
-    width: "48%",
-    height: 130,
-    justifyContent: "center",
-    alignItems: "center",
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: "#ddd",
-    marginBottom: 15,
-    shadowColor: "#000",
-    shadowOffset: { width: 2, height: 3 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 5,
-    justifyContent: "center",
-  },
-  buttonTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 5,
-    textAlign: "center",
-  },
-  buttonSubtitle: {
-    fontSize: 12,
-    textAlign: "center",
-  },
-});

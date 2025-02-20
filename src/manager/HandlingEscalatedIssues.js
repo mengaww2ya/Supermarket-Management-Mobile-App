@@ -1,15 +1,8 @@
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  FlatList,
-  TouchableOpacity,
-  Alert,
-  StyleSheet,
-} from "react-native";
+import { View, Text, FlatList, TouchableOpacity, Alert } from "react-native";
 import { escalatedIssues } from "../global/data";
 
-export default function handleEscalatedIssues() {
+export default function HandleEscalatedIssues() {
   const [issues, setIssues] = useState(escalatedIssues);
 
   const handleResolve = (issueId) => {
@@ -31,40 +24,37 @@ export default function handleEscalatedIssues() {
     );
   };
 
-  const renderPriority = (priority) => {
-    let color = "#ccc";
-    if (priority === "high") color = "#e74c3c";
-    else if (priority === "medium") color = "#f1c40f";
-    else if (priority === "low") color = "#2ecc71";
-
-    return (
-      <Text style={[styles.priority, { backgroundColor: color }]}>
-        {priority.toUpperCase()}
-      </Text>
-    );
-  };
-
   return (
-    <View style={styles.container}>
-      <Text style={styles.header}>Escalated Issues</Text>
+    <View className="flex-1 bg-gray-100 p-4">
+      <Text className="text-xl font-bold text-center mb-4">Escalated Issues</Text>
       <FlatList
         data={issues}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <View style={styles.issueCard}>
-            <View style={styles.issueHeader}>
-              <Text style={styles.issueTitle}>{item.issue}</Text>
-              {renderPriority(item.priority)}
+          <View className="bg-white p-4 mb-3 rounded-lg shadow-md">
+            <View className="flex-row justify-between items-center">
+              <Text className="text-lg font-semibold text-gray-800">
+                {item.issue}
+              </Text>
+              <Text
+                className={`text-white px-3 py-1 rounded-md font-bold ${
+                  item.priority === "high"
+                    ? "bg-red-500"
+                    : item.priority === "medium"
+                    ? "bg-yellow-500"
+                    : "bg-green-500"
+                }`}
+              >
+                {item.priority.toUpperCase()}
+              </Text>
             </View>
-            <Text style={styles.issueText}>Customer: {item.customer}</Text>
-            <Text style={styles.issueText}>
-              Escalated By: {item.escalatedBy}
-            </Text>
+            <Text className="text-gray-600 mt-2">Customer: {item.customer}</Text>
+            <Text className="text-gray-600">Escalated By: {item.escalatedBy}</Text>
             <TouchableOpacity
-              style={styles.resolveButton}
+              className="bg-green-600 mt-3 py-2 rounded-lg active:bg-green-700"
               onPress={() => handleResolve(item.id)}
             >
-              <Text style={styles.buttonText}>Resolve</Text>
+              <Text className="text-white text-center font-semibold">Resolve</Text>
             </TouchableOpacity>
           </View>
         )}
@@ -72,35 +62,3 @@ export default function handleEscalatedIssues() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: "#f8f8f8" },
-  header: {
-    fontSize: 22,
-    fontWeight: "bold",
-    textAlign: "center",
-    marginBottom: 15,
-  },
-  issueCard: {
-    backgroundColor: "#fff",
-    padding: 15,
-    marginVertical: 8,
-    borderRadius: 10,
-    elevation: 2,
-  },
-  issueHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  issueTitle: { fontSize: 18, fontWeight: "bold", color: "#333" },
-  issueText: { fontSize: 16, color: "#555", marginTop: 5 },
-  priority: { padding: 5, borderRadius: 5, color: "#fff", fontWeight: "bold" },
-  resolveButton: {
-    backgroundColor: "#27ae60",
-    padding: 10,
-    borderRadius: 5,
-    marginTop: 10,
-  },
-  buttonText: { color: "white", fontWeight: "bold", textAlign: "center" },
-});

@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import {
   SafeAreaView,
   ScrollView,
-  StyleSheet,
   Text,
   TouchableOpacity,
   View,
@@ -15,13 +14,11 @@ export default function ChannelOverview() {
   const [selectedChannel, setSelectedChannel] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
 
-  // Open Modal and Show Channel Details
   const openDetailsModal = (channel) => {
     setSelectedChannel(channel);
     setModalVisible(true);
   };
 
-  // Update Channel Status
   const updateChannelStatus = (status) => {
     setChannelList((prevChannels) =>
       prevChannels.map((channel) =>
@@ -32,112 +29,93 @@ export default function ChannelOverview() {
   };
 
   return (
-    <SafeAreaView style={styles.safearea}>
-      <ScrollView style={styles.scrollview}>
-        <View style={styles.container}>
-          <Text style={styles.title}>Channel Overview</Text>
-          {channelList.map((channel) => (
-            <TouchableOpacity
-              key={channel.id}
-              style={styles.channelCard}
-              onPress={() => openDetailsModal(channel)}
-            >
-              <View>
-                <Text style={styles.channelName}>{channel.name}</Text>
-                <Text style={styles.lastActivity}>
+    <SafeAreaView className="flex-1 bg-gray-100">
+      <ScrollView className="px-4 py-5">
+        <View className="py-4">
+          <Text className="text-2xl font-bold text-center mb-4">
+            Channel Overview
+          </Text>
+          
+          <View className="flex-row flex-wrap justify-between">
+            {channelList.map((channel) => (
+              <TouchableOpacity
+                key={channel.id}
+                className="w-[48%] bg-white p-4 rounded-lg mb-3 shadow-md"
+                onPress={() => openDetailsModal(channel)}
+                activeOpacity={0.7}
+              >
+                <Text className="text-lg font-bold">{channel.name}</Text>
+                <Text className="text-sm text-gray-600">
                   Last Activity: {channel.lastActivity}
                 </Text>
                 <Text
-                  style={[
-                    styles.status,
+                  className={`text-sm font-bold mt-2 ${
                     channel.status === "Active"
-                      ? styles.active
+                      ? "text-green-600"
                       : channel.status === "Inactive"
-                      ? styles.inactive
-                      : styles.maintenance,
-                  ]}
+                      ? "text-red-600"
+                      : "text-yellow-600"
+                  }`}
                 >
                   {channel.status}
                 </Text>
-              </View>
-            </TouchableOpacity>
-          ))}
+              </TouchableOpacity>
+            ))}
+          </View>
         </View>
       </ScrollView>
 
-      {/* Channel Details Modal */}
       <Modal transparent visible={modalVisible} animationType="slide">
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContainer}>
-            <Text style={styles.modalTitle}>Channel Details</Text>
+        <View className="flex-1 bg-black/50 justify-center items-center">
+          <View className="bg-white p-6 rounded-lg w-4/5">
+            <Text className="text-xl font-bold mb-4">Channel Details</Text>
             {selectedChannel && (
               <>
-                <Text style={styles.modalText}>
-                  <Text style={styles.bold}>Name:</Text> {selectedChannel.name}
+                <Text className="text-lg">
+                  <Text className="font-semibold">Name:</Text> {selectedChannel.name}
                 </Text>
-                <Text style={styles.modalText}>
-                  <Text style={styles.bold}>Status:</Text>{" "}
-                  {selectedChannel.status}
+                <Text className="text-lg">
+                  <Text className="font-semibold">Status:</Text> {selectedChannel.status}
                 </Text>
-                <Text style={styles.modalText}>
-                  <Text style={styles.bold}>Last Activity:</Text>{" "}
-                  {selectedChannel.lastActivity}
+                <Text className="text-lg">
+                  <Text className="font-semibold">Last Activity:</Text> {selectedChannel.lastActivity}
                 </Text>
-                <Text style={styles.modalText}>
-                  <Text style={styles.bold}>Description:</Text>{" "}
-                  {selectedChannel.description || "No description available"}
+                <Text className="text-lg">
+                  <Text className="font-semibold">Description:</Text> {selectedChannel.description || "No description available"}
                 </Text>
-
-                {/* Status Update Buttons */}
-                <View style={styles.buttonContainer}>
+                
+                <View className="flex-row flex-wrap justify-center gap-3 mt-4">
                   <TouchableOpacity
-                    style={[
-                      styles.statusButton,
-                      selectedChannel.status === "Active"
-                        ? styles.disabledButton
-                        : styles.activateButton,
-                    ]}
+                    className={`px-4 py-2 rounded-lg text-white ${selectedChannel.status === "Active" ? "bg-gray-400" : "bg-green-600"}`}
                     onPress={() => updateChannelStatus("Active")}
                     disabled={selectedChannel.status === "Active"}
                   >
-                    <Text style={styles.statusButtonText}>Activate</Text>
+                    <Text className="text-white font-bold">Activate</Text>
                   </TouchableOpacity>
 
                   <TouchableOpacity
-                    style={[
-                      styles.statusButton,
-                      selectedChannel.status === "Inactive"
-                        ? styles.disabledButton
-                        : styles.deactivateButton,
-                    ]}
+                    className={`px-4 py-2 rounded-lg text-white ${selectedChannel.status === "Inactive" ? "bg-gray-400" : "bg-red-600"}`}
                     onPress={() => updateChannelStatus("Inactive")}
                     disabled={selectedChannel.status === "Inactive"}
                   >
-                    <Text style={styles.statusButtonText}>Deactivate</Text>
+                    <Text className="text-white font-bold">Deactivate</Text>
                   </TouchableOpacity>
 
                   <TouchableOpacity
-                    style={[
-                      styles.statusButton,
-                      selectedChannel.status === "Under Maintenance"
-                        ? styles.disabledButton
-                        : styles.maintenanceButton,
-                    ]}
+                    className={`px-4 py-2 rounded-lg text-white ${selectedChannel.status === "Under Maintenance" ? "bg-gray-400" : "bg-yellow-600"}`}
                     onPress={() => updateChannelStatus("Under Maintenance")}
                     disabled={selectedChannel.status === "Under Maintenance"}
                   >
-                    <Text style={styles.statusButtonText}>
-                      Under Maintenance
-                    </Text>
+                    <Text className="text-white font-bold">Maintenance</Text>
                   </TouchableOpacity>
                 </View>
               </>
             )}
             <TouchableOpacity
-              style={styles.closeButton}
+              className="mt-4 bg-red-500 px-4 py-2 rounded-lg w-full text-center"
               onPress={() => setModalVisible(false)}
             >
-              <Text style={styles.closeButtonText}>Close</Text>
+              <Text className="text-white font-bold text-center">Close</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -145,70 +123,3 @@ export default function ChannelOverview() {
     </SafeAreaView>
   );
 }
-
-// Styles
-const styles = StyleSheet.create({
-  safearea: { flex: 1, backgroundColor: "#f8f8f8" },
-  scrollview: { paddingHorizontal: 15 },
-  container: { paddingVertical: 20 },
-  title: {
-    fontSize: 22,
-    fontWeight: "bold",
-    marginBottom: 15,
-    textAlign: "center",
-  },
-  channelCard: {
-    backgroundColor: "#fff",
-    padding: 15,
-    borderRadius: 10,
-    marginBottom: 10,
-    elevation: 3,
-  },
-  channelName: { fontSize: 18, fontWeight: "bold" },
-  lastActivity: { fontSize: 14, color: "#666" },
-  status: { fontSize: 14, fontWeight: "bold", marginTop: 5 },
-  active: { color: "green" },
-  inactive: { color: "red" },
-  maintenance: { color: "orange" },
-
-  // Modal Styles
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  modalContainer: {
-    backgroundColor: "#fff",
-    padding: 20,
-    borderRadius: 10,
-    width: "80%",
-    alignItems: "center",
-  },
-  modalTitle: { fontSize: 20, fontWeight: "bold", marginBottom: 10 },
-  modalText: { fontSize: 16, marginBottom: 5 },
-  bold: { fontWeight: "bold" },
-
-  buttonContainer: { flexDirection: "row", marginTop: 10, gap: 5 ,flexWrap:"wrap",justifyContent:"center" },
-  statusButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 5,
-    alignItems: "center",
-  },
-  activateButton: { backgroundColor: "#2ecc71" },
-  deactivateButton: { backgroundColor: "#e74c3c" },
-  maintenanceButton: { backgroundColor: "#f39c12" },
-  disabledButton: { backgroundColor: "#bdc3c7" },
-
-  statusButtonText: { color: "#fff", fontWeight: "bold" ,width:"30" },
-  closeButton: {
-    marginTop: 15,
-    backgroundColor: "#e74c3c",
-    padding: 10,
-    borderRadius: 5,
-    width: "100%",
-    alignItems: "center",
-  },
-  closeButtonText: { color: "#fff", fontWeight: "bold" },
-});

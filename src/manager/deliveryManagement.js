@@ -4,7 +4,6 @@ import {
   Text,
   FlatList,
   TouchableOpacity,
-  StyleSheet,
   Modal,
   Pressable,
 } from "react-native";
@@ -14,53 +13,48 @@ export default function DeliveryAgentManagement({ navigation }) {
   const [selectedAgent, setSelectedAgent] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
 
-  // Function to get status color
   const getStatusColor = (status) => {
     switch (status) {
       case "available":
-        return "#28a745"; // Green
+        return "text-green-600";
       case "busy":
-        return "#ffc107"; // Yellow
+        return "text-yellow-500";
       case "unavailable":
-        return "#dc3545"; // Red
+        return "text-red-600";
       default:
-        return "#6c757d"; // Gray
+        return "text-gray-500";
     }
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.header}>Manage Delivery Agents</Text>
+    <View className="flex-1 bg-gray-100 p-4">
+      <Text className="text-2xl font-bold text-center text-gray-800 mb-4">
+        Manage Delivery Agents
+      </Text>
+      
       <FlatList
         data={deliveryAgents}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <View style={styles.agentCard}>
-            {/* Agent Name Button */}
+          <View className="bg-white p-4 my-2 rounded-lg shadow flex-row justify-between items-center">
             <TouchableOpacity
-              style={styles.agentButton}
+              className="flex-1"
               onPress={() => {
                 setSelectedAgent(item);
                 setModalVisible(true);
               }}
             >
-              <Text style={styles.agentName}>
+              <Text className="text-lg font-semibold text-blue-600 underline">
                 {item.firstName} {item.lastName}
               </Text>
             </TouchableOpacity>
-            <Text
-              style={[
-                styles.agentStatus,
-                { color: getStatusColor(item.status) },
-              ]}
-            >
+            <Text className={`text-lg font-semibold ${getStatusColor(item.status)}`}>
               {item.status.toUpperCase()}
             </Text>
           </View>
         )}
       />
 
-      {/* Modal Popup for Agent Details */}
       {selectedAgent && (
         <Modal
           animationType="slide"
@@ -68,25 +62,26 @@ export default function DeliveryAgentManagement({ navigation }) {
           visible={modalVisible}
           onRequestClose={() => setModalVisible(false)}
         >
-          <View style={styles.modalContainer}>
-            <View style={styles.modalContent}>
-              <Text style={styles.modalTitle}>
+          <View className="flex-1 justify-center items-center bg-black/50">
+            <View className="bg-white p-6 rounded-lg w-4/5 items-center">
+              <Text className="text-xl font-bold mb-2">
                 {selectedAgent.firstName} {selectedAgent.lastName}
               </Text>
-              <Text style={styles.detailText}>
+              <Text className="text-lg font-semibold mb-1">
                 Phone: {selectedAgent.phone}
               </Text>
-              <Text style={styles.detailText}>
+              <Text className="text-lg font-semibold mb-1">
                 Status: {selectedAgent.status}
               </Text>
-              <Text style={styles.detailText}>
+              <Text className="text-lg font-semibold mb-1">
                 Rating: ⭐ {selectedAgent.rating}
               </Text>
-              <Text style={styles.detailText}>
+              <Text className="text-lg font-semibold mb-3">
                 Completed Orders: {selectedAgent.completedOrders}
               </Text>
+
               <TouchableOpacity
-                style={styles.assignButton}
+                className="bg-blue-600 px-4 py-2 rounded-lg mt-2"
                 onPress={() => {
                   navigation.navigate("mdeliveryOrders", {
                     agentId: selectedAgent.id,
@@ -95,13 +90,14 @@ export default function DeliveryAgentManagement({ navigation }) {
                   setModalVisible(false);
                 }}
               >
-                <Text style={styles.assignText}>Assign Delivery</Text>
+                <Text className="text-white font-bold text-lg">Assign Delivery</Text>
               </TouchableOpacity>
+
               <Pressable
-                style={styles.closeButton}
+                className="mt-4 p-2"
                 onPress={() => setModalVisible(false)}
               >
-                <Text style={styles.closeText}>Close</Text>
+                <Text className="text-red-500 text-lg font-semibold">Close</Text>
               </Pressable>
             </View>
           </View>
@@ -110,85 +106,3 @@ export default function DeliveryAgentManagement({ navigation }) {
     </View>
   );
 }
-
-// Styles
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-    backgroundColor: "#f4f4f4",
-  },
-  header: {
-    fontSize: 22,
-    fontWeight: "bold",
-    marginBottom: 15,
-    textAlign: "center",
-    color: "#333",
-  },
-  agentCard: {
-    backgroundColor: "#fff",
-    padding: 15,
-    marginVertical: 8,
-    borderRadius: 10,
-    elevation: 3,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  agentButton: {
-    flex: 1,
-  },
-  agentName: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#007bff",
-    textDecorationLine: "underline",
-  },
-  agentStatus: {
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  modalContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-  },
-  modalContent: {
-    backgroundColor: "#fff",
-    padding: 20,
-    borderRadius: 10,
-    width: "80%",
-    alignItems: "center",
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    marginBottom: 10,
-  },
-  detailText: {
-    fontSize: 16,
-    fontWeight: "bold",
-    marginBottom: 5,
-  },
-  assignButton: {
-    backgroundColor: "#007bff",
-    paddingVertical: 10,
-    paddingHorizontal: 15,
-    borderRadius: 5,
-    marginTop: 10,
-  },
-  assignText: {
-    color: "white",
-    fontWeight: "bold",
-    fontSize: 16,
-  },
-  closeButton: {
-    marginTop: 10,
-    padding: 10,
-  },
-  closeText: {
-    fontSize: 16,
-    color: "red",
-  },
-});

@@ -9,18 +9,19 @@ import {
   Modal,
   Animated,
 } from "react-native";
-import { Dairyproducts } from "../global/data.js";
 import Footer from "../subscrean/foter.js";
 import Ionicons from "react-native-vector-icons/Ionicons";
+import { allProducts } from "../global/data.js"; // Ensure all products are imported
 
-export default function DairyProductsList({ navigation }) {
+export default function ProductDisplay({ route, navigation }) {
+  const { categoryName } = route.params; // Get category name from navigation params
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
   const fadeAnim = useState(new Animated.Value(0))[0];
 
-  // Filter only active dairy products
-  const activeProducts = Dairyproducts.filter(
-    (product) => product.status === "Active"
+  // Filter products based on the selected category
+  const filteredProducts = allProducts.filter(
+    (product) => product.categoryName === categoryName && product.status === "Active"
   );
 
   const openModal = (image) => {
@@ -38,7 +39,7 @@ export default function DairyProductsList({ navigation }) {
       className="bg-white rounded-xl p-4 mb-4 shadow-lg w-[95%] self-center flex flex-row items-center"
       onPress={() => navigation.navigate("Item", { ...item })}
     >
-      {/* Product Image with Modal Preview */}
+      {/* Product Image */}
       <TouchableOpacity onPress={() => openModal(item.image)}>
         <View className="w-20 h-20 bg-gray-200 rounded-lg flex justify-center items-center overflow-hidden">
           <Image
@@ -64,7 +65,7 @@ export default function DairyProductsList({ navigation }) {
     <SafeAreaView className="flex-1 bg-gray-100 px-2">
       {/* Header */}
       <View className="flex-row items-center justify-between bg-yellow-300 px-4 py-3">
-        <Text className="text-lg font-bold text-green-600">Dairy Products</Text>
+        <Text className="text-lg font-bold text-green-600">{categoryName} Products</Text>
         <TouchableOpacity onPress={() => navigation.navigate("CartPage")} className="p-2">
           <Ionicons name="cart" size={30} color="blue" />
         </TouchableOpacity>
@@ -72,7 +73,7 @@ export default function DairyProductsList({ navigation }) {
 
       {/* Product List */}
       <FlatList
-        data={activeProducts}
+        data={filteredProducts}
         keyExtractor={(item) => item.productId.toString()}
         renderItem={renderItem}
         numColumns={1}

@@ -5,18 +5,18 @@ import {
   FlatList,
   Image,
   TouchableOpacity,
-  StyleSheet,
-  useWindowDimensions,
+  TextInput,
   ScrollView,
   SafeAreaView,
-  Modal,
-  TextInput,
+  Dimensions,
 } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { categories } from "../global/data.js";
 import Footer from "../subscrean/foter.js";
-import { colors } from "react-native-elements";
-import { ScreenHeight } from "react-native-elements/dist/helpers/index.js";
+
+const { width } = Dimensions.get("window");
+const CARD_WIDTH = width * 0.42;
+const IMAGE_SIZE = width * 0.3;
 
 const categoryNavigationMap = {
   "Fruit & Vegetable": "FreshProducts",
@@ -30,9 +30,6 @@ const categoryNavigationMap = {
 };
 
 export default function Homepage({ navigation }) {
-  const ScreenWidth = useWindowDimensions().width;
-  const [selectedCategory, setSelectedCategory] = useState(null);
-  const [menuVisible, setMenuVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
   const promoCategories = categories.filter(
@@ -43,88 +40,86 @@ export default function Homepage({ navigation }) {
   );
 
   const handleCategoryPress = (item) => {
-    setSelectedCategory(item.categoryId);
     const screenName = categoryNavigationMap[item.categoryName];
     if (screenName) {
       navigation.navigate(screenName);
-      setMenuVisible(false);
     }
   };
 
   const renderCategoryItem = ({ item }) => (
     <TouchableOpacity
-      style={[styles.cardContainer, { width: ScreenWidth * 0.42 }]}
+      className="bg-white border border-gray-200 rounded-lg shadow-md p-3 m-2 items-center"
+      style={{ width: CARD_WIDTH }}
       onPress={() => handleCategoryPress(item)}
     >
-      <Text style={styles.cardText}>{item.categoryName}</Text>
-      <Image style={styles.cardImage} source={item.image} />
-      <Text style={styles.cardDescription}>{item.description}</Text>
+      <Text className="text-base font-semibold text-center">{item.categoryName}</Text>
+      <Image
+        className="rounded-md my-2"
+        source={item.image}
+        style={{ width: IMAGE_SIZE, height: IMAGE_SIZE, resizeMode: "contain" }}
+      />
+      <Text className="text-xs text-gray-500 font-medium text-center">
+        {item.description}
+      </Text>
     </TouchableOpacity>
   );
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#f4f4f4" }}>
+    <SafeAreaView className="flex-1 bg-gray-100">
       {/* Header Section */}
-      <View style={styles.header}>
-        {/* Menu Button */}
-        <TouchableOpacity
-          onPress={() => setMenuVisible(true)}
-          style={styles.iconButton}
-        >
+      <View className="flex-row items-center justify-between bg-yellow-400 px-4 py-3">
+        <TouchableOpacity onPress={() => {}}>
           <Ionicons name="menu" size={30} color="black" />
         </TouchableOpacity>
 
-        <Text style={styles.headerTitle}>Home Page</Text>
+        <Text className="text-lg font-bold">Home Page</Text>
 
-        {/* Cart Button */}
-        <TouchableOpacity
-          onPress={() => navigation.navigate("CartPage")}
-          style={styles.iconButton}
-        >
+        <TouchableOpacity onPress={() => navigation.navigate("CartPage")}>
           <Ionicons name="cart" size={30} color="black" />
         </TouchableOpacity>
       </View>
 
-      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-        <View style={styles.container}>
-          {/* Search Bar */}
-          <View style={styles.searchContainer}>
-            <Ionicons name="search" size={24} color="gray" style={styles.searchIcon} />
-            <TextInput
-              style={styles.searchInput}
-              placeholder="Search categories..."
-              value={searchQuery}
-              onChangeText={(text) => setSearchQuery(text)}
+      {/* Search Bar */}
+      <View className="flex-row items-center bg-white rounded-md px-3 py-2 mx-4 my-3 shadow-md">
+        <Ionicons name="search" size={24} color="gray" />
+        <TextInput
+          className="flex-1 ml-2 text-lg"
+          placeholder="Search categories..."
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+        />
+      </View>
+
+      <ScrollView className="flex-1 px-4">
+        {promoCategories.length > 0 && (
+          <View>
+            <Text className="text-xl font-bold text-center text-black my-3">
+              Promotion Categories
+            </Text>
+            <FlatList
+              numColumns={2}
+              data={promoCategories}
+              keyExtractor={(item) => item.categoryId.toString()}
+              renderItem={renderCategoryItem}
+              contentContainerStyle={{ alignItems: "center" }}
             />
           </View>
+        )}
 
-          {promoCategories.length > 0 && (
-            <View>
-              <Text style={styles.TextHeadPromo}>Promotion Categories</Text>
-              <FlatList
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                data={promoCategories}
-                keyExtractor={(item) => item.categoryId.toString()}
-                renderItem={renderCategoryItem}
-                contentContainerStyle={styles.listContainer}
-              />
-            </View>
-          )}
-          {standardCategories.length > 0 && (
-            <View>
-              <Text style={styles.TextHead}>Standard Categories</Text>
-              <FlatList
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                data={standardCategories}
-                keyExtractor={(item) => item.categoryId.toString()}
-                renderItem={renderCategoryItem}
-                contentContainerStyle={styles.listContainer}
-              />
-            </View>
-          )}
-        </View>
+        {standardCategories.length > 0 && (
+          <View>
+            <Text className="text-xl font-bold text-center text-black my-3">
+              Standard Categories
+            </Text>
+            <FlatList
+              numColumns={2}
+              data={standardCategories}
+              keyExtractor={(item) => item.categoryId.toString()}
+              renderItem={renderCategoryItem}
+              contentContainerStyle={{ alignItems: "center" }}
+            />
+          </View>
+        )}
       </ScrollView>
 
       {/* Footer */}
@@ -132,68 +127,3 @@ export default function Homepage({ navigation }) {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { padding: 15 },
-  searchContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#fff",
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    marginHorizontal: 15,
-    marginVertical: 10,
-    elevation: 3,
-  },
-  searchIcon: { marginRight: 8 },
-  searchInput: { flex: 1, fontSize: 16 },
-  TextHead: {
-    fontSize: 22,
-    fontWeight: "bold",
-    marginVertical: 12,
-    color: "#333",
-    textAlign: "center",
-  },
-  TextHeadPromo: {
-    fontSize: 22,
-    fontWeight: "bold",
-    textAlign: "center",
-    marginVertical: 12,
-    color: "black",
-  },
-  listContainer: { paddingVertical: 10 },
-  cardContainer: {
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    padding: 10,
-    marginHorizontal: 10,
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 5,
-    borderWidth: 1,
-    borderColor: colors.grey4,
-  },
-  cardImage: {
-    width: 100,
-    height: 100,
-    borderRadius: 12,
-    marginBottom: 10,
-    resizeMode: "contain",
-  },
-  cardText: { fontSize: 16, fontWeight: "bold", textAlign: "center" },
-  cardDescription: { fontSize: 12, color: colors.grey3, fontWeight: "bold" },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    backgroundColor: "#FFDC2B",
-    paddingVertical: 10,
-    paddingHorizontal: 15,
-  },
-  headerTitle: { fontSize: 20, fontWeight: "bold", color: "black" },
-  iconButton: { padding: 5 },
-});

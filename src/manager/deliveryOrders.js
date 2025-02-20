@@ -1,16 +1,9 @@
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  FlatList,
-  TouchableOpacity,
-  StyleSheet,
-  Alert,
-} from "react-native";
+import { View, Text, FlatList, TouchableOpacity, Alert } from "react-native";
 import { deliveryOrders } from "../global/data";
 
 export default function mDeliveryOrders({ route, navigation }) {
-  const { agentId, AgentName } = route.params; // Get selected agent's ID
+  const { agentId, AgentName } = route.params;
   const [orders, setOrders] = useState(
     deliveryOrders.filter((order) => order.status === "pending")
   );
@@ -18,13 +11,12 @@ export default function mDeliveryOrders({ route, navigation }) {
   const assignOrder = (orderId) => {
     Alert.alert(
       "Confirm Assignment",
-      `Are you sure you want to assign Order ${orderId} to ${AgentName}`,
+      `Are you sure you want to assign Order ${orderId} to ${AgentName}?`,
       [
         { text: "Cancel", style: "cancel" },
         {
           text: "Assign",
           onPress: () => {
-            // Update order status logic (In a real app, update the backend)
             const updatedOrders = orders.map((order) =>
               order.id === orderId ? { ...order, status: "assigned" } : order
             );
@@ -38,32 +30,39 @@ export default function mDeliveryOrders({ route, navigation }) {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.header}>Select an Order to Assign</Text>
+    <View className="flex-1 bg-gray-100 p-4">
+      <Text className="text-xl font-bold text-center mb-4">
+        Select an Order to Assign
+      </Text>
+
       {orders.length === 0 ? (
-        <Text style={styles.noOrders}>No pending orders available.</Text>
+        <Text className="text-gray-500 text-center text-lg mt-6">
+          No pending orders available.
+        </Text>
       ) : (
         <FlatList
           data={orders}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
             <TouchableOpacity
-              style={[
-                styles.orderItem,
-                item.status === "assigned" && styles.assignedOrder,
-              ]}
+              className={`p-4 mb-3 rounded-lg shadow-md border-l-4 ${
+                item.status === "assigned"
+                  ? "border-green-500 bg-green-100"
+                  : "border-blue-500 bg-white"
+              }`}
               onPress={() => assignOrder(item.id)}
               activeOpacity={0.7}
             >
               <View>
-                <Text style={styles.orderText}>Order ID: {item.id}</Text>
-                <Text style={styles.orderText}>Customer: {item.customer}</Text>
-                <Text style={styles.orderText}>Address: {item.address}</Text>
+                <Text className="text-lg font-semibold">
+                  Order ID: {item.id}
+                </Text>
+                <Text className="text-gray-700">Customer: {item.customer}</Text>
+                <Text className="text-gray-700">Address: {item.address}</Text>
                 <Text
-                  style={[
-                    styles.orderStatus,
-                    item.status === "assigned" && styles.statusAssigned,
-                  ]}
+                  className={`mt-2 font-bold ${
+                    item.status === "assigned" ? "text-green-600" : "text-blue-600"
+                  }`}
                 >
                   {item.status === "assigned" ? "Assigned" : "Pending"}
                 </Text>
@@ -75,52 +74,3 @@ export default function mDeliveryOrders({ route, navigation }) {
     </View>
   );
 }
-
-// Styles
-const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: "#f4f4f4" },
-  header: {
-    fontSize: 20,
-    fontWeight: "bold",
-    marginBottom: 15,
-    textAlign: "center",
-    color: "#333",
-  },
-  noOrders: {
-    textAlign: "center",
-    fontSize: 16,
-    color: "gray",
-    marginTop: 20,
-  },
-  orderItem: {
-    backgroundColor: "#fff",
-    padding: 15,
-    marginVertical: 8,
-    borderRadius: 10,
-    elevation: 3,
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 5,
-    borderLeftWidth: 5,
-    borderLeftColor: "#007bff",
-  },
-  assignedOrder: {
-    borderLeftColor: "green",
-    backgroundColor: "#e8f5e9",
-  },
-  orderText: {
-    fontSize: 16,
-    color: "#333",
-    marginBottom: 2,
-  },
-  orderStatus: {
-    fontSize: 14,
-    fontWeight: "bold",
-    marginTop: 5,
-    color: "blue",
-  },
-  statusAssigned: {
-    color: "green",
-  },
-});
