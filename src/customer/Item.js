@@ -3,7 +3,6 @@ import {
   Pressable,
   Dimensions,
   Image,
-  StyleSheet,
   Text,
   ScrollView,
   View,
@@ -12,6 +11,7 @@ import {
   Alert,
 } from "react-native";
 import Footer from "../subscrean/foter.js";
+ import Ionicons from "react-native-vector-icons/Ionicons"; // Make sure to import Ionicons
 
 const screenWidth = Dimensions.get("window").width;
 
@@ -47,38 +47,45 @@ export default function Item({ route, navigation }) {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#f9f9f9" }}>
-      <ScrollView contentContainerStyle={styles.container}>
-        <View style={styles.card}>
-          <Image style={styles.productImage} source={image} />
-          <Text style={styles.title}>{productName}</Text>
-          <Text style={styles.category}>{categoryName}</Text>
-
-          <Text style={styles.price}>${price}</Text>
+    <SafeAreaView className="flex-1 bg-gray-100">
+      <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
+        <View className="bg-white m-4 p-4 rounded-lg shadow-lg">
+          <Image style={{
+    width: "100%",
+    height: 220,
+    borderRadius: 10,
+    marginBottom: 10,
+    resizeMode: "contain",
+  }} source={image} />
+          <Text className="text-xl font-bold text-center mb-1">{productName}</Text>
+          <Text className="text-md text-center text-gray-600">{categoryName}</Text>
+          <Text className="text-lg text-green-600 font-bold text-center mt-2">${price}</Text>
           {discountPrice && (
-            <Text style={styles.discount}>Discount: ${discountPrice}</Text>
+            <Text className="text-md text-red-600 text-center">
+              Discount: ${discountPrice}
+            </Text>
           )}
 
-          <Text style={styles.sectionTitle}>Description</Text>
-          <Text style={styles.description}>{description}</Text>
+          <Text className="text-lg font-semibold mt-4">Description</Text>
+          <Text className="text-md text-gray-700">{description}</Text>
 
-          <Text style={styles.sectionTitle}>Product Details</Text>
-          <Text style={styles.detail}>Stock: {stockQuantity}</Text>
-          <Text style={styles.detail}>Unit: {unitType}</Text>
-          <Text style={styles.detail}>Brand: {brand}</Text>
-          <Text style={styles.detail}>Status: {status}</Text>
+          <Text className="text-lg font-semibold mt-4">Product Details</Text>
+          <Text className="text-md text-gray-700">Stock: {stockQuantity}</Text>
+          <Text className="text-md text-gray-700">Unit: {unitType}</Text>
+          <Text className="text-md text-gray-700">Brand: {brand}</Text>
+          <Text className="text-md text-gray-700">Status: {status}</Text>
 
-          <Text style={styles.sectionTitle}>Supplier</Text>
-          <Text style={styles.detail}>{supplier}</Text>
+          <Text className="text-lg font-semibold mt-4">Supplier</Text>
+          <Text className="text-md text-gray-700">{supplier}</Text>
 
-          <Text style={styles.sectionTitle}>Ratings & Reviews</Text>
-          <Text style={styles.detail}>
+          <Text className="text-lg font-semibold mt-4">Ratings & Reviews</Text>
+          <Text className="text-md text-gray-700">
             Average Rating: {ratings} ({numberOfReviews} Reviews)
           </Text>
 
-          <View style={styles.buttonContainer}>
+          <View className="flex-row justify-around mt-6">
             <Pressable
-              style={styles.button}
+              className="bg-blue-500 py-2 px-4 rounded-lg flex-1 mx-2"
               onPress={() =>
                 navigation.navigate("addToCart", {
                   image,
@@ -89,126 +96,52 @@ export default function Item({ route, navigation }) {
                 })
               }
             >
-              <Text style={styles.buttonText}>Add to Cart</Text>
+              <Text className="text-white text-center font-semibold">Add to Cart</Text>
             </Pressable>
             <Pressable
-              style={[styles.button, styles.likeButton]}
+              className="bg-yellow-400 py-2 px-4 rounded-lg flex-1 mx-2"
               onPress={() => setModalVisible(true)}
             >
-              <Text style={styles.buttonText}>Like</Text>
+              <Text className="text-white text-center font-semibold">Like</Text>
             </Pressable>
           </View>
         </View>
       </ScrollView>
 
-      <Modal animationType="slide" transparent={true} visible={modalVisible}>
-        <View style={styles.modalBackground}>
-          <View style={styles.modalContainer}>
-            <Text style={styles.modalTitle}>
-              How much do you like {productName}?
-            </Text>
-            {[1, 2, 3, 4, 5].map((likeValue) => (
-              <Pressable
-                key={likeValue}
-                style={styles.modalButton}
-                onPress={() => handleLikePress(likeValue)}
-              >
-                <Text style={styles.modalText}>
-                  {likeValue} Star{likeValue > 1 ? "s" : ""}
-                </Text>
-              </Pressable>
-            ))}
-            <Pressable
-              style={styles.modalCloseButton}
-              onPress={() => setModalVisible(false)}
-            >
-              <Text style={styles.modalCloseText}>Close</Text>
-            </Pressable>
-          </View>
-        </View>
-      </Modal>
+
+<Modal animationType="slide" transparent={true} visible={modalVisible}>
+  <View className="flex-1 justify-center items-center bg-black bg-opacity-70">
+    <View className="bg-white p-6 rounded-lg shadow-lg w-80">
+      <Text className="text-lg font-bold mb-4 text-center">
+        How much do you like {productName}?
+      </Text>
+      <View className="flex-row justify-between mb-4">
+        {[1, 2, 3, 4, 5].map((likeValue) => (
+          <Pressable
+            key={likeValue}
+            className="bg-red-200 py-2 px-4 rounded-lg flex-1 mx-1"
+            onPress={() => handleLikePress(likeValue)}
+          >
+            <View className="flex-row items-center justify-center">
+              <Ionicons name="star" size={20} color="red" />
+              <Text className="text-center text-red-700 ml-1">
+                {likeValue}
+              </Text>
+            </View>
+          </Pressable>
+        ))}
+      </View>
+      <Pressable
+        className="bg-red-500 py-2 px-4 rounded-lg mt-4"
+        onPress={() => setModalVisible(false)}
+      >
+        <Text className="text-white font-semibold text-center">Close</Text>
+      </Pressable>
+    </View>
+  </View>
+</Modal>
 
       <Footer navigation={navigation} />
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flexGrow: 1, paddingBottom: 20 },
-  card: {
-    backgroundColor: "white",
-    margin: 10,
-    padding: 15,
-    borderRadius: 10,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-  },
-  productImage: {
-    width: "100%",
-    height: 220,
-    borderRadius: 10,
-    marginBottom: 10,
-    resizeMode: "contain",
-  },
-  title: {
-    fontSize: 22,
-    fontWeight: "bold",
-    textAlign: "center",
-    marginBottom: 5,
-  },
-  category: { fontSize: 16, textAlign: "center", color: "#555" },
-  price: {
-    fontSize: 20,
-    color: "#28a745",
-    fontWeight: "bold",
-    textAlign: "center",
-  },
-  discount: { fontSize: 16, color: "#dc3545", textAlign: "center" },
-  sectionTitle: { fontSize: 18, fontWeight: "bold", marginTop: 10 },
-  description: { fontSize: 15, color: "#666" },
-  detail: { fontSize: 15, marginVertical: 2 },
-  buttonContainer: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    marginTop: 15,
-  },
-  button: {
-    backgroundColor: "#007bff",
-    padding: 12,
-    borderRadius: 8,
-    flex: 1,
-    alignItems: "center",
-    marginHorizontal: 5,
-  },
-  likeButton: { backgroundColor: "#ffc107" },
-  buttonText: { color: "white", fontSize: 16, fontWeight: "bold" },
-  modalBackground: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0,0,0,0.5)",
-  },
-  modalContainer: {
-    backgroundColor: "white",
-    padding: 20,
-    borderRadius: 10,
-    alignItems: "center",
-  },
-  modalTitle: { fontSize: 18, fontWeight: "bold", marginBottom: 10 },
-  modalButton: {
-    padding: 10,
-    backgroundColor: "#f8d7da",
-    borderRadius: 5,
-    marginVertical: 5,
-  },
-  modalText: { fontSize: 16, color: "#721c24" },
-  modalCloseButton: {
-    backgroundColor: "red",
-    padding: 10,
-    borderRadius: 5,
-    marginTop: 10,
-  },
-  modalCloseText: { color: "white", fontWeight: "bold" },
-});

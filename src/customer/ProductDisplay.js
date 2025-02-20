@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   View,
   Text,
@@ -6,33 +6,12 @@ import {
   Image,
   TouchableOpacity,
   SafeAreaView,
-  Modal,
-  Animated,
 } from "react-native";
 import Footer from "../subscrean/foter.js";
-import Ionicons from "react-native-vector-icons/Ionicons";
-import { allProducts } from "../global/data.js"; // Ensure all products are imported
+import Ionicons from "react-native-vector-icons/Ionicons"; // Import Ionicons
 
 export default function ProductDisplay({ route, navigation }) {
-  const { categoryName } = route.params; // Get category name from navigation params
-  const [modalVisible, setModalVisible] = useState(false);
-  const [selectedImage, setSelectedImage] = useState(null);
-  const fadeAnim = useState(new Animated.Value(0))[0];
-
-  // Filter products based on the selected category
-  const filteredProducts = allProducts.filter(
-    (product) => product.categoryName === categoryName && product.status === "Active"
-  );
-
-  const openModal = (image) => {
-    setSelectedImage(image);
-    setModalVisible(true);
-    Animated.timing(fadeAnim, {
-      toValue: 1,
-      duration: 300,
-      useNativeDriver: true,
-    }).start();
-  };
+  const { categoryName, products } = route.params; // Get the category name and products from route params
 
   const renderItem = ({ item }) => (
     <TouchableOpacity
@@ -40,15 +19,13 @@ export default function ProductDisplay({ route, navigation }) {
       onPress={() => navigation.navigate("Item", { ...item })}
     >
       {/* Product Image */}
-      <TouchableOpacity onPress={() => openModal(item.image)}>
-        <View className="w-20 h-20 bg-gray-200 rounded-lg flex justify-center items-center overflow-hidden">
-          <Image
-            style={{ width: "100%", height: "100%" }}
-            source={item.image}
-            resizeMode="contain"
-          />
-        </View>
-      </TouchableOpacity>
+      <View className="w-20 h-20 bg-gray-200 rounded-lg flex justify-center items-center overflow-hidden">
+        <Image
+          style={{ width: "100%", height: "100%" }}
+          source={item.image}
+          resizeMode="contain"
+        />
+      </View>
 
       {/* Product Info */}
       <View className="ml-4 flex-1">
@@ -73,33 +50,13 @@ export default function ProductDisplay({ route, navigation }) {
 
       {/* Product List */}
       <FlatList
-        data={filteredProducts}
+        data={products}
         keyExtractor={(item) => item.productId.toString()}
         renderItem={renderItem}
         numColumns={1}
         contentContainerStyle={{ paddingBottom: 20 }}
         showsVerticalScrollIndicator={false}
       />
-
-      {/* Image Modal */}
-      <Modal
-        animationType="none"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
-      >
-        <View className="flex-1 justify-center items-center bg-black bg-opacity-70">
-          <Animated.View style={{ opacity: fadeAnim }} className="w-11/12 h-11/12">
-            <TouchableOpacity onPress={() => setModalVisible(false)} className="flex-1 justify-center items-center">
-              <Image
-                source={selectedImage}
-                className="w-full h-full"
-                resizeMode="contain"
-              />
-            </TouchableOpacity>
-          </Animated.View>
-        </View>
-      </Modal>
 
       {/* Footer */}
       <Footer navigation={navigation} />

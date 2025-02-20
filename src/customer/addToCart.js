@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   Image,
   SafeAreaView,
   ScrollView,
-  StyleSheet,
   Text,
   TouchableOpacity,
   View,
+  TextInput,
 } from "react-native";
 
 export default function AddToCart({ route }) {
@@ -17,177 +17,85 @@ export default function AddToCart({ route }) {
     discountPrice = 0,
     unitType,
   } = route.params || {};
+  
   const [quantity, setQuantity] = useState(1);
+
   const increaseAmount = () => setQuantity((prev) => prev + 1);
   const decreaseAmount = () => setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
+
   const totalPrice = price * quantity;
   const discount = discountPrice * quantity;
   const finalPrice = totalPrice - discount;
+
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <ScrollView
-        style={{ paddingBottom: 20 }}
-        showsVerticalScrollIndicator={true}
-        //   contentContainerStyle={{ flexGrow: 1 }}
-      >
-        <View style={styles.container}>
-          <Text style={styles.title}>Add {productName} to Cart</Text>
-          <View style={styles.imageContainer}>
-            <Image source={image} style={styles.productImage} />
-          </View>
+    <SafeAreaView className="flex-1 bg-white mx-4 my-2">
+      <ScrollView contentContainerStyle={{ paddingBottom: 20 }} showsVerticalScrollIndicator={true}>
+        <Text className="text-2xl font-bold text-center my-4">Add {productName} to Cart</Text>
+        
+        <View className="items-center mb-4">
+          <Image source={image} style={{
+    width: "100%",
+    height: 220,
+    borderRadius: 10,
+    marginBottom: 10,
+    resizeMode: "contain",
+  }} />
+        </View>
 
-          <Text style={styles.productName}>{productName}</Text>
-          <View style={styles.quantityContainer}>
-            <TouchableOpacity
-              style={styles.quantityButton}
-              onPress={decreaseAmount}
-            >
-              <Text style={styles.quantityButtonText}>Decrease</Text>
-            </TouchableOpacity>
-            <Text style={styles.quantityText}>{quantity}</Text>
-            <TouchableOpacity
-              style={styles.quantityButton}
-              onPress={increaseAmount}
-            >
-              <Text style={styles.quantityButtonText}>Increase</Text>
-            </TouchableOpacity>
-          </View>
-          <Text style={styles.infoText}>
-            Price for one {unitType} {productName}: {price.toFixed(2)} Birr
-          </Text>
-          {discountPrice > 0 && (
-            <Text style={styles.infoText}>
-              Discount for one {unitType} {productName}:{" "}
-              {discountPrice.toFixed(2)} Birr
-            </Text>
-          )}
-          <Text style={styles.infoText}>
-            You add {quantity} {unitType} {productName}
-          </Text>
-          <View style={styles.priceContainer}>
-            <Text style={styles.priceText}>
-              Total Price: {totalPrice.toFixed(2)} Birr
-            </Text>
-            {discountPrice > 0 && (
-              <Text style={styles.discountText}>
-                Discount: {discount.toFixed(2)} Birr
-              </Text>
-            )}
-            <Text style={styles.finalPriceText}>
-              Final Price: {finalPrice.toFixed(2)} Birr
-            </Text>
-          </View>
+        <Text className="text-xl font-bold text-center mb-2">{productName}</Text>
+        
+        <View className="flex-row justify-around items-center my-4">
+          <TouchableOpacity className="bg-blue-500 py-2 px-4 rounded-lg h-10" onPress={decreaseAmount}>
+            <Text className="text-white font-semibold">Decrease</Text>
+          </TouchableOpacity>
 
-          <TouchableOpacity
-            style={styles.checkoutButton}
-            onPress={() => {
-              alert("Hey! this button is not functional right now.", "ok");
-            }}
-          >
-            <Text style={styles.checkoutButtonText}>Proceed to Checkout</Text>
+          <TextInput
+            className="text-center border border-gray rounded-lg w-20 h-10 "
+            value={String(quantity)}
+            onChangeText={(text) => setQuantity(Number(text) || 1)}
+            keyboardType="numeric"
+          />
+          
+          <TouchableOpacity className="bg-blue-500 py-2 px-4 rounded-lg h-10" onPress={increaseAmount}>
+            <Text className="text-white font-semibold">Increase</Text>
           </TouchableOpacity>
         </View>
+
+        <Text className="text-lg text-center">
+          Price for one {unitType} {productName}: {price.toFixed(2)} Birr
+        </Text>
+        {discountPrice > 0 && (
+          <Text className="text-lg text-center text-red-600">
+            Discount for one {unitType} {productName}: {discountPrice.toFixed(2)} Birr
+          </Text>
+        )}
+        <Text className="text-lg text-center mb-4">
+          You add {quantity} {unitType} {productName}
+        </Text>
+
+        <View className="items-center mb-4">
+          <Text className="text-lg font-bold">
+            Total Price: {totalPrice.toFixed(2)} Birr
+          </Text>
+          {discountPrice > 0 && (
+            <Text className="text-lg text-red-600">
+              Discount: {discount.toFixed(2)} Birr
+            </Text>
+          )}
+          <Text className="text-xl font-bold">
+            Final Price: {finalPrice.toFixed(2)} Birr
+          </Text>
+        </View>
+
+        <TouchableOpacity
+          className="bg-green-500 py-3 rounded-lg mt-4 w-70"
+          onPress={() => {
+            alert("Hey! This button is not functional right now.", "ok");
+          }}
+        >
+          <Text className="text-white text-lg font-bold text-center">Proceed to Checkout</Text>
+        </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    margin: 10,
-    backgroundColor: "white",
-  },
-
-  container: {
-    margin: 10,
-  },
-  title: {
-    fontSize: 26,
-    fontWeight: "bold",
-    textAlign: "center",
-    color: "#333",
-    marginBottom: 20,
-  },
-  imageContainer: {
-    alignItems: "center",
-    marginBottom: 10,
-  },
-  productImage: {
-    width: "100%",
-    height: 200,
-    resizeMode: "contain",
-    borderRadius: 10,
-  },
-  noImageText: {
-    fontSize: 16,
-    color: "gray",
-  },
-  productName: {
-    fontSize: 22,
-    fontWeight: "bold",
-    textAlign: "center",
-    color: "#444",
-    marginBottom: 10,
-  },
-  infoText: {
-    fontSize: 16,
-    textAlign: "center",
-    color: "#555",
-    marginBottom: 5,
-  },
-  quantityContainer: {
-    flexDirection: "row",
-    justifyContent: "space-evenly",
-    alignItems: "center",
-    marginVertical: 20,
-  },
-  quantityButton: {
-    backgroundColor: "#007BFF",
-    padding: 10,
-    borderRadius: 8,
-    width: "30%",
-    alignItems: "center",
-  },
-  quantityButtonText: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "white",
-  },
-  quantityText: {
-    fontSize: 20,
-    fontWeight: "bold",
-    marginHorizontal: 15,
-    color: "#333",
-  },
-  priceContainer: {
-    alignItems: "center",
-    marginBottom: 20,
-  },
-  priceText: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#444",
-  },
-  discountText: {
-    fontSize: 16,
-    color: "red",
-  },
-  finalPriceText: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#333",
-    marginTop: 5,
-  },
-  checkoutButton: {
-    backgroundColor: "#28a745",
-    padding: 15,
-    borderRadius: 10,
-    alignItems: "center",
-  },
-  checkoutButtonText: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "white",
-  },
-});

@@ -114,7 +114,7 @@ export const categories = [
     addedBy: "Manager",
   },
 ];
-export const Freshproducts = [
+export const products = [
   {
     productId: 101,
     productName: "Bananas",
@@ -138,6 +138,7 @@ export const Freshproducts = [
     numberOfReviews: 120,
     specialOffers: "Buy 1 Get 1 Free",
     addedBy: "Stock Manager",
+    
   },
   {
     productId: 102,
@@ -331,9 +332,7 @@ export const Freshproducts = [
     specialOffers: "None",
     addedBy: "Manager",
   },
-];
-///////////////////////////////////////////////////////////////////////////
-export const Dairyproducts = [
+
   {
     productId: 201,
     productName: "Whole Milk",
@@ -527,9 +526,7 @@ export const Dairyproducts = [
     specialOffers: "None",
     addedBy: "Stock Manager",
   },
-];
-///////////////////////////////////////////////////////////////////////
-export const Meatproducts = [
+
   {
     productId: 301,
     productName: "Chicken Breast",
@@ -651,9 +648,7 @@ export const Meatproducts = [
     specialOffers: "10% Off",
     addedBy: "Stock Manager",
   },
-];
-///////////////////////////////////////////////////////////////////
-export const Bakeryproducts = [
+
   {
     productId: 401,
     productName: "Whole Wheat Bread",
@@ -848,9 +843,7 @@ export const Bakeryproducts = [
     specialOffers: "None",
     addedBy: "Manager",
   },
-];
-/////////////////////////////////////////////////////////////////
-export const Beveragesproducts = [
+
   {
     productId: 501,
     productName: "Orange Juice",
@@ -972,9 +965,7 @@ export const Beveragesproducts = [
     specialOffers: "Buy 2 Get 1 Free",
     addedBy: "Stock Manager",
   },
-];
-/////////////////////////////////////////////////////////////////////////////////
-export const Pantryproducts = [
+
   {
     productId: 601,
     productName: "Brown Rice",
@@ -1144,9 +1135,7 @@ export const Pantryproducts = [
     specialOffers: "None",
     addedBy: "Manager",
   },
-];
-//////////////////////////////////////////////////////////////////////////
-export const Frozenproducts = [
+
   {
     productId: 701,
     productName: "Frozen Peas",
@@ -1316,9 +1305,7 @@ export const Frozenproducts = [
     specialOffers: "15% Off",
     addedBy: "Stock Manager",
   },
-];
-////////////////////////////////////////////////////////////
-export const PersonalCareproducts = [
+
   {
     productId: 801,
     productName: "Herbal Shampoo",

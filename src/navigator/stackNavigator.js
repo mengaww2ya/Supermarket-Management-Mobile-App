@@ -1,22 +1,10 @@
-import Icon from "react-native-vector-icons/Ionicons";
-import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import { Ionicons } from '@expo/vector-icons';
-
 import { TransitionPresets } from "@react-navigation/stack";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
 import logo from "../screans/logo.js";
 import Login from "../screans/login.js";
 import Welcome from "../screans/welcome.js";
 import EditProfileScreen from "../screans/EditProfileScreen.js";
-import BakeryproductsList from "../customer/Bakeryproducts.js";
-import PersonalCareproductsList from "../customer/PersonalCareproducts.js";
-import DairyProductsList from "../customer/Dairyproducts.js";
-import FreshProductsList from "../customer/Freshproducts.js";
-import FrozenproductsList from "../customer/Frozenproducts.js";
-import MeatproductsList from "../customer//Meatproducts.js";
-import PantryproductsList from "../customer/Pantryproducts.js";
-import BeveragesproductsList from "../customer/Beveragesproducts.js";
 import Homepage from "../customer/homepage.js";
 import Item from "../customer/Item.js";
 import Signup from "../screans/signup.js";
@@ -62,6 +50,7 @@ import ManageChannels from "../manager/ManageChannels.js";
 import ScroScreen from "../screans/scro.js";
 import SplashScreen from "../screans/logo.js";
 import WelcomeScreen from "../screans/scro.js";
+import ProductDisplay from "../customer/ProductDisplay.js"
 const Authentic = createNativeStackNavigator();
 
 
@@ -122,102 +111,6 @@ export default function AuthicStackNavig() {
             fontSize: 25,
           },
           title: "Log In",
-          ...TransitionPresets.RevealFromBottomAndroid,
-          headerStyle: {
-            backgroundColor: "#FFDC2B",
-          },
-        }}
-      />
-      <Authentic.Screen
-        name="Bakeryproducts"
-        component={BakeryproductsList}
-        options={{
-          headerShown: false,
-          headerTitleStyle: {
-            color: "#2ECE33",
-            fontSize: 25,
-          },
-          title: "Bakery Food",
-          ...TransitionPresets.RevealFromBottomAndroid,
-          headerStyle: {
-            backgroundColor: "#FFDC2B",
-          },
-        }}
-      />
-      <Authentic.Screen
-        name="PersonalCareproducts"
-        component={PersonalCareproductsList}
-        options={{
-          headerShown: false,
-          headerTitleStyle: {
-            color: "#2ECE33",
-            fontSize: 25,
-          },
-          title: "Personal Care",
-          ...TransitionPresets.RevealFromBottomAndroid,
-          headerStyle: {
-            backgroundColor: "#FFDC2B",
-          },
-        }}
-      />
-      <Authentic.Screen
-        name="DairyProducts"
-        component={DairyProductsList}
-        options={{
-          headerShown: false,
-          headerTitleStyle: {
-            color: "#2ECE33",
-            fontSize: 25,
-          },
-          title: "Dairy Product",
-          ...TransitionPresets.RevealFromBottomAndroid,
-          headerStyle: {
-            backgroundColor: "#FFDC2B",
-          },
-        }}
-      />
-      <Authentic.Screen
-        name="FreshProducts"
-        component={FreshProductsList}
-        options={{
-          headerShown: false,
-          headerTitleStyle: {
-            color: "#2ECE33",
-            fontSize: 25,
-          },
-          title: "Fresh Produce",
-          ...TransitionPresets.RevealFromBottomAndroid,
-          headerStyle: {
-            backgroundColor: "#FFDC2B",
-          },
-        }}
-      />
-      <Authentic.Screen
-        name="Frozenproducts"
-        component={FrozenproductsList}
-        options={{
-          headerShown: false,
-          headerTitleStyle: {
-            color: "#2ECE33",
-            fontSize: 25,
-          },
-          title: "Frozen Foods",
-          ...TransitionPresets.RevealFromBottomAndroid,
-          headerStyle: {
-            backgroundColor: "#FFDC2B",
-          },
-        }}
-      />
-      <Authentic.Screen
-        name="Meatproducts"
-        component={MeatproductsList}
-        options={{
-          headerShown: false,
-          headerTitleStyle: {
-            color: "#2ECE33",
-            fontSize: 25,
-          },
-          title: "Meat Product See food",
           ...TransitionPresets.RevealFromBottomAndroid,
           headerStyle: {
             backgroundColor: "#FFDC2B",
@@ -869,39 +762,7 @@ export default function AuthicStackNavig() {
           },
         }}
       />
-      {/* /////////////////////////////////////////////////////// */}
-      <Authentic.Screen
-        name="Pantryproducts"
-        component={PantryproductsList}
-        options={{
-          headerShown: false,
-          headerTitleStyle: {
-            color: "#2ECE33",
-            fontSize: 20,
-          },
-          title: "Pantry Essentials",
-          ...TransitionPresets.RevealFromBottomAndroid,
-          headerStyle: {
-            backgroundColor: "#FFDC2B",
-          },
-        }}
-      />
-      <Authentic.Screen
-        name="Beveragesproducts"
-        component={BeveragesproductsList}
-        options={{
-          headerShown: false,
-          headerTitleStyle: {
-            color: "#2ECE33",
-            fontSize: 20,
-          },
-          title: "Beverage Food",
-          ...TransitionPresets.RevealFromBottomAndroid,
-          headerStyle: {
-            backgroundColor: "#FFDC2B",
-          },
-        }}
-      />
+      
       <Authentic.Screen
         name="Homepage"
         component={Homepage}
@@ -957,6 +818,23 @@ export default function AuthicStackNavig() {
 
         }}
       />
+      <Authentic.Screen
+        name="ProductDisplay"
+        component={ProductDisplay}
+        options={{
+          headerShown: false,
+          headerTitleStyle: {
+            color: "#2ECE33",
+            fontSize: 20,
+          },
+          title: "Beverage Food",
+          ...TransitionPresets.RevealFromBottomAndroid,
+          headerStyle: {
+            backgroundColor: "#FFDC2B",
+          },
+        }}
+      />
+      
     </Authentic.Navigator>
 
   );

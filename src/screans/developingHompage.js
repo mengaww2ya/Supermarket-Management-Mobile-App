@@ -4,7 +4,6 @@ import {
   View,
   TouchableOpacity,
   SafeAreaView,
-  StyleSheet,
   ScrollView,
   useWindowDimensions,
 } from "react-native";
@@ -14,122 +13,34 @@ export default function DeveloperHomePage({ navigation }) {
   const { width: ScreenWidth, height: ScreenHeight } = useWindowDimensions();
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <Text style={styles.titleText}>
+    <SafeAreaView className="flex-1 bg-gray-100">
+      <ScrollView contentContainerStyle={{ flexGrow: 1, alignItems: 'center', paddingVertical: 20 }}>
+        <Text className="text-2xl font-bold text-center text-gray-800 mb-5">
           Hey! Which role do you want to test?
         </Text>
 
-        <View style={styles.container}>
-          <TouchableOpacity
-            style={[
-              styles.button,
-              { width: ScreenWidth * 0.4, height: ScreenHeight * 0.12 },
-            ]}
-            onPress={() => navigation.navigate("ManagerHomePage")}
-          >
-            <Text style={styles.buttonText}>Manager</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[
-              styles.button,
-              { width: ScreenWidth * 0.4, height: ScreenHeight * 0.12 },
-            ]}
-            onPress={() => navigation.navigate("Homepage")}
-          >
-            <Text style={styles.buttonText}>Customer</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[
-              styles.button,
-              { width: ScreenWidth * 0.4, height: ScreenHeight * 0.12 },
-            ]}
-            onPress={() => {
-              navigation.navigate("CustomerSuport");
-            }}
-          >
-            <Text style={styles.buttonText}>Customer Support</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[
-              styles.button,
-              { width: ScreenWidth * 0.4, height: ScreenHeight * 0.12 },
-            ]}
-            onPress={() => navigation.navigate("admineHomePage")}
-          >
-            <Text style={styles.buttonText}>Admin</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[
-              styles.button,
-              { width: ScreenWidth * 0.4, height: ScreenHeight * 0.12 },
-            ]}
-            onPress={() => navigation.navigate("stockManagerHome")}
-          >
-            <Text style={styles.buttonText}>Stock Manager</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[
-              styles.button,
-              { width: ScreenWidth * 0.4, height: ScreenHeight * 0.12 },
-            ]}
-            onPress={() => navigation.navigate("suplierHome")}
-          >
-            <Text style={styles.buttonText}>Suplier</Text>
-          </TouchableOpacity>
+        <View className="flex-row flex-wrap justify-center gap-4 mt-5">
+          {[
+            { title: "Manager", screen: "ManagerHomePage" },
+            { title: "Customer", screen: "Homepage" },
+            { title: "Customer Support", screen: "CustomerSuport" },
+            { title: "Admin", screen: "admineHomePage" },
+            { title: "Stock Manager", screen: "stockManagerHome" },
+            { title: "Supplier", screen: "suplierHome" },
+          ].map((role) => (
+            <TouchableOpacity
+              key={role.title}
+              className="bg-gray-300 w-40 h-28 justify-center items-center rounded-lg border border-gray-400 shadow-md"
+              onPress={() => navigation.navigate(role.screen)}
+              style={{ width: ScreenWidth * 0.4, height: ScreenHeight * 0.12 }}
+            >
+              <Text className="text-lg font-bold text-center text-gray-800">
+                {role.title}
+              </Text>
+            </TouchableOpacity>
+          ))}
         </View>
       </ScrollView>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: "#F5F5F5",
-  },
-  scrollContainer: {
-    alignItems: "center",
-    paddingVertical: 20,
-  },
-  titleText: {
-    fontSize: 24,
-    fontWeight: "bold",
-    textAlign: "center",
-    color: "#333",
-    marginBottom: 20,
-  },
-  container: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "center",
-    marginTop: 20,
-    gap: 15,
-  },
-  button: {
-    backgroundColor: colors.grey5,
-    width: "47%",
-    height: 120,
-    justifyContent: "center",
-    alignItems: "center",
-    borderRadius: 10,
-    borderColor: colors.grey4,
-    borderWidth: 1,
-    marginBottom: 15,
-    shadowColor: "#000",
-    shadowOffset: { width: 2, height: 3 },
-    shadowOpacity: 0.3,
-    shadowRadius: 3,
-    elevation: 4,
-  },
-  buttonText: {
-    fontSize: 16,
-    fontWeight: "bold",
-    textAlign: "center",
-    color: "#333",
-  },
-});

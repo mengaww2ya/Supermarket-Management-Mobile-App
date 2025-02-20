@@ -11,54 +11,41 @@ import {
   Dimensions,
 } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
-import { categories } from "../global/data.js";
+import { categories } from "../global/data.js"; // Import your categories
+import { products } from "../global/data.js"; // Import your products
 import Footer from "../subscrean/foter.js";
 
 const { width } = Dimensions.get("window");
 const CARD_WIDTH = width * 0.42;
-const IMAGE_SIZE = width * 0.3;
-
-const categoryNavigationMap = {
-  "Fruit & Vegetable": "FreshProducts",
-  "Dairy & Eggs": "DairyProducts",
-  "Meat & Seafood": "Meatproducts",
-  Bakery: "Bakeryproducts",
-  Beverages: "Beveragesproducts",
-  "Pantry Essentials": "Pantryproducts",
-  "Frozen Foods": "Frozenproducts",
-  "Personal Care": "PersonalCareproducts",
-};
 
 export default function Homepage({ navigation }) {
   const [searchQuery, setSearchQuery] = useState("");
 
-  const promoCategories = categories.filter(
-    (item) => item.status === "Active" && item.discountAvailable === true
-  );
-  const standardCategories = categories.filter(
-    (item) => item.status === "Active" && item.discountAvailable === false
-  );
-
   const handleCategoryPress = (item) => {
-    const screenName = categoryNavigationMap[item.categoryName];
-    if (screenName) {
-      navigation.navigate(screenName);
-    }
+    // Filter products based on the selected category
+    const filteredProducts = products.filter(
+      (product) => product.categoryId === item.categoryId
+    );
+
+    // Navigate to the ProductDisplay page and pass the filtered products
+    navigation.navigate("ProductDisplay", { categoryName: item.categoryName, products: filteredProducts });
   };
 
   const renderCategoryItem = ({ item }) => (
     <TouchableOpacity
-      className="bg-white border border-gray-200 rounded-lg shadow-md p-3 m-2 items-center"
-      style={{ width: CARD_WIDTH }}
+      className="bg-white border border-gray-200 rounded-lg shadow-md p-3 m-2 items-center justify-center transition-transform transform hover:scale-105"
+      style={{ width: CARD_WIDTH, maxHeight: 200 }} // Set a max height for the card
       onPress={() => handleCategoryPress(item)}
     >
-      <Text className="text-base font-semibold text-center">{item.categoryName}</Text>
-      <Image
-        className="rounded-md my-2"
-        source={item.image}
-        style={{ width: IMAGE_SIZE, height: IMAGE_SIZE, resizeMode: "contain" }}
-      />
-      <Text className="text-xs text-gray-500 font-medium text-center">
+      <Text className="text-base color-blue-700  font-bold  text-center">{item.categoryName}</Text>
+      <View className="w-full h-24"> {/* Fixed height for the image container */}
+        <Image
+          className="rounded-md my-2"
+          source={item.image}
+          style={{ width: "100%", height: "100%", resizeMode: "contain" }}
+        />
+      </View>
+      <Text className="text-s  font-medium text-center flex-wrap w-full py-2">
         {item.description}
       </Text>
     </TouchableOpacity>
@@ -91,35 +78,16 @@ export default function Homepage({ navigation }) {
       </View>
 
       <ScrollView className="flex-1 px-4">
-        {promoCategories.length > 0 && (
-          <View>
-            <Text className="text-xl font-bold text-center text-black my-3">
-              Promotion Categories
-            </Text>
-            <FlatList
-              numColumns={2}
-              data={promoCategories}
-              keyExtractor={(item) => item.categoryId.toString()}
-              renderItem={renderCategoryItem}
-              contentContainerStyle={{ alignItems: "center" }}
-            />
-          </View>
-        )}
-
-        {standardCategories.length > 0 && (
-          <View>
-            <Text className="text-xl font-bold text-center text-black my-3">
-              Standard Categories
-            </Text>
-            <FlatList
-              numColumns={2}
-              data={standardCategories}
-              keyExtractor={(item) => item.categoryId.toString()}
-              renderItem={renderCategoryItem}
-              contentContainerStyle={{ alignItems: "center" }}
-            />
-          </View>
-        )}
+        <Text className="text-xl font-bold text-center  text-black my-3">
+          Categories
+        </Text>
+        <FlatList
+          numColumns={2}
+          data={categories}
+          keyExtractor={(item) => item.categoryId.toString()}
+          renderItem={renderCategoryItem}
+          contentContainerStyle={{ alignItems: "center" }}
+        />
       </ScrollView>
 
       {/* Footer */}
