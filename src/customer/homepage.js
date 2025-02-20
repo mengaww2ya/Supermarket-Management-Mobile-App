@@ -37,7 +37,7 @@ export default function Homepage({ navigation }) {
       style={{ width: CARD_WIDTH, maxHeight: 200 }} // Set a max height for the card
       onPress={() => handleCategoryPress(item)}
     >
-      <Text className="text-base color-blue-700  font-bold  text-center">{item.categoryName}</Text>
+      <Text className="text-base color-blue-700 font-bold text-center">{item.categoryName}</Text>
       <View className="w-full h-24"> {/* Fixed height for the image container */}
         <Image
           className="rounded-md my-2"
@@ -45,11 +45,15 @@ export default function Homepage({ navigation }) {
           style={{ width: "100%", height: "100%", resizeMode: "contain" }}
         />
       </View>
-      <Text className="text-s  font-medium text-center flex-wrap w-full py-2">
+      <Text className="text-sm font-medium text-center flex-wrap w-full py-2">
         {item.description}
       </Text>
     </TouchableOpacity>
   );
+
+  // Filter categories based on discountAvailable
+  const promotionCategories = categories.filter(category => category.discountAvailable);
+  const standardCategories = categories.filter(category => !category.discountAvailable);
 
   return (
     <SafeAreaView className="flex-1 bg-gray-100">
@@ -78,12 +82,23 @@ export default function Homepage({ navigation }) {
       </View>
 
       <ScrollView className="flex-1 px-4">
-        <Text className="text-xl font-bold text-center  text-black my-3">
-          Categories
+        <Text className="text-xl font-bold text-center text-green-600 my-3">
+          Promotion Categories
         </Text>
         <FlatList
           numColumns={2}
-          data={categories}
+          data={promotionCategories}
+          keyExtractor={(item) => item.categoryId.toString()}
+          renderItem={renderCategoryItem}
+          contentContainerStyle={{ alignItems: "center" }}
+        />
+
+        <Text className="text-xl font-bold text-center text-blue-500 my-3 ">
+          Standard Categories
+        </Text>
+        <FlatList
+          numColumns={2}
+          data={standardCategories}
           keyExtractor={(item) => item.categoryId.toString()}
           renderItem={renderCategoryItem}
           contentContainerStyle={{ alignItems: "center" }}
