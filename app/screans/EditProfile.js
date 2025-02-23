@@ -10,8 +10,8 @@ import {
 } from 'react-native-paper';
 import { Icon } from 'react-native-elements';
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
-
-const ProfileScreen = ({ navigation }) => {
+import { useRouter } from 'expo-router';
+const ProfileScreen = () => {
   const [bio, setBio] = useState('Tech enthusiast and coffee lover. Always learning.');
   const [isModalVisible, setModalVisible] = useState(false);
   const [newBio, setNewBio] = useState('');
@@ -20,10 +20,10 @@ const ProfileScreen = ({ navigation }) => {
     setBio(newBio);
     setModalVisible(false);
   };
-
+const router=useRouter();
   // Set the header options
   useLayoutEffect(() => {
-    navigation.setOptions({
+    router.setOptions({
       headerRight: () => (
         <View style={styles.editButtonContainer}>
           <MaterialCommunityIcons.Button
@@ -31,7 +31,7 @@ const ProfileScreen = ({ navigation }) => {
             size={25}
             backgroundColor="#FFDC2B"
             color="#000"
-            onPress={() => navigation.navigate("EditProfileScreen")}
+            onPress={() => router.push("/screans/EditProfileScreen")}
           />
         </View>
       ),
@@ -46,7 +46,7 @@ const ProfileScreen = ({ navigation }) => {
           //   />
           // ),
     });
-  }, [navigation]);
+  }, [router]);
 
   return (
     <SafeAreaView style={styles.container}>
