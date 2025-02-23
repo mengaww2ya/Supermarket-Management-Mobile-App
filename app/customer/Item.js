@@ -10,7 +10,6 @@ import {
   Modal,
   Alert,
 } from "react-native";
-import Footer from "../subscrean/foter.js";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { products } from "../global/data.js";
@@ -145,8 +144,6 @@ export default function Item() {
           </View>
         </View>
       </Modal>
-
-      <Footer />
     </SafeAreaView>
   );
 }

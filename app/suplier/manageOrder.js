@@ -9,10 +9,11 @@ import {
   SafeAreaView,
 } from "react-native";
 import { colors } from "react-native-elements";
-import SupplierFooter from "../subscrean/suplierfooter";
-export default function SmanageOrder({ navigation }) {
+import { useRouter } from "expo-router";
+export default function SmanageOrder() {
   const screenWidth = useWindowDimensions().width;
   const screenHeight = useWindowDimensions().height;
+  const router =useRouter();
   return (
     <SafeAreaView style={styles.homeContainer}>
       <ScrollView
@@ -27,7 +28,7 @@ export default function SmanageOrder({ navigation }) {
           <View style={styles.buttoncontainer}>
             <TouchableOpacity
               style={styles.button}
-              onPress={() => navigation.navigate("emplyeeManagement")}
+              onPress={() => router.push("")}
             >
               <View style={styles.buttonview}>
                 <Text style={styles.buttontxt}>View Orders</Text>
@@ -38,7 +39,7 @@ export default function SmanageOrder({ navigation }) {
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.button}
-              onPress={() => navigation.navigate("customerManagement")}
+              onPress={() => router.push("")}
             >
               <View style={styles.buttonview}>
                 <Text style={styles.buttontxt}>Accept or Reject Orders</Text>
@@ -48,7 +49,7 @@ export default function SmanageOrder({ navigation }) {
 
             <TouchableOpacity
               style={styles.button}
-              onPress={() => navigation.navigate("promotionManagement")}
+              onPress={() => router.push("")}
             >
               <View style={styles.buttonview}>
                 <Text style={styles.buttontxt}>Estimated Delivery </Text>
@@ -60,7 +61,6 @@ export default function SmanageOrder({ navigation }) {
           </View>
         </View>
       </ScrollView>
-      <SupplierFooter navigation={navigation} />
     </SafeAreaView>
   );
 }

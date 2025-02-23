@@ -23,7 +23,7 @@ export default function manageDelivery({navigation}) {
           <View style={styles.buttoncontainer}>
             <TouchableOpacity
               style={styles.button}
-              onPress={() => navigation.navigate("emplyeeManagement")}
+              onPress={() => router.push("")}
             >
               <View style={styles.buttonview}>
                 <Text style={styles.buttontxt}>Schedule Delivery</Text>
@@ -34,7 +34,7 @@ export default function manageDelivery({navigation}) {
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.button}
-              onPress={() => navigation.navigate("customerManagement")}
+              onPress={() => router.push("")}
             >
               <View style={styles.buttonview}>
                 <Text style={styles.buttontxt}>Track Delivery</Text>

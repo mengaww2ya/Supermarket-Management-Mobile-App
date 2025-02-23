@@ -9,7 +9,9 @@ import {
   SafeAreaView,
 } from "react-native";
 import { colors } from "react-native-elements";
-export default function suplierHome({ navigation }) {
+import { useRouter } from "expo-router";
+export default function suplierHome() {
+  const router =useRouter();
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <ScrollView
@@ -21,7 +23,7 @@ export default function suplierHome({ navigation }) {
           <View style={styles.buttoncontainer}>
             <TouchableOpacity
               style={styles.button}
-              onPress={() => navigation.navigate("manageProduct")}
+              onPress={() => router.push("")}
             >
               <View style={styles.buttonview}>
                 <Text style={styles.buttontxt}>Manage Product</Text>
@@ -32,7 +34,7 @@ export default function suplierHome({ navigation }) {
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.button}
-              onPress={() => navigation.navigate("SmanageOrder")}
+              onPress={() => router.push("")}
             >
               <View style={styles.buttonview}>
                 <Text style={styles.buttontxt}>Manage Order</Text>
@@ -44,7 +46,7 @@ export default function suplierHome({ navigation }) {
 
             <TouchableOpacity
               style={styles.button}
-              onPress={() => navigation.navigate("manageDelivery")}
+              onPress={() => router.push("")}
             >
               <View style={styles.buttonview}>
                 <Text style={styles.buttontxt}>Manage Deliveries</Text>
@@ -55,7 +57,7 @@ export default function suplierHome({ navigation }) {
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.button}
-              onPress={() => navigation.navigate("SperformanceAnalysis")}
+              onPress={() => router.push("")}
             >
               <View style={styles.buttonview}>
                 <Text style={styles.buttontxt}>Performance & Analytics</Text>

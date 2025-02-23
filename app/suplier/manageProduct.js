@@ -9,11 +9,11 @@ import {
   SafeAreaView,
 } from "react-native";
 import { colors } from "react-native-elements";
-import SupplierFooter from "../subscrean/suplierfooter";
-
+import { useRouter } from "expo-router";
 export default function manageProduct({ navigation }) {
   const screenWidth = useWindowDimensions().width;
   const screenHeight = useWindowDimensions().height;
+  const router=useRouter();
   return (
     <SafeAreaView style={styles.homeContainer}>
       <ScrollView
@@ -28,7 +28,7 @@ export default function manageProduct({ navigation }) {
           <View style={styles.buttoncontainer}>
             <TouchableOpacity
               style={styles.button}
-              onPress={() => navigation.navigate("emplyeeManagement")}
+              onPress={() => router.push("")}
             >
               <View style={styles.buttonview}>
                 <Text style={styles.buttontxt}>View Supplied Products</Text>
@@ -39,7 +39,7 @@ export default function manageProduct({ navigation }) {
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.button}
-              onPress={() => navigation.navigate("customerManagement")}
+              onPress={() => router.push("")}
             >
               <View style={styles.buttonview}>
                 <Text style={styles.buttontxt}>Add Products</Text>
@@ -51,7 +51,7 @@ export default function manageProduct({ navigation }) {
 
             <TouchableOpacity
               style={styles.button}
-              onPress={() => navigation.navigate("promotionManagement")}
+              onPress={() => router.push("")}
             >
               <View style={styles.buttonview}>
                 <Text style={styles.buttontxt}>Update Product</Text>
@@ -63,7 +63,7 @@ export default function manageProduct({ navigation }) {
 
             <TouchableOpacity
               style={styles.button}
-              onPress={() => navigation.navigate("inventoryManagement")}
+              onPress={() => router.push("")}
             >
               <View style={styles.buttonview}>
                 <Text style={styles.buttontxt}>Delete Product</Text>
@@ -73,7 +73,6 @@ export default function manageProduct({ navigation }) {
           </View>
         </View>
       </ScrollView>
-      <SupplierFooter navigation={navigation} />
     </SafeAreaView>
   );
 }
