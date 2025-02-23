@@ -7,11 +7,10 @@ import {
   ScrollView,
   useWindowDimensions,
 } from "react-native";
-import { colors } from "react-native-elements";
-
+import { useRouter } from "expo-router";
 export default function DeveloperHomePage({ navigation }) {
   const { width: ScreenWidth, height: ScreenHeight } = useWindowDimensions();
-
+    const router =useRouter();
   return (
     <SafeAreaView className="flex-1 bg-gray-100">
       <ScrollView contentContainerStyle={{ flexGrow: 1, alignItems: 'center', paddingVertical: 20 }}>
@@ -21,17 +20,17 @@ export default function DeveloperHomePage({ navigation }) {
 
         <View className="flex-row flex-wrap justify-center gap-4 mt-5">
           {[
-            { title: "Manager", screen: "ManagerHomePage" },
-            { title: "Customer", screen: "Homepage" },
-            { title: "Customer Support", screen: "CustomerSuport" },
-            { title: "Admin", screen: "admineHomePage" },
-            { title: "Stock Manager", screen: "stockManagerHome" },
-            { title: "Supplier", screen: "suplierHome" },
+            { title: "Manager", screen: "/manager/managerHomePage" },
+            { title: "Customer", screen: "/customer/homepage" },
+            { title: "Customer Support", screen: "/customeAssistance/customerSuport" },
+            { title: "Admin", screen: "/admine/adminHompage" },
+            { title: "Stock Manager", screen: "/stockManager/stockManagerHome" },
+            { title: "Supplier", screen: "suplier/suplierHomePage" },
           ].map((role) => (
             <TouchableOpacity
               key={role.title}
               className="bg-gray-300 w-40 h-28 justify-center items-center rounded-lg border border-gray-400 shadow-md"
-              onPress={() => navigation.navigate(role.screen)}
+              onPress={() => router.push(role.screen)}
               style={{ width: ScreenWidth * 0.4, height: ScreenHeight * 0.12 }}
             >
               <Text className="text-lg font-bold text-center text-gray-800">

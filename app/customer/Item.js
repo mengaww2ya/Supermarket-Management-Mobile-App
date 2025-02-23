@@ -11,27 +11,24 @@ import {
   Alert,
 } from "react-native";
 import Footer from "../subscrean/foter.js";
- import Ionicons from "react-native-vector-icons/Ionicons"; // Make sure to import Ionicons
-
+import Ionicons from "react-native-vector-icons/Ionicons";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { products } from "../global/data.js";
 const screenWidth = Dimensions.get("window").width;
+export default function Item() {
+  const router = useRouter();
+  const { productId } = useLocalSearchParams();
+  // Find the selected product
+  const product = products.find((item) => item.productId === Number(productId));
+  if (!product) {
+    return (
+      <SafeAreaView className="flex-1 items-center justify-center bg-gray-100">
+        <Text className="text-xl font-bold text-red-500">Product Not Found</Text>
+      </SafeAreaView>
+    );
+  }
 
-export default function Item({ route, navigation }) {
-  const {
-    productId,
-    productName,
-    price,
-    discountPrice,
-    description,
-    image,
-    supplier,
-    categoryName,
-    stockQuantity,
-    unitType,
-    brand,
-    status,
-    ratings,
-    numberOfReviews,
-  } = route.params || {};
+  const { productName, image, categoryName, price, discountPrice, description, stockQuantity, unitType, brand, status, supplier, ratings, numberOfReviews } = product;
 
   const [modalVisible, setModalVisible] = useState(false);
 
@@ -50,13 +47,17 @@ export default function Item({ route, navigation }) {
     <SafeAreaView className="flex-1 bg-gray-100">
       <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
         <View className="bg-white m-4 p-4 rounded-lg shadow-lg">
-          <Image style={{
-    width: "100%",
-    height: 220,
-    borderRadius: 10,
-    marginBottom: 10,
-    resizeMode: "contain",
-  }} source={image} />
+          {/* item image  */}
+          <Image
+            style={{
+              width: "100%",
+              height: 220,
+              borderRadius: 10,
+              marginBottom: 10,
+              resizeMode: "contain",
+            }}
+            source={image }
+          />
           <Text className="text-xl font-bold text-center mb-1">{productName}</Text>
           <Text className="text-md text-center text-gray-600">{categoryName}</Text>
           <Text className="text-lg text-green-600 font-bold text-center mt-2">${price}</Text>
@@ -87,12 +88,16 @@ export default function Item({ route, navigation }) {
             <Pressable
               className="bg-blue-500 py-2 px-4 rounded-lg flex-1 mx-2"
               onPress={() =>
-                navigation.navigate("addToCart", {
-                  image,
-                  productName,
-                  price,
-                  discountPrice,
-                  unitType,
+                router.push({
+                  pathname: "/customer/addToCart",
+                  params: {
+                    productId,
+                    productName,
+                    price,
+                    discountPrice,
+                    unitType,
+                    image:  image,  // Ensure it passes a string
+                  },
                 })
               }
             >
@@ -108,40 +113,40 @@ export default function Item({ route, navigation }) {
         </View>
       </ScrollView>
 
-
-<Modal animationType="slide" transparent={true} visible={modalVisible}>
-  <View className="flex-1 justify-center items-center bg-black bg-opacity-70">
-    <View className="bg-white p-6 rounded-lg shadow-lg w-80">
-      <Text className="text-lg font-bold mb-4 text-center">
-        How much do you like {productName}?
-      </Text>
-      <View className="flex-row justify-between mb-4">
-        {[1, 2, 3, 4, 5].map((likeValue) => (
-          <Pressable
-            key={likeValue}
-            className="bg-red-200 py-2 px-4 rounded-lg flex-1 mx-1"
-            onPress={() => handleLikePress(likeValue)}
-          >
-            <View className="flex-row items-center justify-center">
-              <Ionicons name="star" size={20} color="red" />
-              <Text className="text-center text-red-700 ml-1">
-                {likeValue}
-              </Text>
+      {/* Rating Modal */}
+      <Modal animationType="slide" transparent={true} visible={modalVisible}>
+        <View className="flex-1 justify-center items-center bg-black bg-opacity-70">
+          <View className="bg-white p-6 rounded-lg shadow-lg w-80">
+            <Text className="text-lg font-bold mb-4 text-center">
+              How much do you like {productName}?
+            </Text>
+            <View className="flex-row justify-between mb-4">
+              {[1, 2, 3, 4, 5].map((likeValue) => (
+                <Pressable
+                  key={likeValue}
+                  className="bg-red-200 py-2 px-4 rounded-lg flex-1 mx-1"
+                  onPress={() => handleLikePress(likeValue)}
+                >
+                  <View className="flex-row items-center justify-center">
+                    <Ionicons name="star" size={20} color="red" />
+                    <Text className="text-center text-red-700 ml-1">
+                      {likeValue}
+                    </Text>
+                  </View>
+                </Pressable>
+              ))}
             </View>
-          </Pressable>
-        ))}
-      </View>
-      <Pressable
-        className="bg-red-500 py-2 px-4 rounded-lg mt-4"
-        onPress={() => setModalVisible(false)}
-      >
-        <Text className="text-white font-semibold text-center">Close</Text>
-      </Pressable>
-    </View>
-  </View>
-</Modal>
+            <Pressable
+              className="bg-red-500 py-2 px-4 rounded-lg mt-4"
+              onPress={() => setModalVisible(false)}
+            >
+              <Text className="text-white font-semibold text-center">Close</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
 
-      <Footer navigation={navigation} />
+      <Footer />
     </SafeAreaView>
   );
 }

@@ -9,10 +9,7 @@ import {
   SafeAreaView,
 } from "react-native";
 import { colors } from "react-native-elements";
-import SupplierFooter from "../subscrean/suplierfooter";
 export default function suplierHome({ navigation }) {
-  const screenWidth = useWindowDimensions().width;
-  const screenHeight = useWindowDimensions().height;
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <ScrollView
@@ -70,7 +67,6 @@ export default function suplierHome({ navigation }) {
           </View>
         </View>
       </ScrollView>
-      <SupplierFooter navigation={navigation} />
     </SafeAreaView>
   );
 }

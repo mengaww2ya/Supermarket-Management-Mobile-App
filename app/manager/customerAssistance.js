@@ -1,30 +1,30 @@
 import React from "react";
 import { SafeAreaView, ScrollView, Text, TouchableOpacity, View } from "react-native";
-
-export default function McustomerAssistance({ navigation }) {
+import { useRouter } from "expo-router";
+export default function McustomerAssistance() {
   const menuOptions = [
     {
       title: "Review Operations",
       subtitle: "Overseeing Customer Support Operations",
-      navigate: "MonitorCustomerAssistance",
+      navigate: "/manager/monitorCustomerAssistance",
     },
     {
       title: "Handling Escalated Issues",
       subtitle: "Customer Assistance Transforms These Issues",
-      navigate: "handleEscalatedIssues",
+      navigate: "/manager/HandlingEscalatedIssues",
     },
     {
       title: "Customer Service Performance",
       subtitle: "Monitoring Customer Service Performance",
-      navigate: "MCustomerServicePerformance",
+      navigate: "/manager/customerServicePerformance",
     },
     {
       title: "Manage Channels",
       subtitle: "Customer Support Tools & Communication Channels",
-      navigate: "ManageChannels",
+      navigate: "/manager/ManageChannels",
     },
   ];
-
+const router=useRouter();
   return (
     <SafeAreaView className="flex-1 bg-gray-100">
       <ScrollView className="px-4 py-6">
@@ -45,7 +45,7 @@ export default function McustomerAssistance({ navigation }) {
                 alignItems: "center",
                 elevation: 5,
               }}
-              onPress={() => navigation.navigate(option.navigate)}
+              onPress={() => router.push(option.navigate)}
             >
               <Text className="text-lg font-semibold text-gray-800 text-center">{option.title}</Text>
               <Text className="text-gray-500 text-sm mt-1 text-center">{option.subtitle}</Text>

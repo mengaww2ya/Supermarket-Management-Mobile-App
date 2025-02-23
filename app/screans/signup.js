@@ -4,15 +4,16 @@ import {
   Text,
   StyleSheet,
   Pressable,
-  Dimensions,
   TextInput,
   SafeAreaView,
+  useWindowDimensions,
 } from "react-native";
+import { useRouter } from "expo-router";
 import { colors } from "react-native-elements";
 
-const screenwidth = Dimensions.get("window").width;
+const screenwidth = useWindowDimensions().width;
 
-export default function Signup({ navigation }) {
+export default function Signup() {
   // State for form inputs
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -34,7 +35,7 @@ export default function Signup({ navigation }) {
     setPassword("");
     setConfirmPassword("");
   };
-
+const router=useRouter();
   return (
     <SafeAreaView style={styles.safeContainer}>
       <View style={styles.container}>
@@ -101,14 +102,14 @@ export default function Signup({ navigation }) {
           <View style={styles.buttonContainer}>
             <Pressable
               style={styles.signupButton}
-              onPress={() => navigation.navigate("Homepage")}
+              onPress={() =>router.push("/customer/homepage")}
             >
               <Text style={styles.textButton}>Sign Up</Text>
             </Pressable>
             <Pressable style={styles.clearButton} onPress={clearInputs}>
               <Text style={styles.textButton}>Clear</Text>
             </Pressable>
-            <Pressable style={styles.backButton} onPress={() => navigation.goBack()}>
+            <Pressable style={styles.backButton} onPress={() => router.back()}>
               <Text style={styles.textButton}>Back</Text>
             </Pressable>
           </View>
@@ -116,7 +117,7 @@ export default function Signup({ navigation }) {
       </View>
       <View style={styles.signInBContainer}>
         <Text style={styles.text}>Do you have an account?</Text>
-        <Pressable style={styles.signinButton} onPress={() => navigation.navigate("Login")}>
+        <Pressable style={styles.signinButton} onPress={() => router.push("/screans/login")}>
           <Text style={styles.textButton}>Sign In</Text>
         </Pressable>
       </View>

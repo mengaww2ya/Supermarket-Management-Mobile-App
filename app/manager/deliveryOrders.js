@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 import { View, Text, FlatList, TouchableOpacity, Alert } from "react-native";
 import { deliveryOrders } from "../global/data";
+import { useLocalSearchParams,useRouter } from "expo-router";
 
-export default function mDeliveryOrders({ route, navigation }) {
-  const { agentId, AgentName } = route.params;
+export default function mDeliveryOrders() {
+  const { agentId, AgentName } = useLocalSearchParams;
   const [orders, setOrders] = useState(
     deliveryOrders.filter((order) => order.status === "pending")
   );
@@ -28,7 +29,7 @@ export default function mDeliveryOrders({ route, navigation }) {
       ]
     );
   };
-
+const route=useRouter();
   return (
     <View className="flex-1 bg-gray-100 p-4">
       <Text className="text-xl font-bold text-center mb-4">

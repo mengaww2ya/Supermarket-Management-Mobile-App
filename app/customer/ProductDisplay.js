@@ -7,18 +7,24 @@ import {
   TouchableOpacity,
   SafeAreaView,
 } from "react-native";
-import Footer from "../subscrean/foter.js";
-import Ionicons from "react-native-vector-icons/Ionicons"; // Import Ionicons
+import Ionicons from "react-native-vector-icons/Ionicons";
+import { useLocalSearchParams, useRouter } from "expo-router"; 
+import { products } from "../global/data.js"; // Import product data
 
-export default function ProductDisplay({ route, navigation }) {
-  const { categoryName, products } = route.params; // Get the category name and products from route params
+export default function ProductDisplay() {
+  const router = useRouter();
+  const { categoryId, categoryName } = useLocalSearchParams(); // Get params from URL
+
+  // Convert categoryId to number and filter products
+  const filteredProducts = products.filter(
+    (product) => product.categoryId === Number(categoryId)
+  );
 
   const renderItem = ({ item }) => (
     <TouchableOpacity
       className="bg-white rounded-xl p-4 mb-4 shadow-lg w-[95%] self-center flex flex-row items-center"
-      onPress={() => navigation.navigate("Item", { ...item })}
+      onPress={() => router.push({ pathname: "/customer/Item", params: { productId: item.productId } })} 
     >
-      {/* Product Image */}
       <View className="w-20 h-20 bg-gray-200 rounded-lg flex justify-center items-center overflow-hidden">
         <Image
           style={{ width: "100%", height: "100%" }}
@@ -27,7 +33,6 @@ export default function ProductDisplay({ route, navigation }) {
         />
       </View>
 
-      {/* Product Info */}
       <View className="ml-4 flex-1">
         <Text className="text-lg font-bold text-gray-800">{item.productName}</Text>
         <Text className="text-green-600 font-semibold text-base mt-1">
@@ -40,26 +45,21 @@ export default function ProductDisplay({ route, navigation }) {
 
   return (
     <SafeAreaView className="flex-1 bg-gray-100 px-2">
-      {/* Header */}
       <View className="flex-row items-center justify-between bg-yellow-300 px-4 py-3">
         <Text className="text-lg font-bold text-green-600">{categoryName} Products</Text>
-        <TouchableOpacity onPress={() => navigation.navigate("CartPage")} className="p-2">
+        <TouchableOpacity onPress={() => router.push("/cartPage")} className="p-2">
           <Ionicons name="cart" size={30} color="blue" />
         </TouchableOpacity>
       </View>
 
-      {/* Product List */}
       <FlatList
-        data={products}
-        keyExtractor={(item) => item.productId.toString()}
+        data={filteredProducts}
+        keyExtractor={(item) => item?.productId?.toString() || item.id.toString()} // Ensure safe access
         renderItem={renderItem}
         numColumns={1}
         contentContainerStyle={{ paddingBottom: 20 }}
         showsVerticalScrollIndicator={false}
       />
-
-      {/* Footer */}
-      <Footer navigation={navigation} />
     </SafeAreaView>
   );
 }

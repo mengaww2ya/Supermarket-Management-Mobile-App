@@ -8,8 +8,8 @@ import {
   Pressable,
 } from "react-native";
 import { deliveryAgents } from "../global/data";
-
-export default function DeliveryAgentManagement({ navigation }) {
+import { useRouter } from "expo-router";
+export default function DeliveryAgentManagement() {
   const [selectedAgent, setSelectedAgent] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
 
@@ -25,7 +25,7 @@ export default function DeliveryAgentManagement({ navigation }) {
         return "text-gray-500";
     }
   };
-
+const router=useRouter();
   return (
     <View className="flex-1 bg-gray-100 p-4">
       <Text className="text-2xl font-bold text-center text-gray-800 mb-4">
@@ -83,9 +83,12 @@ export default function DeliveryAgentManagement({ navigation }) {
               <TouchableOpacity
                 className="bg-blue-600 px-4 py-2 rounded-lg mt-2"
                 onPress={() => {
-                  navigation.navigate("mdeliveryOrders", {
+                  router.push({
+                    pathname:"/manager/deliveryOrders", 
+                    params:{
                     agentId: selectedAgent.id,
                     AgentName: selectedAgent.firstName,
+                  }
                   });
                   setModalVisible(false);
                 }}

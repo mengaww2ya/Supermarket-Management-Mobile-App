@@ -7,4 +7,4 @@ const Message =() => {
         </View>
     )
 }
-export default Messsage
+export default Message

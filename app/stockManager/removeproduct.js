@@ -11,10 +11,6 @@ import {
   Image,
 } from "react-native";
 import { colors } from "react-native-elements";
-import { getFirestore, doc, deleteDoc } from "firebase/firestore"; // Import Firebase methods
-
-const db = getFirestore(); // Initialize Firestore
-
 export default function UpdateProduct({ navigation, route }) {
   const product = route?.params?.product || {};
 

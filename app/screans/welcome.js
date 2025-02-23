@@ -9,10 +9,10 @@ import {
 } from "react-native";
 import { colors } from "react-native-elements";
 import { SafeAreaView } from "react-native-safe-area-context";
-
-export default function Welcome({ navigation }) {
+import { useRouter } from "expo-router";
+export default function Welcome() {
   const { width: screenWidth } = useWindowDimensions();
-
+    const router=useRouter();
   return (
     <SafeAreaView style={styles.safeAreaView}>
       <ScrollView showsVerticalScrollIndicator={false}>
@@ -26,13 +26,13 @@ export default function Welcome({ navigation }) {
           <View style={[styles.buttonContainer, { width: screenWidth * 0.75 }]}>
             <TouchableOpacity
               style={styles.button}
-              onPress={() => navigation.navigate("Login")}
+              onPress={() => router.push("/screans/login")}
             >
               <Text style={styles.buttonText}>Log In</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.button}
-              onPress={() => navigation.navigate("Signup")}
+              onPress={() => navigation.navigate("/screans/signup")}
             >
               <Text style={styles.buttonText}>Create Account</Text>
             </TouchableOpacity>

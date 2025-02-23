@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { SafeAreaView, View, Text, FlatList, TouchableOpacity, Modal, Pressable } from "react-native";
 import { customer } from "../global/data.js";
 
-export default function CustomerList({ navigation }) {
+export default function CustomerList() {
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
 

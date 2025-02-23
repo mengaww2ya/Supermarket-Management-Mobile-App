@@ -8,11 +8,20 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Icon } from "react-native-elements";
-
-export default function Login({ navigation }) {
+import { useRouter } from "expo-router";
+export default function Login() {
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const router = useRouter();
+
+  const handleLogin = () => {
+    // if (!username || !password) {
+    //   alert("Please fill in both fields.");
+    //   return;
+    // }
+    router.push("/customer/homepage");
+  };
 
   return (
     <SafeAreaView className="flex-1 bg-gray-100">
@@ -58,7 +67,7 @@ export default function Login({ navigation }) {
 
           <Pressable
             className="bg-green-500 py-3 rounded-md mb-2"
-            onPress={() => navigation.navigate("Homepage")}
+            onPress={handleLogin}
           >
             <Text className="text-white text-center text-lg font-bold">Log In</Text>
           </Pressable>
@@ -69,7 +78,7 @@ export default function Login({ navigation }) {
 
           <Pressable
             className="bg-gray-300 py-3 rounded-md mt-3"
-            onPress={() => navigation.navigate("Signup")}
+            onPress={() => router.push("/screans/signup")}
           >
             <Text className="text-center text-lg font-semibold">I don't have an account? Sign up</Text>
           </Pressable>
@@ -78,7 +87,7 @@ export default function Login({ navigation }) {
 
       <View>
         <Pressable
-          onPress={() => navigation.navigate("DeveloperHomePage")}
+          onPress={() => router.push("/screans/developingHompage")}
           className="bg-gray-800 w-11/12 self-center rounded-md py-3 mt-5"
         >
           <Text className="text-white text-center text-lg font-semibold">I am developing, not logging in</Text>

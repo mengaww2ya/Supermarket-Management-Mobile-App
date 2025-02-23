@@ -1,19 +1,20 @@
 import { SafeAreaView, ScrollView, View, Text, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 
-export default function EmployeeManagement({ navigation }) {
+export default function EmployeeManagement() {
   const menuOptions = [
     {
       title: "Delivery Agent",
       subtitle: "Manage & Assign Deliveries",
       icon: "bicycle-outline",
-      navigate: "MDeliveryAgentManagement",
+      navigate: "/manager/deliveryManagement",
     },
     {
       title: "Customer Assistance",
       subtitle: "Manage Customer Support",
       icon: "people-outline",
-      navigate: "McustomerAssistance",
+      navigate: "/manager/customerAssistance",
     },
     {
       title: "Stock Manager",
@@ -26,7 +27,7 @@ export default function EmployeeManagement({ navigation }) {
       icon: "calendar-outline",
     },
   ];
-
+const router =useRouter();
   return (
     <SafeAreaView className="flex-1 bg-gray-100">
       <ScrollView className="px-4 py-6">
@@ -47,7 +48,7 @@ export default function EmployeeManagement({ navigation }) {
                 alignItems: "center",
                 elevation: 5,
               }}
-              onPress={() => option.navigate && navigation.navigate(option.navigate)}
+              onPress={() =>router.push(option.navigate)}
             >
               <Ionicons name={option.icon} size={30} color="#007bff" className="mb-3" />
               <Text className="text-lg font-semibold text-gray-800">{option.title}</Text>

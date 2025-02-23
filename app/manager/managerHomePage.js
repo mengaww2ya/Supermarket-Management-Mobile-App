@@ -11,6 +11,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { PieChart } from "react-native-chart-kit";
 import { BarChart } from "react-native-chart-kit";
+import { useRouter } from "expo-router";
 
 const dashboardData = {
   employees: {
@@ -28,7 +29,7 @@ const dashboardData = {
   alerts: { lowStock: 10, pendingOrders: 15, expiryWarnings: 8 },
 };
 
-export default function ManagerHomePage({ navigation }) {
+export default function ManagerHomePage() {
   const homeBackground=require("../../assets/background/city.jpg");
   const screenWidth = useWindowDimensions().width;
   const screenHeight = useWindowDimensions().height;
@@ -57,6 +58,8 @@ export default function ManagerHomePage({ navigation }) {
   const salesValues = [totalRevenue, totalSales, totalProfit];
   const totalSuppliers = dashboardData.suppliers.total;
   const pendingOrders = dashboardData.suppliers.pendingOrders;
+    const router=useRouter();
+
   return (
     <SafeAreaView className="flex-1 bg-gray-100">
       <ScrollView
@@ -124,7 +127,7 @@ export default function ManagerHomePage({ navigation }) {
             <TouchableOpacity
              className="bg-green-500 rounded-lg py-3 px-6 mt-2  items-center"
               onPress={() => {
-                navigation.navigate("EmployeeManagement");
+                router.push("/manager/employee management");
               }}
             >
               <Text  className="text-white text-base font-bold text-center">Employee Management</Text>
@@ -196,8 +199,8 @@ export default function ManagerHomePage({ navigation }) {
             <TouchableOpacity
              className="bg-green-500 rounded-lg py-3 px-6 mt-2 items-center"
               onPress={() => {
-                navigation.navigate("CustomerManagement");
-              }}
+            router.push("/manager/customerManagement")
+                      }}
             >
               <Text  className="text-white text-base font-bold text-center">Customer Management</Text>
             </TouchableOpacity>
@@ -254,7 +257,7 @@ export default function ManagerHomePage({ navigation }) {
             <TouchableOpacity
              className="bg-green-500 rounded-lg py-3 px-6 mt-2  items-center"
               onPress={() => {
-                navigation.navigate("promotionManagement");
+              router.push("/manager/promotionDiscount");
               }}
             >
               <Text  className="text-white text-base font-bold text-center">Promotion & Discount</Text>
@@ -302,7 +305,7 @@ export default function ManagerHomePage({ navigation }) {
             <TouchableOpacity
              className="bg-green-500 rounded-lg py-3 px-6 mt-2 items-center"
               onPress={() => {
-                navigation.navigate("inventoryManagement");
+                router.push("/manager/inventoryManagement");
               }}
             >
               <Text  className="text-white text-base font-bold text-center">Inventory Management</Text>
@@ -358,7 +361,7 @@ export default function ManagerHomePage({ navigation }) {
             <TouchableOpacity
              className="bg-green-500 rounded-lg py-3 px-6 mt-2  items-center"
               onPress={() => {
-                navigation.navigate("orderManagement");
+                router.push("manager/orderManagement");
               }}
             >
               <Text  className="text-white text-base font-bold text-center">Order Management</Text>
@@ -414,7 +417,7 @@ export default function ManagerHomePage({ navigation }) {
             <TouchableOpacity
              className="bg-green-500 rounded-lg py-3 px-6 mt-2  items-center"
               onPress={() => {
-                navigation.navigate("saleRevenueManagement");
+               router.push("/manager/saleRevenueManagement");
               }}
             >
               <Text  className="text-white text-base font-bold text-center">Sales & Revenue</Text>
@@ -475,7 +478,7 @@ export default function ManagerHomePage({ navigation }) {
             <TouchableOpacity
              className="bg-green-500 rounded-lg py-3 px-6 mt-2 items-center"
               onPress={() => {
-                navigation.navigate("suplierManagement");
+                router.push("/manager/suplierManagement");
               }}
             >
               <Text  className="text-white text-base font-bold text-center">Supplier Management</Text>
@@ -538,7 +541,7 @@ export default function ManagerHomePage({ navigation }) {
             <TouchableOpacity
              className="bg-green-500 rounded-lg py-3 px-6 mt-2  items-center"
               onPress={() => {
-                navigation.navigate("alertNotifManagement");
+                router.push("/manager/alertNotificationManagement");
               }}
             >
               <Text  className="text-white text-base font-bold text-center">Alerts & Notifications</Text>

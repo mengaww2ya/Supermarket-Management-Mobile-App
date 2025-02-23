@@ -1,7 +1,8 @@
 import React from "react";
 import { SafeAreaView, ScrollView, Text, TouchableOpacity, View } from "react-native";
-
-export default function ManageChannels({ navigation }) {
+import { useRouter } from "expo-router";
+export default function ManageChannels() {
+  const router =useRouter();
   return (
     <SafeAreaView className="flex-1 bg-gray-100">
       <ScrollView contentContainerStyle={{ flexGrow: 1 }} className="p-5">
@@ -11,7 +12,7 @@ export default function ManageChannels({ navigation }) {
           <View className="grid grid-cols-2 gap-4">
             <TouchableOpacity
               className="bg-white p-5 rounded-xl border border-gray-300 shadow-md active:bg-gray-200"
-              onPress={() => navigation.navigate("ChannelOverview")}
+              onPress={() => router.push("/manager/ChannelOverview")}
             >
               <Text className="text-lg font-bold text-center mb-2">Channel Overview</Text>
               <Text className="text-sm text-center text-gray-600">List communication channels</Text>

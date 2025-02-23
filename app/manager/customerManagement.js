@@ -1,13 +1,11 @@
 import React from "react";
 import { SafeAreaView, FlatList, View, Text, Pressable } from "react-native";
-import { useNavigation } from "@react-navigation/native";
 import Icon from "react-native-vector-icons/Feather";
-
+import { useRouter } from "expo-router";
 export default function CustomerManagement() {
-  const navigation = useNavigation();
-
+const router =useRouter();
   const menuItems = [
-    { title: "Customer List", subtitle: "View customers", icon: "users", onPress: () => navigation.navigate("customerList") },
+    { title: "Customer List", subtitle: "View customers", icon: "users", onPress: () => router.push("/manager/customerList") },
     { title: "Customer Feedback", subtitle: "Handle feedback", icon: "message-square", onPress: () => alert("Feature coming soon!") },
     { title: "Loyalty Program", subtitle: "Manage rewards", icon: "gift", onPress: () => alert("Feature coming soon!") },
     { title: "Reports & Insights", subtitle: "Analyze trends", icon: "bar-chart", onPress: () => alert("Feature coming soon!") },

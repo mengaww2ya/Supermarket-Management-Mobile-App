@@ -1,15 +1,15 @@
 import React, { useState, useRef } from 'react';
 import { View, Text, FlatList, Dimensions, StyleSheet, Image, TouchableOpacity } from 'react-native';
-
+import { useRouter } from 'expo-router';
 const { width, height } = Dimensions.get('window');
-
+ const router= useRouter();
 const slides = [
     { id: '1', text: 'Discover Great Products', image: require('../../assets/images/mg.jpg') },
     { id: '2', text: 'Get a delivery service', image: require('../../assets/images/hk2.png') },
     { id: '3', text: 'Let’s Get Started', image: require('../../assets/images/mes.png') },
 ];
 
-const WelcomeScreen = ({ navigation }) => {
+const WelcomeScreen = () => {
     const flatListRef = useRef(null);
     const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -21,10 +21,10 @@ const WelcomeScreen = ({ navigation }) => {
     const handleMomentumScrollEnd = (event) => {
         const slideIndex = Math.round(event.nativeEvent.contentOffset.x / width);
         if (slideIndex === slides.length - 1) {
-            navigation.replace('Welcome');
+           router.replace('/screans/welcome');
         }
     };
-
+   
     return (
         <View style={styles.container}>
             <FlatList
@@ -62,7 +62,7 @@ const WelcomeScreen = ({ navigation }) => {
 
                             <TouchableOpacity
                                 style={styles.button}
-                                onPress={() => navigation.navigate('Welcome')}>
+                                onPress={() =>router.push('/screans/welcome')}>
                                 <Text style={styles.buttonText}>Get Started</Text>
                             </TouchableOpacity>
 
