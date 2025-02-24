@@ -21,7 +21,7 @@ export default function DeveloperHomePage({ navigation }) {
         <View className="flex-row flex-wrap justify-center gap-4 mt-5">
           {[
             { title: "Manager", screen: "/manager/managerHomePage" },
-            { title: "Customer", screen: "/customer/homepage" },
+            { title: "Customer", screen: "/customer/_layout" },
             { title: "Customer Support", screen: "/customeAssistance/customerSuport" },
             { title: "Admin", screen: "/admine/adminHompage" },
             { title: "Stock Manager", screen: "/stockManager/stockManagerHome" },

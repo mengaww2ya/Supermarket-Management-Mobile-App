@@ -2,12 +2,12 @@ import React from "react";
 import { SafeAreaView, StyleSheet, View } from "react-native";
 // import AuthicStackNavig from "../navigator/stackNavigator.js";
 import "../global.css"
-import WelcomeScreen from "./screans/scro";
+import Login from "./screans/login";
 
 export default function App() {
   return (
     <SafeAreaView style={styles.safeContainer}>
-      <WelcomeScreen />
+      <Login />
     </SafeAreaView>
   );
 }

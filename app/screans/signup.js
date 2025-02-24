@@ -1,20 +1,9 @@
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  Pressable,
-  TextInput,
-  SafeAreaView,
-  useWindowDimensions,
-} from "react-native";
+import { View, Text, TextInput, SafeAreaView } from "react-native";
 import { useRouter } from "expo-router";
-import { colors } from "react-native-elements";
-
-const screenwidth = useWindowDimensions().width;
+import { TouchableOpacity } from "react-native-gesture-handler";
 
 export default function Signup() {
-  // State for form inputs
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [address, setAddress] = useState("");
@@ -22,8 +11,7 @@ export default function Signup() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-
-  const [textInput2Focused, setTextInput2Focused] = useState(false);
+  const router = useRouter();
 
   // Function to clear input fields
   const clearInputs = () => {
@@ -35,192 +23,96 @@ export default function Signup() {
     setPassword("");
     setConfirmPassword("");
   };
-const router=useRouter();
+
   return (
-    <SafeAreaView style={styles.safeContainer}>
-      <View style={styles.container}>
-        <Text style={styles.text}>
+    <SafeAreaView className="flex-1 bg-gray-100 justify-center px-6">
+      <View className="bg-white p-6 rounded-xl shadow-lg">
+        <Text className="text-lg font-semibold text-center text-gray-700">
           Fill the form to register or press sign in if you have an account
         </Text>
-        <View style={styles.signupBody}>
-          <View style={styles.textInputContainer}>
-            <TextInput
-              style={styles.textInput}
-              placeholder="Enter your first name"
-              value={firstName}
-              onChangeText={setFirstName}
-            />
-            <TextInput
-              style={styles.textInput}
-              placeholder="Enter your last name"
-              value={lastName}
-              onChangeText={setLastName}
-            />
-            <TextInput
-              style={styles.textInput}
-              placeholder="Enter your address"
-              value={address}
-              onChangeText={setAddress}
-            />
-            <TextInput
-              style={styles.textInput}
-              placeholder="Enter your phone number"
-              value={phone}
-              onChangeText={setPhone}
-            />
-            <TextInput
-              style={styles.textInput}
-              placeholder="Enter your email"
-              value={email}
-              onChangeText={setEmail}
-            />
-            <TextInput
-              placeholder="Create password"
-              secureTextEntry
-              style={[
-                styles.textInputPass,
-                textInput2Focused && styles.focusedInput,
-              ]}
-              value={password}
-              onChangeText={setPassword}
-              onFocus={() => setTextInput2Focused(true)}
-              onBlur={() => setTextInput2Focused(false)}
-            />
-            <TextInput
-              placeholder="Confirm your password"
-              secureTextEntry
-              style={[
-                styles.textInputPass,
-                textInput2Focused && styles.focusedInput,
-              ]}
-              value={confirmPassword}
-              onChangeText={setConfirmPassword}
-              onFocus={() => setTextInput2Focused(true)}
-              onBlur={() => setTextInput2Focused(false)}
-            />
-          </View>
-          <View style={styles.buttonContainer}>
-            <Pressable
-              style={styles.signupButton}
-              onPress={() =>router.push("/customer/homepage")}
-            >
-              <Text style={styles.textButton}>Sign Up</Text>
-            </Pressable>
-            <Pressable style={styles.clearButton} onPress={clearInputs}>
-              <Text style={styles.textButton}>Clear</Text>
-            </Pressable>
-            <Pressable style={styles.backButton} onPress={() => router.back()}>
-              <Text style={styles.textButton}>Back</Text>
-            </Pressable>
-          </View>
+
+        <View className="mt-4">
+          <TextInput
+            className="border border-gray-300 rounded-md p-3 my-2 text-gray-800"
+            placeholder="Enter your first name"
+            value={firstName}
+            onChangeText={setFirstName}
+          />
+          <TextInput
+            className="border border-gray-300 rounded-md p-3 my-2 text-gray-800"
+            placeholder="Enter your last name"
+            value={lastName}
+            onChangeText={setLastName}
+          />
+          <TextInput
+            className="border border-gray-300 rounded-md p-3 my-2 text-gray-800"
+            placeholder="Enter your address"
+            value={address}
+            onChangeText={setAddress}
+          />
+          <TextInput
+            className="border border-gray-300 rounded-md p-3 my-2 text-gray-800"
+            placeholder="Enter your phone number"
+            keyboardType="phone-pad"
+            value={phone}
+            onChangeText={setPhone}
+          />
+          <TextInput
+            className="border border-gray-300 rounded-md p-3 my-2 text-gray-800"
+            placeholder="Enter your email"
+            keyboardType="email-address"
+            value={email}
+            onChangeText={setEmail}
+          />
+          <TextInput
+            className="border border-gray-300 rounded-md p-3 my-2 text-gray-800"
+            placeholder="Create password"
+            secureTextEntry
+            value={password}
+            onChangeText={setPassword}
+          />
+          <TextInput
+            className="border border-gray-300 rounded-md p-3 my-2 text-gray-800"
+            placeholder="Confirm your password"
+            secureTextEntry
+            value={confirmPassword}
+            onChangeText={setConfirmPassword}
+          />
+        </View>
+
+        <View className="flex-row justify-between mt-6">
+          <TouchableOpacity
+            className="bg-green-500 py-3 px-4 rounded-md shadow-md active:opacity-80 flex-1 mx-2"
+            onPress={() => router.push("/customer/homepage")}
+          >
+            <Text className="text-white font-bold text-center">Sign Up</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            className="bg-yellow-500 py-3 px-4 rounded-md shadow-md active:opacity-80 flex-1 mx-2"
+            onPress={clearInputs}
+          >
+            <Text className="text-white font-bold text-center">Clear</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            className="bg-gray-500 py-3 px-4 rounded-md shadow-md active:opacity-80 flex-1 mx-2"
+            onPress={() => router.back()}
+          >
+            <Text className="text-white font-bold text-center">Back</Text>
+          </TouchableOpacity>
         </View>
       </View>
-      <View style={styles.signInBContainer}>
-        <Text style={styles.text}>Do you have an account?</Text>
-        <Pressable style={styles.signinButton} onPress={() => router.push("/screans/login")}>
-          <Text style={styles.textButton}>Sign In</Text>
-        </Pressable>
+
+      <View className="items-center mt-8">
+        <Text className="text-gray-700">Do you have an account?</Text>
+        <TouchableOpacity
+          className="bg-blue-500 mt-3 py-3 px-6 rounded-md shadow-md active:opacity-80"
+          onPress={() => router.push("/screens/login")}
+        >
+          <Text className="text-white font-bold">Sign In</Text>
+        </TouchableOpacity>
       </View>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  safeContainer: {
-    flex: 1,
-    backgroundColor: colors.grey5,
-    justifyContent: "center",
-    paddingHorizontal: 20,
-  },
-  container: {
-    backgroundColor: colors.grey5,
-    borderWidth: 1,
-    borderColor: colors.grey4,
-    padding: 15,
-    borderRadius: 5,
-    alignItems: "center",
-  },
-  signupBody:{
-    width:screenwidth*0.8
-  },
-  textInputContainer: {
-    width: "100%",
-    backgroundColor: "white",
-    padding: 10,
-    borderRadius: 5,
-    borderWidth: 1,
-    borderColor: colors.grey4,
-  },
-  textInput: {
-    padding: 12,
-    fontSize: 16,
-    marginVertical: 5,
-    color: colors.grey4,
-    borderRadius: 5,
-    borderWidth: 1,
-    borderColor: colors.grey4,
-  },
-  textInputPass: {
-    padding: 12,
-    fontSize: 16,
-    marginVertical: 5,
-    borderRadius: 5,
-    borderWidth: 1,
-    borderColor: colors.grey4,
-  },
-  focusedInput: {
-    borderColor: colors.primary,
-    borderWidth: 2,
-  },
-  buttonContainer: {
-    flexDirection: "row",
-    justifyContent: "space-evenly",
-    width: "100%",
-    marginTop: 10,
-  },
-  signupButton: {
-    backgroundColor: colors.grey2,
-    borderRadius: 5,
-    padding: 10,
-    alignItems: "center",
-    width: "30%",
-  },
-  clearButton: {
-    backgroundColor: colors.warning,
-    borderRadius: 5,
-    padding: 10,
-    alignItems: "center",
-    width: "30%",
-  },
-  backButton: {
-    backgroundColor: colors.grey3,
-    borderRadius: 5,
-    padding: 10,
-    alignItems: "center",
-    width: "30%",
-  },
-  signinButton: {
-    backgroundColor: colors.grey3,
-    borderRadius: 5,
-    width: "50%",
-    padding: 10,
-    alignItems: "center",
-  },
-  text: {
-    fontSize: 18,
-    marginVertical: 10,
-    color: colors.grey3,
-    textAlign: "center",
-    fontWeight: "bold",
-  },
-  textButton: {
-    color: "white",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  signInBContainer: {
-    alignItems: "center",
-    marginTop: 20,
-  },
-});
-

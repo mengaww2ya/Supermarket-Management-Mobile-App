@@ -12,7 +12,7 @@ import {
 } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { useRouter } from "expo-router"; // ✅ Use Expo Router
-import { categories, products } from "../global/data.js"; // Import categories and products
+import { categories, products } from "../../global/data.js"; // Import categories and products
 
 const { width } = Dimensions.get("window");
 const CARD_WIDTH = width * 0.42;
@@ -53,15 +53,15 @@ export default function Homepage() {
   return (
     <SafeAreaView className="flex-1 bg-gray-100">
       {/* Header Section */}
-      <View className="flex-row items-center justify-between bg-yellow-400 px-4 py-3">
-        <TouchableOpacity>
+      {/* <View className="flex-row items-center justify-between bg-yellow-400 px-4 py-3">
+        <TouchableOpacity onPress={handleCategoryPress}>
           <Ionicons name="menu" size={30} color="black" />
         </TouchableOpacity>
         <Text className="text-lg font-bold">Home Page</Text>
         <TouchableOpacity onPress={() => router.push("/cartPage")}>
           <Ionicons name="cart" size={30} color="black" />
         </TouchableOpacity>
-      </View>
+      </View> */}
 
       {/* Search Bar */}
       <View className="flex-row items-center bg-white rounded-md px-3 py-2 mx-4 my-3 shadow-md">

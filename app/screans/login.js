@@ -20,7 +20,7 @@ export default function Login() {
     //   alert("Please fill in both fields.");
     //   return;
     // }
-    router.push("/customer/homepage");
+    router.push("/customer/_layout");
   };
 
   return (
@@ -90,7 +90,7 @@ export default function Login() {
           onPress={() => router.push("/screans/developingHompage")}
           className="bg-gray-800 w-11/12 self-center rounded-md py-3 mt-5"
         >
-          <Text className="text-white text-center text-lg font-semibold">I am developing, not logging in</Text>
+          <Text className="text-white text-center text-lg font-semibold ">I am developing, not logging in</Text>
         </Pressable>
       </View>
     </SafeAreaView>
