@@ -5,11 +5,16 @@ import {
   TextInput,
   Pressable,
   TouchableOpacity,
+  ImageBackground,
+  useWindowDimensions,
+  Image
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Icon } from "react-native-elements";
 import { useRouter } from "expo-router";
 export default function Login() {
+  const screenWidth=useWindowDimensions().width;
+  const screenheight=useWindowDimensions().height;
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -20,30 +25,34 @@ export default function Login() {
     //   alert("Please fill in both fields.");
     //   return;
     // }
-    router.push("/customer/_layout");
+    router.push("/customer/(tabs)");
   };
-
+  const backgroundImage=require("../../assets/background/login2.png")
   return (
     <SafeAreaView className="flex-1 bg-gray-100">
       <View className="flex-1 justify-center items-center px-4">
-        <Text className="text-2xl font-bold mb-5 text-center">
-          Welcome to Queen Supermarket
-        </Text>
+                <Text className="text-4xl text-center font-extrabold text-blue-800"> Login</Text>
 
+       <ImageBackground
+        source={backgroundImage}
+
+       style={{ width:screenWidth*0.8,
+        height:screenheight*0.3}}
+        resizeMode="contain"
+       >
+   </ImageBackground>
         <View className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
-          <Text className="text-lg font-semibold mb-4 text-center">
-            Fill the form below to log in
-          </Text>
+          
 
-          <Text className="text-md font-medium mb-1">Username</Text>
+          <Text className="text-lg font-bold mb-1">Username</Text>
           <TextInput
-            className="border border-gray-300 rounded-md p-3 mb-4 text-lg"
+            className="border border-gray-300  rounded-md p-3 mb-4 text-lg"
             placeholder="Enter your username"
             value={username}
             onChangeText={setUsername}
           />
 
-          <Text className="text-md font-medium mb-1">Password</Text>
+          <Text className="text-lg font-bold mb-1">Password</Text>
           <View className="flex-row items-center border border-gray-300 rounded-md mb-4">
             <TextInput
               placeholder="Enter your password"
@@ -66,25 +75,27 @@ export default function Login() {
           </View>
 
           <Pressable
-            className="bg-green-500 py-3 rounded-md mb-2"
+            className="bg-green-500 py-2 rounded-md "
             onPress={handleLogin}
           >
             <Text className="text-white text-center text-lg font-bold">Log In</Text>
           </Pressable>
 
+         <View className="flex-row justify-between"> 
           <Pressable>
-            <Text className="text-center text-md text-blue-600 underline">Forgot password?</Text>
+            <Text className="text-center text-lg text-blue-600 ">Forgot password?</Text>
           </Pressable>
 
           <Pressable
-            className="bg-gray-300 py-3 rounded-md mt-3"
+            className="bg-white rounded-md "
             onPress={() => router.push("/screans/signup")}
           >
-            <Text className="text-center text-lg font-semibold">I don't have an account? Sign up</Text>
+            <Text className="text-center text-lg text-black-400 font-semibold ">Sign up</Text>
           </Pressable>
+          </View>
         </View>
-      </View>
-
+      
+        </View>
       <View>
         <Pressable
           onPress={() => router.push("/screans/developingHompage")}
