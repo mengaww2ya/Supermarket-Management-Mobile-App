@@ -1,18 +1,9 @@
 import React, { useState } from "react";
 import * as ImagePicker from "expo-image-picker";
-import {
-  Pressable,
-  SafeAreaView,
-  ScrollView,
-  Text,
-  View,
-  StyleSheet,
-  TextInput,
-  Image,
-} from "react-native";
-import { colors } from "react-native-elements";
+import { Pressable, SafeAreaView, ScrollView, Text, View, TextInput, Image } from "react-native";
+import { useRouter } from "expo-router";
 
-export default function AddProduct({ navigation }) {
+export default function AddProduct() {
   const [image, setImage] = useState(null);
   const [productName, setProductName] = useState("");
   const [productId, setProductId] = useState("");
@@ -25,6 +16,7 @@ export default function AddProduct({ navigation }) {
   const [packageType, setPackageType] = useState("");
   const [supplier, setSupplier] = useState("");
   const [origin, setOrigin] = useState("");
+  const router = useRouter();
 
   const clearInput = () => {
     setProductName("");
@@ -61,98 +53,34 @@ export default function AddProduct({ navigation }) {
   };
 
   return (
-    <SafeAreaView>
+    <SafeAreaView className="flex-1 bg-gray-100 p-4">
       <ScrollView>
-        <View style={styles.container}>
-          <Text style={styles.title}>Fill Product Details</Text>
-
-          <TextInput
-            style={styles.textInput}
-            placeholder="Product Name"
-            value={productName}
-            onChangeText={setProductName}
-          />
-          <TextInput
-            style={styles.textInput}
-            placeholder="Product Id"
-            value={productId}
-            onChangeText={setProductId}
-          />
-          <TextInput
-            style={styles.textInput}
-            placeholder="Product Category"
-            value={category}
-            onChangeText={setCategory}
-          />
-          <TextInput
-            style={styles.textInput}
-            placeholder="Product Price"
-            keyboardType="numeric"
-            value={price}
-            onChangeText={setPrice}
-          />
-          <TextInput
-            style={styles.textInput}
-            placeholder="Product Discount"
-            keyboardType="numeric"
-            value={discount}
-            onChangeText={setDiscount}
-          />
-          <TextInput
-            style={styles.textInput}
-            placeholder="Product Description"
-            value={description}
-            onChangeText={setDescription}
-          />
-          <TextInput
-            style={styles.textInput}
-            placeholder="Product Ingredients"
-            value={ingredients}
-            onChangeText={setIngredients}
-          />
-          <TextInput
-            style={styles.textInput}
-            placeholder="Product Nutrition Info"
-            value={nutrition}
-            onChangeText={setNutrition}
-          />
-          <TextInput
-            style={styles.textInput}
-            placeholder="Product Package Type"
-            value={packageType}
-            onChangeText={setPackageType}
-          />
-          <TextInput
-            style={styles.textInput}
-            placeholder="Product Supplier Name"
-            value={supplier}
-            onChangeText={setSupplier}
-          />
-          <TextInput
-            style={styles.textInput}
-            placeholder="Product Origin"
-            value={origin}
-            onChangeText={setOrigin}
-          />
-
-          <Pressable style={styles.button} onPress={selectImage}>
-            <Text style={styles.buttonText}>Upload Image</Text>
+        <View className="bg-white rounded-xl shadow p-5">
+          <Text className="text-xl font-bold text-center mb-4">Fill Product Details</Text>
+          {["Product Name", "Product Id", "Product Category", "Product Price", "Product Discount", "Product Description", "Product Ingredients", "Product Nutrition Info", "Product Package Type", "Product Supplier Name", "Product Origin"].map((placeholder, index) => (
+            <TextInput
+              key={index}
+              className="border border-gray-300 rounded-lg p-3 mb-3 text-base"
+              placeholder={placeholder}
+              value={eval(placeholder.toLowerCase().replace(/ /g, ""))}
+              onChangeText={(text) => eval(`set${placeholder.replace(/ /g, '')}(text)`)}/>
+          ))}
+          
+          <Pressable className="bg-blue-500 py-3 rounded-lg items-center mb-3" onPress={selectImage}>
+            <Text className="text-white text-lg font-semibold">Upload Image</Text>
           </Pressable>
 
-          {image && <Image source={{ uri: image }} style={styles.image} />}
+          {image && <Image source={{ uri: image }} className="w-48 h-48 mx-auto my-3 rounded-lg" />}
 
-          <View style={styles.buttonContainer}>
-            <Pressable style={styles.button} onPress={() => {}}>
-              <Text style={styles.buttonText}>Add Product</Text>
+          <View className="flex-row justify-between">
+            <Pressable className="bg-green-500 py-3 px-5 rounded-lg" onPress={() => {}}>
+              <Text className="text-white text-lg font-semibold">Add Product</Text>
             </Pressable>
-            <Pressable
-              style={styles.button}
-              onPress={() => navigation.goBack()}
-            >
-              <Text style={styles.buttonText}>Back</Text>
+            <Pressable className="bg-gray-500 py-3 px-5 rounded-lg" onPress={() => router.back()}>
+              <Text className="text-white text-lg font-semibold">Back</Text>
             </Pressable>
-            <Pressable style={styles.buttonclear} onPress={clearInput}>
-              <Text style={styles.buttonText}>Clear</Text>
+            <Pressable className="bg-red-500 py-3 px-5 rounded-lg" onPress={clearInput}>
+              <Text className="text-white text-lg font-semibold">Clear</Text>
             </Pressable>
           </View>
         </View>
@@ -160,57 +88,3 @@ export default function AddProduct({ navigation }) {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    margin: 10,
-    padding: 10,
-    backgroundColor: "#f5f5f5",
-    borderRadius: 5,
-    borderWidth: 1,
-    borderColor: "#ddd",
-  },
-  title: {
-    marginBottom: 5,
-    padding: 5,
-    fontSize: 20,
-    textAlign: "center",
-    fontWeight: "bold",
-  
-  },
-  textInput: {
-    padding: 10,
-    fontSize: 16,
-    marginVertical: 5,
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 5,
-  },
-  button: {
-    backgroundColor: colors.grey3,
-    padding: 10,
-    marginVertical: 5,
-    borderRadius: 5,
-    alignItems: "center",
-  },
-  buttonText: {
-    color: "white",
-    fontSize: 18,
-  },
-  buttonContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
-  image: {
-    width: 200,
-    height: 200,
-    alignSelf: "center",
-    marginTop: 10,
-  },
-  buttonclear: {
-    backgroundColor: colors.warning,
-    borderRadius: 5,
-    padding: 10,
-    alignItems: "center",
-  },
-});

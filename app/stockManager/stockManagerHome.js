@@ -1,37 +1,31 @@
 import React from "react";
-import {
-  Pressable,
-  SafeAreaView,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-  useWindowDimensions,
-} from "react-native";
-import { colors } from "react-native-elements";
-export default function StockManagerHome({ navigation }) {
-  const { width: ScreenWidth, height: ScreenHeight } = useWindowDimensions();
+import { Pressable, SafeAreaView, ScrollView, Text, View } from "react-native";
+import { useRouter } from "expo-router";
+
+export default function StockManagerHome() {
+  const router = useRouter();
+
+  const options = [
+    { name: "Stock Management", route:"/stockManager/Manage_stock_levels"},
+    { name: "Review Stock Status", route: "/stockManager/" },
+    { name: "Supplier Order Management", route: "" },
+  ];
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <Text style={styles.titleText}>Welcome to Stock Management</Text>
-
-        <View style={styles.container}>
-          {[
-            { name: "Stock Management", route: "manageStock" },
-            { name: "Review Stock Status", route: "" },
-            { name: "Supplier Order Management", route: "" },
-          ].map((item, index) => (
+    <SafeAreaView className="flex-1 bg-gray-100">
+      <ScrollView contentContainerStyle={{ alignItems: "center", paddingVertical: 20 }}>
+        <Text className="text-2xl font-bold text-gray-800 mb-6 text-center">
+          Welcome to Stock Management
+        </Text>
+        
+        <View className="w-full flex items-center space-y-4">
+          {options.map((item, index) => (
             <Pressable
               key={index}
-              style={[
-                styles.button,
-                { width: ScreenWidth * 0.8, height: ScreenHeight * 0.1 },
-              ]}
-              onPress={() => item.route && navigation.navigate(item.route)}
+              className="w-4/5 h-16 bg-gray-200 rounded-lg flex items-center justify-center shadow-md active:bg-gray-300"
+              onPress={() => item.route ? router.push(item.route) : alert('Feature coming soon!')}
             >
-              <Text style={styles.buttonText}>{item.name}</Text>
+              <Text className="text-lg font-semibold text-gray-800">{item.name}</Text>
             </Pressable>
           ))}
         </View>
@@ -39,49 +33,3 @@ export default function StockManagerHome({ navigation }) {
     </SafeAreaView>
   );
 }
-
-// Styles
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: "#F5F5F5",
-  },
-  scrollContainer: {
-    alignItems: "center",
-    paddingVertical: 20,
-  },
-  titleText: {
-    fontSize: 24,
-    fontWeight: "bold",
-    textAlign: "center",
-    color: "#333",
-    marginBottom: 20,
-  },
-  container: {
-    width: "100%",
-    alignItems: "center",
-    gap: 15,
-  },
-  button: {
-    backgroundColor: colors.grey5,
-    width: "47%", // Responsive grid layout
-    height: 120,
-    justifyContent: "center",
-    alignItems: "center",
-    borderRadius: 10,
-    borderColor: colors.grey4,
-    borderWidth: 1,
-    marginBottom: 15,
-    shadowColor: "#000",
-    shadowOffset: { width: 2, height: 3 },
-    shadowOpacity: 0.3,
-    shadowRadius: 3,
-    elevation: 4, //
-  },
-  buttonText: {
-    fontSize: 16,
-    fontWeight: "bold",
-    textAlign: "center",
-    color: "#333",
-  },
-});

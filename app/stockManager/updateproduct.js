@@ -1,18 +1,10 @@
 import React, { useState } from "react";
 import * as ImagePicker from "expo-image-picker";
-import {
-  Pressable,
-  SafeAreaView,
-  ScrollView,
-  Text,
-  View,
-  StyleSheet,
-  TextInput,
-  Image,
-} from "react-native";
-import { colors } from "react-native-elements";
+import { useRouter } from "expo-router";
+import { Pressable, SafeAreaView, ScrollView, Text, View, TextInput, Image } from "react-native";
 
-export default function UpdateProduct({ navigation, route }) {
+export default function UpdateProduct({ route }) {
+  const router = useRouter();
   const product = route?.params?.product || {};
 
   const [image, setImage] = useState(product.image || null);
@@ -49,119 +41,58 @@ export default function UpdateProduct({ navigation, route }) {
       alert("Permission required to access media library.");
       return;
     }
-
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [4, 3],
       quality: 1,
     });
-
     if (!result.canceled) {
       setImage(result.assets[0].uri);
     }
   };
 
   const handleUpdate = () => {
-    // Add update logic here
     alert("Product updated successfully!");
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <ScrollView>
-        <View style={styles.container}>
-          <Text style={styles.title}>Update Product Details</Text>
+    <SafeAreaView className="flex-1 bg-gray-100">
+      <ScrollView className="px-4 py-6">
+        <View className="bg-white p-4 rounded-xl shadow-md">
+          <Text className="text-xl font-bold text-center mb-4">Update Product Details</Text>
 
-          <TextInput style={styles.textInput} placeholder="Product Name" value={productName} onChangeText={setProductName} />
-          <TextInput style={styles.textInput} placeholder="Product Id" value={productId} onChangeText={setProductId} editable={false} />
-          <TextInput style={styles.textInput} placeholder="Product Category" value={category} onChangeText={setCategory} />
-          <TextInput style={styles.textInput} placeholder="Product Price" keyboardType="numeric" value={price} onChangeText={setPrice} />
-          <TextInput style={styles.textInput} placeholder="Product Discount" keyboardType="numeric" value={discount} onChangeText={setDiscount} />
-          <TextInput style={styles.textInput} placeholder="Product Description" value={description} onChangeText={setDescription} />
-          <TextInput style={styles.textInput} placeholder="Product Ingredients" value={ingredients} onChangeText={setIngredients} />
-          <TextInput style={styles.textInput} placeholder="Product Nutrition Info" value={nutrition} onChangeText={setNutrition} />
-          <TextInput style={styles.textInput} placeholder="Product Package Type" value={packageType} onChangeText={setPackageType} />
-          <TextInput style={styles.textInput} placeholder="Product Supplier Name" value={supplier} onChangeText={setSupplier} />
-          <TextInput style={styles.textInput} placeholder="Product Origin" value={origin} onChangeText={setOrigin} />
+          <TextInput className="border border-gray-300 p-3 rounded-md mb-3" placeholder="Product Name" value={productName} onChangeText={setProductName} />
+          <TextInput className="border border-gray-300 p-3 rounded-md mb-3 bg-gray-200" placeholder="Product Id" value={productId} onChangeText={setProductId} editable={false} />
+          <TextInput className="border border-gray-300 p-3 rounded-md mb-3" placeholder="Product Category" value={category} onChangeText={setCategory} />
+          <TextInput className="border border-gray-300 p-3 rounded-md mb-3" placeholder="Product Price" keyboardType="numeric" value={price} onChangeText={setPrice} />
+          <TextInput className="border border-gray-300 p-3 rounded-md mb-3" placeholder="Product Discount" keyboardType="numeric" value={discount} onChangeText={setDiscount} />
+          <TextInput className="border border-gray-300 p-3 rounded-md mb-3" placeholder="Product Description" value={description} onChangeText={setDescription} />
+          <TextInput className="border border-gray-300 p-3 rounded-md mb-3" placeholder="Product Ingredients" value={ingredients} onChangeText={setIngredients} />
+          <TextInput className="border border-gray-300 p-3 rounded-md mb-3" placeholder="Product Nutrition Info" value={nutrition} onChangeText={setNutrition} />
+          <TextInput className="border border-gray-300 p-3 rounded-md mb-3" placeholder="Product Package Type" value={packageType} onChangeText={setPackageType} />
+          <TextInput className="border border-gray-300 p-3 rounded-md mb-3" placeholder="Product Supplier Name" value={supplier} onChangeText={setSupplier} />
+          <TextInput className="border border-gray-300 p-3 rounded-md mb-3" placeholder="Product Origin" value={origin} onChangeText={setOrigin} />
 
-          <Pressable style={styles.button} onPress={selectImage}>
-            <Text style={styles.buttonText}>Upload Image</Text>
+          <Pressable className="bg-blue-500 p-3 rounded-md mb-3" onPress={selectImage}>
+            <Text className="text-white text-center font-semibold">Upload Image</Text>
           </Pressable>
 
-          {image && <Image source={{ uri: image }} style={styles.image} />}
+          {image && <Image source={{ uri: image }} className="w-40 h-40 self-center rounded-md mt-3" />}
 
-          <View style={styles.buttonContainer}>
-            <Pressable style={styles.button} onPress={handleUpdate}>
-              <Text style={styles.buttonText}>Update Product</Text>
+          <View className="flex-row justify-between mt-4">
+            <Pressable className="bg-green-500 p-3 flex-1 mr-2 rounded-md" onPress={handleUpdate}>
+              <Text className="text-white text-center font-semibold">Update Product</Text>
             </Pressable>
-            <Pressable style={styles.button} onPress={() => navigation.goBack()}>
-              <Text style={styles.buttonText}>Back</Text>
+            <Pressable className="bg-red-500 p-3 flex-1 ml-2 rounded-md" onPress={clearInput}>
+              <Text className="text-white text-center font-semibold">Clear</Text>
             </Pressable>
-             <Pressable style={styles.buttonclear} onPress={clearInput}>
-             <Text style={styles.buttonText}>Clear</Text>
-             </Pressable>
           </View>
+          <Pressable className="bg-gray-500 p-3 mt-4 rounded-md" onPress={() => router.back()}>
+            <Text className="text-white text-center font-semibold">Back</Text>
+          </Pressable>
         </View>
       </ScrollView>
     </SafeAreaView>
   );
 }
-
-
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: "#F5F5F5",
-  },
-  container: {
-    margin: 10,
-    padding: 10,
-    backgroundColor: "#f5f5f5",
-    borderRadius: 5,
-    borderWidth: 1,
-    borderColor: "#ddd",
-  },
-  title: {
-    marginBottom: 5,
-    padding: 5,
-    fontSize: 20,
-    textAlign: "center",
-    fontWeight: "bold",
-  },
-  textInput: {
-    padding: 10,
-    fontSize: 16,
-    marginVertical: 5,
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 5,
-  },
-  button: {
-    backgroundColor: colors.grey3,
-    padding: 10,
-    marginVertical: 5,
-    borderRadius: 5,
-    alignItems: "center",
-  },
-  buttonText: {
-    color: "white",
-    fontSize: 18,
-  },
-  buttonContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
-  image: {
-    width: 200,
-    height: 200,
-    alignSelf: "center",
-    marginTop: 10,
-  },
-  buttonclear: {
-    backgroundColor: colors.warning,
-    borderRadius: 5,
-    padding: 10,
-    alignItems: "center",
-  },
-});

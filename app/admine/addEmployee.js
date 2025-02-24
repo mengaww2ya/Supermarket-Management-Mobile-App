@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import {
   SafeAreaView,
   ScrollView,
-  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
@@ -11,6 +10,7 @@ import {
   Platform,
 } from "react-native";
 import DropDownPicker from "react-native-dropdown-picker";
+import { Alert } from "react-native";
 
 export default function AddEmployee() {
   const [open, setOpen] = useState(false);
@@ -21,57 +21,101 @@ export default function AddEmployee() {
     { label: "Delivery Agent", value: "delivery_agent" },
     { label: "Customer Assistance", value: "customer_assistance" },
   ]);
+  const [form, setForm] = useState({
+    firstName: "",
+    lastName: "",
+    phone: "",
+    password: "",
+    confirmPassword: "",
+    emergencyFirstName: "",
+    emergencyLastName: "",
+    emergencyPhone: "",
+  });
+
+  const handleInputChange = (field, value) => {
+    setForm((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleSubmit = () => {
+    if (!form.firstName || !form.lastName || !form.phone || !selectedRole) {
+      Alert.alert("Error", "Please fill all required fields.");
+      return;
+    }
+    Alert.alert("Success", "Employee added successfully!");
+  };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView className="flex-1 bg-gray-100 p-4">
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={styles.container}
+        className="flex-1"
       >
-        <ScrollView contentContainerStyle={styles.scrollContainer}>
-          <Text style={styles.title}>Add Employee</Text>
+        <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
+          <Text className="text-2xl font-bold text-center text-gray-800 mb-5">
+            Add Employee
+          </Text>
 
-          <View style={styles.formView}>
-            {/* Employee Details */}
+          <View className="bg-white p-4 rounded-xl shadow-md">
             <TextInput
-              style={styles.textInput}
-              placeholder="Enter First Name"
+              className="border border-gray-300 p-3 rounded-lg mb-3"
+              placeholder="First Name"
+              value={form.firstName}
+              onChangeText={(text) => handleInputChange("firstName", text)}
             />
-            <TextInput style={styles.textInput} placeholder="Enter Last Name" />
             <TextInput
-              style={styles.textInput}
-              placeholder="Enter Phone"
+              className="border border-gray-300 p-3 rounded-lg mb-3"
+              placeholder="Last Name"
+              value={form.lastName}
+              onChangeText={(text) => handleInputChange("lastName", text)}
+            />
+            <TextInput
+              className="border border-gray-300 p-3 rounded-lg mb-3"
+              placeholder="Phone Number"
               keyboardType="phone-pad"
+              value={form.phone}
+              onChangeText={(text) => handleInputChange("phone", text)}
             />
             <TextInput
-              style={styles.textInput}
-              placeholder="Enter Password"
+              className="border border-gray-300 p-3 rounded-lg mb-3"
+              placeholder="Password"
               secureTextEntry
+              value={form.password}
+              onChangeText={(text) => handleInputChange("password", text)}
             />
             <TextInput
-              style={styles.textInput}
+              className="border border-gray-300 p-3 rounded-lg mb-3"
               placeholder="Confirm Password"
               secureTextEntry
+              value={form.confirmPassword}
+              onChangeText={(text) => handleInputChange("confirmPassword", text)}
             />
 
-            {/* Emergency Contact */}
-            <Text style={styles.sectionTitle}>Emergency Contact</Text>
+            <Text className="text-lg font-semibold text-gray-700 mt-3 mb-2">
+              Emergency Contact
+            </Text>
             <TextInput
-              style={styles.textInput}
-              placeholder="Enter Contact First Name"
+              className="border border-gray-300 p-3 rounded-lg mb-3"
+              placeholder="Emergency First Name"
+              value={form.emergencyFirstName}
+              onChangeText={(text) => handleInputChange("emergencyFirstName", text)}
             />
             <TextInput
-              style={styles.textInput}
-              placeholder="Enter Contact Last Name"
+              className="border border-gray-300 p-3 rounded-lg mb-3"
+              placeholder="Emergency Last Name"
+              value={form.emergencyLastName}
+              onChangeText={(text) => handleInputChange("emergencyLastName", text)}
             />
             <TextInput
-              style={styles.textInput}
-              placeholder="Enter Contact Phone"
+              className="border border-gray-300 p-3 rounded-lg mb-3"
+              placeholder="Emergency Phone"
               keyboardType="phone-pad"
+              value={form.emergencyPhone}
+              onChangeText={(text) => handleInputChange("emergencyPhone", text)}
             />
 
-            {/* Employee Role Selection */}
-            <Text style={styles.sectionTitle}>Select Employee Role</Text>
+            <Text className="text-lg font-semibold text-gray-700 mt-3 mb-2">
+              Select Employee Role
+            </Text>
             <DropDownPicker
               open={open}
               value={selectedRole}
@@ -79,25 +123,23 @@ export default function AddEmployee() {
               setOpen={setOpen}
               setValue={setSelectedRole}
               setItems={setRoles}
-              style={styles.dropdown}
-              containerStyle={styles.dropdownContainer}
               placeholder="Select a role"
+              className="border border-gray-300 rounded-lg mb-3"
             />
 
             {selectedRole && (
-              <Text style={styles.selectedText}>
-                Selected Role: {selectedRole}
+              <Text className="text-blue-600 font-semibold text-lg mt-2">
+                Selected Role: {roles.find((r) => r.value === selectedRole)?.label}
               </Text>
             )}
 
-            {/* Submit Button */}
             <TouchableOpacity
-              style={styles.button}
-              onPress={() =>
-                alert("Hey! this button is not functional right now.", "ok")
-              }
+              className="bg-blue-500 p-4 rounded-lg mt-4"
+              onPress={handleSubmit}
             >
-              <Text style={styles.buttonText}>Add Employee</Text>
+              <Text className="text-white text-lg font-bold text-center">
+                Add Employee
+              </Text>
             </TouchableOpacity>
           </View>
         </ScrollView>
@@ -105,73 +147,3 @@ export default function AddEmployee() {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: "#F5F5F5",
-  },
-  container: {
-    flex: 1,
-    padding: 15,
-  },
-  scrollContainer: {
-    paddingBottom: 20,
-  },
-  title: {
-    fontSize: 22,
-    fontWeight: "bold",
-    textAlign: "center",
-    marginBottom: 20,
-    color: "#333",
-  },
-  formView: {
-    backgroundColor: "white",
-    padding: 15,
-    borderRadius: 8,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  textInput: {
-    backgroundColor: "#fff",
-    padding: 12,
-    borderRadius: 5,
-    borderWidth: 1,
-    borderColor: "#ddd",
-    marginBottom: 12,
-    fontSize: 16,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginVertical: 10,
-    color: "#555",
-  },
-  dropdownContainer: {
-    marginBottom: 12,
-  },
-  dropdown: {
-    borderColor: "#ddd",
-  },
-  selectedText: {
-    fontSize: 16,
-    color: "#007BFF",
-    fontWeight: "bold",
-    marginVertical: 8,
-  },
-  button: {
-    backgroundColor: "#007BFF",
-    padding: 15,
-    borderRadius: 5,
-    alignItems: "center",
-    marginTop: 10,
-  },
-  buttonText: {
-    color: "white",
-    fontSize: 18,
-    fontWeight: "bold",
-  },
-});

@@ -1,63 +1,49 @@
 import React from "react";
-import {
-  SafeAreaView,
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  ScrollView,
-  useWindowDimensions,
-} from "react-native";
-import { colors } from "react-native-elements";
+import { SafeAreaView, View, Text, TouchableOpacity, ScrollView } from "react-native";
 
 export default function CustomerManagement({ navigation }) {
-  const { width: screenWidth } = useWindowDimensions();
-
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView className="flex-1 bg-gray-100">
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContainer}
+        contentContainerClass="p-4"
       >
-        <View style={styles.container}>
-          <Text style={styles.titltxt}>Customer Management</Text>
+        <View className="bg-white p-5 rounded-lg shadow-md">
+          <Text className="text-2xl font-bold text-center text-gray-800 mb-6">
+            Customer Management
+          </Text>
 
-          <View style={styles.buttonView}>
+          <View className="flex flex-wrap flex-row justify-between">
             <TouchableOpacity
-              style={styles.button}
+              className="bg-blue-500 w-[47%] h-28 justify-center items-center rounded-lg shadow-md mb-4"
               onPress={() => navigation.navigate("Signup")}
             >
-              <View style={styles.btnView}>
-                <Text style={styles.buttontxt}>Add Customer</Text>
-
-                <Text style={styles.suptxt}>Register New Customer </Text>
-              </View>
+              <Text className="text-lg font-bold text-white">Add Customer</Text>
+              <Text className="text-sm text-white">Register New Customer</Text>
             </TouchableOpacity>
+
             <TouchableOpacity
-              style={styles.button}
+              className="bg-red-500 w-[47%] h-28 justify-center items-center rounded-lg shadow-md mb-4"
               onPress={() => navigation.navigate("Signup")}
             >
-              <View style={styles.btnView}>
-                <Text style={styles.buttontxt}>Delete Customer</Text>
-
-                <Text style={styles.suptxt}>Remove Existing Customer </Text>
-              </View>
+              <Text className="text-lg font-bold text-white">Delete Customer</Text>
+              <Text className="text-sm text-white">Remove Existing Customer</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.button} onPress={() => {}}>
-              <View style={styles.btnView}>
-                <Text style={styles.buttontxt}>Update Customer</Text>
-
-                <Text style={styles.suptxt}>Update Existing Customer </Text>
-              </View>
+            <TouchableOpacity
+              className="bg-yellow-500 w-[47%] h-28 justify-center items-center rounded-lg shadow-md mb-4"
+              onPress={() => {}}
+            >
+              <Text className="text-lg font-bold text-white">Update Customer</Text>
+              <Text className="text-sm text-white">Update Existing Customer</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.button} onPress={() => {}}>
-              <View style={styles.btnView}>
-                <Text style={styles.buttontxt}>View Customers</Text>
-
-                <Text style={styles.suptxt}>Display All Customers </Text>
-              </View>
+            <TouchableOpacity
+              className="bg-green-500 w-[47%] h-28 justify-center items-center rounded-lg shadow-md mb-4"
+              onPress={() => {}}
+            >
+              <Text className="text-lg font-bold text-white">View Customers</Text>
+              <Text className="text-sm text-white">Display All Customers</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -65,56 +51,3 @@ export default function CustomerManagement({ navigation }) {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: "white",
-    borderColor: colors.grey5,
-    borderWidth: 1,
-    borderRadius: 5,
-  },
-  buttonView: {
-    margin: 10,
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
-  },
-  button: {
-    backgroundColor: colors.grey5,
-    width: "47%",
-    height: 120,
-    justifyContent: "center",
-    alignItems: "center",
-    borderRadius: 10,
-    borderColor: colors.grey4,
-    borderWidth: 1,
-    marginBottom: 15,
-    shadowColor: "#000",
-    shadowOffset: { width: 2, height: 3 },
-    shadowOpacity: 0.3,
-    shadowRadius: 3,
-    elevation: 4,
-  },
-  titltxt: {
-    fontSize: 24,
-    fontWeight: "bold",
-    textAlign: "center",
-    color: "#333",
-    marginBottom: 20,
-  },
-  buttontxt: {
-    fontSize: 16,
-    fontWeight: "bold",
-    textAlign: "center",
-    color: "#333",
-  },
-  btnView: {
-    backgroundColor: colors.grey5,
-    justifyContent: "center",
-  },
-  suptxt: {
-    fontSize: 10,
-    textAlign: "center",
-    color: "#333",
-  },
-});

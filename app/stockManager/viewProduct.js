@@ -1,22 +1,12 @@
 import React, { useState, useEffect } from "react";
-import {
-  SafeAreaView,
-  Text,
-  View,
-  StyleSheet,
-  FlatList,
-  Image,
-  Pressable,
-  TextInput,
-} from "react-native";
-import { colors } from "react-native-elements";
+import { useRouter } from "expo-router";
+import { SafeAreaView, Text, View, FlatList, Image, Pressable } from "react-native";
 
-export default function ViewProductList({ navigation }) {
+export default function ViewProductList() {
+  const router = useRouter();
   const [products, setProducts] = useState([]);
 
-  // Dummy data for testing, replace with API fetch in real use case
   useEffect(() => {
-    // Simulate fetching data
     const fetchedProducts = [
       {
         id: "1",
@@ -40,126 +30,42 @@ export default function ViewProductList({ navigation }) {
     setProducts(fetchedProducts);
   }, []);
 
-  const renderItem = ({ item }) => (
-    <View style={styles.productCard}>
-      <Image source={{ uri: item.image }} style={styles.productImage} />
-      <View style={styles.productInfo}>
-        <Text style={styles.productName}>{item.name}</Text>
-        <Text style={styles.productCategory}>Category: {item.category}</Text>
-        <Text style={styles.productPrice}>Price: ${item.price}</Text>
-        <Text style={styles.productDiscount}>Discount: {item.discount}</Text>
-        <Text style={styles.productDescription}>Description: {item.description}</Text>
-      </View>
+  const handleUpdateProduct = (product) => {
+    router.push({ pathname: "addProduct", params: { product } });
+  };
 
-      <View style={styles.buttonContainer}>
-        <Pressable style={styles.button} onPress={() => handleUpdateProduct(item)}>
-          <Text style={styles.buttonText}>Update Product</Text>
+  const handleRemoveProduct = (product) => {
+    setProducts(products.filter((p) => p.id !== product.id));
+  };
+
+  const renderItem = ({ item }) => (
+    <View className="flex flex-row bg-white rounded-lg shadow-md p-4 mb-4 items-center">
+      <Image source={{ uri: item.image }} className="w-24 h-24 rounded-lg" />
+      <View className="ml-4 flex-1">
+        <Text className="text-lg font-bold">{item.name}</Text>
+        <Text className="text-gray-500">Category: {item.category}</Text>
+        <Text className="text-blue-500 font-semibold">Price: ${item.price}</Text>
+        <Text className="text-red-500">Discount: {item.discount}</Text>
+        <Text className="text-gray-600 text-sm">{item.description}</Text>
+      </View>
+      <View className="ml-auto space-y-2">
+        <Pressable className="bg-blue-500 px-4 py-2 rounded-lg" onPress={() => handleUpdateProduct(item)}>
+          <Text className="text-white font-semibold">Update</Text>
         </Pressable>
-        <Pressable style={styles.button} onPress={() => handleRemoveProduct(item)}>
-          <Text style={styles.buttonText}>Remove Product</Text>
+        <Pressable className="bg-red-500 px-4 py-2 rounded-lg" onPress={() => handleRemoveProduct(item)}>
+          <Text className="text-white font-semibold">Remove</Text>
         </Pressable>
       </View>
     </View>
   );
 
-  const handleUpdateProduct = (product) => {
-    // Logic for updating the product
-    console.log("Update Product:", product);
-    // You can navigate to the "AddProduct" screen and pass the selected product data to edit it.
-    navigation.navigate("AddProduct", { product });
-  };
-
-  const handleRemoveProduct = (product) => {
-    // Logic for removing the product
-    console.log("Remove Product:", product);
-    // You can filter the product out of the list
-    setProducts(products.filter(p => p.id !== product.id));
-  };
-
   return (
-    <SafeAreaView style={styles.container}>
-      <Text style={styles.title}>Product List</Text>
-
-      {/* FlatList to render list of products */}
-      <FlatList
-        data={products}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.id}
-      />
-      
-      <Pressable style={styles.button} onPress={() => navigation.navigate("AddProduct")}>
-        <Text style={styles.buttonText}>Add New Product</Text>
+    <SafeAreaView className="flex-1 bg-gray-100 p-4">
+      <Text className="text-2xl font-bold text-center my-4">Product List</Text>
+      <FlatList data={products} renderItem={renderItem} keyExtractor={(item) => item.id} />
+      <Pressable className="bg-green-500 p-4 rounded-lg mt-4" onPress={() => router.push("addProduct")}> 
+        <Text className="text-white text-center font-bold">Add New Product</Text>
       </Pressable>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 10,
-    backgroundColor: "#f5f5f5",
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    textAlign: "center",
-    marginVertical: 10,
-  },
-  productCard: {
-    flexDirection: "row",
-    padding: 10,
-    marginBottom: 10,
-    backgroundColor: "#fff",
-    borderRadius: 5,
-    borderWidth: 1,
-    borderColor: "#ddd",
-  },
-  productImage: {
-    width: 100,
-    height: 100,
-    borderRadius: 5,
-  },
-  productInfo: {
-    marginLeft: 10,
-    justifyContent: "center",
-    flex: 1,
-  },
-  productName: {
-    fontSize: 18,
-    fontWeight: "bold",
-  },
-  productCategory: {
-    fontSize: 14,
-    color: "#888",
-  },
-  productPrice: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#007BFF",
-  },
-  productDiscount: {
-    fontSize: 14,
-    color: "#ff6347",
-  },
-  productDescription: {
-    fontSize: 12,
-    color: "#555",
-  },
-  button: {
-    backgroundColor: colors.grey3,
-    padding: 10,
-    borderRadius: 5,
-    alignItems: "center",
-    marginTop: 10,
-  },
-  buttonText: {
-    color: "white",
-    fontSize: 16,
-  },
-  buttonContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-});

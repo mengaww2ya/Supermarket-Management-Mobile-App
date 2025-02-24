@@ -1,110 +1,32 @@
-import {
-  SafeAreaView,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
-import { colors } from "react-native-elements";
-export default function asuplierManagement({ navigation }) {
+import { SafeAreaView, ScrollView, Text, TouchableOpacity, View } from "react-native";
+
+export default function SupplierManagement({ navigation }) {
+  const buttons = [
+    { title: "Add Supplier", subtitle: "Register new supplier", screen: "AddSupplier" },
+    { title: "Delete Supplier", subtitle: "Remove existing supplier", screen: "DeleteSupplier" },
+    { title: "Update Supplier", subtitle: "Modify supplier details", screen: "UpdateSupplier" },
+    { title: "View Supplier List", subtitle: "See all suppliers", screen: "ViewSupplier" },
+  ];
+
   return (
-    <SafeAreaView>
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ flexGrow: 1, paddingBottom: 20 }}
-      >
-        <View style={styles.container}>
-          <Text style={styles.titltxt}>Suplier Management</Text>
-          <View style={styles.buttonView}>
-            <TouchableOpacity
-              style={styles.button}
-              onPress={() => {
-                navigation.navigate("AddSupplier");
-              }}
-            >
-              <View style={styles.btnView}>
-                <Text style={styles.buttontxt}>Add Suplier</Text>
-
-                <Text style={styles.suptxt}>add suplier</Text>
-              </View>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.button}>
-              <View style={styles.btnView}>
-                <Text style={styles.buttontxt}>Delete Suplier</Text>
-
-                <Text style={styles.suptxt}>delete suplier</Text>
-              </View>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.button}>
-              <View style={styles.btnView}>
-                <Text style={styles.buttontxt}>Update Suplier</Text>
-
-                <Text style={styles.suptxt}>update suplier</Text>
-              </View>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.button}>
-              <View style={styles.btnView}>
-                <Text style={styles.buttontxt}>View suplier list</Text>
-
-                <Text style={styles.suptxt}>view suplier</Text>
-              </View>
-            </TouchableOpacity>
+    <SafeAreaView className="flex-1 bg-gray-100 p-4">
+      <ScrollView showsVerticalScrollIndicator={false} className="flex-1">
+        <View className="bg-white p-5 rounded-xl shadow-lg">
+          <Text className="text-2xl font-bold text-center text-gray-800 mb-4">Supplier Management</Text>
+          <View className="flex-row flex-wrap justify-between">
+            {buttons.map((btn, index) => (
+              <TouchableOpacity
+                key={index}
+                className="w-[47%] bg-blue-600 p-5 rounded-xl shadow-md mb-4 active:scale-95"
+                onPress={() => navigation.navigate(btn.screen)}
+              >
+                <Text className="text-lg font-semibold text-white text-center">{btn.title}</Text>
+                <Text className="text-xs text-gray-200 text-center mt-1">{btn.subtitle}</Text>
+              </TouchableOpacity>
+            ))}
           </View>
         </View>
       </ScrollView>
     </SafeAreaView>
   );
 }
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: "white",
-    borderColor: colors.grey5,
-    borderWidth: 1,
-    borderRadius: 5,
-  },
-  buttonView: {
-    margin:10,
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
-  },
-  button: {
-    backgroundColor: colors.grey5,
-    width: "47%",
-    height: 120,
-    justifyContent: "center",
-    alignItems: "center",
-    borderRadius: 10,
-    borderColor: colors.grey4,
-    borderWidth: 1,
-    marginBottom: 15,
-    shadowColor: "#000",
-    shadowOffset: { width: 2, height: 3 },
-    shadowOpacity: 0.3,
-    shadowRadius: 3,
-    elevation: 4,
-  },
-  titltxt: {
-    fontSize: 24,
-    fontWeight: "bold",
-    textAlign: "center",
-    color: "#333",
-    marginBottom: 20,
-  },
-  buttontxt: {
-    fontSize: 16,
-    fontWeight: "bold",
-    textAlign: "center",
-    color: "#333",
-  },
-  btnView: {
-    backgroundColor: colors.grey5,
-    justifyContent: "center",
-  },
-  suptxt: {
-    fontSize: 10,
-    textAlign: "center",
-    color: "#333",
-  },
-});
