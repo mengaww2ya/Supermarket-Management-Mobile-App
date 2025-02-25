@@ -44,8 +44,8 @@ export default function Item() {
 
   return (
     <SafeAreaView className="flex-1 bg-gray-100">
-      <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
-        <View className="bg-white m-4 p-4 rounded-lg shadow-lg">
+      <ScrollView contentContainerStyle={{ paddingBottom: 5 }}>
+        <View className="bg-white  p-4 rounded-lg shadow-lg">
           {/* item image  */}
           <Image
             style={{
@@ -95,8 +95,7 @@ export default function Item() {
                     price,
                     discountPrice,
                     unitType,
-                    image:  image,  // Ensure it passes a string
-                  },
+                    image: image.uri,                  },
                 })
               }
             >

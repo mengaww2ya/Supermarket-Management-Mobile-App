@@ -12,8 +12,6 @@ import {
 import { useLocalSearchParams } from "expo-router";
 
 export default function AddToCart() {
-  const params = useLocalSearchParams();
-
   // Ensure parameters exist, with proper defaults
   const {
     productName = "Unknown Product",
@@ -21,7 +19,7 @@ export default function AddToCart() {
     discountPrice = "0",
     unitType = "unit",
     image,
-  } = params;
+  } = useLocalSearchParams();
 
   // Ensure price and discountPrice are treated as numbers
   const parsedPrice = parseFloat(price) || 0;
@@ -38,7 +36,7 @@ export default function AddToCart() {
 
   return (
     <SafeAreaView className="flex-1 bg-white mx-4 my-2">
-      <ScrollView contentContainerStyle={{ paddingBottom: 20 }} showsVerticalScrollIndicator={true}>
+      <ScrollView contentContainerStyle={{ paddingBottom: 20 }} showsVerticalScrollIndicator={false}>
         <Text className="text-2xl font-bold text-center my-4">Add {productName} to Cart</Text>
 
         <View className="items-center mb-4">
@@ -51,10 +49,10 @@ export default function AddToCart() {
                 marginBottom: 10,
                 resizeMode: "contain",
               }}
-               source={ image}
+              source={{ uri: image }}  // Ensure the image is formatted correctly
             />
           ) : (
-            <Text className="text-center text-red-500">No Image Available</Text>
+            <Text className="text-gray-500">No Image Available</Text>
           )}
         </View>
 

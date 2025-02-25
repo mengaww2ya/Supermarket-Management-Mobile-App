@@ -25,7 +25,7 @@ export default function Layout() {
       }}
     >
       <Tabs.Screen
-        name="homePage"
+        name="homepage"
         options={{
           title: "Home",
           tabBarIcon: ({ color }) => <FontAwesome size={28} name="home" color={color} />,

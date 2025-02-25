@@ -23,9 +23,9 @@ export default function DeveloperHomePage({ navigation }) {
             { title: "Manager", screen: "/manager/(tabs)" },
             { title: "Customer", screen: "/customer/(tabs)" },
             { title: "Customer Support", screen: "/customeAssistance/customerSuport" },
-            { title: "Admin", screen: "/admine/adminHompage" },
-            { title: "Stock Manager", screen: "/stockManager/stockManagerHome" },
-            { title: "Supplier", screen: "suplier/suplierHomePage" },
+            { title: "Admin", screen: "/admine/(tabs)" },
+            { title: "Stock Manager", screen: "/stockManager/(tabs)" },
+            { title: "Supplier", screen: "suplier/(tabs)"},
           ].map((role) => (
             <TouchableOpacity
               key={role.title}

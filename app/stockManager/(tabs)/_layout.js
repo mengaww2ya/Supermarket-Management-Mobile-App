@@ -15,8 +15,8 @@ export default function Layout() {
       }}
     >
       <Tabs.Screen
-        name="managerHomePage"
-         options={{
+        name="stockManagerHome"
+        options={{
           title: "Home",
           tabBarIcon: ({ color }) => <FontAwesome size={28} name="home" color={color} />,
         }}
