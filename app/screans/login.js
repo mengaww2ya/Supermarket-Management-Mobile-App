@@ -28,17 +28,17 @@ export default function Login() {
     // }
     router.push("/customer/(tabs)");
   };
-  const backgroundImage=require("../../assets/background/login2.png")
+  const backgroundImage=require("../../assets/background/login.png")
   return (
     <SafeAreaView className="flex-1 gap-2 bg-grey1">
       <View className="flex-1 justify-center items-center px-4">
        <Text className="text-4xl text-center font-extrabold text-blue-800"> Login</Text>
 
-       <Image
+       <ImageBackground
         source={backgroundImage}
 
        style={{ width:screenWidth,
-        height:screenheight*0.4,margin:5,  padding:5}}
+        height:screenheight*0.4,margin:5, borderRadius:5, padding:5}}
         resizeMode="cover"
        />
    
