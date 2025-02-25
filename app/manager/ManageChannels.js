@@ -4,7 +4,7 @@ import { useRouter } from "expo-router";
 export default function ManageChannels() {
   const router =useRouter();
   return (
-    <SafeAreaView className="flex-1 bg-gray-100">
+    <SafeAreaView className="flex-1  bg-grey1">
       <ScrollView contentContainerStyle={{ flexGrow: 1 }} className="p-5">
         <View className="bg-white p-6 rounded-2xl shadow-md">
           <Text className="text-xl font-bold text-center text-gray-800 mb-6">Manage Channels</Text>

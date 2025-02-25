@@ -29,7 +29,7 @@ export default function ChannelOverview() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-100">
+    <SafeAreaView className="flex-1  bg-grey1">
       <ScrollView className="px-4 py-5">
         <View className="py-4">
           <Text className="text-2xl font-bold text-center mb-4">

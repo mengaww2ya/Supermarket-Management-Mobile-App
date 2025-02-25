@@ -29,7 +29,7 @@ export default function Homepage() {
     });
   };
 
-  const renderCategoryItem = ({ item }) => (
+   const  renderCategoryItem = ({ item }) => (
     <TouchableOpacity
       className="bg-white border border-gray-200 rounded-lg shadow-md p-3 m-2 items-center justify-center"
       style={{ width: CARD_WIDTH, maxHeight: 200 }}

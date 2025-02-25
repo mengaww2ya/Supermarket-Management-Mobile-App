@@ -30,7 +30,7 @@ export default function PromotionManagement({ navigation }) {
   ];
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-100">
+    <SafeAreaView className="flex-1  bg-grey1">
       <ScrollView className="px-4 py-6">
         {/* Title */}
         <View className="bg-gray-800 p-4 rounded-lg shadow-md">

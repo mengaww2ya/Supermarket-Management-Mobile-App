@@ -12,7 +12,7 @@ export default function CustomerList() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-100 p-4">
+    <SafeAreaView className="flex-1  bg-grey1 p-4">
       {/* Title */}
       <Text className="text-2xl font-bold text-center text-gray-800 mb-4">
         All Registered Supermarket Customers

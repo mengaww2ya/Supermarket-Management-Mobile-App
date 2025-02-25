@@ -6,6 +6,7 @@ import {
   Pressable,
   TouchableOpacity,
   ImageBackground,
+  StyleSheet,
   useWindowDimensions,
   Image
 } from "react-native";
@@ -29,35 +30,35 @@ export default function Login() {
   };
   const backgroundImage=require("../../assets/background/login2.png")
   return (
-    <SafeAreaView className="flex-1 bg-gray-100">
+    <SafeAreaView className="flex-1 gap-2 bg-grey1">
       <View className="flex-1 justify-center items-center px-4">
-                <Text className="text-4xl text-center font-extrabold text-blue-800"> Login</Text>
+       <Text className="text-4xl text-center font-extrabold text-blue-800"> Login</Text>
 
-       <ImageBackground
+       <Image
         source={backgroundImage}
 
-       style={{ width:screenWidth*0.8,
-        height:screenheight*0.3}}
-        resizeMode="contain"
-       >
-   </ImageBackground>
-        <View className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
+       style={{ width:screenWidth,
+        height:screenheight*0.4,margin:5,  padding:5}}
+        resizeMode="cover"
+       />
+   
+        {/* <View className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md"> */}
           
 
-          <Text className="text-lg font-bold mb-1">Username</Text>
+          <Text className="text-lg w-full font-bold mb-1 text-white">Username</Text>
           <TextInput
-            className="border border-gray-300  rounded-md p-3 mb-4 text-lg"
+            className="border border-gray-300 w-full text-white rounded-md p-3 mb-4 text-lg"
             placeholder="Enter your username"
             value={username}
             onChangeText={setUsername}
           />
 
-          <Text className="text-lg font-bold mb-1">Password</Text>
-          <View className="flex-row items-center border border-gray-300 rounded-md mb-4">
+          <Text className="text-lg font-bold w-full mb-1 text-white">Password</Text>
+          <View className="flex-row items-center border border-gray-300 w-full rounded-md mb-4">
             <TextInput
               placeholder="Enter your password"
               secureTextEntry={!passwordVisible}
-              className="flex-1 p-3 text-lg"
+              className="flex-1  p-3 w-full text-lg text-white"
               value={password}
               onChangeText={setPassword}
             />
@@ -75,25 +76,25 @@ export default function Login() {
           </View>
 
           <Pressable
-            className="bg-green-500 py-2 rounded-md "
+            className="bg-green-500 py-2 rounded-md w-full"
             onPress={handleLogin}
           >
-            <Text className="text-white text-center text-lg font-bold">Log In</Text>
+            <Text className="text-white text-center text-lg font-bold ">Log In</Text>
           </Pressable>
 
-         <View className="flex-row justify-between"> 
+         <View className="flex-row gap-10"> 
           <Pressable>
-            <Text className="text-center text-lg text-blue-600 ">Forgot password?</Text>
+            <Text className="text-center text-xl text-blue-600 ">Forgot password?</Text>
           </Pressable>
 
           <Pressable
-            className="bg-white rounded-md "
+            className=" rounded-md "
             onPress={() => router.push("/screans/signup")}
           >
-            <Text className="text-center text-lg text-black-400 font-semibold ">Sign up</Text>
+            <Text className="text-center text-lg text-white font-semibold  ">Sign up</Text>
           </Pressable>
           </View>
-        </View>
+        {/* </View> */}
       
         </View>
       <View>

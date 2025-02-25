@@ -13,7 +13,7 @@ const router =useRouter();
   ];
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-100 px-4 py-6">
+    <SafeAreaView className="flex-1  bg-grey1 px-4 py-6">
       <Text className="text-2xl font-bold text-gray-800 mb-6">Customer Management</Text>
 
       {/* 2-Column Grid Layout with Spacing */}

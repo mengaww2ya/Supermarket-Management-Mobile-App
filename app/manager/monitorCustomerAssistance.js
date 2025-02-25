@@ -21,7 +21,7 @@ export default function MonitorCustomerAssistance() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-100">
+    <SafeAreaView className="flex-1  bg-grey1">
       <ScrollView className="p-4">
         <Text className="text-xl font-bold text-center mb-4">Customer Assistance Monitoring</Text>
 

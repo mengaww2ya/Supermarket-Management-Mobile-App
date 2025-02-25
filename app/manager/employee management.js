@@ -29,7 +29,7 @@ export default function EmployeeManagement() {
   ];
 const router =useRouter();
   return (
-    <SafeAreaView className="flex-1 bg-gray-100">
+    <SafeAreaView className="flex-1 bg-grey1">
       <ScrollView className="px-4 py-6">
         {/* Header */}
         <View className="bg-blue-600 p-5 rounded-lg shadow-lg">

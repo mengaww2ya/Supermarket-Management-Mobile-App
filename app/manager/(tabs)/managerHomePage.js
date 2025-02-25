@@ -30,7 +30,7 @@ const dashboardData = {
 };
 
 export default function ManagerHomePage() {
-  const homeBackground=require("../../assets/background/city.jpg");
+  const homeBackground=require("../../../assets/background/city.jpg");
   const screenWidth = useWindowDimensions().width;
   const screenHeight = useWindowDimensions().height;
   const totalProducts = dashboardData.inventory.totalProducts;
@@ -61,21 +61,19 @@ export default function ManagerHomePage() {
     const router=useRouter();
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-100">
+    <SafeAreaView className="flex-1 bg-grey1 gap-5">
       <ScrollView
         showsVerticalScrollIndicator={false}
       contentContainerStyle={{
-    paddingBottom: 20,
+    padding: 10,
             alignItems: "center",
   }}
       >
-        <View
-        className="w-full  items-center py-5 flex-1 justify-start"          
-        >
-          <Text className="text-2xl font-bold text-gray-800 mb-5 text-center">Welcome, Manager!</Text>
+        {/* <View className="w-full  items-center py-5 flex-1 justify-start"   > */}
+          <Text className="text-2xl font-bold text-blue-700 mb-5 text-center">Welcome, Manager!</Text>
           {/* Employee Management view */}
           <View 
-           className="bg-white rounded-2xl p-6 items-center justify-center shadow-md mb-5"
+           className="bg-white rounded-2xl p-6 w-full items-center justify-center shadow-md mb-5"
             
           >
             <View className="items-center w-full">
@@ -135,7 +133,7 @@ export default function ManagerHomePage() {
           </View>
           {/* Customer Management */}
           <View
-          className="bg-white rounded-2xl p-6 items-center justify-center shadow-md mb-5"
+          className="bg-white rounded-2xl p-6 w-full items-center justify-center shadow-md mb-5"
          
           >
             <View className="items-center w-full">
@@ -208,7 +206,7 @@ export default function ManagerHomePage() {
 
           {/* Promotion & Discount */}
           <View
-          className="bg-white rounded-2xl p-6 items-center justify-center shadow-md mb-5"
+          className="bg-white rounded-2xl p-6 w-full items-center justify-center shadow-md mb-5"
           >
             <View className="items-center w-full">
               <Text className="text-base font-bold text-gray-700 mb-1 text-center">
@@ -265,7 +263,7 @@ export default function ManagerHomePage() {
           </View>
           {/* Inventory Management */}
           <View
-          className="bg-white rounded-2xl p-6 items-center justify-center shadow-md mb-5"
+          className="bg-white rounded-2xl p-6 w-full items-center justify-center shadow-md mb-5"
             
           >
             <View className="items-center w-full">
@@ -313,7 +311,7 @@ export default function ManagerHomePage() {
           </View>
           {/* Order Management */}
           <View
-          className="bg-white rounded-2xl p-6 items-center justify-center shadow-md mb-5"
+          className="bg-white rounded-2xl p-6 w-full items-center justify-center shadow-md mb-5"
            
           >
             <View className="items-center w-full">
@@ -369,7 +367,7 @@ export default function ManagerHomePage() {
           </View>
           {/* Sales & Revenue */}
           <View
-          className="bg-white rounded-2xl p-6 items-center justify-center shadow-md mb-5"
+          className="bg-white rounded-2xl p-6 w-full items-center justify-center shadow-md mb-5"
             
           >
             <View className="items-center w-full">
@@ -425,7 +423,7 @@ export default function ManagerHomePage() {
           </View>
           {/* Supplier Management */}
           <View
-          className="bg-white rounded-2xl p-6 items-center justify-center shadow-md mb-5"
+          className="bg-white rounded-2xl p-6 w-full items-center justify-center shadow-md mb-5"
             
           >
             <View className="items-center w-full">
@@ -486,7 +484,7 @@ export default function ManagerHomePage() {
           </View>
           {/* Alerts & Notifications */}
           <View
-          className="bg-white rounded-2xl p-6 items-center justify-center shadow-md mb-5"
+          className="bg-white rounded-2xl p-6 w-full items-center justify-center shadow-md mb-5"
             
           >
             <View className="items-center w-full">
@@ -547,7 +545,7 @@ export default function ManagerHomePage() {
               <Text  className="text-white text-base font-bold text-center">Alerts & Notifications</Text>
             </TouchableOpacity>
           </View>
-        </View>
+        {/* </View> */}
       </ScrollView>
     </SafeAreaView>
   );
