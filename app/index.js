@@ -1,16 +1,25 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { SafeAreaView, StyleSheet, View } from "react-native";
-// import AuthicStackNavig from "../navigator/stackNavigator.js";
-import "../global.css"
-import Login from "./screans/login";
+import "../global.css";
+import WelcomeScreen from "./screans/scro";
+import SplashScreen from "./screans/SplashScreen";
 
 export default function App() {
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 4000);
+  }, []);
+
   return (
     <SafeAreaView style={styles.safeContainer}>
-      <Login />
+      {isLoading ? <SplashScreen /> : <WelcomeScreen />}
     </SafeAreaView>
   );
 }
+
 const styles = StyleSheet.create({
   safeContainer: {
     flex: 1,

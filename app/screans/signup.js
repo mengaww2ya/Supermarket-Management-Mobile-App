@@ -1,6 +1,20 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, SafeAreaView ,TouchableOpacity, KeyboardAvoidingView} from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Pressable,
+  Dimensions,
+  TextInput,
+  SafeAreaView,
+  Alert,
+} from "react-native";
+import { colors } from "react-native-elements";
 import { useRouter } from "expo-router";
+import { auth } from "../../firebaseConfig";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+
+const screenwidth = Dimensions.get("window").width;
 
 export default function Signup() {
   const [firstName, setFirstName] = useState("");
@@ -12,112 +26,71 @@ export default function Signup() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const router = useRouter();
 
-  // Function to clear input fields
-  const clearInputs = () => {
-    setFirstName("");
-    setLastName("");
-    setAddress("");
-    setPhone("");
-    setEmail("");
-    setPassword("");
-    setConfirmPassword("");
+  const handleSignUp = async () => {
+    if (!email || !password || !firstName || !lastName || !address || !phone) {
+      Alert.alert("Error", "Please fill in all fields");
+      return;
+    }
+    if (password !== confirmPassword) {
+      Alert.alert("Error", "Passwords do not match");
+      return;
+    }
+    try {
+      await createUserWithEmailAndPassword(auth, email, password);
+      Alert.alert("Success", "Account created!");
+      router.push("/screans/login");
+    } catch (error) {
+      Alert.alert("Error", error.message);
+    }
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-grey1 justify-center p-3 " >
-      {/* <View className="bg-white p-6 rounded-xl shadow-lg"> */}
-        <Text className="text-4xl font-semibold text-center text-white">
-          Sign Up
+    <SafeAreaView style={styles.safeContainer}>
+      <View style={styles.container}>
+        <Text style={styles.text}>
+          Fill the form to register or press sign in if you have an account
         </Text>
-
-<KeyboardAvoidingView>
-        <View className="gap-4 m-2 ">
-             <Text className="text-lg w-full font-bold  text-white">First Name</Text>
-          
-          <TextInput
-            className="border border-gray-300 bg-slate-200   rounded-md w-full p-3  "
-            placeholder="Enter your first name"
-            value={firstName}
-            onChangeText={setFirstName}
-          />
-                    <Text className="text-lg w-full font-bold  text-white">Last Name</Text>
-          
-          <TextInput
-            className="border border-gray-300 rounded-md w-full p-3 bg-slate-200 "
-            placeholder="Enter your last name"
-            value={lastName}
-            onChangeText={setLastName}
-          />
-                    <Text className="text-lg w-full font-bold  text-white">Adress</Text>
-          
-          <TextInput
-            className="border border-gray-300 rounded-md w-full p-3 bg-slate-200 "
-            placeholder="Enter your address"
-            value={address}
-            onChangeText={setAddress}
-          />
-                    <Text className="text-lg w-full font-bold  text-white">Phone</Text>
-          
-          <TextInput
-            className="border border-gray-300 rounded-md w-full p-3 bg-slate-200 "
-            placeholder="Enter your phone number"
-            keyboardType="phone-pad"
-            value={phone}
-            onChangeText={setPhone}
-          />
-                    <Text className="text-lg w-full font-bold  text-white">email</Text>
-          
-          <TextInput
-            className="border border-gray-300 rounded-md w-full p-3 bg-slate-200 "
-            placeholder="Enter your email"
-            keyboardType="email-address"
-            value={email}
-            onChangeText={setEmail}
-          />
-                    <Text className="text-lg w-full font-bold  text-white">Create your password</Text>
-          
-          <TextInput
-            className="border border-gray-300 rounded-md w-full  p-3 bg-slate-200 "
-            placeholder="Create password"
-            secureTextEntry
-            value={password}
-            onChangeText={setPassword}
-          />
-                    <Text className="text-lg w-full font-bold  text-white">Confirm Password</Text>
-          
-          <TextInput
-            className="border border-gray-300 rounded-md w-full p-3 bg-gray-400 "
-            placeholder="Confirm your password"
-            secureTextEntry
-            value={confirmPassword}
-            onChangeText={setConfirmPassword}
-          />
+        <View style={styles.signupBody}>
+          <View style={styles.textInputContainer}>
+            <TextInput style={styles.textInput} placeholder="First Name" value={firstName} onChangeText={setFirstName} />
+            <TextInput style={styles.textInput} placeholder="Last Name" value={lastName} onChangeText={setLastName} />
+            <TextInput style={styles.textInput} placeholder="Address" value={address} onChangeText={setAddress} />
+            <TextInput style={styles.textInput} placeholder="Phone Number" value={phone} onChangeText={setPhone} keyboardType="phone-pad" />
+            <TextInput style={styles.textInput} placeholder="Email" value={email} onChangeText={setEmail} keyboardType="email-address" />
+            <TextInput style={styles.textInput} placeholder="Password" secureTextEntry value={password} onChangeText={setPassword} />
+            <TextInput style={styles.textInput} placeholder="Confirm Password" secureTextEntry value={confirmPassword} onChangeText={setConfirmPassword} />
+          </View>
+          <View style={styles.buttonContainer}>
+            <Pressable style={styles.signupButton} onPress={handleSignUp}>
+              <Text style={styles.textButton}>Sign Up</Text>
+            </Pressable>
+            <Pressable style={styles.clearButton} onPress={() => { setFirstName(''); setLastName(''); setAddress(''); setPhone(''); setEmail(''); setPassword(''); setConfirmPassword(''); }}>
+              <Text style={styles.textButton}>Clear</Text>
+            </Pressable>
+          </View>
         </View>
-
-        <View className="flex-row justify-evenly mt-3" >
-          <TouchableOpacity
-            className=" py-3 px-4 rounded-md shadow-md active:opacity-80 flex-1 mx-2 bg-purple-600"
-            onPress={() => router.push("/customer/homepage")}
-          >
-            <Text className="text-white font-bold text-2xl text-center">Sign Up</Text>
-          </TouchableOpacity>
-
-       
-
-      
-        </View>
-      {/* </View> */}
-
-      <View className="justify-evenly  mt-3 flex-row ">
-        <Text className="text-white text-2xl font-bold">Do you have an account?</Text>
-        <TouchableOpacity
-          className="  rounded-md shadow-md active:opacity-80"
-          onPress={() => router.back("/screens/login")}
-        >
-          <Text className="text-blue-700 text-2xl font-bold">Sign In</Text>
-        </TouchableOpacity>
       </View>
-      </KeyboardAvoidingView>
+      <View style={styles.signInBContainer}>
+        <Text style={styles.text}>Already have an account?</Text>
+        <Pressable style={styles.signinButton} onPress={() => router.push("/screans/login")}>
+          <Text style={styles.textButton}>Login</Text>
+        </Pressable>
+      </View>
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  safeContainer: { flex: 1, backgroundColor: colors.grey5, justifyContent: "center", paddingHorizontal: 20 },
+  container: { backgroundColor: colors.grey5, padding: 15, borderRadius: 5, alignItems: "center" },
+  signupBody: { width: screenwidth * 0.8 },
+  textInputContainer: { width: "100%", backgroundColor: "white", padding: 10, borderRadius: 5, borderWidth: 1, borderColor: colors.grey4 },
+  textInput: { padding: 12, fontSize: 16, marginVertical: 5, borderRadius: 5, borderWidth: 1, borderColor: colors.grey4 },
+  buttonContainer: { flexDirection: "row", justifyContent: "space-evenly", width: "100%", marginTop: 10 },
+  signupButton: { backgroundColor: colors.grey2, borderRadius: 5, padding: 10, alignItems: "center", width: "45%" },
+  clearButton: { backgroundColor: colors.warning, borderRadius: 5, padding: 10, alignItems: "center", width: "45%" },
+  signinButton: { backgroundColor: colors.grey3, borderRadius: 5, padding: 10, alignItems: "center" },
+  text: { fontSize: 18, marginVertical: 10, color: colors.grey3, textAlign: "center", fontWeight: "bold" },
+  textButton: { color: "white", fontSize: 16, fontWeight: "bold" },
+  signInBContainer: { alignItems: "center", marginTop: 20 },
+});

@@ -1,31 +1,32 @@
-import React, { useState, useRef } from "react";
-import { View, Text, FlatList, Dimensions, Image, TouchableOpacity } from "react-native";
-import { useRouter } from "expo-router";
-
-const { width } = Dimensions.get("window");
-
-import mg from "../../assets/images/mg.jpg";
-import hk2 from "../../assets/images/hk2.png";
-import mes from "../../assets/images/mes.png";
-
+import React, { useState, useRef } from 'react';
+import { View, Text, FlatList, Dimensions, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import { useRouter } from 'expo-router';
+const { width, height } = Dimensions.get('window');
+const router = useRouter();
 const slides = [
-  { id: "1", text: "Discover Great Products", image: mg },
-  { id: "2", text: "Get a delivery service", image: hk2 },
-  { id: "3", text: "Let’s Get Started", image: mes },
+  { id: '1', text: 'Discover Great Products', image: require('../../assets/images/mg.jpg') },
+  { id: '2', text: 'Get a delivery service', image: require('../../assets/images/hk2.png') },
+  { id: '3', text: 'Let’s Get Started', image: require('../../assets/images/mes.png') },
 ];
 
 const WelcomeScreen = () => {
   const flatListRef = useRef(null);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const router = useRouter();
 
   const handleScroll = (event) => {
     const slideIndex = Math.round(event.nativeEvent.contentOffset.x / width);
     setCurrentIndex(slideIndex);
   };
 
+  const handleMomentumScrollEnd = (event) => {
+    const slideIndex = Math.round(event.nativeEvent.contentOffset.x / width);
+    if (slideIndex === slides.length - 1) {
+      router.replace('/screans/welcome');
+    }
+  };
+
   return (
-    <View style={{ flex: 1, backgroundColor: "white", alignItems: "center" }}>
+    <View style={styles.container}>
       <FlatList
         ref={flatListRef}
         data={slides}
@@ -34,61 +35,37 @@ const WelcomeScreen = () => {
         pagingEnabled
         showsHorizontalScrollIndicator={false}
         onScroll={handleScroll}
+        onMomentumScrollEnd={handleMomentumScrollEnd}
         renderItem={({ item }) => (
-          <View style={{ justifyContent: "center", alignItems: "center" }}>
-            <Image source={item.image} style={{ width: 300, height: 300, resizeMode: "contain", marginVertical: 20 }} />
-            <View
-              style={{
-                width: "100%",
-                minHeight: 250,
-                backgroundColor: "#FACC15",
-                borderTopLeftRadius: 30,
-                borderTopRightRadius: 30,
-                padding: 20,
-                alignItems: "center",
-                position: "absolute",
-                bottom: 0,
-                shadowColor: "#000",
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.2,
-                shadowRadius: 4,
-              }}
-            >
-              <View style={{ flexDirection: "row", marginBottom: 10 }}>
+          <View style={styles.slide}>
+            <Image source={item.image} style={styles.image} />
+
+
+            <View style={styles.infoContainer}>
+
+
+              <View style={styles.dotsContainer}>
                 {slides.map((_, index) => (
                   <View
                     key={index}
-                    style={{
-                      width: currentIndex === index ? 12 : 8,
-                      height: currentIndex === index ? 12 : 8,
-                      borderRadius: 50,
-                      backgroundColor: currentIndex === index ? "#047857" : "#9CA3AF",
-                      marginHorizontal: 5,
-                    }}
+                    style={[
+                      styles.dot,
+                      currentIndex === index && styles.activeDot,
+                    ]}
                   />
                 ))}
               </View>
 
-              <Text style={{ fontSize: 20, color: "#047857", textAlign: "center", marginVertical: 10, fontWeight: "600" }}>
-                {item.text}
-              </Text>
+
+              <Text style={styles.text}>{item.text}</Text>
+
 
               <TouchableOpacity
-                style={{
-                  backgroundColor: "#047857",
-                  paddingVertical: 10,
-                  paddingHorizontal: 20,
-                  borderRadius: 8,
-                  marginTop: 10,
-                  shadowOpacity: 0.2,
-                  shadowRadius: 4,
-                  shadowColor: "#000",
-                  shadowOffset: { width: 0, height: 2 },
-                }}
-                onPress={() => router.push("/screans/welcome")}
-              >
-                <Text style={{ color: "white", fontWeight: "bold", fontSize: 16 }}>Get Started</Text>
+                style={styles.button}
+                onPress={() => router.push('/screans/welcome')}>
+                <Text style={styles.buttonText}>Get Started</Text>
               </TouchableOpacity>
+
             </View>
           </View>
         )}
@@ -96,5 +73,73 @@ const WelcomeScreen = () => {
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: 'white',
+    alignItems: 'center',
+  },
+  slide: {
+    width,
+    alignItems: 'center',
+  },
+  image: {
+    width: '100%',
+    height: height * 0.5,
+    resizeMode: 'cover',
+  },
+  infoContainer: {
+    width: '100%',
+    minHeight: 250,
+    backgroundColor: '#FFDC2B',
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
+    paddingVertical: 40,
+    paddingHorizontal: 20,
+    alignItems: 'center',
+    position: 'absolute',
+    bottom: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  text: {
+    fontSize: 22,
+    color: 'green',
+    textAlign: 'center',
+    marginVertical: 10,
+  },
+  button: {
+    backgroundColor: 'green',
+    paddingVertical: 12,
+    paddingHorizontal: 25,
+    borderRadius: 10,
+    marginTop: 10,
+  },
+  buttonText: {
+    fontSize: 18,
+    color: 'white',
+    fontWeight: 'bold',
+  },
+  dotsContainer: {
+    flexDirection: 'row',
+    marginBottom: 10,
+  },
+  dot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: 'grey',
+    marginHorizontal: 5,
+  },
+  activeDot: {
+    backgroundColor: 'green',
+    width: 12,
+    height: 12,
+  },
+});
 
 export default WelcomeScreen;
