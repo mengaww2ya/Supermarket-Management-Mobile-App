@@ -71,25 +71,7 @@ const ProfileScreen = ({ navigation }) => {
     }
   };
 
-  useLayoutEffect(() => {
-    if (navigation) {
-      navigation.setOptions({
-        headerLeft: () => (
-          <View style={styles.editButtonContainer}>
-            <MaterialCommunityIcons.Button
-              name="account-edit"
-              size={25}
-              backgroundColor="#FFDC2B"
-              color="#000"
-              onPress={() => setEditModalVisible(true)}
-            />
-          </View>
-        ),
-      });
-    }
-  }, [navigation]);
-
-  if (loading) {
+   if (loading) {
     return <ActivityIndicator size="large" color="#0000ff" />; // Loading indicator
   }
 
@@ -207,6 +189,8 @@ const ProfileScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor:"white",
+
   },
   editButtonContainer: {
     marginRight: 20,

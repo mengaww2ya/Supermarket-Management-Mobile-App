@@ -62,7 +62,7 @@ const WelcomeScreen = () => {
 
               <TouchableOpacity
                 style={styles.button}
-                onPress={() => router.push('/screans/welcome')}>
+                onPress={() => router.push('/screans/login')}>
                 <Text style={styles.buttonText}>Get Started</Text>
               </TouchableOpacity>
 

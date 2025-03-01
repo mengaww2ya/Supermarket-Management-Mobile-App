@@ -37,74 +37,76 @@ export default function Login() {
 
   return (
     <SafeAreaView className="flex-1 bg-gray-100">
-      <View className="flex-1 justify-center items-center px-4">
-        <Text className="text-2xl font-bold mb-5 text-center text-green-600">
-          Welcome to Queen Supermarket
-        </Text>
-
-        <View className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
-          <Text className="text-lg font-semibold mb-4 text-center">
-            Fill the form below to log in
+      <View className="flex-1 pt-0"> {/* Removed horizontal padding */}
+        
+        {/* Full-Width Box with Custom Yellow Color */}
+        <View style={{ backgroundColor: '#FFDC2B', width: '100%', padding: 26, borderRadius: 0, marginBottom: 35 }}>
+          <Text className="text-2xl font-bold text-center text-black">
+            Welcome to Queen Supermarket
           </Text>
+        </View>
 
-          <Text className="text-md font-medium mb-1">Email</Text>
+        <TextInput
+          className="border border-gray-700 rounded-md p-3 mb-2 text-lg" // Reduced margin
+          placeholder="Enter your email"
+          value={email}
+          onChangeText={setEmail}
+          keyboardType="email-address"
+          style={{marginTop:15}}
+        />
+
+        <View className="flex-row items-center border border-gray-700 rounded-md mb-2"style={{marginTop:30}}> 
           <TextInput
-            className="border border-gray-300 rounded-md p-3 mb-4 text-lg"
-            placeholder="Enter your email"
-            value={email}
-            onChangeText={setEmail}
-            keyboardType="email-address"
+            placeholder="Enter your password"
+            secureTextEntry={!passwordVisible}
+            className="flex-1 p-3 text-lg"
+            value={password}
+            onChangeText={setPassword}
           />
-
-          <Text className="text-md font-medium mb-1">Password</Text>
-          <View className="flex-row items-center border border-gray-300 rounded-md mb-4">
-            <TextInput
-              placeholder="Enter your password"
-              secureTextEntry={!passwordVisible}
-              className="flex-1 p-3 text-lg"
-              value={password}
-              onChangeText={setPassword}
+          <TouchableOpacity
+            onPress={() => setPasswordVisible(!passwordVisible)}
+            className="p-3"
+          >
+            <Icon
+              name={passwordVisible ? "eye" : "eye-slash"}
+              type="font-awesome"
+              color="gray"
+              size={20}
             />
-            <TouchableOpacity
-              onPress={() => setPasswordVisible(!passwordVisible)}
-              className="p-3"
-            >
-              <Icon
-                name={passwordVisible ? "eye" : "eye-slash"}
-                type="font-awesome"
-                color="gray"
-                size={20}
-              />
-            </TouchableOpacity>
-          </View>
+          </TouchableOpacity>
+        </View>
+        <View style={{marginTop:100}} > 
+        <Pressable 
+          className="bg-green-500 py-2 px-4 mx-auto rounded-md mb-2" // Adjusted padding and margin
+          style={{ width: '50%', marginBottom:15}} // Centered button
+          onPress={handleLogin}
+        >
+          
+          <Text className="text-white text-center text-lg font-bold">Log In</Text>
+        </Pressable>
 
-          {/* Login Button */}
-          <Pressable
-            className="bg-green-500 py-3 rounded-md mb-2"
-            onPress={handleLogin}
-          >
-            <Text className="text-white text-center text-lg font-bold">Log In</Text>
-          </Pressable>
+        <Pressable style={{marginBottom:15}}>
+          <Text className="text-center text-md text-blue-600 underline mb-2">Forgot password?</Text> {/* Added margin */}
+        </Pressable>
 
-          <Pressable>
-            <Text className="text-center text-md text-blue-600 underline">Forgot password?</Text>
-          </Pressable>
+        {/* Sign-Up Button */}
+        <Pressable 
+          className="bg-gray-300 py-2 rounded-md mt-2 mx-auto" // Adjusted padding and margin
+          style={{ width: '60%',marginBottom:15}} // Centered button
+          onPress={() => router.push('/screans/signup')}
+        >
+          <Text className="text-center text-lg font-semibold">don't have an account? Sign up</Text>
+        </Pressable>
 
-          {/* Sign-Up Button */}
-          <Pressable
-            className="bg-gray-300 py-3 rounded-md mt-3"
-            onPress={() => router.push('/screans/signup')}
-          >
-            <Text className="text-center text-lg font-semibold">I don't have an account? Sign up</Text>
-          </Pressable>
+        {/* Developer Button */}
+        <Pressable
+          className="bg-blue-500 py-2 rounded-md mt-2 mx-auto" // Adjusted padding and margin
+          style={{ width: '50%' }} // Centered button
+          onPress={() => router.push('/screans/developingHompage')}
+        >
+          <Text className="text-white text-center text-lg font-bold">I am Developer</Text>
+        </Pressable>
 
-          {/* Developer Button (Now Below the Sign-Up Button) */}
-          <Pressable
-            className="bg-blue-500 py-3 rounded-md mt-3"
-            onPress={() => router.push('/screans/developingHompage')}
-          >
-            <Text className="text-white text-center text-lg font-bold">I am Developer</Text>
-          </Pressable>
         </View>
       </View>
     </SafeAreaView>
