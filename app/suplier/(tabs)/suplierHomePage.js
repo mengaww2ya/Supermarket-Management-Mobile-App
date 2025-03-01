@@ -11,7 +11,7 @@ import {
 import { colors } from "react-native-elements";
 import { useRouter } from "expo-router";
 export default function suplierHome() {
-  const router =useRouter();
+  const router = useRouter();
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <ScrollView

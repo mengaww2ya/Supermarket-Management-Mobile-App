@@ -11,8 +11,9 @@ import {
 } from "react-native";
 import { colors } from "react-native-elements";
 import { useRouter } from "expo-router";
-import { auth } from "../../firebaseConfig";
+import { auth, db } from "../../firebaseConfig"; // Import Firestore
 import { createUserWithEmailAndPassword } from "firebase/auth";
+import { doc, setDoc } from "firebase/firestore"; // Import Firestore functions
 
 const screenwidth = Dimensions.get("window").width;
 
@@ -36,7 +37,18 @@ export default function Signup() {
       return;
     }
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const userId = userCredential.user.uid; // Get the user ID from the credential
+
+      // Store additional user info in Firestore
+      await setDoc(doc(db, "customers", userId), {
+        firstName,
+        lastName,
+        email,
+        address,
+        phone,
+      });
+
       Alert.alert("Success", "Account created!");
       router.push("/screans/login");
     } catch (error) {

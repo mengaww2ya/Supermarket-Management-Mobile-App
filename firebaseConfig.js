@@ -1,6 +1,7 @@
-// firebaseConfig.js
 import { initializeApp } from "firebase/app";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
+import { getFirestore } from 'firebase/firestore'; // Import Firestore
+
 const firebaseConfig = {
     apiKey: "AIzaSyCENWif-Y8KNr0jFSJTWCoX14ZTftBZpik",
     authDomain: "queens-1f687.firebaseapp.com",
@@ -11,8 +12,9 @@ const firebaseConfig = {
     measurementId: "G-DJM7C07RZH"
 };
 
-
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+const db = getFirestore(app); // Initialize Firestore
 
-export { auth, createUserWithEmailAndPassword, signInWithEmailAndPassword };
+// Export auth and db for use in other modules
+export { auth, db, createUserWithEmailAndPassword, signInWithEmailAndPassword };
