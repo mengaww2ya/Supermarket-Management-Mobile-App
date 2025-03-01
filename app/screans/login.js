@@ -53,7 +53,7 @@ export default function Login() {
         resizeMode="cover"
        />          
 
-          <Text className="text-lg w-full font-bold mb-1 text-white">email</Text>
+          <Text className="text-lg w-full font-bold mb-1 text-white">Email</Text>
           <TextInput
             className="border border-gray-300 w-full text-white rounded-md p-3 mb-4 text-lg"
             placeholder="Enter your username"
