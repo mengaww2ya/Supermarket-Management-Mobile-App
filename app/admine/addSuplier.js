@@ -43,26 +43,63 @@ export default function AddSupplier() {
 
   return (
     <SafeAreaView className="flex-1 bg-gray-100">
-      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} className="flex-1 p-4">
-        <ScrollView contentContainerClassName="pb-6">
-          <Text className="text-2xl font-bold text-center text-gray-800 mb-5">Add Supplier</Text>
-          
-          <View className="bg-white p-4 rounded-xl shadow-md">
-            <TextInput className="border border-gray-300 p-3 rounded-md mb-3" placeholder="Supplier Name" value={supplier.name} onChangeText={(text) => handleInputChange("name", text)} />
-            <TextInput className="border border-gray-300 p-3 rounded-md mb-3" placeholder="Company Name" value={supplier.company} onChangeText={(text) => handleInputChange("company", text)} />
-            <TextInput className="border border-gray-300 p-3 rounded-md mb-3" placeholder="Email" keyboardType="email-address" value={supplier.email} onChangeText={(text) => handleInputChange("email", text)} />
-            <TextInput className="border border-gray-300 p-3 rounded-md mb-3" placeholder="Phone" keyboardType="phone-pad" value={supplier.phone} onChangeText={(text) => handleInputChange("phone", text)} />
-            <TextInput className="border border-gray-300 p-3 rounded-md mb-3" placeholder="Address" multiline numberOfLines={3} value={supplier.address} onChangeText={(text) => handleInputChange("address", text)} />
+      <KeyboardAvoidingView behavior={Platform.OS === "ios"
+        ? "padding" : "height"} className="flex-1 p-4">
+        <ScrollView contentContainerClassName="pb-6 flex-1 ">
+          <Text className="text-2xl font-bold text-center text-gray-800 mb-5">
+            Add Supplier
+          </Text>
+          <Text className="font-bold  text-gray-700 m-2">
+                      Supplier Name
+                    </Text>
+          {/* <View className="bg-white p-4 rounded-xl shadow-md"> */}
+          <TextInput className="border border-gray-500 p-3 bg-slate-200 rounded-lg ml-3 text-gray-700"
+            placeholder="Supplier Name" value={supplier.name}
+            onChangeText={(text) => handleInputChange("name", text)} />
+          <Text className="font-bold  text-gray-700 m-2">
+                      Campany Name
+                    </Text>
+          <TextInput className="border border-gray-500 p-3 bg-slate-200 rounded-lg ml-3 text-gray-700"
+            placeholder="Company Name"
+            value={supplier.company}
+            onChangeText={(text) => handleInputChange("company", text)} />
+          <Text className="font-bold  text-gray-700 m-2">
+                      Email
+                    </Text>
+          <TextInput className="border border-gray-500 p-3 bg-slate-200 rounded-lg ml-3 text-gray-700"
+            placeholder="Email" keyboardType="email-address"
+            value={supplier.email}
+            onChangeText={(text) => handleInputChange("email", text)} />
+          <Text className="font-bold  text-gray-700 m-2">
+                      Phone
+                    </Text>
+          <TextInput className="border border-gray-500 p-3 bg-slate-200 rounded-lg ml-3 text-gray-700"
+            placeholder="Phone" keyboardType="phone-pad" value={supplier.phone}
+            onChangeText={(text) => handleInputChange("phone", text)} />
+          <Text className="font-bold  text-gray-700 m-2">
+                      Address
+                    </Text>
+          <TextInput className="border border-gray-500 p-3 bg-slate-200 rounded-lg ml-3 text-gray-700"
+            placeholder="Address" multiline numberOfLines={3} value={supplier.address}
+            onChangeText={(text) => handleInputChange("address", text)} />
             
             <Text className="text-lg font-semibold text-gray-700 mb-2">Product Type</Text>
-            <DropDownPicker open={open} value={productType} items={productOptions} setOpen={setOpen} setValue={setProductType} setItems={setProductOptions} placeholder="Select Product Type" className="border border-gray-300 rounded-md mb-3" />
+          <DropDownPicker open={open} value={productType} items={productOptions}
+            setOpen={setOpen} setValue={setProductType} setItems={setProductOptions}
+            placeholder="Select Product Type" className="border border-gray-300 rounded-md mb-3" />
             
-            {productType && <Text className="text-blue-600 font-semibold text-center mb-3">Selected Product Type: {productType}</Text>}
+          {productType &&
+            <Text className="text-blue-600 font-semibold text-center mb-3">
+              Selected Product Type: {productType}
+            </Text>}
 
-            <TouchableOpacity className="bg-blue-600 p-4 rounded-lg items-center" onPress={handleSubmit}>
-              <Text className="text-white text-lg font-bold">Add Supplier</Text>
+          <TouchableOpacity className="bg-blue-600 p-2  mt-2 rounded-lg items-center"
+            onPress={handleSubmit}>
+            <Text className="text-white text-lg font-bold">
+              Add Supplier
+            </Text>
             </TouchableOpacity>
-          </View>
+          {/* </View> */}
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>

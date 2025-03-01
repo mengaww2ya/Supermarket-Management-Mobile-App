@@ -1,23 +1,6 @@
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  ScrollView,
-  KeyboardAvoidingView,
-  Dimensions,
-  TextInput,
-  SafeAreaView,
-  Alert,
-} from "react-native";
-import { colors } from "react-native-elements";
+import { View, Text, TextInput, SafeAreaView ,TouchableOpacity, KeyboardAvoidingView, ScrollView} from "react-native";
 import { useRouter } from "expo-router";
-import { auth, db } from "../../firebaseConfig"; // Import Firestore
-import { createUserWithEmailAndPassword } from "firebase/auth";
-import { doc, setDoc } from "firebase/firestore"; // Import Firestore functions
-
-const screenwidth = Dimensions.get("window").width;
 
 export default function Signup() {
   const [firstName, setFirstName] = useState("");
@@ -29,46 +12,26 @@ export default function Signup() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const router = useRouter();
 
-  const handleSignUp = async () => {
-    if (!email || !password || !firstName || !lastName || !address || !phone) {
-      Alert.alert("Error", "Please fill in all fields");
-      return;
-    }
-    if (password !== confirmPassword) {
-      Alert.alert("Error", "Passwords do not match");
-      return;
-    }
-    try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      const userId = userCredential.user.uid; // Get the user ID from the credential
-
-      // Store additional user info in Firestore
-      await setDoc(doc(db, "customers", userId), {
-        firstName,
-        lastName,
-        email,
-        address,
-        phone,
-      });
-
-      Alert.alert("Success", "Account created!");
-      router.push("/screans/login");
-    } catch (error) {
-      Alert.alert("Error", error.message);
-    }
+  const clearInputs = () => {
+    setFirstName("");
+    setLastName("");
+    setAddress("");
+    setPhone("");
+    setEmail("");
+    setPassword("");
+    setConfirmPassword("");
   };
 
-  
   return (
     <SafeAreaView className="flex-1 bg-grey1 justify-center p-3 " >
       <ScrollView    showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ flexGrow: 1, padding: 20, backgroundColor:"white"}}>
+      contentContainerClassName="flex-1 p-5 bg-white"
+      >
         <Text className="text-xl font-semibold text-center text-gray-700">
-          Sign Up
+          Register Customer
         </Text>
 
       <KeyboardAvoidingView>
-        {/* <View className="gap m-2 "> */}
              <Text className="font-bold  text-gray-700 m-2">First Name</Text>
           
           <TextInput
@@ -102,7 +65,7 @@ export default function Signup() {
             value={phone}
             onChangeText={setPhone}
           />
-                    <Text className="font-bold  text-gray-700 m-2">email</Text>
+                    <Text className="font-bold  text-gray-700 m-2">Email</Text>
           
           <TextInput
             className="border border-gray-300 rounded-md w-full ml-3 p-3 bg-slate-200 "
@@ -129,28 +92,18 @@ export default function Signup() {
             value={confirmPassword}
             onChangeText={setConfirmPassword}
           />
-        {/* </View> */}
 
         <View className="flex-row justify-evenly mt-3" >
           <TouchableOpacity
             className=" py-2 px-4 rounded-md shadow-md active:opacity-80 flex-1 mx-2 bg-purple-600"
-            onPress={handleSignUp}
+            onPress={() => router.push("/customer/homepage")}
           >
-            <Text className="text-white font-bold text-xl text-center">Sign Up</Text>
+            <Text className="text-white font-bold text-xl text-center">Register</Text>
           </TouchableOpacity>
       
         </View>
-      {/* </View> */}
 
-      <View className="justify-evenly  mt-3 flex-row ">
-        <Text className="text-gray-700 text-lg font-bold">Do you have an account?</Text>
-        <TouchableOpacity
-          className="  rounded-md shadow-md active:opacity-80"
-          onPress={() => router.back()}
-        >
-          <Text className="text-blue-700 text-xl font-bold">Sign In</Text>
-        </TouchableOpacity>
-      </View>
+     
         </KeyboardAvoidingView>
         </ScrollView>
     </SafeAreaView>

@@ -5,7 +5,6 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  View,
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
@@ -45,75 +44,101 @@ export default function AddEmployee() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-100 p-4">
+    <SafeAreaView className="flex-1 bg-grey1 justify-center p-4">
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         className="flex-1"
       >
-        <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
-          <Text className="text-2xl font-bold text-center text-gray-800 mb-5">
+        <ScrollView 
+          showsVerticalScrollIndicator={false}
+          contentContainerClassName=" p-5 bg-white"
+        >
+          <Text className="text-2xl font-bold text-center text-grey1 mb-5">
             Add Employee
           </Text>
 
-          <View className="bg-white p-4 rounded-xl shadow-md">
+          {/* <View className="bg-white rounded-xl p-2 shadow-md"> */}
+            <Text className="font-bold  text-gray-700 m-2">
+            First Name
+          </Text>
             <TextInput
-              className="border border-gray-300 p-3 rounded-lg mb-3"
+              className="border border-gray-500 p-3 bg-slate-200 rounded-lg ml-3 text-gray-700"
               placeholder="First Name"
               value={form.firstName}
               onChangeText={(text) => handleInputChange("firstName", text)}
             />
+              <Text className="font-bold  text-gray-700 m-2">
+            Last Name
+          </Text>
             <TextInput
-              className="border border-gray-300 p-3 rounded-lg mb-3"
+              className="border border-gray-500 p-3 bg-slate-200 rounded-lg ml-3 text-gray-700"
               placeholder="Last Name"
               value={form.lastName}
               onChangeText={(text) => handleInputChange("lastName", text)}
             />
+              <Text className="font-bold  text-gray-700 m-2">
+            Phone Number
+          </Text>
             <TextInput
-              className="border border-gray-300 p-3 rounded-lg mb-3"
+              className="border border-gray-500 p-3 bg-slate-200 rounded-lg ml-3 text-gray-700"
               placeholder="Phone Number"
               keyboardType="phone-pad"
               value={form.phone}
               onChangeText={(text) => handleInputChange("phone", text)}
             />
+              <Text className="font-bold  text-gray-700 m-2">
+            Password
+          </Text>
             <TextInput
-              className="border border-gray-300 p-3 rounded-lg mb-3"
+              className="border border-gray-500 p-3 bg-slate-200 rounded-lg ml-3 text-gray-700"
               placeholder="Password"
               secureTextEntry
               value={form.password}
               onChangeText={(text) => handleInputChange("password", text)}
             />
+              <Text className="font-bold  text-gray-700 m-2">
+          Confirm  Password
+          </Text>
             <TextInput
-              className="border border-gray-300 p-3 rounded-lg mb-3"
+              className="border border-gray-500 p-3 bg-slate-200 rounded-lg ml-3 text-gray-700"
               placeholder="Confirm Password"
               secureTextEntry
               value={form.confirmPassword}
               onChangeText={(text) => handleInputChange("confirmPassword", text)}
             />
-
-            <Text className="text-lg font-semibold text-gray-700 mt-3 mb-2">
+            
+            <Text className="font-semibold text-gray-700 mt-3 mb-2 text-center " >
               Emergency Contact
             </Text>
+              <Text className="font-bold  text-gray-700 m-2">
+           Contact First Name
+          </Text>
             <TextInput
-              className="border border-gray-300 p-3 rounded-lg mb-3"
+              className="border border-gray-500 p-3 bg-slate-200 rounded-lg ml-3 text-gray-700"
               placeholder="Emergency First Name"
               value={form.emergencyFirstName}
               onChangeText={(text) => handleInputChange("emergencyFirstName", text)}
             />
+              <Text className="font-bold  text-gray-700 m-2">
+            Contact Last Name
+          </Text>
             <TextInput
-              className="border border-gray-300 p-3 rounded-lg mb-3"
+              className="border border-gray-500 p-3 bg-slate-200 rounded-lg ml-3 text-gray-700"
               placeholder="Emergency Last Name"
               value={form.emergencyLastName}
               onChangeText={(text) => handleInputChange("emergencyLastName", text)}
             />
+              <Text className="font-bold  text-gray-700 m-2">
+            Contact Phone
+          </Text>
             <TextInput
-              className="border border-gray-300 p-3 rounded-lg mb-3"
+              className="border border-gray-500 p-3 bg-slate-200 rounded-lg ml-3 text-gray-700"
               placeholder="Emergency Phone"
               keyboardType="phone-pad"
               value={form.emergencyPhone}
               onChangeText={(text) => handleInputChange("emergencyPhone", text)}
             />
-
-            <Text className="text-lg font-semibold text-gray-700 mt-3 mb-2">
+            <Text className="font-semibold text-gray-700 mt-3 mb-2 text-center">
               Select Employee Role
             </Text>
             <DropDownPicker
@@ -124,11 +149,11 @@ export default function AddEmployee() {
               setValue={setSelectedRole}
               setItems={setRoles}
               placeholder="Select a role"
-              className="border border-gray-300 rounded-lg mb-3"
+              className="border border-gray-500 rounded-lg ml-3 text-gray-700"
             />
 
             {selectedRole && (
-              <Text className="text-blue-600 font-semibold text-lg mt-2">
+              <Text className="text-blue-600 font-semibold mt-2">
                 Selected Role: {roles.find((r) => r.value === selectedRole)?.label}
               </Text>
             )}
@@ -137,11 +162,11 @@ export default function AddEmployee() {
               className="bg-blue-500 p-4 rounded-lg mt-4"
               onPress={handleSubmit}
             >
-              <Text className="text-white text-lg font-bold text-center">
+              <Text className="text-white font-bold text-center">
                 Add Employee
               </Text>
             </TouchableOpacity>
-          </View>
+          {/* </View> */}
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
