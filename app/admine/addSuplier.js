@@ -45,7 +45,7 @@ export default function AddSupplier() {
     <SafeAreaView className="flex-1 bg-gray-100">
       <KeyboardAvoidingView behavior={Platform.OS === "ios"
         ? "padding" : "height"} className="flex-1 p-4">
-        <ScrollView contentContainerClassName="pb-6 ">
+        <ScrollView contentContainerClassName="pb-6 " showsVerticalScrollIndicator={false}>
           <Text className="text-2xl font-bold text-center text-gray-800 mb-5">
             Add Supplier
           </Text>
