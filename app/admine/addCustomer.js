@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, SafeAreaView ,TouchableOpacity, KeyboardAvoidingView, ScrollView} from "react-native";
+import { View, Text, TextInput, SafeAreaView ,TouchableOpacity,Platform, KeyboardAvoidingView, ScrollView} from "react-native";
 import { useRouter } from "expo-router";
 
 export default function Signup() {
@@ -23,15 +23,17 @@ export default function Signup() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-grey1 justify-center p-3 " >
+    <SafeAreaView className="flex-1 bg-grey1  p-3 " >
       <ScrollView    showsVerticalScrollIndicator={false}
-      contentContainerClassName="flex-1 p-5 bg-white"
+      contentContainerClassName=" p-5 bg-white"
       >
         <Text className="text-xl font-semibold text-center text-gray-700">
           Register Customer
         </Text>
 
-      <KeyboardAvoidingView>
+        <KeyboardAvoidingView className="flex-1"
+                behavior={Platform.OS === "ios" ? "padding" : "height"}
+        >
              <Text className="font-bold  text-gray-700 m-2">First Name</Text>
           
           <TextInput
