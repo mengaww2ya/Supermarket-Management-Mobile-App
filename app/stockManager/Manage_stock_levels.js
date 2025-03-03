@@ -18,7 +18,7 @@ export default function ManageStock() {
               className="bg-gray-300 w-40 h-24 justify-center items-center rounded-lg border border-gray-400 shadow-md hover:bg-gray-400 active:bg-gray-500"
               style={{ width: screenWidth * 0.4, height: screenHeight * 0.1 }}
               onPress={() => {
-                  router.push("/stockManager/AddProduct");
+                  router.push("/stockManager/addProduct");
                 
               }}
             >
@@ -28,7 +28,7 @@ export default function ManageStock() {
               className="bg-gray-300 w-40 h-24 justify-center items-center rounded-lg border border-gray-400 shadow-md hover:bg-gray-400 active:bg-gray-500"
               style={{ width: screenWidth * 0.4, height: screenHeight * 0.1 }}
               onPress={() => {
-                  router.push("/stockManager/AddProduct");
+                  router.push("/stockManager/removeproduct");
                 
               }}
             >
@@ -58,7 +58,7 @@ export default function ManageStock() {
               className="bg-gray-300 w-40 h-24 justify-center items-center rounded-lg border border-gray-400 shadow-md hover:bg-gray-400 active:bg-gray-500"
               style={{ width: screenWidth * 0.4, height: screenHeight * 0.1 }}
               onPress={() => {
-                  router.push("/stockManager/viewProduct");
+                  router.push("/stockManager/addCategory");
                 
               }}
             >

@@ -56,7 +56,7 @@ export default function StockManagerHome() {
           {/* Supplier Order Management */}
           <TouchableOpacity
             className="flex-row items-center bg-white p-4 rounded-lg shadow-md active:bg-gray-200"
-            onPress={() => router.push("/stockManager/supplierOrders")}
+            onPress={() => router.push("/stockManager/Supplier_order_management")}
           >
             <Ionicons name="cart-outline" size={24} color="gray" />
             <Text className="text-lg font-semibold text-gray-800 ml-3">Supplier Order Management</Text>
