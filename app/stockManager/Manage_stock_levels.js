@@ -5,8 +5,8 @@ import { useRouter } from "expo-router";
 import { FontAwesome5 } from "@expo/vector-icons";
 
 const options = [
+  { title: "Update Product", icon: "edit", route: "/stockManager/searchProductForUpdate" },
   { title: "Add Product", icon: "plus-circle", route: "/stockManager/addProduct" },
-  { title: "Remove Product", icon: "trash-alt", route: "/stockManager/removeproduct" },
   { title: "Update Product", icon: "edit", route: "/stockManager/updateproduct" },
   { title: "View Product List", icon: "list-alt", route: "/stockManager/viewProduct" },
   { title: "Add New Category", icon: "tags", route: "/stockManager/addCategory" },
@@ -18,7 +18,6 @@ const options = [
 export default function ManageStock() {
   const { width } = useWindowDimensions();
   const router = useRouter();
-
   return (
     <SafeAreaView className="flex-1 bg-white">
       <ScrollView contentContainerClassName="pb-3" showsVerticalScrollIndicator={false}>

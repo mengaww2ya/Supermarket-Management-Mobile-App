@@ -19,6 +19,8 @@ export default function UpdateProduct({ route }) {
   const [packageType, setPackageType] = useState(product.packageType || "");
   const [supplier, setSupplier] = useState(product.supplier || "");
   const [origin, setOrigin] = useState(product.origin || "");
+  const [expiryDate, setExpiryDate] = useState(product.expiryDate || "");
+  const [productionDate, setProductionDate] = useState(product.productionDate || "");
 
   const clearInput = () => {
     setProductName("");
@@ -32,6 +34,8 @@ export default function UpdateProduct({ route }) {
     setPackageType("");
     setSupplier("");
     setOrigin("");
+    setExpiryDate("");
+    setProductionDate("")
     setImage(null);
   };
 
@@ -58,39 +62,80 @@ export default function UpdateProduct({ route }) {
 
   return (
     <SafeAreaView className="flex-1 bg-gray-100">
-      <ScrollView className="px-4 py-6">
+      <ScrollView className="" showsVerticalScrollIndicator={false}>
         <View className="bg-white p-4 rounded-xl shadow-md">
           <Text className="text-xl font-bold text-center mb-4">Update Product Details</Text>
+            <Text className="text-gray-700 font-bold text-md "> Name</Text>
+          <TextInput className="border border-gray-300 p-3 rounded-md mb-3"
+            placeholder=" Name" value={productName}
+            onChangeText={setProductName} />
+                      <Text className="text-gray-700 font-bold text-md "> ID</Text>
 
-          <TextInput className="border border-gray-300 p-3 rounded-md mb-3" placeholder="Product Name" value={productName} onChangeText={setProductName} />
-          <TextInput className="border border-gray-300 p-3 rounded-md mb-3 bg-gray-200" placeholder="Product Id" value={productId} onChangeText={setProductId} editable={false} />
-          <TextInput className="border border-gray-300 p-3 rounded-md mb-3" placeholder="Product Category" value={category} onChangeText={setCategory} />
-          <TextInput className="border border-gray-300 p-3 rounded-md mb-3" placeholder="Product Price" keyboardType="numeric" value={price} onChangeText={setPrice} />
-          <TextInput className="border border-gray-300 p-3 rounded-md mb-3" placeholder="Product Discount" keyboardType="numeric" value={discount} onChangeText={setDiscount} />
-          <TextInput className="border border-gray-300 p-3 rounded-md mb-3" placeholder="Product Description" value={description} onChangeText={setDescription} />
-          <TextInput className="border border-gray-300 p-3 rounded-md mb-3" placeholder="Product Ingredients" value={ingredients} onChangeText={setIngredients} />
-          <TextInput className="border border-gray-300 p-3 rounded-md mb-3" placeholder="Product Nutrition Info" value={nutrition} onChangeText={setNutrition} />
-          <TextInput className="border border-gray-300 p-3 rounded-md mb-3" placeholder="Product Package Type" value={packageType} onChangeText={setPackageType} />
-          <TextInput className="border border-gray-300 p-3 rounded-md mb-3" placeholder="Product Supplier Name" value={supplier} onChangeText={setSupplier} />
-          <TextInput className="border border-gray-300 p-3 rounded-md mb-3" placeholder="Product Origin" value={origin} onChangeText={setOrigin} />
+          <TextInput className="border border-gray-300 p-3 rounded-md mb-3 bg-gray-200"
+            placeholder=" Id" value={productId}
+            onChangeText={setProductId} editable={false} />
+                      <Text className="text-gray-700 font-bold text-md "> Category</Text>
+
+          <TextInput className="border border-gray-300 p-3 rounded-md mb-3"
+            placeholder=" Category" value={category} onChangeText={setCategory} />
+          <Text className="text-gray-700 font-bold text-md "> Price</Text>
+          <TextInput className="border border-gray-300 p-3 rounded-md mb-3"
+            placeholder=" Price" keyboardType="numeric"
+            value={price} onChangeText={setPrice} />
+          <Text className="text-gray-700 font-bold text-md "> Discount</Text>
+          <TextInput className="border border-gray-300 p-3 rounded-md mb-3"
+            placeholder=" Discount" keyboardType="numeric"
+            value={discount} onChangeText={setDiscount} />
+          <Text className="text-gray-700 font-bold text-md "> Production Date</Text>
+          <TextInput className="border border-gray-300 p-3 rounded-md mb-3"
+            placeholder="Production Date (YYYY-MM-DD)" value={productionDate}
+            onChangeText={setExpiryDate} />
+          <Text className="text-gray-700 font-bold text-md "> Expiry Date</Text>
+          <TextInput className="border border-gray-300 p-3 rounded-md mb-3"
+            placeholder="Expiry Date (YYYY-MM-DD)" value={expiryDate}
+            onChangeText={setExpiryDate} />
+          <Text className="text-gray-700 font-bold text-md "> Description</Text>
+          <TextInput className="border border-gray-300 p-3 rounded-md mb-3"
+            placeholder=" Description" value={description}
+            onChangeText={setDescription} />
+          <Text className="text-gray-700 font-bold text-md "> Ingredients</Text>
+          <TextInput className="border border-gray-300 p-3 rounded-md mb-3"
+            placeholder=" Ingredients" value={ingredients}
+            onChangeText={setIngredients} />
+          <Text className="text-gray-700 font-bold text-md "> Nutrition Info</Text>
+          <TextInput className="border border-gray-300 p-3 rounded-md mb-3"
+            placeholder=" Nutrition Info" value={nutrition}
+            onChangeText={setNutrition} />
+          <Text className="text-gray-700 font-bold text-md "> Package Type</Text>
+          <TextInput className="border border-gray-300 p-3 rounded-md mb-3"
+            placeholder=" Package Type" value={packageType}
+            onChangeText={setPackageType} />
+          <Text className="text-gray-700 font-bold text-md "> Supplier Name</Text>
+          <TextInput className="border border-gray-300 p-3 rounded-md mb-3"
+            placeholder=" Supplier Name" value={supplier}
+            onChangeText={setSupplier} />
+          <Text className="text-gray-700 font-bold text-md "> Origin</Text>
+          <TextInput className="border border-gray-300 p-3 rounded-md mb-3"
+            placeholder=" Origin" value={origin} onChangeText={setOrigin} />
 
           <Pressable className="bg-blue-500 p-3 rounded-md mb-3" onPress={selectImage}>
             <Text className="text-white text-center font-semibold">Upload Image</Text>
           </Pressable>
 
-          {image && <Image source={{ uri: image }} className="w-40 h-40 self-center rounded-md mt-3" />}
+          {image && <Image source={{ uri: image }}
+            className="w-40 h-40 self-center rounded-md mt-3" />}
 
           <View className="flex-row justify-between mt-4">
-            <Pressable className="bg-green-500 p-3 flex-1 mr-2 rounded-md" onPress={handleUpdate}>
+            <Pressable className="bg-green-500 p-3 flex-1 mr-2 rounded-md"
+              onPress={handleUpdate}>
               <Text className="text-white text-center font-semibold">Update Product</Text>
             </Pressable>
-            <Pressable className="bg-red-500 p-3 flex-1 ml-2 rounded-md" onPress={clearInput}>
+            <Pressable className="bg-red-500 p-3 flex-1 ml-2 rounded-md"
+              onPress={clearInput}>
               <Text className="text-white text-center font-semibold">Clear</Text>
             </Pressable>
           </View>
-          <Pressable className="bg-gray-500 p-3 mt-4 rounded-md" onPress={() => router.back()}>
-            <Text className="text-white text-center font-semibold">Back</Text>
-          </Pressable>
+        
         </View>
       </ScrollView>
     </SafeAreaView>
