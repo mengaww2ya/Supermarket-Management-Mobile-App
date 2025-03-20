@@ -1,5 +1,5 @@
 import React from "react";
-export const categories = [
+ export const categories = [
   {
     categoryId: 1,
     categoryName: "Fruit & Vegetable",
@@ -113,7 +113,8 @@ export const categories = [
     lastUpdated: "2025-02-11T11:40:00Z",
     addedBy: "Manager",
   },
-];
+ ];
+
 export const products = [
   {
     productId: 101,

@@ -2,14 +2,15 @@ import React, { useState, useRef } from 'react';
 import { View, Text, FlatList, Dimensions, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 const { width, height } = Dimensions.get('window');
-const router = useRouter();
+
+
+const WelcomeScreen = () => {
+  const router = useRouter();
 const slides = [
   { id: '1', text: 'Discover Great Products', image: require('../../assets/images/mg.jpg') },
   { id: '2', text: 'Get a delivery service', image: require('../../assets/images/hk2.png') },
   { id: '3', text: 'Let’s Get Started', image: require('../../assets/images/mes.png') },
 ];
-
-const WelcomeScreen = () => {
   const flatListRef = useRef(null);
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -62,7 +63,7 @@ const WelcomeScreen = () => {
 
               <TouchableOpacity
                 style={styles.button}
-                onPress={() => router.push('/screans/login')}>
+                onPress={() => router.push('/(auth)/login')}>
                 <Text style={styles.buttonText}>Get Started</Text>
               </TouchableOpacity>
 

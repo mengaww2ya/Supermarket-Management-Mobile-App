@@ -1,9 +1,10 @@
 {
   "expo": {
-    "name": "my-expo-app",
-    "slug": "my-expo-app",
-    "scheme": "my-expo-app",
-
+    "name": "QUEEN",
+    "slug": "QUEEN",
+    "scheme": "QUEEN",
+    "newArchEnabled": true,
+    "userInterfaceStyle": "automatic",
     "version": "1.0.0",
     "web": {},
     "experiments": {
@@ -13,7 +14,6 @@
       "expo-router"
     ],
     "orientation": "portrait",
-    "userInterfaceStyle": "light",
     "splash": {
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
