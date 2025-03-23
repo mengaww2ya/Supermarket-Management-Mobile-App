@@ -9,7 +9,8 @@ import { blurhash } from '../utills/common';
 
 export default function ChatRoomHeader({user,router}) {
   return (
-<View className=' justify-between  flex-row  bg-indigo-200 rounded-br-3xl shadow' >        
+      <View
+          className=' justify-between  flex-row  bg-indigo-200 rounded-br-3xl shadow' >        
                   <View className="flex-row ">
                       <TouchableOpacity onPress={()=>router.back()}>
                           <Entypo name="chevron-left" size={hp(4)} color="#737373" />

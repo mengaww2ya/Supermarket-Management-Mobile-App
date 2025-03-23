@@ -1,10 +1,8 @@
-import { Slot, useRouter, useSegments } from 'expo-router';
+import { Slot, Stack, useRouter, useSegments } from 'expo-router';
 import React, { useEffect } from 'react';
-import { MenuProvider } from 'react-native-popup-menu'; // ✅ Import MenuProvider
-import { useAuth } from './context/authContext';
-import AuthContextProvider from "./context/authContext";  
+import { MenuProvider } from 'react-native-popup-menu';
+import AuthContextProvider, { useAuth } from './context/authContext';
 import '../global.css';
-
 const MainLayout = () => {
     const router = useRouter();
     const { isAuthenticated, user, loading } = useAuth();
@@ -37,13 +35,15 @@ const MainLayout = () => {
         }
     }, [isAuthenticated, user, segments, loading]);
 
-    return <Slot />;
+    return (
+        <Slot/>
+    );
 };
 
 export default function _layout() {
     return (
         <AuthContextProvider>  
-            <MenuProvider>  {/* ✅ Wrap everything inside MenuProvider */}
+            <MenuProvider>  
                 <MainLayout />
             </MenuProvider>
         </AuthContextProvider>

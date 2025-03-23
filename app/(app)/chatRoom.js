@@ -92,8 +92,11 @@ export default function ChatRoom  (){
   return (
     <CustomKeyboardAvoidingView inChat={true}>
         <View className="flex-1 bg-white">
-            <StatusBar style="dark" />
-            <ChatRoomHeader user={item} router={router} />
+<StatusBar 
+  style="dark" 
+  backgroundColor="white" // for Android
+  translucent={true} // for Android
+/>            <ChatRoomHeader user={item} router={router} />
 
             <View className="h-3 border-b border-neutral-300" />
             <View className="flex-1 justify-between bg-neutral-100 overflow-visible">

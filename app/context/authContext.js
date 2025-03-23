@@ -10,59 +10,68 @@ import {
 import { doc, setDoc, getDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { Alert } from "react-native";
+import { enableScreens } from "react-native-screens";
+
+enableScreens();
 
 export const AuthContext = createContext();
+
+// Constants for default values
+const DEFAULT_ROLE = "customer";
+const DEFAULT_STRINGS = {
+  noEmail: "No email",
+  noDisplayName: "No display name",
+  profilePicturesPath: "profile_pictures/",
+};
 
 export default function AuthContextProvider({ children }) {
   const [user, setUser] = useState(null);
   const [isAuthenticated, setAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // This effect runs when the component mounts to check the user's authentication status.
-useEffect(() => {
+  // Effect to check authentication status
+  useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-        if (!currentUser) {
-            setUser(null);
-            setAuthenticated(false);
-            setLoading(false);
-            return;
-        }
+      if (!currentUser) {
+        setUser(null);
+        setAuthenticated(false);
+        setLoading(false);
+        return;
+      }
 
-        try {
-            const userDoc = await getDoc(doc(db, "users", currentUser.uid));
-            let userData = userDoc.exists() ? { uid: currentUser.uid, ...userDoc.data() } : null;
+      try {
+        const userDoc = await getDoc(doc(db, "users", currentUser.uid));
+        const userData = userDoc.exists()
+          ? { uid: currentUser.uid, ...userDoc.data() }
+          : {
+              uid: currentUser.uid,
+              email: currentUser.email || DEFAULT_STRINGS.noEmail,
+              displayName: currentUser.displayName || DEFAULT_STRINGS.noDisplayName,
+              photoURL: currentUser.photoURL || null,
+              role: DEFAULT_ROLE,
+            };
 
-            if (!userData) {
-                userData = {
-                    uid: currentUser.uid,
-                    email: currentUser.email || "No email",
-                    displayName: currentUser.displayName || "No display name",
-                    photoURL: currentUser.photoURL || null,
-                    role: "customer",
-                };
-            }
-
-            setUser(userData);
-            setAuthenticated(true);
-        } catch (error) {
-            console.error("Error fetching user data:", error);
-            setUser(null);
-            setAuthenticated(false);
-        } finally {
-            setLoading(false);
-        }
+        setUser(userData);
+        setAuthenticated(true);
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+        Alert.alert("Error", "Failed to fetch user data. Please try again.");
+        setUser(null);
+        setAuthenticated(false);
+      } finally {
+        setLoading(false);
+      }
     });
 
     return () => unsubscribe();
-}, []);
-
+  }, []);
 
   const uploadProfileImage = async (uri, email) => {
     try {
-      if (!uri) return null;
+      if (!uri) throw new Error("Invalid image URI");
       const response = await fetch(uri);
       const blob = await response.blob();
-      const storageRef = ref(storage, `profile_pictures/${email}_${Date.now()}.jpg`);
+      const storageRef = ref(storage, `${DEFAULT_STRINGS.profilePicturesPath}${email}_${Date.now()}.jpg`);
       await uploadBytes(storageRef, blob);
       return await getDownloadURL(storageRef);
     } catch (error) {
@@ -71,16 +80,13 @@ useEffect(() => {
     }
   };
 
-  const Register = async (email, password, firstName, lastName, address, phone, profileImageUri, role = "customer") => {
+  const Register = async (email, password, firstName, lastName, address, phone, profileImageUri, role = DEFAULT_ROLE) => {
     setLoading(true);
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const newUser = userCredential.user;
 
-      let photoURL = null;
-      if (profileImageUri) {
-        photoURL = await uploadProfileImage(profileImageUri, email);
-      }
+      const photoURL = profileImageUri ? await uploadProfileImage(profileImageUri, email) : null;
 
       await updateProfile(newUser, {
         displayName: `${firstName} ${lastName}`,
@@ -106,9 +112,9 @@ useEffect(() => {
       Alert.alert("Success", "Account created successfully!");
     } catch (error) {
       console.error("Registration Error:", error.message);
-      Alert.alert("Error", error.message || "Failed to create account.");
+      Alert.alert("Error", "Failed to create account. Please try again.");
     } finally {
-      setLoading(false); // Always stop loading after the operation
+      setLoading(false);
     }
   };
 
@@ -119,28 +125,24 @@ useEffect(() => {
       const loggedInUser = userCredential.user;
 
       const userDoc = await getDoc(doc(db, "users", loggedInUser.uid));
-      let userData;
-
-      if (userDoc.exists()) {
-        userData = { uid: loggedInUser.uid, ...userDoc.data() };
-      } else {
-        userData = {
-          uid: loggedInUser.uid,
-          email: loggedInUser.email || "No email",
-          displayName: loggedInUser.displayName || "No display name",
-          photoURL: loggedInUser.photoURL || null,
-          role: "customer", // Default role
-        };
-      }
+      const userData = userDoc.exists()
+        ? { uid: loggedInUser.uid, ...userDoc.data() }
+        : {
+            uid: loggedInUser.uid,
+            email: loggedInUser.email || DEFAULT_STRINGS.noEmail,
+            displayName: loggedInUser.displayName || DEFAULT_STRINGS.noDisplayName,
+            photoURL: loggedInUser.photoURL || null,
+            role: DEFAULT_ROLE,
+          };
 
       setUser(userData);
       setAuthenticated(true);
       Alert.alert("Success", "Logged in successfully!");
     } catch (error) {
       console.error("Login Error:", error.message);
-      Alert.alert("Error", error.message || "Failed to log in.");
+      Alert.alert("Error", "Failed to log in. Please check your credentials.");
     } finally {
-      setLoading(false); // Always stop loading after the operation
+      setLoading(false);
     }
   };
 
@@ -153,9 +155,9 @@ useEffect(() => {
       Alert.alert("Success", "Logged out successfully!");
     } catch (error) {
       console.error("Logout Error:", error.message);
-      Alert.alert("Error", error.message || "Failed to log out.");
+      Alert.alert("Error", "Failed to log out. Please try again.");
     } finally {
-      setLoading(false); // Always stop loading after the operation
+      setLoading(false);
     }
   };
 

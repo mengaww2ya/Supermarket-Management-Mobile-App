@@ -2,10 +2,10 @@ import "dotenv/config";
 export default {
   expo: {
     "plugins": [
-    "expo-router"
+      "expo-router"
     ],
-     "newArchEnabled": true,
-
+    "newArchEnabled": true,
+     userInterfaceStyle: "automatic",
     name: "QUEEN",
     slug: "QUEEN",
     extra: {
@@ -19,5 +19,9 @@ export default {
 
       
     },
-  },
+    
+    android: {
+      package: "com.anonymous.QUEEN"
+    }
+  }
 };

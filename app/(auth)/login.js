@@ -14,7 +14,6 @@ import { useRouter } from 'expo-router';
 import { auth } from '../../firebase/firebaseConfig';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { Icon } from 'react-native-elements';
-
 export default function Login() {
   const screenWidth = useWindowDimensions().width;
   const screenHeight = useWindowDimensions().height;

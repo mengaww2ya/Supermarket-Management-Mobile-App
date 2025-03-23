@@ -3,10 +3,12 @@
     "name": "QUEEN",
     "slug": "QUEEN",
     "scheme": "QUEEN",
-    "newArchEnabled": true,
     "userInterfaceStyle": "automatic",
     "version": "1.0.0",
-    "web": {},
+    "web": {
+    "bundler": "metro"
+    
+    },
     "experiments": {
       "tsconfigPaths": true
     },
@@ -22,9 +24,13 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "newArchEnabled": true
+
     },
     "android": {
+       "newArchEnabled": true,
+
       "adaptiveIcon": {
         "backgroundColor": "#ffffff"
       }

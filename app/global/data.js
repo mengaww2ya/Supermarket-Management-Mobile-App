@@ -1921,4 +1921,7 @@ export const channels = [
     status: "Under Maintenance",
     lastActivity: "3 hours ago",
   },
-];
+]
+export default function getProducts() {
+  return products;
+}

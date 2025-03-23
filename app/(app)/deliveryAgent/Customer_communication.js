@@ -4,7 +4,7 @@ import React from 'react'
 export default function Customer_communication() {
   return (
     <View>
-      <Text>Customer_communication</Text>
+      <Text>Customer communication</Text>
     </View>
   )
 }

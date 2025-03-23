@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, SafeAreaView, Modal, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
-import { Avatar, Title, Caption, Text, TouchableRipple, Button } from 'react-native-paper';
+import { View, StyleSheet, SafeAreaView,Text, Modal, TextInput,TouchableOpacity,   ActivityIndicator } from 'react-native';
+import { Avatar, Title, Caption,  } from 'react-native-paper';
 import { Icon } from 'react-native-elements';
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import * as ImagePicker from 'expo-image-picker';
@@ -198,47 +198,51 @@ const handleLogout = async () => {
 
           {/* Buttons */}
           <View className="flex-row justify-between">
-            <Button
+            <TouchableOpacity
               mode="contained"
               onPress={handleEditProfile}
               className="flex-1 bg-blue-500 py-2 rounded-lg mr-2"
               labelStyle={{ color: 'white' }}
-            >
-              Save
-            </Button>
-            <Button
+              >
+                <Text>Save</Text>
+              
+            </TouchableOpacity>
+            <TouchableOpacity
               mode="outlined"
               onPress={() => setEditModalVisible(false)}
               className="flex-1 border-red-500 py-2 rounded-lg"
               labelStyle={{ color: 'red' }}
-            >
-              Cancel
-            </Button>
+              >
+                                <Text>Cancel</Text>
+
+              
+            </TouchableOpacity>
           </View>
         </View>
       </View>
     </Modal>
 
       <View style={styles.menuWrapper}>
-        <TouchableRipple onPress={()=>{router.push('/chatRoom')}}>
+        <TouchableOpacity onPress={()=>{router.push('/customer/chat')}}>
           <View style={styles.menuItem}>
             <Icon name='account-check-outline' type="material-community" color="#ff6347" size={25} />
             <Text style={styles.menuItemText}>Support</Text>
           </View>
-        </TouchableRipple>
-        <TouchableRipple>
+        </TouchableOpacity>
+        <TouchableOpacity>
           <View style={styles.menuItem}>
             <Icon name='cog-outline' type="material-community" color="#ff6347" size={25} />
             <Text style={styles.menuItemText}>Settings</Text>
           </View>
-        </TouchableRipple>
-        <TouchableRipple onPress={handleLogout}>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={handleLogout}>
           <View style={styles.menuItem}>
             <Icon name='logout' type="material-community" color="#ff6347" size={25} />
             <Text style={styles.menuItemText}>Logout</Text>
           </View>
-        </TouchableRipple>
+        </TouchableOpacity>
       </View>
+      
     </SafeAreaView>
   );
 };

@@ -7,7 +7,7 @@ import { heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import ChatList from '../../../components/ChatList';
 import Loading from '../../../components/Loading';
 import { query, where, getDocs, onSnapshot, collection, orderBy } from 'firebase/firestore';
-import HomeHeader from '~/components/HomeHeader';
+import HomeHeader from '../../../components/HomeHeader';
 export default function Home () {
   const { user } = useAuth(auth);
   const [users, setUsers] = useState([]);
@@ -57,11 +57,11 @@ export default function Home () {
       <StatusBar style="light" />
       {loading ? (
         <View className="flex items-center" style={{ top: hp(30) }}>
-          <Loading size={hp(5)} />
+          <Loading size={hp(2)} />
         </View>
       ) : (
           <>
-                     <HomeHeader title={"Chat"}/>
+      <HomeHeader title={"Chat"}/>
 
           <TextInput
             style={{

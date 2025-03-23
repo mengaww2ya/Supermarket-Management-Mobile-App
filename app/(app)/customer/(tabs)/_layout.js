@@ -1,8 +1,11 @@
+import { enableScreens } from 'react-native-screens';
 import { Tabs } from "expo-router";
 import { FontAwesome, MaterialIcons } from "@expo/vector-icons";
-import { View, TouchableOpacity, Text } from "react-native";
+import { View, TouchableOpacity, Text, Platform } from "react-native";
 import HomeHeader from "../../../components/HomeHeader";
-
+if (Platform .OS === 'android') {
+    enableScreens();
+}
 export default function Layout() {
   return (
     <Tabs

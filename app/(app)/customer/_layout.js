@@ -1,11 +1,14 @@
+import { enableScreens } from 'react-native-screens';
 import { Stack } from "expo-router";
-import { TouchableOpacity,Text } from "react-native";
+import { TouchableOpacity,Text, Platform } from "react-native";
 import FontAwesome from '@expo/vector-icons/FontAwesome';
-
+if (Platform .OS === 'android') {
+    enableScreens();
+}
 export default function Layout(){
     return(
    <Stack screenOptions={{
-        headerShown: true,
+        headerShown: false,
                 headerTitleAlign: "center", // Centers the title
           headerTitleStyle:{
             fontSize:25,
