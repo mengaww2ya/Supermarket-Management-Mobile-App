@@ -1,13 +1,14 @@
-import { View, StatusBar, TextInput } from 'react-native';
+import { View, TextInput } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../../../context/authContext';
 import { auth, usersRef, db } from '../../../../firebase/firebaseConfig';
-import { heightPercentageToDP as hp } from 'react-native-responsive-screen';
+import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import ChatList from '../../../components/ChatList';
 import Loading from '../../../components/Loading';
 import { query, where, getDocs, onSnapshot, collection, orderBy } from 'firebase/firestore';
 import HomeHeader from '../../../components/HomeHeader';
+import { StatusBar } from 'expo-status-bar';
 export default function Home () {
   const { user } = useAuth(auth);
   const [users, setUsers] = useState([]);

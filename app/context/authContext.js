@@ -10,9 +10,6 @@ import {
 import { doc, setDoc, getDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { Alert } from "react-native";
-import { enableScreens } from "react-native-screens";
-
-enableScreens();
 
 export const AuthContext = createContext();
 

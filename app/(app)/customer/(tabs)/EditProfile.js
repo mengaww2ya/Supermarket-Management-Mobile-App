@@ -7,9 +7,10 @@ import * as ImagePicker from 'expo-image-picker';
 import { auth, db } from '../../../../firebase/firebaseConfig';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { onAuthStateChanged } from "firebase/auth";
-import { router } from 'expo-router';
-import { useAuth } from '~/context/authContext';
-const ProfileScreen = ({ navigation }) => {
+import { useRouter } from 'expo-router';
+import { useAuth } from '../../../context/authContext';
+const ProfileScreen = () => {
+  const router = useRouter(); 
   const [bio, setBio] = useState('');
   const [isEditModalVisible, setEditModalVisible] = useState(false);
   const [profileImage, setProfileImage] = useState(null);

@@ -1,6 +1,6 @@
 import { View, Text, KeyboardAvoidingView, Platform, ScrollView } from 'react-native'
 import React from 'react'
-const ios = Platform.OS = 'ios';
+const ios = Platform.OS === 'ios';
 export default function CustomKeyboardAvoidingView({ children, inChat }) {
     let kevconfig = {};
     let scrollViewConfig = {};

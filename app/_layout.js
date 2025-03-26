@@ -1,8 +1,8 @@
 import { Slot, Stack, useRouter, useSegments } from 'expo-router';
 import React, { useEffect } from 'react';
-import { MenuProvider } from 'react-native-popup-menu';
 import AuthContextProvider, { useAuth } from './context/authContext';
 import '../global.css';
+
 const MainLayout = () => {
     const router = useRouter();
     const { isAuthenticated, user, loading } = useAuth();
@@ -36,16 +36,14 @@ const MainLayout = () => {
     }, [isAuthenticated, user, segments, loading]);
 
     return (
-        <Slot/>
+        <Stack screenOptions={{ headerShown: false }} />
     );
 };
 
 export default function _layout() {
     return (
         <AuthContextProvider>  
-            <MenuProvider>  
-                <MainLayout />
-            </MenuProvider>
+            <MainLayout />
         </AuthContextProvider>
     );
 }

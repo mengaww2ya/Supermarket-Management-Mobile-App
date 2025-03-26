@@ -3,17 +3,22 @@
     "name": "QUEEN",
     "slug": "QUEEN",
     "scheme": "QUEEN",
+    "platforms": [
+      "ios",
+      "android",
+      "web"
+    ],
     "userInterfaceStyle": "automatic",
     "version": "1.0.0",
     "web": {
-    "bundler": "metro"
-    
+      "bundler": "metro"
     },
     "experiments": {
       "tsconfigPaths": true
     },
     "plugins": [
-      "expo-router"
+      "expo-router",
+      "expo-image-picker"
     ],
     "orientation": "portrait",
     "splash": {
@@ -25,15 +30,15 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "newArchEnabled": true
-
+      "newArchEnabled": true,
+      "bundleIdentifier": "com.anonymous.QUEEN"
     },
     "android": {
-       "newArchEnabled": true,
-
+      "newArchEnabled": true,
       "adaptiveIcon": {
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.anonymous.queen"
     }
   }
 }

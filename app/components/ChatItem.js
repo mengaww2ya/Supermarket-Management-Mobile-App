@@ -6,8 +6,11 @@ import { collection, doc, onSnapshot, orderBy, query } from 'firebase/firestore'
 import { db } from '../../firebase/firebaseConfig';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 
+const DEFAULT_PROFILE_IMAGE = require('../../assets/images/PrifileDemo.png');
+
 export default function ChatItem({ item, router, noBorder, currentUser }) {
     const [lastMessage, setLastMessage] = useState(null);
+    const [imageError, setImageError] = useState(false);
 
     useEffect(() => {
         if (!currentUser?.uid || !item?.uid) return;
@@ -55,11 +58,12 @@ export default function ChatItem({ item, router, noBorder, currentUser }) {
     return (
         <TouchableOpacity onPress={openChatroom} className={`flex-row justify-between mx-4 items-center gap-3 pb-2 ${noBorder ? '' : ' border-b-neutral-200'}`}>
             <Image
-                source={item?.photoURL || require('../../assets/images/PrifileDemo.png')}
+                source={imageError || !item?.photoURL ? DEFAULT_PROFILE_IMAGE : { uri: item?.photoURL }}
                 style={{ height: hp(6), width: hp(6), borderRadius: 100 }}
-                placeholder={{ blurhash }}
+                placeholder={blurhash}
                 transition={500}
                 resizeMode='cover'
+                onError={() => setImageError(true)}
             />
             <View className='flex-1 gap-1'>
                 <View className='flex-row justify-between'>

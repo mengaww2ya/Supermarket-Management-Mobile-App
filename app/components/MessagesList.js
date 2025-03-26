@@ -23,7 +23,7 @@ export default function MessagesList({ messages, currentUser, ScrollViewRef }) {
                                 maxWidth: wp(70), // Adjust width dynamically
                                 alignSelf: isCurrentUser ? 'flex-end' : 'flex-start',
                             }}
-                            className={`p-3 px-4 rounded-2xl border ${isCurrentUser ? 'bg-white border-neutral-200' : 'bg-indigo-100 border-indigo-200'}`}
+                            className={`p-3 px-4 rounded-2xl border ${isCurrentUser ? 'bg-indigo-100 border-neutral-200' : 'bg-indigo-100 border-indigo-200'}`}
                         >
                             <Text style={{ fontSize: hp(1.9) }}>
                                 {message?.text}
