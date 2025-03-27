@@ -10,7 +10,7 @@ import {
   Alert,
 } from "react-native";
 import { useLocalSearchParams } from "expo-router";
-
+import HomeHeader from "../../components/HomeHeader";
 export default function AddToCart() {
   // Ensure parameters exist, with proper defaults
   const {
@@ -36,6 +36,8 @@ export default function AddToCart() {
 
   return (
     <SafeAreaView className="flex-1 bg-white mx-4 my-2">
+             <HomeHeader title={"Add to Cart"}/>
+    
       <ScrollView contentContainerStyle={{ paddingBottom: 20 }} showsVerticalScrollIndicator={false}>
         <Text className="text-2xl font-bold text-center my-4">Add {productName} to Cart</Text>
 

@@ -58,11 +58,11 @@ export default function Home () {
       <StatusBar style="light" />
       {loading ? (
         <View className="flex items-center" style={{ top: hp(30) }}>
-          <Loading size={hp(2)} />
+          <Loading size={hp(1)} />
         </View>
       ) : (
           <>
-      <HomeHeader title={"Chat"}/>
+      <HomeHeader title={"All Customer Assistance"}/>
 
           <TextInput
             style={{

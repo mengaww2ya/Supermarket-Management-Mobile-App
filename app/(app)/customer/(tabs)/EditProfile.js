@@ -9,6 +9,7 @@ import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { onAuthStateChanged } from "firebase/auth";
 import { useRouter } from 'expo-router';
 import { useAuth } from '../../../context/authContext';
+import HomeHeader from '../../../components/HomeHeader';
 const ProfileScreen = () => {
   const router = useRouter(); 
   const [bio, setBio] = useState('');
@@ -109,6 +110,7 @@ const handleLogout = async () => {
   }
   return (
     <SafeAreaView style={styles.container}>
+             <HomeHeader title={"My Profile"}/>
       <View style={styles.userInfoSection}>
         <View style={{ flexDirection: 'row', marginTop: 15 }}>
           <TouchableOpacity onPress={pickImage}>

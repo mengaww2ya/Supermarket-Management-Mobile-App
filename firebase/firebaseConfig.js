@@ -16,16 +16,6 @@ const firebaseConfig = {
 
 };
 
-// Debug Firebase config
-console.log('Firebase Config:', {
-  apiKey: Constants.expoConfig.extra.firebaseApiKey,
-  authDomain: Constants.expoConfig.extra.firebaseAuthDomain,
-  projectId: Constants.expoConfig.extra.firebaseProjectId,
-  storageBucket: Constants.expoConfig.extra.firebaseStorageBucket,
-  messagingSenderId: Constants.expoConfig.extra.firebaseMessagingSenderId,
-  appId: Constants.expoConfig.extra.firebaseAppId,
-});
-
 const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
 const auth = getAuth(app);  // ✅ Changed from initializeAuth
 

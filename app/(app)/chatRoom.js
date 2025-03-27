@@ -12,7 +12,7 @@ import { useAuth } from '../context/authContext';
 import { getRoomId } from '../utills/common';
 import { addDoc, collection, doc, onSnapshot, orderBy, query, setDoc, Timestamp } from 'firebase/firestore';
 import { db } from '../../firebase/firebaseConfig';
-
+import HomeHeader from '../components/HomeHeader';
 export default function ChatRoom  (){
   const router = useRouter();
   const item = useLocalSearchParams(); // Second user
@@ -90,13 +90,15 @@ export default function ChatRoom  (){
   };
 
   return (
+    <>
+         <HomeHeader title={"Chat"}/>
     <CustomKeyboardAvoidingView inChat={true}>
         <View className="flex-1 bg-white">
-<StatusBar 
+{/* <StatusBar 
   style="dark" 
   backgroundColor="white" // for Android
   translucent={true} // for Android
-/>            <ChatRoomHeader user={item} router={router} />
+/>            <ChatRoomHeader user={item} router={router} /> */}
 
             <View className="h-3 border-b border-neutral-300" />
             <View className="flex-1 justify-between bg-neutral-100 overflow-visible">
@@ -120,6 +122,7 @@ export default function ChatRoom  (){
                 </View>
             </View>
         </View>
-    </CustomKeyboardAvoidingView>
+      </CustomKeyboardAvoidingView>
+      </>
   );
 };

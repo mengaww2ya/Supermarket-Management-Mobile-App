@@ -13,6 +13,7 @@ import {
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { products } from "../../global/data.js";
+import HomeHeader from "../../components/HomeHeader";
 const screenWidth = Dimensions.get("window").width;
 export default function Item() {
   const router = useRouter();
@@ -44,6 +45,7 @@ export default function Item() {
 
   return (
     <SafeAreaView className="flex-1 bg-gray-100">
+       <HomeHeader title={"Product Detail"}/>
       <ScrollView contentContainerStyle={{ paddingBottom: 5 }}>
         <View className="bg-white  p-4 rounded-lg shadow-lg">
           {/* item image  */}

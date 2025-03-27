@@ -10,7 +10,7 @@ import {
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { useLocalSearchParams, useRouter } from "expo-router"; 
 import { products } from "../../global/data.js"; // Import product data
-
+import HomeHeader from "../../components/HomeHeader";
 export default function ProductDisplay() {
   const router = useRouter();
   const { categoryId, categoryName } = useLocalSearchParams(); // Get params from URL
@@ -45,13 +45,7 @@ export default function ProductDisplay() {
 
   return (
     <SafeAreaView className="flex-1 bg-gray-100 px-2">
-      {/* <View className="flex-row items-center justify-between bg-yellow-300 px-4 py-3">
-        <Text className="text-lg font-bold text-green-600">{categoryName} Products</Text>
-        <TouchableOpacity onPress={() => router.push("/cartPage")} className="p-2">
-          <Ionicons name="cart" size={30} color="blue" />
-        </TouchableOpacity>
-      </View> */}
-
+       <HomeHeader title={"PRODUCTS"}/>
       <FlatList
         data={filteredProducts}
         keyExtractor={(item) => item?.productId?.toString() || item.id.toString()} // Ensure safe access
