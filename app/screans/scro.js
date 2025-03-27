@@ -2,14 +2,14 @@ import React, { useState, useRef } from 'react';
 import { View, Text, FlatList, Dimensions, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 const { width, height } = Dimensions.get('window');
+const router = useRouter();
+const slides = [
+  { id: '1', text: 'Discover Great Products', image: require('../../assets/images/mg.jpg') },
+  { id: '2', text: 'Get a delivery service', image: require('../../assets/images/h2.jpg') },
+  { id: '3', text: 'Let’s Get Started', image: require('../../assets/images/mes.png') },
+];
 
 const WelcomeScreen = () => {
-  const router = useRouter();
-  const slides = [
-    { id: '1', text: 'Discover Great Products', image: require('../../assets/images/mg.jpg') },
-    { id: '2', text: 'Get a delivery service', image: require('../../assets/images/hk2.png') },
-    { id: '3', text: 'Let’s Get Started', image: require('../../assets/images/mes.png') },
-  ];
   const flatListRef = useRef(null);
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -21,7 +21,7 @@ const WelcomeScreen = () => {
   const handleMomentumScrollEnd = (event) => {
     const slideIndex = Math.round(event.nativeEvent.contentOffset.x / width);
     if (slideIndex === slides.length - 1) {
-      router.replace('/app/_layout'); // Navigate to _layout after the last slide
+      router.replace('/screans/login');
     }
   };
 
@@ -39,7 +39,11 @@ const WelcomeScreen = () => {
         renderItem={({ item }) => (
           <View style={styles.slide}>
             <Image source={item.image} style={styles.image} />
+
+
             <View style={styles.infoContainer}>
+
+
               <View style={styles.dotsContainer}>
                 {slides.map((_, index) => (
                   <View
@@ -51,12 +55,17 @@ const WelcomeScreen = () => {
                   />
                 ))}
               </View>
+
+
               <Text style={styles.text}>{item.text}</Text>
+
+
               <TouchableOpacity
                 style={styles.button}
-                onPress={() => router.push('/(app)/_layout')}>
+                onPress={() => router.push('/screans/login')}>
                 <Text style={styles.buttonText}>Get Started</Text>
               </TouchableOpacity>
+
             </View>
           </View>
         )}

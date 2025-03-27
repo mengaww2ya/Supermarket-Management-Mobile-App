@@ -1,5 +1,5 @@
 import React from "react";
- export const categories = [
+export const categories = [
   {
     categoryId: 1,
     categoryName: "Fruit & Vegetable",
@@ -113,8 +113,7 @@ import React from "react";
     lastUpdated: "2025-02-11T11:40:00Z",
     addedBy: "Manager",
   },
- ];
-
+];
 export const products = [
   {
     productId: 101,
@@ -1921,7 +1920,4 @@ export const channels = [
     status: "Under Maintenance",
     lastActivity: "3 hours ago",
   },
-]
-export default function getProducts() {
-  return products;
-}
+];

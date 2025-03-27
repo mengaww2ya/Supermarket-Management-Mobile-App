@@ -1,26 +1,19 @@
 {
   "expo": {
-    "name": "QUEEN",
-    "slug": "QUEEN",
-    "scheme": "QUEEN",
-    "platforms": [
-      "ios",
-      "android",
-      "web"
-    ],
-    "userInterfaceStyle": "automatic",
+    "name": "my-expo-app",
+    "slug": "my-expo-app",
+    "scheme": "my-expo-app",
+
     "version": "1.0.0",
-    "web": {
-      "bundler": "metro"
-    },
+    "web": {},
     "experiments": {
       "tsconfigPaths": true
     },
     "plugins": [
-      "expo-router",
-      "expo-image-picker"
+      "expo-router"
     ],
     "orientation": "portrait",
+    "userInterfaceStyle": "light",
     "splash": {
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
@@ -29,16 +22,12 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true,
-      "newArchEnabled": true,
-      "bundleIdentifier": "com.anonymous.QUEEN"
+      "supportsTablet": true
     },
     "android": {
-      "newArchEnabled": true,
       "adaptiveIcon": {
         "backgroundColor": "#ffffff"
-      },
-      "package": "com.anonymous.queen"
+      }
     }
   }
 }

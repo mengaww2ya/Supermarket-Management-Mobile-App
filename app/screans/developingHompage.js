@@ -20,12 +20,12 @@ export default function DeveloperHomePage({ navigation }) {
 
         <View className="flex-row flex-wrap justify-center gap-4 mt-5">
           {[
-            { title: "Manager", screen: "/(app)/manager/(tabs)" },
-            { title: "Customer", screen: "/(app)/customer/(tabs)" },
-            { title: "Customer Support", screen: "/(app)/customeAssistance/customerSuport" },
-            { title: "Admin", screen: "/(app)/admine/(tabs)" },
-            { title: "Stock Manager", screen: "/(app)/stockManager/(tabs)" },
-            { title: "Supplier", screen: "/(app)/suplier/(tabs)"},
+            { title: "Manager", screen: "/manager/(tabs)" },
+            { title: "Customer", screen: "/customer/(tabs)" },
+            { title: "Customer Support", screen: "/customeAssistance/customerSuport" },
+            { title: "Admin", screen: "/admine/(tabs)" },
+            { title: "Stock Manager", screen: "/stockManager/(tabs)" },
+            { title: "Supplier", screen: "suplier/(tabs)"},
           ].map((role) => (
             <TouchableOpacity
               key={role.title}

@@ -8,7 +8,7 @@ const SplashScreen = () => {
 
     useEffect(() => {
         const timer = setTimeout(() => {
-            router.replace('/screans/scro'); // Navigating to scro page
+            router.replace('/screans/scro');
         }, 4000);
 
         return () => clearTimeout(timer);
