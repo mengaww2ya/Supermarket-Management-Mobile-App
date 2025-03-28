@@ -6,12 +6,9 @@ import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-nat
 import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
 import { blurhash } from '../utills/common';
-
 const DEFAULT_PROFILE_IMAGE = require('../../assets/images/PrifileDemo.png');
-
 export default function ChatRoomHeader({user, router}) {
   const [imageError, setImageError] = useState(false);
-
   return (
       <View
           className=' justify-between  flex-row  bg-indigo-200 rounded-br-3xl shadow' >        
