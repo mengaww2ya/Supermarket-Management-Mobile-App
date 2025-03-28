@@ -31,7 +31,7 @@ const MainLayout = () => {
                 router.replace(rolePaths[userRole]);
             }
         } else if (!isAuthPage) {
-            // router.replace('/(auth)/login');
+            router.replace('/(auth)/login');
         }
     }, [isAuthenticated, user, segments, loading]);
 
