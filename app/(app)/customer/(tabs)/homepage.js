@@ -66,29 +66,27 @@ export default function Homepage() {
 
   return (
     <SafeAreaView className="flex-1 bg-gray-100">
-      <View className="flex-1">
-        <HomeHeader title={"Home"}/>
-        <View className="flex-row items-center bg-white rounded-md px-3 py-2 mx-4 my-3 shadow-md">
-          <Ionicons name="search" size={24} color="gray" />
-          <TextInput
-            className="flex-1 ml-2 text-lg"
-            placeholder="Search categories..."
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-          />
-        </View>
-
-        <ScrollView className="flex-1 px-4">
-          <Text className="text-xl font-bold text-center text-green-600 my-3">Categories</Text>
-          <FlatList
-            numColumns={2}
-            data={categories.filter(category => category.categoryName.toLowerCase().includes(searchQuery.toLowerCase()))}
-            keyExtractor={(item) => item.id}
-            renderItem={renderCategoryItem}
-            contentContainerStyle={{ alignItems: "center" }}
-          />
-        </ScrollView>
+      <HomeHeader title={"Home"}/>
+      <View className="flex-row items-center bg-white rounded-md px-3 py-2 mx-4 my-3 shadow-md">
+        <Ionicons name="search" size={24} color="gray" />
+        <TextInput
+          className="flex-1 ml-2 text-lg"
+          placeholder="Search categories..."
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+        />
       </View>
+
+      <ScrollView className="flex-1 px-4">
+        <Text className="text-xl font-bold text-center text-green-600 my-3">Categories</Text>
+        <FlatList
+          numColumns={2}
+          data={categories.filter(category => category.categoryName.toLowerCase().includes(searchQuery.toLowerCase()))}
+          keyExtractor={(item) => item.id}
+          renderItem={renderCategoryItem}
+          contentContainerStyle={{ alignItems: "center" }}
+        />
+      </ScrollView>
     </SafeAreaView>
   );
 }
