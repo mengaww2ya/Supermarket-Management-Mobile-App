@@ -142,7 +142,7 @@ export default function Signup() {
             }}
           >
             {/* Profile Image */}
-            <Animatable.View 
+            {/* <Animatable.View 
               animation="fadeInUp"
               duration={1500}
               className="items-center mb-6"
@@ -166,7 +166,7 @@ export default function Signup() {
                 </View>
               </TouchableOpacity>
               <Text className="text-gray-600 mt-2">Tap to add profile picture</Text>
-            </Animatable.View>
+            </Animatable.View> */}
 
             {/* Form Fields */}
             <Animatable.View 

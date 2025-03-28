@@ -21,7 +21,7 @@ const ProfileScreen = ({ navigation }) => {
 
   const fetchUserData = async () => {
     const userId = auth.currentUser.uid;
-    const userDoc = await getDoc(doc(db, 'customers', userId));
+    const userDoc = await getDoc(doc(db, 'users', userId));
     if (userDoc.exists()) {
       const data = userDoc.data();
       setUserData(data);
