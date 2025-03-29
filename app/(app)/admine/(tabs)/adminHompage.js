@@ -35,7 +35,7 @@ const menuItems = [
     icon: "account-group",
     iconType: "MaterialCommunityIcons",
     color: "#F59E0B",
-    route: "admine/employeeDetail",
+    route: "admine/employeeList",
     gradient: ["#F59E0B", "#FBBF24"]
   },
   {
