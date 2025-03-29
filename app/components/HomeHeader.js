@@ -4,30 +4,35 @@ import { Image } from 'expo-image';
 import { blurhash } from '../utills/common';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import { useAuth } from 'app/context/authContext';
-import { auth } from '../../firebase/firebaseConfig';
+// import { auth } from '../../firebase/firebaseConfig';
 import { Feather } from '@expo/vector-icons';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { router } from 'expo-router';
 
 export default function HomeHeader({ title }) {  
-  const { user, Logout } = useAuth(auth);
+  const { user, signOut } = useAuth();
   const [showMenu, setShowMenu] = useState(false);
 
   const handleProfile = () => {
     setShowMenu(false);
-    router.push('/customer/EditProfile');
+    router.push('/common/EditProfile');
   };
 
   const handleLogout = async () => {
-    setShowMenu(false);
-    await Logout();
+    try {
+      await signOut();
+      setShowMenu(false);
+      router.replace('/login');
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
   };
 
   const displayName = user?.displayName || user?.email?.split('@')[0] || 'User';
   const ProfileImgPlaceholder = require('../../assets/images/PrifileDemo.png');
 
   return (
-    <View className="bg-indigo-400 rounded-br-3xl shadow">
+    <View className="bg-indigo-600 rounded-br-3xl shadow">
       <View className="flex-row items-center justify-between px-5 py-4">
         {/* Title */}
         <Text className="font-medium text-white text-lg w-full text-center">{title}</Text>

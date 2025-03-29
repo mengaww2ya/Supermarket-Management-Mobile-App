@@ -21,7 +21,7 @@ const WelcomeScreen = () => {
   const handleMomentumScrollEnd = (event) => {
     const slideIndex = Math.round(event.nativeEvent.contentOffset.x / width);
     if (slideIndex === slides.length - 1) {
-      router.replace('/screans/login');
+      router.replace('/(auth)/login');
     }
   };
 

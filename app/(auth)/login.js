@@ -25,7 +25,7 @@ export default function Login() {
   const [fadeAnim] = useState(new Animated.Value(0));
   const [slideAnim] = useState(new Animated.Value(50));
   const router = useRouter();
-  const { Login, loading } = useAuth();
+  const { signIn, loading } = useAuth();
 
   useEffect(() => {
     Animated.parallel([
@@ -50,8 +50,8 @@ export default function Login() {
     }
 
     try {
-      await Login(email, password);
-      // Navigation will be handled by the auth context's useEffect
+      await signIn(email, password);
+      // Navigation will be handled by the root layout based on role
     } catch (error) {
       // Error handling is done in the context
     }

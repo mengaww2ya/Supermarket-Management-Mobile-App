@@ -7,7 +7,7 @@ import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
-
+import HomeHeader from "../../../components/HomeHeader";
 const { width } = Dimensions.get('window');
 
 const menuItems = [
@@ -107,7 +107,7 @@ export default function AdminHomePage() {
         colors={['#4F46E5', '#6366F1']}
         className="h-32 rounded-b-3xl px-6 pt-4"
       >
-        <View className="flex-row justify-between items-center">
+        {/* <View className="flex-row justify-between items-center">
           <View>
             <Text className="text-2xl font-bold text-white mb-2">Admin Dashboard</Text>
             <Text className="text-white/80">Manage your supermarket system</Text>
@@ -115,7 +115,9 @@ export default function AdminHomePage() {
           <View className="w-10 h-10 bg-white/20 rounded-full items-center justify-center">
             <MaterialIcons name="notifications" size={24} color="white" />
           </View>
-        </View>
+        </View> */}
+        <HomeHeader title="Admin Dashboard" />
+
       </LinearGradient>
 
       <ScrollView

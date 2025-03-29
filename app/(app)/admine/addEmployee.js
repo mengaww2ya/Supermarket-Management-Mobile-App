@@ -23,7 +23,8 @@ import DropDownPicker from 'react-native-dropdown-picker';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import * as Haptics from 'expo-haptics';
 import CountryPicker from 'react-native-country-picker-modal';
-
+import { useAuth } from '../../context/authContext';
+import HomeHeader from '../../components/HomeHeader';
 const { width } = Dimensions.get('window');
 
 const EMPLOYEE_ROLES = [
@@ -52,6 +53,7 @@ const steps = [
 ];
 
 export default function AddEmployee() {
+  const { registerUser, registerEmployee } = useAuth();
   const [currentStep, setCurrentStep] = useState(0);
   const [open, setOpen] = useState(false);
   const [selectedRole, setSelectedRole] = useState(null);
@@ -252,22 +254,68 @@ export default function AddEmployee() {
 
     try {
       setLoading(true);
-      const userCredential = await createUserWithEmailAndPassword(auth, form.email, form.password);
-      const user = userCredential.user;
+      
+      // Get the gender value correctly
+      const genderValue = selectedGender || form.gender;
+      
+      // Prepare user data
+      const userData = {
+        firstName: form.firstName,
+        lastName: form.lastName,
+        fullName: `${form.firstName} ${form.lastName}`,
+        email: form.email,
+        phone: form.phone,
+        address: form.address,
+        dateOfBirth: form.dateOfBirth,
+        gender: genderValue, // Use the correct gender value
+        nationalId: form.nationalId,
+        emergencyContact: {
+          name: form.emergencyContact.name,
+          phone: form.emergencyContact.phone,
+          relationship: form.emergencyContact.relationship
+        },
+        employmentDetails: {
+          department: form.employmentDetails.department,
+          position: form.employmentDetails.position,
+          joiningDate: form.employmentDetails.joiningDate,
+          salary: form.employmentDetails.salary,
+          bankAccount: form.employmentDetails.bankAccount
+        }
+      };
 
-      await setDoc(doc(db, selectedRole), {
-        uid: user.uid,
-        ...form,
-        createdAt: new Date(),
-      });
+      // Register employee using the new function
+      await registerEmployee(
+        form.email,
+        form.password,
+        selectedRole,
+        userData
+      );
 
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      Alert.alert("Success", "Employee added successfully!");
-      router.back();
+      Alert.alert(
+        "Success", 
+        "Employee added successfully!",
+        [
+          {
+            text: "OK",
+            onPress: () => router.back()
+          }
+        ]
+      );
     } catch (error) {
-      console.error("Error adding document: ", error);
+      console.error("Error adding employee: ", error);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      Alert.alert("Error", error.message);
+      
+      let errorMessage = "An error occurred while adding the employee.";
+      if (error.code === 'auth/email-already-in-use') {
+        errorMessage = "This email is already registered.";
+      } else if (error.code === 'auth/invalid-email') {
+        errorMessage = "Please enter a valid email address.";
+      } else if (error.code === 'auth/weak-password') {
+        errorMessage = "Password should be at least 6 characters.";
+      }
+      
+      Alert.alert("Error", errorMessage);
     } finally {
       setLoading(false);
     }
@@ -326,7 +374,7 @@ export default function AddEmployee() {
             />
           </View>
         ) : isGender ? (
-          <View>
+          <View style={{ zIndex: 2000 }}>
             <DropDownPicker
               open={genderOpen}
               value={selectedGender}
@@ -334,7 +382,7 @@ export default function AddEmployee() {
               setOpen={setGenderOpen}
               setValue={(value) => {
                 setSelectedGender(value);
-                handleInputChange('gender', value);
+                handleInputChange('gender', GENDER_OPTIONS.find(option => option.value === value)?.label || value);
                 setGenderOpen(false);
               }}
               placeholder="Select gender"
@@ -344,7 +392,7 @@ export default function AddEmployee() {
                 borderRadius: 12,
                 paddingHorizontal: 16,
                 paddingVertical: 12,
-                zIndex: 1000,
+                zIndex: 2000,
               }}
               textStyle={{
                 fontSize: 16,
@@ -352,6 +400,7 @@ export default function AddEmployee() {
               }}
               dropDownContainerStyle={{
                 borderColor: '#E5E7EB',
+                zIndex: 2000,
               }}
               listItemLabelStyle={{
                 color: '#374151',
@@ -421,7 +470,7 @@ export default function AddEmployee() {
 
   const renderCurrentStep = () => {
     const currentStepId = steps[currentStep].id;
-    return (
+  return (
       <Animated.View
         style={{
           transform: [{ translateX: slideAnim }],
@@ -476,14 +525,14 @@ export default function AddEmployee() {
               {renderInputField('Confirm Password', 'lock', form.confirmPassword, (text) => handleInputChange("confirmPassword", text), "Confirm password", "default", true)}
               <View className="mb-6">
                 <Text className="text-lg font-semibold text-gray-800 mb-2">Select Role</Text>
-                <DropDownPicker
-                  open={open}
-                  value={selectedRole}
-                  items={roles}
-                  setOpen={setOpen}
+          <DropDownPicker
+            open={open}
+            value={selectedRole}
+            items={roles}
+            setOpen={setOpen}
                   setValue={handleRoleSelect}
                   setItems={() => {}}
-                  placeholder="Select a role"
+            placeholder="Select a role"
                   style={{
                     backgroundColor: '#F9FAFB',
                     borderColor: '#E5E7EB',
@@ -513,8 +562,8 @@ export default function AddEmployee() {
         colors={['#4F46E5', '#6366F1']}
         className="h-32 rounded-b-3xl px-6 pt-4"
       >
-        <View className="flex-row items-center">
-          <TouchableOpacity 
+        {/* <View className="flex-row items-center">
+          <TouchableOpacity
             onPress={handleBackPress}
             className="w-10 h-10 bg-white/20 rounded-full items-center justify-center"
           >
@@ -524,7 +573,8 @@ export default function AddEmployee() {
             <Text className="text-2xl font-bold text-white">Add Employee</Text>
             <Text className="text-white/80">Step {currentStep + 1} of {steps.length}</Text>
           </View>
-        </View>
+        </View> */}
+        <HomeHeader title="Add Employee" />
       </LinearGradient>
 
       {renderProgressBar()}
@@ -537,6 +587,7 @@ export default function AddEmployee() {
           ref={scrollViewRef}
           className="flex-1 px-6"
           showsVerticalScrollIndicator={false}
+          nestedScrollEnabled={true}
         >
           {renderCurrentStep()}
         </ScrollView>

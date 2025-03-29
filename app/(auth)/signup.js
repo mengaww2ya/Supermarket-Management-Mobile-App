@@ -37,7 +37,7 @@ export default function Signup() {
   const [fadeAnim] = useState(new Animated.Value(0));
   const [slideAnim] = useState(new Animated.Value(50));
   const router = useRouter();
-  const { Register, loading } = useAuth();
+  const { registerCustomer, loading } = useAuth();
 
   useEffect(() => {
     Animated.parallel([
@@ -86,18 +86,25 @@ export default function Signup() {
     }
 
     try {
-      await Register(
-        formData.email,
-        formData.password,
-        formData.firstName,
-        formData.lastName,
-        formData.address,
-        formData.phone,
-        profileImage
-      );
-      // Navigation will be handled by the auth context's useEffect
+      const userData = {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        fullName: `${formData.firstName} ${formData.lastName}`,
+        email: formData.email,
+        phone: formData.phone,
+        address: formData.address,
+        profileImage: profileImage || null,
+        createdAt: new Date(),
+        status: 'active'
+      };
+
+      await registerCustomer(formData.email, formData.password, userData);
+      
+      Alert.alert('Success', 'Account created successfully!');
+      router.push('/customer/homepage');
     } catch (error) {
-      // Error handling is done in the context
+      console.error('Registration error:', error);
+      Alert.alert('Error', error.message || 'Failed to create account');
     }
   };
 

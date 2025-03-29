@@ -1,0 +1,48 @@
+61f0a7acab5c32a4b29884913b8ecc03382c26d8 8fb0b119dde4b7105568f7a6bcb90bc40e8ea222 mengaww2ya <mengaww2ya@gmail.com> 1739918152 +0300	commit: triying to fix nativewind configuration
+8fb0b119dde4b7105568f7a6bcb90bc40e8ea222 8a155d502f52c3e1227e1649e0a65d55dfa09d46 mengaww2ya <mengaww2ya@gmail.com> 1739945810 +0300	rebase (start): checkout origin/branch-one
+8a155d502f52c3e1227e1649e0a65d55dfa09d46 3042fd2a592d3e69dd267730ef9444ed25c7c9bb mengaww2ya <mengaww2ya@gmail.com> 1739946310 +0300	commit: configur nativewind
+3042fd2a592d3e69dd267730ef9444ed25c7c9bb 8fb0b119dde4b7105568f7a6bcb90bc40e8ea222 mengaww2ya <mengaww2ya@gmail.com> 1739946453 +0300	checkout: moving from 3042fd2a592d3e69dd267730ef9444ed25c7c9bb to branch-one
+8fb0b119dde4b7105568f7a6bcb90bc40e8ea222 8fb0b119dde4b7105568f7a6bcb90bc40e8ea222 mengaww2ya <mengaww2ya@gmail.com> 1739947147 +0300	rebase (continue) (finish): refs/heads/branch-one onto 8a155d502f52c3e1227e1649e0a65d55dfa09d46
+8fb0b119dde4b7105568f7a6bcb90bc40e8ea222 8fb0b119dde4b7105568f7a6bcb90bc40e8ea222 mengaww2ya <mengaww2ya@gmail.com> 1739947147 +0300	rebase (continue) (finish): returning to refs/heads/branch-one
+8fb0b119dde4b7105568f7a6bcb90bc40e8ea222 8a155d502f52c3e1227e1649e0a65d55dfa09d46 mengaww2ya <mengaww2ya@gmail.com> 1739947160 +0300	pull origin branch-one --rebase (start): checkout 8a155d502f52c3e1227e1649e0a65d55dfa09d46
+8a155d502f52c3e1227e1649e0a65d55dfa09d46 a9636eba76f8e14f3f84f9ab21255dc32369ac67 mengaww2ya <mengaww2ya@gmail.com> 1739948856 +0300	rebase (continue): triying to fix nativewind configuration
+a9636eba76f8e14f3f84f9ab21255dc32369ac67 a9636eba76f8e14f3f84f9ab21255dc32369ac67 mengaww2ya <mengaww2ya@gmail.com> 1739948906 +0300	rebase (continue) (finish): returning to refs/heads/branch-one
+a9636eba76f8e14f3f84f9ab21255dc32369ac67 351bc8f95b611342f86511f266c487f725fdab44 mengaww2ya <mengaww2ya@gmail.com> 1739953594 +0300	commit: on home page stylesheet removed
+351bc8f95b611342f86511f266c487f725fdab44 bd0ab8bd2fd84cbfc3bd21d9de6e32591f33edd6 mengaww2ya <mengaww2ya@gmail.com> 1739990481 +0300	pull origin branch-one: Fast-forward
+bd0ab8bd2fd84cbfc3bd21d9de6e32591f33edd6 a385d634f3f263905f4e769d747cad1bbea038bf mengaww2ya <mengaww2ya@gmail.com> 1740001243 +0300	commit: changing stylesheet to nativewind
+a385d634f3f263905f4e769d747cad1bbea038bf 842d62a10137585c23c927eb87d2f59f806e179b mengaww2ya <mengaww2ya@gmail.com> 1740038416 +0300	commit: making pages more interactive and better and remove stylsheet by useing nativewind
+842d62a10137585c23c927eb87d2f59f806e179b 8717106733b3bc41f971c65bf43640ea8631e032 mengaww2ya <mengaww2ya@gmail.com> 1740069347 +0300	commit: remove duplication file from customer and create one product display page and all product are render from itan remove stylsheet and use nativewind
+8717106733b3bc41f971c65bf43640ea8631e032 5227a2c024ebb33a5533711d02fe5824317261fa mengaww2ya <mengaww2ya@gmail.com> 1740070515 +0300	commit: classify the catedories in to promotion categories and standard categories
+5227a2c024ebb33a5533711d02fe5824317261fa faf7a4a43e94c71dcbf2e95f68656b9b90a576b4 mengaww2ya <mengaww2ya@gmail.com> 1740341318 +0300	commit: changinge react-native stack navigator to expo router navigation
+faf7a4a43e94c71dcbf2e95f68656b9b90a576b4 175124766709ea5a98094f2bbcecf33ff53c8d0d mengaww2ya <mengaww2ya@gmail.com> 1740341751 +0300	commit: removing unnecessary file and folder
+175124766709ea5a98094f2bbcecf33ff53c8d0d b3f93b0780731577229ff41ad9f02131e5a1da93 mengaww2ya <mengaww2ya@gmail.com> 1740343941 +0300	commit: remove unneccesary file and imports
+b3f93b0780731577229ff41ad9f02131e5a1da93 2f7046f6352907a798dfd5b0169cfd3daed757dd mengaww2ya <mengaww2ya@gmail.com> 1740383254 +0300	commit: remove stylesheet and use nativewind
+2f7046f6352907a798dfd5b0169cfd3daed757dd 02ad868d03e5762b9ce6a7c626257e18d37fa80c mengaww2ya <mengaww2ya@gmail.com> 1740402060 +0300	commit: remove stylesheet and creat tab special forlder on customer for tab navigation
+02ad868d03e5762b9ce6a7c626257e18d37fa80c 3cede1d9a9bd5954d338d32d68b75297508ac6c3 mengaww2ya <mengaww2ya@gmail.com> 1740425915 +0300	commit: image on login
+3cede1d9a9bd5954d338d32d68b75297508ac6c3 521d93c8c8c4d9b79622a539666fdb813d68be9e mengaww2ya <mengaww2ya@gmail.com> 1740490248 +0300	commit: tab on the manager but not implemented
+521d93c8c8c4d9b79622a539666fdb813d68be9e 2690867e6451eea23a47d23e07a9395645cf0531 mengaww2ya <mengaww2ya@gmail.com> 1740514909 +0300	commit: photo display on add to cart button and tab folder created on the stock manager and suplier and only home page are add to it
+2690867e6451eea23a47d23e07a9395645cf0531 3f70ea0c6c17575fe91990beca3ed7b257e215b9 mengaww2ya <mengaww2ya@gmail.com> 1740517832 +0300	commit: sign up page updated
+3f70ea0c6c17575fe91990beca3ed7b257e215b9 15096f77d9e21951017362440659a6911e6771ac mengaww2ya <mengaww2ya@gmail.com> 1740772853 +0300	pull: Fast-forward
+15096f77d9e21951017362440659a6911e6771ac 32502ebd1d74550aca716bb413038a2d77b9f34c mengaww2ya <mengaww2ya@gmail.com> 1740829697 +0300	pull: Fast-forward
+32502ebd1d74550aca716bb413038a2d77b9f34c 92ed1c5a1eead818f664d0da83fb796cff135219 mengaww2ya <mengaww2ya@gmail.com> 1740857711 +0300	commit: updated
+92ed1c5a1eead818f664d0da83fb796cff135219 ce9c9528fed16f836a5d4d4bd97b0f707408f28c mengaww2ya <mengaww2ya@gmail.com> 1740857791 +0300	commit: updated
+ce9c9528fed16f836a5d4d4bd97b0f707408f28c ddf5d5474dbbcaf9d90d84e5802b1e9dff79b703 mengaww2ya <mengaww2ya@gmail.com> 1740942598 +0300	commit: update
+ddf5d5474dbbcaf9d90d84e5802b1e9dff79b703 618798deffce309e21011d6f427a1e4d5a0f9ba6 mengaww2ya <mengaww2ya@gmail.com> 1740944362 +0300	commit: update
+618798deffce309e21011d6f427a1e4d5a0f9ba6 07b1883f0dce64e791ef7dfc83845aa7a5617812 mengaww2ya <mengaww2ya@gmail.com> 1741002068 +0300	commit: stock manager home page updated
+07b1883f0dce64e791ef7dfc83845aa7a5617812 1d61abba652d174946ff433b57d0d0856d88ba10 mengaww2ya <mengaww2ya@gmail.com> 1741004150 +0300	commit: add product updated
+1d61abba652d174946ff433b57d0d0856d88ba10 af42cd8d525bce06cdd46354971f7944d14f9d14 mengaww2ya <mengaww2ya@gmail.com> 1741038608 +0300	commit: stock manager side updating
+af42cd8d525bce06cdd46354971f7944d14f9d14 27c23038816f6c5e766ae917f833046e43dc0979 mengaww2ya <mengaww2ya@gmail.com> 1741089739 +0300	commit: update
+27c23038816f6c5e766ae917f833046e43dc0979 e9d240329302165b1f4919ab45c6c84bfedc3887 mengaww2ya <mengaww2ya@gmail.com> 1742479525 +0300	commit: chat implementing
+e9d240329302165b1f4919ab45c6c84bfedc3887 d603a058347a7e8bb9c36c68bb1dfc7316b1caa7 mengaww2ya <mengaww2ya@gmail.com> 1742750575 +0300	commit: after the chat is implemented it is not work on android and ios
+d603a058347a7e8bb9c36c68bb1dfc7316b1caa7 135e03bcac8744fef80fbe6ecae238cd5bb3da9f mengaww2ya <mengaww2ya@gmail.com> 1743027029 +0300	commit: chat is working now but need to fix some issues for able to be scanned the QR code
+135e03bcac8744fef80fbe6ecae238cd5bb3da9f 679ee467e57d20dd2b9b74e05e9c3414a6b690f4 mengaww2ya <mengaww2ya@gmail.com> 1743033972 +0300	commit: heading added to customer pages
+679ee467e57d20dd2b9b74e05e9c3414a6b690f4 046e7abf4746aaeb1d72d092d357cf0680751761 mengaww2ya <mengaww2ya@gmail.com> 1743065469 +0300	commit: update
+046e7abf4746aaeb1d72d092d357cf0680751761 046e7abf4746aaeb1d72d092d357cf0680751761 mengaww2ya <mengaww2ya@gmail.com> 1743065866 +0300	reset: moving to HEAD
+046e7abf4746aaeb1d72d092d357cf0680751761 e4a7c06b16c43dd6af1ba3b5b99f49187084a295 mengaww2ya <mengaww2ya@gmail.com> 1743102813 +0300	commit: chat implementing at customer side
+e4a7c06b16c43dd6af1ba3b5b99f49187084a295 06d08caeb25fcddb3418102326677173a2147105 mengaww2ya <mengaww2ya@gmail.com> 1743187175 +0300	commit: the profile picture position adjested and the user name and logout button with
+06d08caeb25fcddb3418102326677173a2147105 ea0b47bfb73288fc245badd9f577e5e719a69153 mengaww2ya <mengaww2ya@gmail.com> 1743195975 +0300	commit: header and header menu corrected and function well on customer side
+ea0b47bfb73288fc245badd9f577e5e719a69153 9b8d7931f1c287ed6538cad2b7ff992ada6b8456 mengaww2ya <mengaww2ya@gmail.com> 1743205980 +0300	commit: add employee page implementing
+9b8d7931f1c287ed6538cad2b7ff992ada6b8456 5251d798bb758f6ce19fc3342dfe19200c1d17ef mengaww2ya <mengaww2ya@gmail.com> 1743206030 +0300	commit: add employee page
+5251d798bb758f6ce19fc3342dfe19200c1d17ef 721b9e79006a6337cc7c1121c83719e6d8c213a6 mengaww2ya <mengaww2ya@gmail.com> 1743234558 +0300	commit: admin registration implemented but login process have some isue
+721b9e79006a6337cc7c1121c83719e6d8c213a6 b76e86f131ff14486d239fe1ebbd4775972e5339 mengaww2ya <mengaww2ya@gmail.com> 1743239468 +0300	commit: login for addmin implemented
+                                                                                                                                                     
