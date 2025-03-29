@@ -22,7 +22,7 @@ const menuItems = [
   },
   {
     title: "Add Supplier",
-    subtitle: "Add new supplier to the system",
+    subtitle: "Add & create supplier accounts",
     icon: "truck",
     iconType: "FontAwesome5",
     color: "#10B981",
@@ -53,7 +53,7 @@ const menuItems = [
     icon: "truck-delivery",
     iconType: "MaterialCommunityIcons",
     color: "#3B82F6",
-    route: "",
+    route: "/admine/suppliersList",
     gradient: ["#3B82F6", "#60A5FA"]
   }
 ];

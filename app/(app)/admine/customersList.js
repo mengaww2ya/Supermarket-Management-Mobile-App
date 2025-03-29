@@ -39,15 +39,15 @@ const CustomerList = () => {
     useEffect(() => {
         fetchCustomers();
     }, []);
-    
+
     useEffect(() => {
         if (customers.length > 0) {
             handleSearch(searchQuery);
         }
     }, [customers, searchQuery]);
 
-    const fetchCustomers = async () => {
-        try {
+        const fetchCustomers = async () => {
+            try {
             setLoading(true);
             // Query users collection for customers
             const usersRef = collection(db, 'users');
@@ -55,20 +55,20 @@ const CustomerList = () => {
             const querySnapshot = await getDocs(q);
             
             const customersList = querySnapshot.docs.map((doc) => ({
-                id: doc.id,
-                ...doc.data(),
-            }));
+                    id: doc.id,
+                    ...doc.data(),
+                }));
             
             setCustomers(customersList);
             setFilteredCustomers(customersList);
-        } catch (err) {
+            } catch (err) {
             console.error('Error fetching customers:', err);
             setError('Failed to fetch customers. Please try again.');
-        } finally {
-            setLoading(false);
+            } finally {
+                setLoading(false);
             setRefreshing(false);
-        }
-    };
+            }
+        };
 
     const handleRefresh = () => {
         setRefreshing(true);
@@ -136,7 +136,7 @@ const CustomerList = () => {
             ]
         );
     };
-    
+
     const handleCustomerPress = (customer) => {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
         setSelectedCustomer(customer);
@@ -375,8 +375,8 @@ const CustomerList = () => {
     // Customer Detail Modal Component
     const CustomerDetailModal = ({ visible, customer, onClose, onDelete }) => {
         if (!customer) return null;
-        
-        return (
+
+    return (
             <Modal
                 visible={visible}
                 transparent={true}
@@ -579,7 +579,7 @@ const CustomerList = () => {
                             
                             {/* Actions */}
                             <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 10 }}>
-                                <TouchableOpacity 
+                                <TouchableOpacity
                                     style={{
                                         backgroundColor: '#FEE2E2',
                                         paddingVertical: 12,

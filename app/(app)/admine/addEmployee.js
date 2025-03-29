@@ -288,7 +288,8 @@ export default function AddEmployee() {
         form.email,
         form.password,
         selectedRole,
-        userData
+        userData,
+        true  // Add preserveSession=true parameter to prevent logging out the admin
       );
 
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);

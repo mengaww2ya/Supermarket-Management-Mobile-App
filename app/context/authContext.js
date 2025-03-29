@@ -76,7 +76,7 @@ export default function AuthContextProvider({ children }) {
     }
   };
 
-  const registerCustomer = async (email, password, userData) => {
+  const registerCustomer = async (email, password, userData, preserveSession = false) => {
     try {
       // Create user in Firebase Auth
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
@@ -95,10 +95,12 @@ export default function AuthContextProvider({ children }) {
       // Store in users collection
       await setDoc(doc(db, 'users', user.uid), customerData);
 
-      // Update local state
-      setUser(user);
-      setUserData(customerData);
-      setLoading(false);
+      // Only update local state if not preserving session
+      if (!preserveSession) {
+        setUser(user);
+        setUserData(customerData);
+        setLoading(false);
+      }
 
       return user;
     } catch (error) {
@@ -108,7 +110,7 @@ export default function AuthContextProvider({ children }) {
     }
   };
 
-  const registerEmployee = async (email, password, role, userData) => {
+  const registerEmployee = async (email, password, role, userData, preserveSession = false) => {
     try {
       // Validate required fields
       const requiredFields = [
@@ -165,14 +167,80 @@ export default function AuthContextProvider({ children }) {
       // Store in users collection
       await setDoc(doc(db, 'users', user.uid), employeeData);
 
-      // Update local state
-      setUser(user);
-      setUserData(employeeData);
-      setLoading(false);
+      // Only update local state if not preserving session
+      if (!preserveSession) {
+        setUser(user);
+        setUserData(employeeData);
+        setLoading(false);
+      }
 
       return user;
     } catch (error) {
       console.error('Error registering employee:', error);
+      setLoading(false);
+      throw error;
+    }
+  };
+
+  const registerSupplier = async (email, password, supplierData, preserveSession = false) => {
+    try {
+      // Validate required fields
+      const requiredFields = [
+        'companyName', 'contactPerson', 'email', 'phone', 'address'
+      ];
+      
+      const missingFields = requiredFields.filter(field => !supplierData[field]);
+      if (missingFields.length > 0) {
+        throw new Error(`Missing required fields: ${missingFields.join(', ')}`);
+      }
+
+      // Create user in Firebase Auth
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+
+      // Extract first and last name from contact person
+      const nameParts = supplierData.contactPerson.split(' ');
+      const firstName = nameParts[0] || '';
+      const lastName = nameParts.slice(1).join(' ') || '';
+
+      // Prepare supplier data for users collection
+      const userData = {
+        uid: user.uid,
+        firstName: firstName,
+        lastName: lastName,
+        fullName: supplierData.contactPerson,
+        email: email,
+        phone: supplierData.phone,
+        address: supplierData.address,
+        companyName: supplierData.companyName,
+        
+        // Optional fields
+        website: supplierData.website || '',
+        taxId: supplierData.taxId || '',
+        productType: supplierData.productType || '',
+        yearEstablished: supplierData.yearEstablished || '',
+        
+        // System Fields
+        role: 'supplier',
+        createdAt: new Date(),
+        status: 'active',
+        lastUpdated: new Date()
+      };
+
+      // Store in users collection
+      await setDoc(doc(db, 'users', user.uid), userData);
+
+      // Only update local state if not preserving session
+      // This prevents logging out the admin when they create a supplier
+      if (!preserveSession) {
+        setUser(user);
+        setUserData(userData);
+        setLoading(false);
+      }
+
+      return user;
+    } catch (error) {
+      console.error('Error registering supplier:', error);
       setLoading(false);
       throw error;
     }
@@ -261,17 +329,21 @@ export default function AuthContextProvider({ children }) {
     }
   };
 
-  const value = {
+  const contextValue = {
     user,
     userData,
+    isAuthenticated,
     loading,
-    signIn: Login,
-    signOut: Logout,
+    Login,
+    Logout,
+    signIn: Login,     // Keep this for backward compatibility
+    signOut: Logout,   // Keep this for backward compatibility
+    Register,
     registerCustomer,
     registerEmployee,
+    registerSupplier,
     updateUserProfile: Register,
     updateUserData: Register,
-    isAuthenticated: !!user,
     isAdmin: userData?.role === 'admin',
     isManager: userData?.role === 'manager',
     isCustomer: userData?.role === 'customer',
@@ -279,7 +351,7 @@ export default function AuthContextProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={value}>
+    <AuthContext.Provider value={contextValue}>
       {children}
     </AuthContext.Provider>
   );

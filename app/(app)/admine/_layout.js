@@ -1,5 +1,5 @@
 import { Stack } from "expo-router";
-import { TouchableOpacity,Text } from "react-native";
+import { TouchableOpacity, Text } from "react-native";
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 
 export default function Layout(){
@@ -12,8 +12,14 @@ export default function Layout(){
             color:"blue",
           },
       }}>
-    <Stack.Screen  name="(tabs)"  options={{
-headerShown:false
+    <Stack.Screen name="(tabs)" options={{
+      headerShown: false
+    }} />
+    <Stack.Screen name="registerSupplier" options={{
+      headerShown: false
+    }} />
+    <Stack.Screen name="suppliersList" options={{
+      headerShown: false
     }} />
    </Stack>
     );
