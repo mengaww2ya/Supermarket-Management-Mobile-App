@@ -310,14 +310,14 @@ export default function EmployeeManagement() {
             contentContainerClassName="pb-2"
           >
             {categoryTabs.map((tab) => (
-              <TouchableOpacity
+            <TouchableOpacity
                 key={tab.key}
                 className={`flex-row items-center px-[18px] py-3 rounded-full mr-2 border ${
                   selectedTab === tab.key 
                     ? 'bg-blue-500 border-blue-500' 
                     : 'bg-white border-gray-200'
                 }`}
-                style={{
+              style={{
                   shadowColor: "#000",
                   shadowOffset: { width: 0, height: 1 },
                   shadowOpacity: selectedTab === tab.key ? 0.1 : 0.05,
@@ -342,8 +342,8 @@ export default function EmployeeManagement() {
                 >
                   {tab.label}
                 </Text>
-              </TouchableOpacity>
-            ))}
+            </TouchableOpacity>
+          ))}
           </ScrollView>
         </View>
 
@@ -358,7 +358,7 @@ export default function EmployeeManagement() {
           
           {/* Add extra space at the bottom */}
           <View className="h-10" />
-        </ScrollView>
+      </ScrollView>
       </Animated.View>
     </SafeAreaView>
   );
