@@ -259,7 +259,7 @@ const IssueCard = ({ item, index, onResolve, onRespond, onViewDetails }) => {
 };
 
 // Stat Card component
-const StatCard = ({ title, value, icon, color, index }) => {
+const StatCard = ({ title, value, icon, color, index, trend }) => {
   const scaleAnim = useRef(new Animated.Value(0.9)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
 
@@ -307,7 +307,14 @@ const StatCard = ({ title, value, icon, color, index }) => {
             {icon}
           </View>
         </View>
-        <Text className="text-lg font-bold" style={{ color }}>{value}</Text>
+        <View className="flex-row items-baseline">
+          <Text className="text-lg font-bold" style={{ color }}>{value}</Text>
+          {trend && (
+            <Text className="text-xs ml-1" style={{ color }}>
+              {trend}
+            </Text>
+          )}
+        </View>
       </LinearGradient>
     </Animated.View>
   );
@@ -351,6 +358,18 @@ export default function HandleEscalatedIssues() {
   const [detailModalVisible, setDetailModalVisible] = useState(false);
   const [selectedIssue, setSelectedIssue] = useState(null);
   const [messageInput, setMessageInput] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Add onRefresh function
+  const onRefresh = React.useCallback(() => {
+    setRefreshing(true);
+    // Simulate API call
+    setTimeout(() => {
+      setRefreshing(false);
+      // In a real app, you would fetch new data here
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    }, 2000);
+  }, []);
 
   // Stats calculation
   const stats = {
@@ -359,6 +378,17 @@ export default function HandleEscalatedIssues() {
     low: issues.filter(issue => issue.priority === "low").length,
     total: issues.length
   };
+
+  // Add search functionality
+  const filteredIssues = issues
+    .filter(issue => {
+      const matchesPriority = filterPriority === "all" || issue.priority === filterPriority;
+      const matchesSearch = searchQuery === "" || 
+        issue.issue.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        issue.customer.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        issue.description.toLowerCase().includes(searchQuery.toLowerCase());
+      return matchesPriority && matchesSearch;
+    });
 
   // Add sample messages to issues if they don't have any
   useEffect(() => {
@@ -399,11 +429,6 @@ export default function HandleEscalatedIssues() {
       ]
     })));
   }, []);
-
-  // Filter issues by priority
-  const filteredIssues = filterPriority === "all"
-    ? issues
-    : issues.filter(issue => issue.priority === filterPriority);
 
   const handleResolve = (issueId) => {
     Alert.alert(
@@ -628,7 +653,25 @@ export default function HandleEscalatedIssues() {
             />
           }
         >
-          {/* Stats cards */}
+          {/* Search Bar */}
+          <View className="mb-4">
+            <View className="flex-row items-center bg-white rounded-full px-4 py-2 shadow-sm border border-gray-200">
+              <MaterialIcons name="search" size={20} color="#6B7280" />
+              <TextInput
+                className="flex-1 ml-2 text-gray-700"
+                placeholder="Search issues..."
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+              />
+              {searchQuery !== "" && (
+                <TouchableOpacity onPress={() => setSearchQuery("")}>
+                  <MaterialIcons name="close" size={20} color="#6B7280" />
+                </TouchableOpacity>
+              )}
+            </View>
+          </View>
+
+          {/* Stats cards with enhanced design */}
           <View className="mb-6">
             <View className="flex-row mb-3">
               <StatCard
@@ -637,6 +680,7 @@ export default function HandleEscalatedIssues() {
                 icon={<MaterialIcons name="priority-high" size={16} color="#EF4444" />}
                 color="#EF4444"
                 index={0}
+                trend={stats.high > 0 ? "+2" : null}
               />
               <StatCard
                 title="Medium Priority"
@@ -644,6 +688,7 @@ export default function HandleEscalatedIssues() {
                 icon={<MaterialIcons name="warning" size={16} color="#F59E0B" />}
                 color="#F59E0B"
                 index={1}
+                trend={stats.medium > 0 ? "+1" : null}
               />
               <StatCard
                 title="Low Priority"
@@ -651,11 +696,12 @@ export default function HandleEscalatedIssues() {
                 icon={<MaterialIcons name="info" size={16} color="#10B981" />}
                 color="#10B981"
                 index={2}
+                trend={stats.low > 0 ? "+3" : null}
               />
             </View>
           </View>
 
-          {/* Priority filter tabs */}
+          {/* Priority filter tabs with enhanced design */}
           <View className="mb-4">
             <Text className="text-lg font-bold text-gray-800 mb-3">
               Filter by Priority
@@ -665,13 +711,14 @@ export default function HandleEscalatedIssues() {
               horizontal 
               showsHorizontalScrollIndicator={false} 
               className="mb-2"
+              contentContainerStyle={{ paddingRight: 16 }}
             >
               {["all", "high", "medium", "low"].map((priority) => (
                 <TouchableOpacity
                   key={priority}
                   className={`px-4 py-2 rounded-full mr-2 ${
                     filterPriority === priority 
-                      ? "bg-indigo-600" 
+                      ? "bg-indigo-600 shadow-lg" 
                       : "bg-white border border-gray-200"
                   }`}
                   onPress={() => {
@@ -691,7 +738,7 @@ export default function HandleEscalatedIssues() {
             </ScrollView>
           </View>
 
-          {/* Issues list */}
+          {/* Issues list with enhanced empty state */}
           <View>
             {filteredIssues.length > 0 ? (
               filteredIssues.map((item, index) => (
@@ -705,14 +752,25 @@ export default function HandleEscalatedIssues() {
                 />
               ))
             ) : (
-              <View className="justify-center items-center py-8">
+              <View className="justify-center items-center py-8 bg-white rounded-xl shadow-sm">
                 <MaterialIcons name="done-all" size={64} color="#D1D5DB" />
                 <Text className="text-gray-500 text-lg font-medium mt-2">No escalated issues</Text>
                 <Text className="text-gray-400 text-center mt-1">
                   {filterPriority !== "all" 
                     ? `No ${filterPriority} priority issues found` 
-                    : "All issues have been resolved"}
+                    : searchQuery 
+                      ? "No matching issues found"
+                      : "All issues have been resolved"}
                 </Text>
+                <TouchableOpacity 
+                  className="mt-4 bg-indigo-100 px-4 py-2 rounded-full"
+                  onPress={() => {
+                    setSearchQuery("");
+                    setFilterPriority("all");
+                  }}
+                >
+                  <Text className="text-indigo-600 font-medium">Clear Filters</Text>
+                </TouchableOpacity>
               </View>
             )}
           </View>
