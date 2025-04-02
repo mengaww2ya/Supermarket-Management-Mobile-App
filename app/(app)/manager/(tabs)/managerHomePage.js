@@ -674,45 +674,35 @@ export default function ManagerHomePage() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#F3F4F6" }}>
-      {/* Header with Gradient */}
-      <LinearGradient
-        colors={["#4F46E5", "#6366F1"]}
-        style={{
-          height: 180,
-          borderBottomLeftRadius: 30,
-          borderBottomRightRadius: 30,
-          paddingHorizontal: 20,
-          paddingTop: 20,
-        }}
-      >
-        <HomeHeader title="Manager Dashboard" />
-        <Text style={{ 
-          color: "rgba(255, 255, 255, 0.9)", 
-          fontSize: 18, 
-          marginTop: 16,
-          marginLeft: 10 
-        }}>
-          Welcome back, Manager
-              </Text>
-        <Text style={{ 
-          color: "rgba(255, 255, 255, 0.7)", 
-          fontSize: 14, 
-          marginTop: 8,
-          marginLeft: 10 
-        }}>
-          Tuesday, 2 April 2024
-                </Text>
-      </LinearGradient>
-
+      <HomeHeader title="Manager Dashboard" />
+      
       <ScrollView
         showsVerticalScrollIndicator={false}
         style={{
           flex: 1,
           paddingHorizontal: 20,
-          marginTop: -50
+          marginTop: 15
         }}
       >
         <Animated.View style={{ opacity: fadeAnim }}>
+          {/* Welcome Message */}
+          <View style={{ marginBottom: 20 }}>
+            <Text style={{ 
+              color: "#4F46E5", 
+              fontSize: 18, 
+              fontWeight: "600",
+            }}>
+              Welcome back, Manager
+            </Text>
+            <Text style={{ 
+              color: "#6B7280", 
+              fontSize: 14, 
+              marginTop: 4,
+            }}>
+              Tuesday, 2 April 2024
+            </Text>
+          </View>
+          
           {/* Performance Metrics */}
           <SectionHeader title="Performance Overview" color="#4F46E5" />
           

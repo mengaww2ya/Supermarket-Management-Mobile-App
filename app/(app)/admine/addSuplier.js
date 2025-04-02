@@ -24,9 +24,10 @@ import HomeHeader from '../../components/HomeHeader';
 import { db } from '../../../firebase/firebaseConfig';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { useAuth } from '../../context/authContext';
+import CountryPicker, { getAllCountries } from 'react-native-country-picker-modal';
 
-// Get the width once at the beginning
-const { width } = Dimensions.get('window');
+// Get the width and height once at the beginning
+const { width, height } = Dimensions.get('window');
 
 export default function AddSupplier() {
   const { registerSupplier } = useAuth();
@@ -39,6 +40,11 @@ export default function AddSupplier() {
   const [currentSection, setCurrentSection] = useState(0);
   const [showPassword, setShowPassword] = useState(false);
   const sectionTitles = ["Basic Info", "Contact", "Financial", "Products", "Account"];
+  
+  // Add country code state
+  const [countryCode, setCountryCode] = useState('+251'); // Default Ethiopia
+  const [countryPickerVisible, setCountryPickerVisible] = useState(false);
+  const [selectedCountry, setSelectedCountry] = useState({ callingCode: ['251'], cca2: 'ET' });
   
   const [name, setName] = useState("");
   const [contactPerson, setContactPerson] = useState("");
@@ -87,6 +93,13 @@ export default function AddSupplier() {
   // Create a reference for input fields
   const inputRefs = useRef({});
 
+  // Add animation for button press
+  const buttonScale = useRef(new Animated.Value(1)).current;
+
+  // Add scroll state and handler
+  const [financialScrollPosition, setFinancialScrollPosition] = useState(0);
+  const financialScrollRef = useRef(null);
+
   // This custom component will handle its own internal state
   const InputField = useCallback(({ 
     label, 
@@ -100,6 +113,8 @@ export default function AddSupplier() {
     fieldName,
     secureTextEntry = false,
     onToggleSecure = null,
+    hint = null,
+    showCurrency = false,
   }) => {
     // Internal state to handle text changes
     const [text, setText] = useState(value);
@@ -125,7 +140,7 @@ export default function AddSupplier() {
           marginBottom: 6,
           marginLeft: 4 
         }}>
-          {label}
+          {label}{showCurrency ? ' (Birr)' : ''}
         </Text>
         <View style={{
           borderWidth: 1,
@@ -168,6 +183,7 @@ export default function AddSupplier() {
                 inputRefs.current[fieldName] = ref;
               }
             }}
+            maxLength={fieldName === 'phone' ? 9 : undefined}
           />
           {onToggleSecure && (
             <TouchableOpacity onPress={onToggleSecure}>
@@ -182,6 +198,11 @@ export default function AddSupplier() {
         {error && (
           <Text style={{ color: '#EF4444', fontSize: 12, marginTop: 2, marginLeft: 4 }}>
             {error}
+          </Text>
+        )}
+        {hint && (
+          <Text style={{ color: '#6B7280', fontSize: 12, marginTop: 2, marginLeft: 4, fontStyle: 'italic' }}>
+            {hint}
           </Text>
         )}
       </View>
@@ -204,11 +225,26 @@ export default function AddSupplier() {
   }, []);
   
   useEffect(() => {
+    // First fade out
+    Animated.timing(fadeAnim, {
+      toValue: 0.7,
+      duration: 100,
+      useNativeDriver: true
+    }).start(() => {
+      // Then slide and fade back in
+      Animated.parallel([
     Animated.timing(slideAnim, {
       toValue: -currentSection * width,
       duration: 300,
       useNativeDriver: true
-    }).start();
+        }),
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 300,
+          useNativeDriver: true
+        })
+      ]).start();
+    });
     
     // Close any open dropdowns when changing sections
     setShowProductDropdown(false);
@@ -216,88 +252,123 @@ export default function AddSupplier() {
     
     // Dismiss keyboard when changing sections
     Keyboard.dismiss();
+    
+    // Add haptic feedback
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
   }, [currentSection]);
   
   const validateFields = () => {
     const newErrors = {};
+    const errorMessages = [];
     
     // Required fields validation
     if (!name.trim()) {
       newErrors.name = "Supplier name is required";
+      errorMessages.push("Supplier name is required");
     }
     
     if (!email.trim()) {
       newErrors.email = "Email is required";
+      errorMessages.push("Email is required");
     } else if (!/\S+@\S+\.\S+/.test(email)) {
       newErrors.email = "Email format is invalid";
+      errorMessages.push("Email format is invalid");
     }
     
     if (!phone.trim()) {
       newErrors.phone = "Phone number is required";
-    } else if (!/^\d{10,}$/.test(phone.replace(/[- )(]/g, ''))) {
-      newErrors.phone = "Phone number must have at least 10 digits";
+      errorMessages.push("Phone number is required");
+    } else if (!/^\d{9}$/.test(phone.replace(/[- )(]/g, ''))) {
+      newErrors.phone = "Enter a valid 9-digit phone number";
+      errorMessages.push("Enter a valid 9-digit phone number");
     }
     
     if (!address.trim()) {
       newErrors.address = "Address is required";
+      errorMessages.push("Address is required");
     }
     
     if (!taxId.trim()) {
       newErrors.taxId = "Tax ID is required";
+      errorMessages.push("Tax ID is required");
     }
     
     if (!contactPerson.trim()) {
       newErrors.contactPerson = "Contact person is required";
+      errorMessages.push("Contact person is required");
     }
     
     if (!productType) {
       newErrors.productType = "Product type is required";
+      errorMessages.push("Product type is required");
     }
     
     if (!website.trim()) {
       newErrors.website = "Website is required";
+      errorMessages.push("Website is required");
     }
     
     if (!yearEstablished.trim()) {
       newErrors.yearEstablished = "Year established is required";
+      errorMessages.push("Year established is required");
     } else {
       const year = Number(yearEstablished);
       const currentYear = new Date().getFullYear();
       if (isNaN(year) || year < 1900 || year > currentYear) {
         newErrors.yearEstablished = `Must be between 1900 and ${currentYear}`;
+        errorMessages.push(`Year established must be between 1900 and ${currentYear}`);
       }
     }
      
     if (!accountNumber.trim()) {
       newErrors.accountNumber = "Account number is required";
+      errorMessages.push("Account number is required");
     }
      
     if (!minOrderQuantity.trim()) {
       newErrors.minOrderQuantity = "Minimum order quantity is required";
+      errorMessages.push("Minimum order quantity is required");
     } else if (isNaN(Number(minOrderQuantity))) {
       newErrors.minOrderQuantity = "Must be a number";
+      errorMessages.push("Minimum order quantity must be a number");
     }
      
     if (!discountRate.trim()) {
       newErrors.discountRate = "Discount rate is required";
+      errorMessages.push("Discount rate is required");
     } else if (isNaN(Number(discountRate)) || Number(discountRate) > 100) {
       newErrors.discountRate = "Must be a valid percentage (0-100)";
+      errorMessages.push("Discount rate must be a valid percentage (0-100)");
     }
     
     // Account validation - always required now
     if (!password.trim()) {
       newErrors.password = "Password is required";
+      errorMessages.push("Password is required");
     } else if (password.length < 6) {
       newErrors.password = "Password must be at least 6 characters";
+      errorMessages.push("Password must be at least 6 characters");
     }
     
     if (!confirmPassword.trim()) {
       newErrors.confirmPassword = "Please confirm your password";
+      errorMessages.push("Please confirm your password");
     } else if (password !== confirmPassword) {
       newErrors.confirmPassword = "Passwords do not match";
+      errorMessages.push("Passwords do not match");
     }
     
     setErrors(newErrors);
+    
+    // If there are errors, show an alert
+    if (errorMessages.length > 0) {
+      Alert.alert(
+        "Validation Error",
+        errorMessages.join('\n'),
+        [{ text: "OK" }]
+      );
+    }
+    
     return Object.keys(newErrors).length === 0;
   };
 
@@ -318,6 +389,20 @@ export default function AddSupplier() {
       return;
     }
     
+    // Animate button press
+    Animated.sequence([
+      Animated.timing(buttonScale, {
+        toValue: 0.95,
+        duration: 100,
+        useNativeDriver: true,
+      }),
+      Animated.timing(buttonScale, {
+        toValue: 1,
+        duration: 100,
+        useNativeDriver: true,
+      }),
+    ]).start();
+    
     try {
       setLoading(true);
       // Create supplier data object
@@ -326,7 +411,7 @@ export default function AddSupplier() {
         contactPerson,
         yearEstablished,
         email,
-        phone,
+        phone: `${countryCode}${phone}`, // Include country code
         address,
         website,
         taxId,
@@ -346,7 +431,7 @@ export default function AddSupplier() {
         companyName: name,
         contactPerson,
         email,
-        phone,
+        phone: `${countryCode}${phone}`, // Include country code
         address,
         website,
         taxId,
@@ -361,6 +446,14 @@ export default function AddSupplier() {
       setSubmitted(true);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       
+      // Enhanced success alert
+      Alert.alert(
+        "Success ✅", 
+        `Supplier ${name} has been added successfully!\n\nLogin credentials have been created for this supplier.`,
+        [
+          {
+            text: "OK",
+            onPress: () => {
       // Reset form after successful submission
       setTimeout(() => {
         setName("");
@@ -384,22 +477,41 @@ export default function AddSupplier() {
         if (scrollRef.current) {
           scrollRef.current.scrollTo({ x: 0, y: 0, animated: true });
         }
-      }, 2000);
+              }, 500);
+            }
+          }
+        ]
+      );
       
     } catch (error) {
       console.error("Error adding supplier:", error);
       setLoading(false);
       
       let errorMessage = "Failed to add supplier. Please try again.";
+      let errorTitle = "Error ❌";
+      
       if (error.code === 'auth/email-already-in-use') {
-        errorMessage = "This email is already registered.";
+        errorMessage = "This email is already registered in the system.";
+        errorTitle = "Email Already Exists";
       } else if (error.code === 'auth/invalid-email') {
         errorMessage = "Please enter a valid email address.";
+        errorTitle = "Invalid Email";
       } else if (error.code === 'auth/weak-password') {
-        errorMessage = "Password should be at least 6 characters.";
+        errorMessage = "Password should be at least 6 characters with a combination of letters, numbers and symbols.";
+        errorTitle = "Weak Password";
       }
       
-      Alert.alert("Error", errorMessage);
+      Alert.alert(
+        errorTitle, 
+        errorMessage,
+        [
+          {
+            text: "Try Again",
+            style: "default"
+          }
+        ]
+      );
+      
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     }
   };
@@ -408,98 +520,130 @@ export default function AddSupplier() {
     const currentStepId = sectionTitles[currentSection];
     let hasError = false;
     const newErrors = {};
+    const errorMessages = [];
     
     // Validate based on current section
     if (currentSection === 0) { // Basic Info
       if (!name.trim()) {
         newErrors.name = "Supplier name is required";
+        errorMessages.push("Supplier name is required");
         hasError = true;
       }
       if (!contactPerson.trim()) {
         newErrors.contactPerson = "Contact person is required";
+        errorMessages.push("Contact person is required");
         hasError = true;
       }
       if (!yearEstablished.trim()) {
         newErrors.yearEstablished = "Year established is required";
+        errorMessages.push("Year established is required");
         hasError = true;
       } else {
         const year = Number(yearEstablished);
         const currentYear = new Date().getFullYear();
         if (isNaN(year) || year < 1900 || year > currentYear) {
           newErrors.yearEstablished = `Must be between 1900 and ${currentYear}`;
+          errorMessages.push(`Year established must be between 1900 and ${currentYear}`);
           hasError = true;
         }
       }
     } else if (currentSection === 1) { // Contact
       if (!email.trim()) {
         newErrors.email = "Email is required";
+        errorMessages.push("Email is required");
         hasError = true;
       } else if (!/\S+@\S+\.\S+/.test(email)) {
         newErrors.email = "Email format is invalid";
+        errorMessages.push("Email format is invalid");
         hasError = true;
       }
       if (!phone.trim()) {
         newErrors.phone = "Phone number is required";
+        errorMessages.push("Phone number is required");
         hasError = true;
-      } else if (!/^\d{10,}$/.test(phone.replace(/[- )(]/g, ''))) {
-        newErrors.phone = "Phone number must have at least 10 digits";
+      } else if (!/^\d{9}$/.test(phone.replace(/[- )(]/g, ''))) {
+        newErrors.phone = "Enter a valid 9-digit phone number";
+        errorMessages.push("Enter a valid 9-digit phone number");
         hasError = true;
       }
       if (!address.trim()) {
         newErrors.address = "Address is required";
+        errorMessages.push("Address is required");
         hasError = true;
       }
       if (!website.trim()) {
         newErrors.website = "Website is required";
+        errorMessages.push("Website is required");
         hasError = true;
       }
     } else if (currentSection === 2) { // Financial
       if (!taxId.trim()) {
         newErrors.taxId = "Tax ID is required";
+        errorMessages.push("Tax ID is required");
         hasError = true;
       }
       if (!accountNumber.trim()) {
         newErrors.accountNumber = "Account number is required";
+        errorMessages.push("Account number is required");
         hasError = true;
       }
       if (!minOrderQuantity.trim()) {
         newErrors.minOrderQuantity = "Minimum order quantity is required";
+        errorMessages.push("Minimum order quantity is required");
         hasError = true;
       } else if (isNaN(Number(minOrderQuantity))) {
         newErrors.minOrderQuantity = "Must be a number";
+        errorMessages.push("Minimum order quantity must be a number");
         hasError = true;
       }
       if (!discountRate.trim()) {
         newErrors.discountRate = "Discount rate is required";
+        errorMessages.push("Discount rate is required");
         hasError = true;
       } else if (isNaN(Number(discountRate)) || Number(discountRate) > 100) {
         newErrors.discountRate = "Must be a valid percentage (0-100)";
+        errorMessages.push("Discount rate must be a valid percentage (0-100)");
         hasError = true;
       }
     } else if (currentSection === 3) { // Product
       if (!productType) {
         newErrors.productType = "Product type is required";
+        errorMessages.push("Product type is required");
         hasError = true;
       }
     } else if (currentSection === 4) { // Account
       if (!password.trim()) {
         newErrors.password = "Password is required";
+        errorMessages.push("Password is required");
         hasError = true;
       } else if (password.length < 6) {
         newErrors.password = "Password must be at least 6 characters";
+        errorMessages.push("Password must be at least 6 characters");
         hasError = true;
       }
       if (!confirmPassword.trim()) {
         newErrors.confirmPassword = "Please confirm your password";
+        errorMessages.push("Please confirm your password");
         hasError = true;
       } else if (password !== confirmPassword) {
         newErrors.confirmPassword = "Passwords do not match";
+        errorMessages.push("Passwords do not match");
         hasError = true;
       }
     }
     
     if (hasError) {
       setErrors(newErrors);
+      
+      // Show alert with all error messages
+      if (errorMessages.length > 0) {
+        Alert.alert(
+          "Validation Error",
+          errorMessages.join('\n'),
+          [{ text: "OK" }]
+        );
+      }
+      
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       return;
     }
@@ -595,24 +739,14 @@ export default function AddSupplier() {
         fieldName="yearEstablished"
       />
       
-      <View style={{ marginTop: 16 }}>
-        <TouchableOpacity
-          style={{
-            backgroundColor: '#4F46E5',
-            borderRadius: 10,
-            height: 50,
-            alignItems: 'center',
-            justifyContent: 'center',
-            flexDirection: 'row',
-          }}
+      <View style={{ marginTop: 20 }}>
+        <AnimatedButton 
+          text="Next" 
+          icon="arrow-right" 
           onPress={goToNextSection}
-          activeOpacity={0.8}
-        >
-          <Text style={{ color: 'white', fontSize: 15, fontWeight: 'bold', marginRight: 8 }}>
-            Next
-          </Text>
-          <Feather name="arrow-right" size={16} color="white" />
-        </TouchableOpacity>
+          isPrimary={true}
+          isFullWidth={true}
+        />
       </View>
     </View>
   );
@@ -632,16 +766,104 @@ export default function AddSupplier() {
         fieldName="email"
       />
       
-      <InputField
-        label="Phone Number"
+      <View style={{ marginBottom: 20 }}>
+        <Text style={{ 
+          fontSize: 14, 
+          fontWeight: '600',
+          color: '#374151', 
+          marginBottom: 6,
+          marginLeft: 4 
+        }}>
+          Phone Number
+        </Text>
+        
+        <View style={{ flexDirection: 'row' }}>
+          <TouchableOpacity
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              backgroundColor: 'white',
+              borderWidth: 2,
+              borderColor: errors.phone ? '#EF4444' : '#4F46E5',
+              borderTopLeftRadius: 10,
+              borderBottomLeftRadius: 10,
+              paddingHorizontal: 12,
+              paddingVertical: 12,
+              borderRightWidth: 0,
+              height: 50,
+            }}
+            onPress={() => setCountryPickerVisible(true)}
+          >
+            <Text style={{ 
+              color: '#1F2937',
+              fontSize: 15,
+              fontWeight: '500'
+            }}>
+              {countryCode}
+            </Text>
+            <Ionicons name="chevron-down" size={16} color="#4F46E5" style={{ marginLeft: 4 }} />
+          </TouchableOpacity>
+          
+          <View style={{ 
+            flex: 1, 
+            flexDirection: 'row', 
+            alignItems: 'center', 
+            backgroundColor: 'white', 
+            borderWidth: 2, 
+            borderColor: errors.phone ? '#EF4444' : '#4F46E5', 
+            borderTopRightRadius: 10, 
+            borderBottomRightRadius: 10, 
+            paddingHorizontal: 12,
+            height: 50,
+          }}>
+            <TextInput
+              style={{ 
+                flex: 1, 
+                color: '#1F2937', 
+                fontSize: 15 
+              }}
         placeholder="Enter phone number"
         value={phone}
-        onChangeText={setPhone}
+              onChangeText={(text) => {
+                setPhone(text);
+                if (errors.phone) clearFieldError('phone');
+              }}
         keyboardType="phone-pad"
-        error={errors.phone}
-        icon="call-outline"
-        fieldName="phone"
-      />
+              maxLength={9}
+              placeholderTextColor="#9CA3AF"
+            />
+            {!errors.phone && phone.length === 9 && (
+              <Ionicons name="checkmark-circle" size={20} color="#059669" />
+            )}
+          </View>
+        </View>
+        
+        {errors.phone && (
+          <Text style={{ color: '#EF4444', fontSize: 12, marginTop: 4, marginLeft: 4 }}>
+            {errors.phone}
+          </Text>
+        )}
+        
+        <Text style={{ color: '#6B7280', fontSize: 12, marginTop: 4, marginLeft: 4, fontStyle: 'italic' }}>
+          Enter a 9-digit phone number without country code
+        </Text>
+        
+        <CountryPicker
+          visible={countryPickerVisible}
+          onClose={() => setCountryPickerVisible(false)}
+          withFilter
+          withFlag
+          withCountryNameButton={false}
+          withAlphaFilter
+          withCallingCode
+          onSelect={(country) => {
+            setSelectedCountry(country);
+            setCountryCode(`+${country.callingCode[0]}`);
+            setCountryPickerVisible(false);
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          }}
+        />
+      </View>
       
       <InputField
         label="Address"
@@ -665,50 +887,30 @@ export default function AddSupplier() {
         fieldName="website"
       />
       
-      <View style={{ flexDirection: 'row', marginTop: 16 }}>
-        <TouchableOpacity
-          style={{
-            backgroundColor: '#F3F4F6',
-            borderRadius: 10,
-            height: 50,
-            alignItems: 'center',
-            flex: 1,
-            flexDirection: 'row',
-            justifyContent: 'center',
-            marginRight: 10,
-            zIndex: 20,
-          }}
+      <View style={{ flexDirection: 'row', marginTop: 20, justifyContent: 'space-between' }}>
+        <View style={{ flex: 1, marginRight: 10 }}>
+          <AnimatedButton 
+            text="Back" 
+            icon="arrow-left" 
+            iconPosition="left"
           onPress={goToPrevSection}
-          activeOpacity={0.8}
-        >
-          <Feather name="arrow-left" size={16} color="#4B5563" />
-          <Text style={{ color: '#4B5563', fontSize: 15, fontWeight: '600', marginLeft: 4 }}>
-            Back
-          </Text>
-        </TouchableOpacity>
+            isPrimary={false}
+            isFullWidth={true}
+          />
+        </View>
         
-        <TouchableOpacity
-          style={{
-            backgroundColor: '#4F46E5',
-            borderRadius: 10,
-            height: 50,
-            alignItems: 'center',
-            flex: 1,
-            flexDirection: 'row',
-            justifyContent: 'center',
-            zIndex: 20,
-          }}
+        <View style={{ flex: 1 }}>
+          <AnimatedButton 
+            text="Next" 
+            icon="arrow-right" 
           onPress={() => {
             setShowPaymentDropdown(false);
             goToNextSection();
           }}
-          activeOpacity={0.8}
-        >
-          <Text style={{ color: 'white', fontSize: 15, fontWeight: 'bold', marginRight: 8 }}>
-            Next
-          </Text>
-          <Feather name="arrow-right" size={16} color="white" />
-        </TouchableOpacity>
+            isPrimary={true}
+            isFullWidth={true}
+          />
+        </View>
       </View>
     </View>
   );
@@ -717,15 +919,124 @@ export default function AddSupplier() {
     <View style={{ width: width, paddingHorizontal: 20, paddingVertical: 24 }}>
       <SectionHeader title="Financial Information" icon="card-outline" />
       
-      <InputField
-        label="Tax ID / Business Registration Number"
+      <ScrollView 
+        ref={financialScrollRef}
+        style={{ maxHeight: Platform.OS === 'ios' ? height - 300 : height - 250 }}
+        showsVerticalScrollIndicator={true}
+        scrollIndicatorInsets={{ right: 1 }}
+        contentContainerStyle={{ paddingRight: 5 }}
+        onScroll={(event) => {
+          const scrollY = event.nativeEvent.contentOffset.y;
+          setFinancialScrollPosition(scrollY);
+        }}
+        scrollEventThrottle={16}
+      >
+        {/* Scroll indicator at top - fades out when scrolling down */}
+        <Animated.View style={{ 
+          alignItems: 'center', 
+          marginBottom: 10, 
+          paddingVertical: 5,
+          backgroundColor: 'rgba(79, 70, 229, 0.05)',
+          borderRadius: 20,
+          opacity: financialScrollPosition > 50 ? 0 : 1,
+        }}>
+          <Feather name="chevrons-down" size={18} color="#4F46E5" />
+        </Animated.View>
+
+        {/* Shadow at top when scrolled down */}
+        {financialScrollPosition > 20 && (
+          <View style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            height: 10,
+            backgroundColor: 'transparent',
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.1,
+            shadowRadius: 3,
+            elevation: 3,
+            zIndex: 1000
+          }} />
+        )}
+
+        <View style={{ 
+          backgroundColor: `rgba(79, 70, 229, 0.05)`, 
+          padding: 12, 
+          borderRadius: 10, 
+          marginBottom: 16,
+          borderLeftWidth: 4,
+          borderLeftColor: '#4F46E5',
+        }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Text style={{ fontSize: 14, color: '#4F46E5', fontWeight: '600' }}>
+              Financial Details
+            </Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <Feather name="chevrons-down" size={14} color="#4F46E5" />
+              <Text style={{ fontSize: 12, color: '#4F46E5', fontWeight: '500', marginLeft: 2 }}>
+                Scroll for more
+              </Text>
+            </View>
+          </View>
+          <Text style={{ fontSize: 13, color: '#6B7280', marginTop: 4 }}>
+            Please provide accurate financial information for this supplier.
+          </Text>
+        </View>
+        
+        {/* Enhanced Tax ID section */}
+        <View style={{ marginBottom: 20 }}>
+          <Text style={{ 
+            fontSize: 14, 
+            fontWeight: '600',
+            color: '#374151', 
+            marginBottom: 6,
+            marginLeft: 4 
+          }}>
+            Tax ID / Business Registration Number
+          </Text>
+          <View style={{
+            borderWidth: 1,
+            borderColor: errors.taxId ? '#EF4444' : '#D1D5DB',
+            borderRadius: 10,
+            backgroundColor: 'white',
+            paddingHorizontal: 12,
+            flexDirection: 'row',
+            alignItems: 'center',
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 1 },
+            shadowOpacity: 0.05,
+            shadowRadius: 1,
+            elevation: 1,
+            height: 50,
+          }}>
+            <Ionicons 
+              name="document-text-outline" 
+              size={18} 
+              color="#4F46E5" 
+              style={{ marginRight: 8 }} 
+            />
+            <TextInput
         placeholder="Enter tax ID number"
         value={taxId}
-        onChangeText={setTaxId}
-        error={errors.taxId}
-        icon="document-text-outline"
-        fieldName="taxId"
-      />
+              onChangeText={(text) => {
+                setTaxId(text);
+                if (errors.taxId) clearFieldError('taxId');
+              }}
+              style={{
+                flex: 1,
+                fontSize: 15,
+                color: '#1F2937',
+              }}
+            />
+          </View>
+          {errors.taxId && (
+            <Text style={{ color: '#EF4444', fontSize: 12, marginTop: 2, marginLeft: 4 }}>
+              {errors.taxId}
+            </Text>
+          )}
+        </View>
       
       <Text style={{ 
         fontSize: 14, 
@@ -739,67 +1050,163 @@ export default function AddSupplier() {
       
       <TouchableOpacity
         style={{
-          borderWidth: 1,
-          borderColor: errors.paymentTerms ? '#EF4444' : '#D1D5DB',
+            borderWidth: 2,
+            borderColor: errors.paymentTerms ? '#EF4444' : '#4F46E5',
           borderRadius: 10,
           backgroundColor: 'white',
-          height: 50,
+            height: 56,
           flexDirection: 'row',
           alignItems: 'center',
           justifyContent: 'space-between',
           paddingHorizontal: 12,
-          marginBottom: errors.paymentTerms ? 2 : 20,
-        }}
-        onPress={() => setShowPaymentDropdown(!showPaymentDropdown)}
+            marginBottom: errors.paymentTerms ? 2 : 6,
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 1 },
+            shadowOpacity: 0.1,
+            shadowRadius: 2,
+            elevation: 2,
+          }}
+          onPress={() => {
+            setShowPaymentDropdown(!showPaymentDropdown);
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          }}
         activeOpacity={0.7}
       >
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
           <Ionicons 
             name={paymentTermsOptions.find(option => option.value === paymentTerms)?.icon || "cash-outline"} 
-            size={18} 
+              size={22} 
             color="#4F46E5" 
             style={{ marginRight: 8 }}
           />
           
-          <Text style={{ fontSize: 15, color: '#1F2937' }}>
-            {paymentTermsOptions.find(option => option.value === paymentTerms)?.label || "Select payment terms"}
+            <Text style={{ 
+              fontSize: 16, 
+              color: '#1F2937',
+              fontWeight: '500'
+            }}>
+              {paymentTermsOptions.find(option => option.value === paymentTerms)?.label}
           </Text>
         </View>
+          <View style={{ backgroundColor: `rgba(79, 70, 229, 0.1)`, padding: 5, borderRadius: 8 }}>
         <Feather 
           name={showPaymentDropdown ? "chevron-up" : "chevron-down"} 
-          size={18} 
-          color="#6B7280" 
+              size={22} 
+              color="#4F46E5" 
         />
+          </View>
       </TouchableOpacity>
       
-      {errors.paymentTerms && (
-        <Text style={{ color: '#EF4444', fontSize: 12, marginBottom: 12, marginLeft: 4 }}>
-          {errors.paymentTerms}
+        <Text style={{ 
+          color: '#6B7280', 
+          fontSize: 12, 
+          marginTop: 2, 
+          marginLeft: 4, 
+          fontStyle: 'italic',
+          marginBottom: 20 
+        }}>
+          Select the payment terms for this supplier
         </Text>
-      )}
+        
+        <InputField
+          label="Bank Account Number"
+          placeholder="Enter bank account number"
+          value={accountNumber}
+          onChangeText={setAccountNumber}
+          error={errors.accountNumber}
+          icon="card-outline"
+          fieldName="accountNumber"
+        />
+        
+        <InputField
+          label="Minimum Order Quantity"
+          placeholder="Enter minimum order quantity"
+          value={minOrderQuantity}
+          onChangeText={setMinOrderQuantity}
+          keyboardType="numeric"
+          error={errors.minOrderQuantity}
+          icon="cart-outline"
+          fieldName="minOrderQuantity"
+        />
+        
+        <InputField
+          label="Discount Rate"
+          placeholder="Enter discount percentage"
+          value={discountRate}
+          onChangeText={setDiscountRate}
+          keyboardType="numeric"
+          error={errors.discountRate}
+          icon="pricetag-outline"
+          fieldName="discountRate"
+          hint="Enter a percentage value between 0-100"
+          showCurrency={false}
+        />
+        
+        <View style={{ flexDirection: 'row', marginTop: 20, marginBottom: 10, justifyContent: 'space-between' }}>
+          <View style={{ flex: 1, marginRight: 10 }}>
+            <AnimatedButton 
+              text="Back" 
+              icon="arrow-left" 
+              iconPosition="left"
+              onPress={goToPrevSection} 
+              isPrimary={false}
+              isFullWidth={true}
+            />
+          </View>
+          
+          <View style={{ flex: 1 }}>
+            <AnimatedButton 
+              text="Next" 
+              icon="arrow-right" 
+              onPress={() => {
+                setShowPaymentDropdown(false);
+                goToNextSection();
+              }} 
+              isPrimary={true}
+              isFullWidth={true}
+            />
+          </View>
+        </View>
+      </ScrollView>
       
       {showPaymentDropdown && (
         <View style={{
           backgroundColor: 'white',
           borderRadius: 10,
-          borderWidth: 1,
-          borderColor: '#E5E7EB',
-          marginBottom: 20,
+          borderWidth: 2,
+          borderColor: '#4F46E5',
           shadowColor: '#000',
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.1,
-          shadowRadius: 3,
-          elevation: 2,
-          maxHeight: 200,
-          zIndex: 9,
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.2,
+          shadowRadius: 5,
+          elevation: 5,
+          maxHeight: 270,
+          zIndex: 5000,
           position: 'absolute',
-          top: 245,
+          top: Math.max(200 - financialScrollPosition, 100), // Adjust based on scroll
           left: 20,
-          right: 20
+          right: 20,
+          paddingBottom: 4,
         }}>
+          <View style={{ 
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            paddingHorizontal: 16,
+            paddingVertical: 10,
+            borderBottomWidth: 1,
+            borderBottomColor: '#F3F4F6',
+            backgroundColor: '#F9FAFB'
+          }}>
+            <Text style={{ fontWeight: '600', color: '#4F46E5' }}>Select Payment Terms</Text>
+            <TouchableOpacity onPress={() => setShowPaymentDropdown(false)}>
+              <Feather name="x" size={20} color="#6B7280" />
+            </TouchableOpacity>
+          </View>
           <ScrollView 
             nestedScrollEnabled={true}
             keyboardShouldPersistTaps="handled"
+            style={{ zIndex: 5001 }}
           >
             {paymentTermsOptions.map((option) => (
               <TouchableOpacity
@@ -807,95 +1214,41 @@ export default function AddSupplier() {
                 style={{
                   flexDirection: 'row',
                   alignItems: 'center',
-                  paddingVertical: 12,
-                  paddingHorizontal: 12,
+                  paddingVertical: 14,
+                  paddingHorizontal: 16,
                   borderBottomWidth: option.value !== paymentTermsOptions[paymentTermsOptions.length - 1].value ? 1 : 0,
                   borderBottomColor: '#F3F4F6',
-                  backgroundColor: paymentTerms === option.value ? '#F3F4F6' : 'transparent',
+                  backgroundColor: paymentTerms === option.value ? 'rgba(79, 70, 229, 0.1)' : 'transparent',
                 }}
                 onPress={() => {
                   setPaymentTerms(option.value);
                   setShowPaymentDropdown(false);
-                  clearFieldError("paymentTerms");
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                 }}
               >
-                <Ionicons name={option.icon} size={18} color="#4F46E5" style={{ marginRight: 8 }} />
+                <Ionicons name={option.icon} size={22} color="#4F46E5" style={{ marginRight: 12 }} />
                 <Text style={{ 
-                  fontSize: 15, 
+                  fontSize: 16, 
                   color: '#1F2937',
-                  fontWeight: paymentTerms === option.value ? 'bold' : 'normal',
+                  fontWeight: paymentTerms === option.value ? 'bold' : '500',
                 }}>
                   {option.label}
                 </Text>
                 
                 {paymentTerms === option.value && (
-                  <Ionicons name="checkmark" size={18} color="#4F46E5" style={{ marginLeft: 'auto' }} />
+                  <Ionicons name="checkmark-circle" size={22} color="#4F46E5" style={{ marginLeft: 'auto' }} />
                 )}
               </TouchableOpacity>
             ))}
           </ScrollView>
         </View>
       )}
-      
-      <InputField
-        label="Account Number"
-        placeholder="Enter bank account number"
-        value={accountNumber}
-        onChangeText={setAccountNumber}
-        error={errors.accountNumber}
-        icon="wallet-outline"
-        fieldName="accountNumber"
-      />
-      
-      <View style={{ flexDirection: 'row', marginTop: 16 }}>
-        <TouchableOpacity
-          style={{
-            backgroundColor: '#F3F4F6',
-            borderRadius: 10,
-            height: 50,
-            alignItems: 'center',
-            flex: 1,
-            flexDirection: 'row',
-            justifyContent: 'center',
-            marginRight: 10,
-            zIndex: 20,
-          }}
-          onPress={goToPrevSection}
-          activeOpacity={0.8}
-        >
-          <Feather name="arrow-left" size={16} color="#4B5563" />
-          <Text style={{ color: '#4B5563', fontSize: 15, fontWeight: '600', marginLeft: 4 }}>
-            Back
-          </Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity
-          style={{
-            backgroundColor: '#4F46E5',
-            borderRadius: 10,
-            height: 50,
-            alignItems: 'center',
-            flex: 1,
-            flexDirection: 'row',
-            justifyContent: 'center',
-            zIndex: 20,
-          }}
-          onPress={forceNavigateFinancialToProduct}
-          activeOpacity={0.8}
-        >
-          <Text style={{ color: 'white', fontSize: 15, fontWeight: 'bold', marginRight: 8 }}>
-            Next
-          </Text>
-          <Feather name="arrow-right" size={16} color="white" />
-        </TouchableOpacity>
-      </View>
     </View>
   );
   
   const renderProductSection = () => (
     <View style={{ width: width, paddingHorizontal: 20, paddingVertical: 24 }}>
-      <SectionHeader title="Product Information" icon="basket-outline" />
+      <SectionHeader title="Product Information" icon="cube-outline" />
       
       <Text style={{ 
         fontSize: 14, 
@@ -909,19 +1262,25 @@ export default function AddSupplier() {
       
       <TouchableOpacity
         style={{
-          borderWidth: 1,
-          borderColor: errors.productType ? '#EF4444' : '#D1D5DB',
+          borderWidth: 2,
+          borderColor: errors.productType ? '#EF4444' : '#4F46E5',
           borderRadius: 10,
           backgroundColor: 'white',
-          height: 50,
+          height: 56,
           flexDirection: 'row',
           alignItems: 'center',
           justifyContent: 'space-between',
           paddingHorizontal: 12,
-          marginBottom: errors.productType ? 2 : 20,
+          marginBottom: errors.productType ? 2 : 6,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 1 },
+          shadowOpacity: 0.1,
+          shadowRadius: 2,
+          elevation: 2,
         }}
         onPress={() => {
           setShowProductDropdown(!showProductDropdown);
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
         }}
         activeOpacity={0.7}
       >
@@ -929,58 +1288,73 @@ export default function AddSupplier() {
           {productType ? (
             <Ionicons 
               name={productOptions.find(option => option.value === productType)?.icon} 
-              size={18} 
+              size={22} 
               color="#4F46E5" 
               style={{ marginRight: 8 }}
             />
           ) : (
-            <Ionicons name="apps-outline" size={18} color="#9CA3AF" style={{ marginRight: 8 }} />
+            <Ionicons name="apps-outline" size={22} color="#9CA3AF" style={{ marginRight: 8 }} />
           )}
           
           <Text style={{ 
-            fontSize: 15, 
-            color: productType ? '#1F2937' : '#9CA3AF' 
+            fontSize: 16, 
+            color: productType ? '#1F2937' : '#9CA3AF',
+            fontWeight: '500'
           }}>
             {productType 
               ? productOptions.find(option => option.value === productType)?.label 
               : 'Select product type'}
           </Text>
         </View>
+        <View style={{ backgroundColor: `rgba(79, 70, 229, 0.1)`, padding: 5, borderRadius: 8 }}>
         <Feather 
           name={showProductDropdown ? "chevron-up" : "chevron-down"} 
-          size={18} 
-          color="#6B7280" 
+            size={22} 
+            color="#4F46E5" 
         />
+        </View>
       </TouchableOpacity>
       
       {errors.productType && (
-        <Text style={{ color: '#EF4444', fontSize: 12, marginBottom: 12, marginLeft: 4 }}>
+        <Text style={{ color: '#EF4444', fontSize: 14, marginBottom: 12, marginLeft: 4, fontWeight: '500' }}>
           {errors.productType}
                     </Text>
       )}
+      
+      <Text style={{ 
+        color: '#6B7280', 
+        fontSize: 12, 
+        marginTop: 2, 
+        marginLeft: 4, 
+        fontStyle: 'italic',
+        marginBottom: 20 
+      }}>
+        Select the primary product category this supplier provides
+      </Text>
       
       {showProductDropdown && (
         <View style={{
           backgroundColor: 'white',
           borderRadius: 10,
-          borderWidth: 1,
-          borderColor: '#E5E7EB',
+          borderWidth: 2,
+          borderColor: '#4F46E5',
           marginBottom: 20,
           shadowColor: '#000',
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.1,
-          shadowRadius: 3,
-          elevation: 2,
-          maxHeight: 200,
-          zIndex: 9,
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.2,
+          shadowRadius: 5,
+          elevation: 5,
+          maxHeight: 300,
+          zIndex: 5000,
           position: 'absolute',
-          top: 175,
+          top: 195,
           left: 20,
           right: 20
         }}>
           <ScrollView 
             nestedScrollEnabled={true}
             keyboardShouldPersistTaps="handled"
+            style={{ zIndex: 5001 }}
           >
             {productOptions.map((option) => (
               <TouchableOpacity
@@ -988,11 +1362,11 @@ export default function AddSupplier() {
                 style={{
                   flexDirection: 'row',
                   alignItems: 'center',
-                  paddingVertical: 12,
-                  paddingHorizontal: 12,
+                  paddingVertical: 14,
+                  paddingHorizontal: 16,
                   borderBottomWidth: option.value !== productOptions[productOptions.length - 1].value ? 1 : 0,
                   borderBottomColor: '#F3F4F6',
-                  backgroundColor: productType === option.value ? '#F3F4F6' : 'transparent',
+                  backgroundColor: productType === option.value ? 'rgba(79, 70, 229, 0.1)' : 'transparent',
                 }}
                 onPress={() => {
                   setProductType(option.value);
@@ -1001,17 +1375,17 @@ export default function AddSupplier() {
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                 }}
               >
-                <Ionicons name={option.icon} size={18} color="#4F46E5" style={{ marginRight: 8 }} />
+                <Ionicons name={option.icon} size={22} color="#4F46E5" style={{ marginRight: 12 }} />
                 <Text style={{ 
-                  fontSize: 15, 
+                  fontSize: 16, 
                   color: '#1F2937',
-                  fontWeight: productType === option.value ? 'bold' : 'normal',
+                  fontWeight: productType === option.value ? 'bold' : '500',
                 }}>
                   {option.label}
                     </Text>
                 
                 {productType === option.value && (
-                  <Ionicons name="checkmark" size={18} color="#4F46E5" style={{ marginLeft: 'auto' }} />
+                  <Ionicons name="checkmark-circle" size={22} color="#4F46E5" style={{ marginLeft: 'auto' }} />
                 )}
               </TouchableOpacity>
             ))}
@@ -1019,148 +1393,222 @@ export default function AddSupplier() {
         </View>
       )}
       
-      <InputField
-        label="Minimum Order Quantity"
-        placeholder="Enter minimum order quantity"
-        value={minOrderQuantity}
-        onChangeText={setMinOrderQuantity}
-        keyboardType="numeric"
-        error={errors.minOrderQuantity}
-        icon="cart-outline"
-        fieldName="minOrderQuantity"
-      />
-      
-      <InputField
-        label="Discount Rate %"
-        placeholder="Enter discount percentage"
-        value={discountRate}
-        onChangeText={setDiscountRate}
-        keyboardType="numeric"
-        error={errors.discountRate}
-        icon="pricetag-outline"
-        fieldName="discountRate"
-      />
-      
-      <View style={{ flexDirection: 'row', marginTop: 16 }}>
-        <TouchableOpacity
-          style={{
-            backgroundColor: '#F3F4F6',
-            borderRadius: 10,
-            height: 50,
-            alignItems: 'center',
-            flex: 1,
-            flexDirection: 'row',
-            justifyContent: 'center',
-            marginRight: 10,
-            zIndex: 20,
-          }}
-          onPress={goToPrevSection}
-          activeOpacity={0.8}
-        >
-          <Feather name="arrow-left" size={16} color="#4B5563" />
-          <Text style={{ color: '#4B5563', fontSize: 15, fontWeight: '600', marginLeft: 4 }}>
-            Back
-                    </Text>
-        </TouchableOpacity>
+      <View style={{ flexDirection: 'row', marginTop: 20, justifyContent: 'space-between' }}>
+        <View style={{ flex: 1, marginRight: 10 }}>
+          <AnimatedButton 
+            text="Back" 
+            icon="arrow-left" 
+            iconPosition="left"
+            onPress={goToPrevSection} 
+            isPrimary={false}
+            isFullWidth={true}
+          />
+        </View>
         
-        <TouchableOpacity
-          style={{
-            backgroundColor: '#4F46E5',
-            borderRadius: 10,
-            height: 50,
-            alignItems: 'center',
-            flex: 1,
-            flexDirection: 'row',
-            justifyContent: 'center',
-            zIndex: 20,
-          }}
+        <View style={{ flex: 1 }}>
+          <AnimatedButton 
+            text="Next" 
+            icon="arrow-right" 
           onPress={() => {
             setShowProductDropdown(false);
             goToNextSection();
           }}
-          activeOpacity={0.8}
-        >
-          <Text style={{ color: 'white', fontSize: 15, fontWeight: 'bold', marginRight: 8 }}>
-            Next
-                    </Text>
-          <Feather name="arrow-right" size={16} color="white" />
-        </TouchableOpacity>
+            isPrimary={true}
+            isFullWidth={true}
+          />
+        </View>
       </View>
     </View>
   );
 
-  // Modify the account section to remove the toggle and always show password fields
+  // Fix the Account section to ensure form fields can be filled properly
   const renderAccountSection = () => (
     <View style={{ width: width, paddingHorizontal: 20, paddingVertical: 24 }}>
       <SectionHeader title="Account Information" icon="key-outline" />
       
       <View style={{ 
         backgroundColor: '#EBF5FF', 
-        padding: 12, 
-        borderRadius: 8,
-        marginBottom: 20
+        padding: 16, 
+        borderRadius: 12,
+        marginBottom: 24,
+        flexDirection: 'row',
+        alignItems: 'center'
       }}>
-        <Text style={{ fontSize: 14, color: '#1E40AF' }}>
-          Create login credentials for this supplier
+        <Ionicons name="information-circle" size={24} color="#1E40AF" style={{ marginRight: 12 }} />
+        <Text style={{ fontSize: 14, color: '#1E40AF', flex: 1 }}>
+          Create login credentials for this supplier to access the system
                     </Text>
       </View>
       
-      <InputField
-        label="Password"
+      <View style={{ marginBottom: 20 }}>
+        <Text style={{ 
+          fontSize: 14, 
+          fontWeight: '600',
+          color: '#374151', 
+          marginBottom: 6,
+          marginLeft: 4 
+        }}>
+          Password
+        </Text>
+        <View style={{
+          borderWidth: 1,
+          borderColor: errors.password ? '#EF4444' : '#D1D5DB',
+          borderRadius: 10,
+          backgroundColor: 'white',
+          paddingHorizontal: 12,
+          flexDirection: 'row',
+          alignItems: 'center',
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 1 },
+          shadowOpacity: 0.05,
+          shadowRadius: 1,
+          elevation: 1,
+          height: 50,
+        }}>
+          <Ionicons 
+            name="lock-closed-outline" 
+            size={18} 
+            color="#4F46E5" 
+            style={{ marginRight: 8 }} 
+          />
+          <TextInput
         placeholder="Enter password for supplier account"
         value={password}
-        onChangeText={setPassword}
-        error={errors.password}
-        icon="lock-closed-outline"
-        fieldName="password"
+            onChangeText={(text) => {
+              setPassword(text);
+              if (errors.password) clearFieldError('password');
+            }}
         secureTextEntry={!showPassword}
-        onToggleSecure={() => setShowPassword(!showPassword)}
-      />
+            style={{
+              flex: 1,
+              fontSize: 15,
+              color: '#1F2937',
+            }}
+          />
+          <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+            <Ionicons
+              name={showPassword ? 'eye-off-outline' : 'eye-outline'}
+              size={22}
+              color="#6B7280"
+            />
+          </TouchableOpacity>
+        </View>
+        {errors.password && (
+          <Text style={{ color: '#EF4444', fontSize: 12, marginTop: 2, marginLeft: 4 }}>
+            {errors.password}
+          </Text>
+        )}
+        <Text style={{ color: '#6B7280', fontSize: 12, marginTop: 2, marginLeft: 4, fontStyle: 'italic' }}>
+          Password must be at least 6 characters with uppercase, lowercase and numbers
+        </Text>
+      </View>
       
-      <InputField
-        label="Confirm Password"
+      <View style={{ marginBottom: 20 }}>
+        <Text style={{ 
+          fontSize: 14, 
+          fontWeight: '600',
+          color: '#374151', 
+          marginBottom: 6,
+          marginLeft: 4 
+        }}>
+          Confirm Password
+        </Text>
+        <View style={{
+          borderWidth: 1,
+          borderColor: errors.confirmPassword ? '#EF4444' : '#D1D5DB',
+          borderRadius: 10,
+          backgroundColor: 'white',
+          paddingHorizontal: 12,
+          flexDirection: 'row',
+          alignItems: 'center',
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 1 },
+          shadowOpacity: 0.05,
+          shadowRadius: 1,
+          elevation: 1,
+          height: 50,
+        }}>
+          <Ionicons 
+            name="lock-closed-outline" 
+            size={18} 
+            color="#4F46E5" 
+            style={{ marginRight: 8 }} 
+          />
+          <TextInput
         placeholder="Confirm password"
         value={confirmPassword}
-        onChangeText={setConfirmPassword}
-        error={errors.confirmPassword}
-        icon="lock-closed-outline"
-        fieldName="confirmPassword"
+            onChangeText={(text) => {
+              setConfirmPassword(text);
+              if (errors.confirmPassword) clearFieldError('confirmPassword');
+            }}
         secureTextEntry={!showPassword}
-        onToggleSecure={() => setShowPassword(!showPassword)}
-      />
+          style={{
+            flex: 1,
+              fontSize: 15,
+              color: '#1F2937',
+            }}
+          />
+          <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+            <Ionicons
+              name={showPassword ? 'eye-off-outline' : 'eye-outline'}
+              size={22}
+              color="#6B7280"
+            />
+        </TouchableOpacity>
+        </View>
+        {errors.confirmPassword && (
+          <Text style={{ color: '#EF4444', fontSize: 12, marginTop: 2, marginLeft: 4 }}>
+            {errors.confirmPassword}
+          </Text>
+        )}
+      </View>
+      
+      <View style={{ 
+        backgroundColor: `rgba(79, 70, 229, 0.1)`, 
+        borderRadius: 12, 
+        padding: 16, 
+        marginBottom: 24,
+        borderLeftWidth: 4,
+        borderLeftColor: '#4F46E5'
+      }}>
+        <Text style={{ fontSize: 14, color: '#4F46E5', fontWeight: '500' }}>
+          Security Tip
+        </Text>
+        <Text style={{ fontSize: 13, color: '#6B7280', marginTop: 4 }}>
+          Strong passwords contain a mix of uppercase letters, lowercase letters, numbers, and special characters.
+        </Text>
+      </View>
       
       <View style={{ flexDirection: 'row', marginTop: 16 }}>
-        <TouchableOpacity
-          style={{
-            backgroundColor: '#F3F4F6',
-            borderRadius: 10,
-            height: 50,
-            alignItems: 'center',
-            flex: 1,
-            flexDirection: 'row',
-            justifyContent: 'center',
-            marginRight: 10,
-            zIndex: 20,
-          }}
-          onPress={goToPrevSection}
-          activeOpacity={0.8}
-        >
-          <Feather name="arrow-left" size={16} color="#4B5563" />
-          <Text style={{ color: '#4B5563', fontSize: 15, fontWeight: '600', marginLeft: 4 }}>
-            Back
-          </Text>
-        </TouchableOpacity>
+        <View style={{ flex: 1, marginRight: 10 }}>
+          <AnimatedButton 
+            text="Back" 
+            icon="arrow-left" 
+            iconPosition="left"
+            onPress={goToPrevSection} 
+            isPrimary={false}
+            isFullWidth={true}
+          />
+        </View>
         
+        <Animated.View style={{ 
+          flex: 2,
+          transform: [{ scale: buttonScale }] 
+        }}>
         <TouchableOpacity
           style={{
             backgroundColor: submitted ? '#059669' : '#4F46E5',
             borderRadius: 10,
             height: 50,
             alignItems: 'center',
-            flex: 2,
-            flexDirection: 'row',
             justifyContent: 'center',
+              flexDirection: 'row',
             zIndex: 20,
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.1,
+              shadowRadius: 3,
+              elevation: 2,
           }}
           onPress={handleSubmit}
           disabled={loading || submitted}
@@ -1177,45 +1625,95 @@ export default function AddSupplier() {
             </>
           ) : (
             <>
-              <Text style={{ color: 'white', fontSize: 15, fontWeight: 'bold' }}>
+                <Text style={{ color: 'white', fontSize: 15, fontWeight: 'bold', marginRight: 8 }}>
               Add Supplier
               </Text>
+                <Feather name="check-circle" size={18} color="white" />
             </>
           )}
         </TouchableOpacity>
+        </Animated.View>
       </View>
     </View>
   );
 
   const ProgressDots = () => (
     <View style={{ 
+      marginBottom: 24 
+    }}>
+    <View style={{ 
       flexDirection: 'row', 
-      justifyContent: 'center', 
-      marginBottom: 16 
+        justifyContent: 'space-between',
+        marginBottom: 10,
+        paddingHorizontal: 12
+      }}>
+        {sectionTitles.map((title, index) => (
+          <Text 
+            key={index}
+            style={{ 
+              fontSize: 12,
+              color: currentSection >= index ? '#4F46E5' : '#9CA3AF',
+              fontWeight: currentSection === index ? '700' : '500',
+              textAlign: 'center',
+              width: 60,
+            }}
+          >
+            {title}
+          </Text>
+        ))}
+      </View>
+      
+      <View style={{ 
+        flexDirection: 'row', 
+        alignItems: 'center',
+        height: 30,
+        paddingHorizontal: 10
     }}>
       {sectionTitles.map((_, index) => (
+          <React.Fragment key={index}>
+            {/* Connect dots with lines */}
+            {index > 0 && (
+              <View style={{
+                flex: 1,
+                height: 3,
+                backgroundColor: currentSection >= index ? '#4F46E5' : '#E5E7EB'
+              }} />
+            )}
+            
         <TouchableOpacity
-          key={index}
           onPress={() => setCurrentSection(index)}
+              activeOpacity={0.7}
           style={{
             width: 30,
             height: 30,
             borderRadius: 15,
-            backgroundColor: currentSection === index ? '#4F46E5' : '#E5E7EB',
+                backgroundColor: 'white',
             justifyContent: 'center',
             alignItems: 'center',
-            marginHorizontal: 4
-          }}
-        >
+                borderWidth: 2,
+                borderColor: currentSection >= index ? '#4F46E5' : '#E5E7EB',
+                shadowColor: currentSection === index ? '#4F46E5' : 'transparent',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.2,
+                shadowRadius: 3,
+                elevation: currentSection === index ? 2 : 0,
+              }}
+            >
+              {currentSection > index ? (
+                <Ionicons name="checkmark" size={16} color="#4F46E5" />
+              ) : (
           <Text style={{ 
-            color: currentSection === index ? 'white' : '#6B7280', 
+                  color: currentSection === index ? '#4F46E5' : '#9CA3AF', 
             fontSize: 14, 
             fontWeight: 'bold' 
           }}>
             {index + 1}
             </Text>
+              )}
             </TouchableOpacity>
+          </React.Fragment>
       ))}
+      </View>
     </View>
   );
 
@@ -1263,3 +1761,84 @@ export default function AddSupplier() {
     </SafeAreaView>
   );
 }
+
+// Add animated button for all Next/Back buttons
+const AnimatedButton = ({ 
+  text, 
+  icon, 
+  iconPosition = 'right', 
+  onPress, 
+  isPrimary = true,
+  isFullWidth = false,
+  loading = false,
+  disabled = false
+}) => {
+  const buttonAnimation = useRef(new Animated.Value(1)).current;
+  
+  const handlePress = () => {
+    Animated.sequence([
+      Animated.timing(buttonAnimation, {
+        toValue: 0.95,
+        duration: 100,
+        useNativeDriver: true,
+      }),
+      Animated.timing(buttonAnimation, {
+        toValue: 1,
+        duration: 100,
+        useNativeDriver: true,
+      }),
+    ]).start();
+    
+    if (onPress) onPress();
+  };
+  
+  return (
+    <Animated.View style={{ 
+      flex: isFullWidth ? 1 : undefined,
+      transform: [{ scale: buttonAnimation }],
+      shadowColor: isPrimary ? "#4338CA" : "#000",
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: isPrimary ? 0.2 : 0.1,
+      shadowRadius: 3,
+      elevation: isPrimary ? 2 : 1,
+      borderRadius: 10,
+    }}>
+      <TouchableOpacity
+        style={{
+          backgroundColor: disabled ? '#A5B4FC' : (isPrimary ? '#4F46E5' : '#F3F4F6'),
+          borderRadius: 10,
+          height: 50,
+          paddingHorizontal: 16,
+          alignItems: 'center',
+          justifyContent: 'center',
+          flexDirection: 'row',
+        }}
+        onPress={handlePress}
+        activeOpacity={0.8}
+        disabled={disabled || loading}
+      >
+        {loading ? (
+          <ActivityIndicator color="white" size="small" />
+        ) : (
+          <>
+            {icon && iconPosition === 'left' && (
+              <Feather name={icon} size={16} color={isPrimary ? 'white' : '#4B5563'} style={{ marginRight: 6 }} />
+            )}
+            <Text style={{ 
+              color: isPrimary ? 'white' : '#4B5563', 
+              fontSize: 15, 
+              fontWeight: isPrimary ? 'bold' : '600',
+              marginLeft: icon && iconPosition === 'left' ? 4 : 0,
+              marginRight: icon && iconPosition === 'right' ? 4 : 0
+            }}>
+              {text}
+            </Text>
+            {icon && iconPosition === 'right' && (
+              <Feather name={icon} size={16} color={isPrimary ? 'white' : '#4B5563'} style={{ marginLeft: 6 }} />
+            )}
+          </>
+        )}
+      </TouchableOpacity>
+    </Animated.View>
+  );
+};
