@@ -38,7 +38,8 @@ import {
   updateDoc,
   where,
   getDoc,
-  writeBatch
+  writeBatch,
+  limit
 } from 'firebase/firestore';
 import { db } from '../../../../firebase/firebaseConfig';
 
@@ -58,6 +59,7 @@ export default function CustomerSupportChat() {
   const [supportTopic, setSupportTopic] = useState('');
   const [supportMessage, setSupportMessage] = useState('');
   const [tempSupportData, setTempSupportData] = useState({});
+  const [resolvedChats, setResolvedChats] = useState([]);
   
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(20)).current;
@@ -81,6 +83,7 @@ export default function CustomerSupportChat() {
     ]).start();
 
     fetchSupportAgents();
+    fetchResolvedIssues();
   }, [userData?.uid]);
 
   // Fetch customer support agents
@@ -122,6 +125,9 @@ export default function CustomerSupportChat() {
           setSupportAgents(backupAgents);
           setFilteredAgents(backupAgents);
           fetchExistingChats(backupAgents);
+          
+          // After setting support agents, check assignments
+          await checkAgentAssignments();
         } else {
           setLoading(false);
         }
@@ -147,6 +153,10 @@ export default function CustomerSupportChat() {
       // Check for existing chats
       fetchExistingChats(availableAgents.length > 0 ? availableAgents : agentsList);
       
+      // After setting support agents, check assignments
+      await checkAgentAssignments();
+      
+      setLoading(false);
     } catch (error) {
       console.error('Error fetching support agents:', error);
       setLoading(false);
@@ -236,6 +246,8 @@ export default function CustomerSupportChat() {
       const unread = {};
       let hasActiveChat = false;
       
+      const currentActiveIssues = new Set(); // Track active issues
+      
       for (const chatDoc of chatSnapshot.docs) {
         const chatData = chatDoc.data();
         const agentId = chatDoc.id;
@@ -251,17 +263,38 @@ export default function CustomerSupportChat() {
           // Store unread count
           unread[agentId] = chatData.unreadCount || 0;
           
-          // Check if this is an active chat
-          if (!hasActiveChat && chatData.status !== 'resolved') {
-            setActiveChat(agent);
-            hasActiveChat = true;
+          // Check if this is an active chat and track the issue
+          if (chatData.status === 'active' && chatData.issueId) {
+            currentActiveIssues.add(chatData.issueId);
+            
+            if (!hasActiveChat) {
+              setActiveChat(agent);
+              hasActiveChat = true;
+            }
           }
         }
+      }
+      
+      // Filter out agents that shouldn't be available for new issues
+      if (currentActiveIssues.size > 0 && tempSupportData.topic && tempSupportData.message) {
+        // We have a new issue and existing issues - make sure we don't assign same agent
+        const availableForNewIssue = agentsList.filter(agent => {
+          // Check if this agent is already handling an active issue
+          const isHandlingActiveIssue = currentActiveIssues.has(chatData?.issueId);
+          return !isHandlingActiveIssue;
+        });
+        
+        setFilteredAgents(availableForNewIssue);
       }
       
       setLastMessages(messages);
       setUnreadCounts(unread);
       setLoading(false);
+      
+      // If no active chats were found, show the + button
+      if (!hasActiveChat) {
+        setActiveChat(null);
+      }
       
     } catch (error) {
       console.error('Error fetching existing chats:', error);
@@ -282,7 +315,8 @@ export default function CustomerSupportChat() {
     // Store the topic and message for later use
     setTempSupportData({
       topic: supportTopic.trim(),
-      message: supportMessage.trim()
+      message: supportMessage.trim(),
+      issueId: `issue_${Date.now()}_${Math.random().toString(36).substring(2, 9)}` // Create unique issue ID
     });
     
     // If no agents were loaded or found, fetch them
@@ -293,7 +327,7 @@ export default function CustomerSupportChat() {
     // Show a brief help message
     Alert.alert(
       'Select a Support Agent', 
-      'Please select one of our available support agents below to handle your request.',
+      'Please select one of our available support agents to handle your request. Once assigned, this issue will be handled exclusively by the selected agent.',
       [{ text: 'OK', onPress: () => {} }]
     );
   };
@@ -323,7 +357,8 @@ export default function CustomerSupportChat() {
         createdAt: serverTimestamp(),
         read: false,
         type: 'text',
-        topic: tempSupportData.topic
+        topic: tempSupportData.topic,
+        issueId: tempSupportData.issueId // Include the unique issue ID
       };
       
       // Batch write to ensure consistency
@@ -344,6 +379,7 @@ export default function CustomerSupportChat() {
         participantName: agent.fullName || `${agent.firstName || ''} ${agent.lastName || ''}`,
         participantPhoto: agent.photoURL || null,
         topic: tempSupportData.topic,
+        issueId: tempSupportData.issueId, // Include issue ID in metadata
         lastMessage: {
           text: tempSupportData.message,
           senderId: userData.uid,
@@ -351,7 +387,9 @@ export default function CustomerSupportChat() {
         },
         updatedAt: serverTimestamp(),
         lastRead: serverTimestamp(),
-        status: 'active'
+        status: 'active',
+        assignedAgent: agent.uid, // Track the assigned agent
+        canTransfer: false // Prevent transfer by default
       }, { merge: true });
       
       // 4. Update recipient's chat metadata
@@ -361,6 +399,7 @@ export default function CustomerSupportChat() {
         participantName: userData.fullName || `${userData.firstName || ''} ${userData.lastName || ''}`,
         participantPhoto: userData.photoURL || null,
         topic: tempSupportData.topic,
+        issueId: tempSupportData.issueId, // Include issue ID in metadata
         lastMessage: {
           text: tempSupportData.message,
           senderId: userData.uid,
@@ -368,14 +407,37 @@ export default function CustomerSupportChat() {
         },
         updatedAt: serverTimestamp(),
         unreadCount: 1,
-        status: 'active'
+        status: 'active',
+        assignedAgent: agent.uid, // Track the assigned agent
+        canTransfer: false // Prevent transfer by default
       }, { merge: true });
+      
+      // 5. Add this issue to a global issues collection to track assignments
+      const issueRef = doc(db, 'supportIssues', tempSupportData.issueId);
+      batch.set(issueRef, {
+        issueId: tempSupportData.issueId,
+        topic: tempSupportData.topic,
+        customerId: userData.uid,
+        customerName: userData.fullName || `${userData.firstName || ''} ${userData.lastName || ''}`,
+        assignedAgentId: agent.uid,
+        assignedAgentName: agent.fullName || `${agent.firstName || ''} ${agent.lastName || ''}`,
+        status: 'active',
+        canTransfer: false,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+        roomId: roomId
+      });
       
       // Commit all changes
       await batch.commit();
       
       // Set active chat
       setActiveChat(agent);
+      
+      // Update the list to remove other agents from this issue
+      if (supportAgents.length > 0) {
+        setFilteredAgents([]);
+      }
       
       // Reset temp data
       setTempSupportData({});
@@ -387,7 +449,11 @@ export default function CustomerSupportChat() {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       }
       
-      Alert.alert('Request Sent', `Your support request has been sent to ${agent.fullName || 'the selected agent'}. They will respond shortly.`);
+      Alert.alert(
+        'Support Agent Assigned', 
+        `Your support request has been assigned exclusively to ${agent.fullName || 'the selected agent'}. Only this agent will handle your issue.`,
+        [{ text: 'OK', onPress: () => fetchSupportAgents() }] // Refresh the agent list after assignment
+      );
       
       setLoading(false);
     } catch (error) {
@@ -485,7 +551,7 @@ export default function CustomerSupportChat() {
       <MaterialIcons name="support-agent" size={70} color="#d1d5db" />
       <Text className="text-gray-500 mt-4 text-lg font-medium">No Active Support Chats</Text>
       <Text className="text-gray-400 text-center mt-2 mb-6">
-        Need help? Start a new conversation with our support team.
+        Need help? Start a new conversation with our support team. Each support issue will be handled by a dedicated agent.
       </Text>
       <TouchableOpacity
         className="bg-blue-500 py-3 px-6 rounded-full"
@@ -521,6 +587,180 @@ export default function CustomerSupportChat() {
       )}
     </View>
   );
+
+  // Function to check if agent is already assigned to another issue
+  const checkAgentAssignments = async () => {
+    if (!userData?.uid) return;
+    
+    try {
+      // Get all active support issues for this user
+      const issuesQuery = query(
+        collection(db, 'supportIssues'),
+        where('customerId', '==', userData.uid),
+        where('status', '==', 'active')
+      );
+      
+      const issuesSnapshot = await getDocs(issuesQuery);
+      if (!issuesSnapshot.empty) {
+        // Get all agents that are already assigned to this user's issues
+        const assignedAgentIds = issuesSnapshot.docs.map(doc => doc.data().assignedAgentId);
+        
+        // Filter out agents that are already handling other issues for this user
+        const availableAgents = supportAgents.filter(agent => 
+          !assignedAgentIds.includes(agent.uid) || 
+          (activeChat && agent.uid === activeChat.uid)
+        );
+        
+        setFilteredAgents(availableAgents);
+        
+        if (availableAgents.length === 0 && supportAgents.length > 0) {
+          // All agents are already assigned to this user's other issues
+          Alert.alert(
+            'Agents Already Assigned',
+            'All available support agents are already handling your other support issues. Please continue with your existing conversations.'
+          );
+        }
+      }
+    } catch (error) {
+      console.error('Error checking agent assignments:', error);
+    }
+  };
+
+  // Fetch resolved support issues
+  const fetchResolvedIssues = async () => {
+    if (!userData?.uid) return;
+    
+    try {
+      const resolvedIssuesQuery = query(
+        collection(db, 'supportIssues'),
+        where('customerId', '==', userData.uid),
+        where('status', '==', 'resolved'),
+        orderBy('updatedAt', 'desc'),
+        limit(5)
+      );
+      
+      const snapshot = await getDocs(resolvedIssuesQuery);
+      const resolvedIssues = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      
+      setResolvedChats(resolvedIssues);
+    } catch (error) {
+      console.error('Error fetching resolved issues:', error);
+    }
+  };
+
+  // Function to mark issue as resolved
+  const markIssueAsResolved = async () => {
+    if (!userData?.uid || !activeChat) return;
+    
+    try {
+      setLoading(true);
+      
+      // Find the active issue
+      const issuesQuery = query(
+        collection(db, 'supportIssues'),
+        where('customerId', '==', userData.uid),
+        where('assignedAgentId', '==', activeChat.uid),
+        where('status', '==', 'active')
+      );
+      
+      const issuesSnapshot = await getDocs(issuesQuery);
+      if (issuesSnapshot.empty) {
+        Alert.alert('Error', 'No active issue found to resolve.');
+        setLoading(false);
+        return;
+      }
+      
+      // Get the issue data
+      const issueDoc = issuesSnapshot.docs[0];
+      const issueData = issueDoc.data();
+      
+      // Update the issue status in the supportIssues collection
+      await updateDoc(doc(db, 'supportIssues', issueDoc.id), {
+        status: 'resolved',
+        resolvedAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+        resolution: 'Resolved by customer'
+      });
+      
+      // Update chat status in user's chats collection
+      const userChatRef = doc(db, 'users', userData.uid, 'chats', activeChat.uid);
+      await updateDoc(userChatRef, {
+        status: 'resolved',
+        resolvedAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      });
+      
+      // Update chat status in agent's chats collection
+      const agentChatRef = doc(db, 'users', activeChat.uid, 'chats', userData.uid);
+      await updateDoc(agentChatRef, {
+        status: 'resolved',
+        resolvedAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      });
+      
+      // Send a system message to notify both parties
+      const systemMessage = {
+        text: 'This support issue has been marked as resolved by the customer.',
+        senderId: 'system',
+        senderName: 'System',
+        receiverId: activeChat.uid,
+        receiverName: activeChat.fullName || `${activeChat.firstName || ''} ${activeChat.lastName || ''}`,
+        type: 'system',
+        createdAt: serverTimestamp(),
+        read: false
+      };
+      
+      // Add to both chat collections
+      await addDoc(collection(db, 'users', userData.uid, 'chats', activeChat.uid, 'messages'), systemMessage);
+      await addDoc(collection(db, 'users', activeChat.uid, 'chats', userData.uid, 'messages'), systemMessage);
+      
+      // Refresh data
+      setActiveChat(null);
+      await fetchSupportAgents();
+      await fetchResolvedIssues();
+      
+      Alert.alert(
+        'Issue Resolved', 
+        'Your support issue has been marked as resolved. You can now start a new support request if needed.',
+        [{ text: 'OK' }]
+      );
+      
+      setLoading(false);
+    } catch (error) {
+      console.error('Error resolving issue:', error);
+      Alert.alert('Error', 'Failed to mark issue as resolved. Please try again.');
+      setLoading(false);
+    }
+  };
+
+  // Render a resolved chat item
+  const renderResolvedChatItem = ({ item }) => {
+    const resolvedDate = item.resolvedAt?.toDate?.() || 
+                          new Date(item.resolvedAt?.seconds * 1000) || 
+                          new Date();
+    
+    return (
+      <View className="bg-white rounded-lg p-4 mb-2 border border-gray-200">
+        <View className="flex-row justify-between items-center">
+          <Text className="font-medium text-gray-800">{item.topic || 'Support Issue'}</Text>
+          <View className="bg-green-100 px-2 py-0.5 rounded-full">
+            <Text className="text-green-700 text-xs">Resolved</Text>
+          </View>
+        </View>
+        
+        <Text className="text-gray-500 text-xs mt-1">
+          Helped by: {item.assignedAgentName || 'Support Agent'}
+        </Text>
+        
+        <Text className="text-gray-500 text-xs mt-1">
+          Resolved on: {resolvedDate.toLocaleDateString()} at {resolvedDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+        </Text>
+      </View>
+    );
+  };
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50">
@@ -573,12 +813,20 @@ export default function CustomerSupportChat() {
                 <Text className="text-green-600 text-xs mt-1">
                   Active Support Session
                 </Text>
-                <TouchableOpacity
-                  className="bg-blue-500 rounded-full px-4 py-2 mt-3"
-                  onPress={() => openChat(activeChat)}
-                >
-                  <Text className="text-white text-center">Continue Chat</Text>
-                </TouchableOpacity>
+                <View className="flex-row mt-3">
+                  <TouchableOpacity
+                    className="bg-blue-500 rounded-full px-4 py-2 mr-2 flex-1"
+                    onPress={() => openChat(activeChat)}
+                  >
+                    <Text className="text-white text-center">Continue Chat</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    className="bg-green-500 rounded-full px-4 py-2 flex-1"
+                    onPress={markIssueAsResolved}
+                  >
+                    <Text className="text-white text-center">Resolve Issue</Text>
+                  </TouchableOpacity>
+                </View>
               </View>
             </TouchableOpacity>
             
@@ -601,17 +849,32 @@ export default function CustomerSupportChat() {
                   <Text className="text-blue-600">Cancel Request</Text>
                 </TouchableOpacity>
               </View>
-            ) : null}
+            ) : (
+              <View className="bg-amber-50 p-4 rounded-lg mb-4 border border-amber-200">
+                <Text className="font-medium text-amber-800">
+                  You have an active support session
+                </Text>
+                <Text className="text-amber-700 text-sm mt-1">
+                  Please continue your conversation with the assigned agent above. 
+                  To start a new issue, tap "Resolve Issue" when your current issue is solved.
+                </Text>
+              </View>
+            )}
             
-            <Text className="font-semibold text-gray-700 mb-2 mt-4">
-              {tempSupportData.topic && tempSupportData.message ? 'Choose a Support Agent' : 'Other Support Staff'}
-            </Text>
-            <FlatList
-              data={filteredAgents.filter(agent => agent.uid !== activeChat.uid)}
-              keyExtractor={(item) => item.uid}
-              renderItem={renderAgentItem}
-              ListEmptyComponent={renderEmptyAgentsList}
-            />
+            {/* Removing the "Other Support Staff" section */}
+            {tempSupportData.topic && tempSupportData.message && (
+              <>
+                <Text className="font-semibold text-gray-700 mb-2 mt-4">
+                  Choose a Support Agent
+                </Text>
+                <FlatList
+                  data={filteredAgents.filter(agent => agent.uid !== activeChat.uid)}
+                  keyExtractor={(item) => item.uid}
+                  renderItem={renderAgentItem}
+                  ListEmptyComponent={renderEmptyAgentsList}
+                />
+              </>
+            )}
           </>
         ) : (
           <>
@@ -648,14 +911,27 @@ export default function CustomerSupportChat() {
               <>
                 {/* Show empty state if no active chats */}
                 {renderEmptyState()}
+                
+                {/* Recent resolved issues */}
+                {resolvedChats.length > 0 && (
+                  <View className="mt-6">
+                    <Text className="font-semibold text-gray-700 mb-2">Recently Resolved Issues</Text>
+                    <FlatList
+                      data={resolvedChats}
+                      keyExtractor={(item) => item.issueId}
+                      renderItem={renderResolvedChatItem}
+                      scrollEnabled={false}
+                    />
+                  </View>
+                )}
               </>
             )}
           </>
         )}
       </Animated.View>
       
-      {/* FAB for new support request */}
-      {!newSupportRequest && !tempSupportData.topic && activeChat && (
+      {/* FAB for new support request - only show if no active issues */}
+      {!newSupportRequest && !tempSupportData.topic && !activeChat && (
         <TouchableOpacity
           className="absolute right-6 bottom-6 bg-blue-500 w-14 h-14 rounded-full justify-center items-center shadow-lg"
           onPress={() => setNewSupportRequest(true)}
@@ -681,7 +957,10 @@ export default function CustomerSupportChat() {
             <Pressable className="bg-white rounded-t-xl p-5" onPress={e => e.stopPropagation()}>
               <View className="w-12 h-1 bg-gray-300 rounded-full self-center mb-4" />
               
-              <Text className="text-xl font-bold text-gray-800 mb-6">New Support Request</Text>
+              <Text className="text-xl font-bold text-gray-800 mb-2">New Support Request</Text>
+              <Text className="text-sm text-gray-500 mb-4">
+                Your issue will be assigned to a single customer support agent who will handle it exclusively
+              </Text>
               
               <Text className="text-gray-700 font-medium mb-2">Topic</Text>
               <TextInput
