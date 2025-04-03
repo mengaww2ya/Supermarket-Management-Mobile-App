@@ -35,10 +35,10 @@ export default function Layout() {
         }}
       />
       <Tabs.Screen
-        name="chat"
+        name="supportChat"
         options={{
-          title: "chat",
-          tabBarIcon: ({ color }) => <MaterialIcons size={28} name="chat" color={color} />,
+          title: "Support",
+          tabBarIcon: ({ color }) => <MaterialIcons size={28} name="support-agent" color={color} />,
         }}
       />
       <Tabs.Screen

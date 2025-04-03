@@ -131,13 +131,12 @@ export default function SupportChat() {
     if (!userData?.uid || !customersList?.length) return;
     
     try {
-      const q = query(
-        collection(db, 'chatRooms'),
-        where('participants', 'array-contains', userData.uid),
-        orderBy('lastMessageTime', 'desc')
+      // Look for chats in the agent's chats collection
+      const userChatsQuery = query(
+        collection(db, 'users', userData.uid, 'chats')
       );
       
-      const unsubscribe = onSnapshot(q, (snapshot) => {
+      const unsubscribe = onSnapshot(userChatsQuery, (snapshot) => {
         const active = [];
         const pending = [];
         const resolved = [];
@@ -145,41 +144,43 @@ export default function SupportChat() {
         const unread = {};
         
         snapshot.docs.forEach(doc => {
-          const room = doc.data();
+          const chatData = doc.data();
+          const customerId = doc.id;
           
-          // Get the customer from this chat room
-          const otherUserId = room.participants.find(id => id !== userData.uid);
-          const customer = customersList.find(c => c.uid === otherUserId);
+          // Get the customer for this chat
+          const customer = customersList.find(c => c.uid === customerId);
           
           if (customer) {
-            const chatData = {
-              ...customer,
-              roomId: room.roomId,
-              lastMessageTime: room.lastMessageTime,
-              lastMessage: room.lastMessage
-            };
-            
             // Store last message
-            messages[customer.uid] = room.lastMessage;
+            if (chatData.lastMessage) {
+              messages[customer.uid] = chatData.lastMessage;
+            }
             
             // Store unread count
-            unread[customer.uid] = room.unreadCount?.[userData.uid] || 0;
+            unread[customer.uid] = chatData.unreadCount || 0;
+            
+            const chatInfo = {
+              ...customer,
+              roomId: getRoomId(userData.uid, customerId),
+              lastMessageTime: chatData.updatedAt,
+              lastMessage: chatData.lastMessage
+            };
             
             // Categorize based on status
-            if (room.status === 'resolved') {
-              resolved.push(chatData);
-            } else if (room.status === 'pending') {
-              pending.push(chatData);
+            if (chatData.status === 'resolved') {
+              resolved.push(chatInfo);
+            } else if (chatData.status === 'pending') {
+              pending.push(chatInfo);
             } else {
-              active.push(chatData);
+              active.push(chatInfo);
             }
           }
         });
         
         // Sort by last message time
         const sortByTime = (a, b) => {
-          const timeA = a.lastMessageTime?.toDate() || new Date(0);
-          const timeB = b.lastMessageTime?.toDate() || new Date(0);
+          const timeA = a.lastMessageTime?.toDate?.() || a.lastMessageTime || new Date(0);
+          const timeB = b.lastMessageTime?.toDate?.() || b.lastMessageTime || new Date(0);
           return timeB - timeA;
         };
         
@@ -239,36 +240,46 @@ export default function SupportChat() {
     if (!userData?.uid || !customer?.uid) return;
     
     try {
-      // Create or ensure chat room exists
+      // Create or ensure chat documentation exists in both users' collections
       const roomId = getRoomId(userData.uid, customer.uid);
       
-      // Check if room already exists
-      const roomDoc = await getDoc(doc(db, 'chatRooms', roomId));
+      // Check if chat already exists in agent's collection
+      const chatRef = doc(db, 'users', userData.uid, 'chats', customer.uid);
+      const chatDoc = await getDoc(chatRef);
       
-      if (!roomDoc.exists()) {
-        // Create new room
-        await setDoc(doc(db, 'chatRooms', roomId), {
-          roomId,
-          participants: [userData.uid, customer.uid],
+      if (!chatDoc.exists()) {
+        // Create new chat metadata for both users
+        const timestamp = serverTimestamp();
+        
+        // Create for agent
+        await setDoc(chatRef, {
+          participantId: customer.uid,
+          participantName: customer.fullName || `${customer.firstName || ''} ${customer.lastName || ''}`,
+          participantPhoto: customer.photoURL || null,
+          updatedAt: timestamp,
           status: 'active',
-          createdAt: serverTimestamp(),
-          lastMessageTime: serverTimestamp(),
-          unreadCount: {
-            [userData.uid]: 0,
-            [customer.uid]: 0
-          }
+          unreadCount: 0
         });
         
-        // Create in chatRoom collection too (for message storage)
-        await setDoc(doc(db, 'chatRoom', roomId), {
-          roomId,
-          participants: [userData.uid, customer.uid],
-          createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp()
+        // Create for customer
+        const customerChatRef = doc(db, 'users', customer.uid, 'chats', userData.uid);
+        await setDoc(customerChatRef, {
+          participantId: userData.uid,
+          participantName: userData.fullName || `${userData.firstName || ''} ${userData.lastName || ''}`,
+          participantPhoto: userData.photoURL || null,
+          updatedAt: timestamp,
+          status: 'active',
+          unreadCount: 0
         });
-      } else if (roomDoc.data().status === 'resolved') {
-        // Reactivate resolved chat
-        await updateDoc(doc(db, 'chatRooms', roomId), {
+      } else if (chatDoc.data().status === 'resolved') {
+        // Reactivate resolved chat on both sides
+        await updateDoc(chatRef, {
+          status: 'active',
+          reopenedAt: serverTimestamp()
+        });
+        
+        const customerChatRef = doc(db, 'users', customer.uid, 'chats', userData.uid);
+        await updateDoc(customerChatRef, {
           status: 'active',
           reopenedAt: serverTimestamp()
         });
@@ -285,11 +296,20 @@ export default function SupportChat() {
   };
 
   // Update chat status
-  const updateChatStatus = async (roomId, status) => {
-    if (!roomId) return;
+  const updateChatStatus = async (customer, status) => {
+    if (!customer?.uid) return;
     
     try {
-      await updateDoc(doc(db, 'chatRooms', roomId), {
+      // Update status in both collections
+      const agentChatRef = doc(db, 'users', userData.uid, 'chats', customer.uid);
+      await updateDoc(agentChatRef, {
+        status: status,
+        statusUpdatedAt: serverTimestamp(),
+        statusUpdatedBy: userData.uid
+      });
+      
+      const customerChatRef = doc(db, 'users', customer.uid, 'chats', userData.uid);
+      await updateDoc(customerChatRef, {
         status: status,
         statusUpdatedAt: serverTimestamp(),
         statusUpdatedBy: userData.uid
