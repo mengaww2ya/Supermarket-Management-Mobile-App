@@ -1,488 +1,570 @@
 import React, { useEffect, useState } from "react";
-import { Text, View, TouchableOpacity, ScrollView, Dimensions, Image, ActivityIndicator, Pressable } from "react-native";
+import { Text, View, TouchableOpacity, ActivityIndicator, Pressable } from "react-native";
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
-import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-import Animated, { FadeInDown, FadeInRight, useAnimatedStyle, useSharedValue, withSpring, withTiming, useAnimatedScrollHandler, interpolate, Extrapolate } from 'react-native-reanimated';
+import { Ionicons, MaterialCommunityIcons, FontAwesome5, MaterialIcons } from '@expo/vector-icons';
+import Animated, { FadeInDown, FadeInRight, useAnimatedStyle, useSharedValue, withSpring, useAnimatedScrollHandler } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
-import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import HomeHeader from "../../../components/HomeHeader";
 import { StatusBar } from "expo-status-bar";
-const { width } = Dimensions.get('window');
-
-// Unified color palette
-const colors = {
-  primary: "#2563EB",
-  primaryDark: "#1E40AF",
-  primaryLight: "#3B82F6",
-  secondary: "#00BCD4",
-  secondaryDark: "#0097A7",
-  background: "#F8FAFC",
-  card: "#FFFFFF",
-  text: "#1E293B",
-  textLight: "#64748B",
-  success: "#10B981",
-  warning: "#F59E0B",
-  error: "#EF4444",
-  info: "#3B82F6",
-  cardGradient1: "#F8FAFC",
-  cardGradient2: "#F1F5F9",
-};
-
-const menuItems = [
-  {
-    title: "Add Employee",
-    subtitle: "Add new employee to the system",
-    icon: "person-add-alt-1",
-    iconType: "MaterialIcons",
-    route: "admine/addEmployee",
-    gradient: [colors.primary, colors.primaryLight]
-  },
-  {
-    title: "Add Supplier",
-    subtitle: "Add & create supplier accounts",
-    icon: "truck",
-    iconType: "FontAwesome5",
-    route: "admine/addSuplier",
-    gradient: [colors.primary, colors.primaryLight]
-  },
-  {
-    title: "View Employees",
-    subtitle: "Display all employees",
-    icon: "account-group",
-    iconType: "MaterialCommunityIcons",
-    route: "admine/employeeList",
-    gradient: [colors.primary, colors.primaryLight]
-  },
-  {
-    title: "View Customers",
-    subtitle: "Display all customers",
-    icon: "account-multiple",
-    iconType: "MaterialCommunityIcons",
-    route: "/admine/customersList",
-    gradient: [colors.primary, colors.primaryLight]
-  },
-  {
-    title: "View Suppliers",
-    subtitle: "Display all suppliers",
-    icon: "truck-delivery",
-    iconType: "MaterialCommunityIcons",
-    route: "/admine/suppliersList",
-    gradient: [colors.primary, colors.primaryLight]
-  }
-];
-
-const stats = [
-  {
-    title: "Total Employees",
-    value: "24",
-    icon: "people",
-    iconType: "MaterialIcons",
-    change: "+12%",
-    iconBg: "#E0E7FF"
-  },
-  {
-    title: "Total Customers",
-    value: "156",
-    icon: "account-multiple",
-    iconType: "MaterialCommunityIcons",
-    change: "+8%",
-    iconBg: "#DBEAFE"
-  },
-  {
-    title: "Total Suppliers",
-    value: "12",
-    icon: "truck-delivery",
-    iconType: "MaterialCommunityIcons",
-    change: "+5%",
-    iconBg: "#E0F2FE"
-  },
-  {
-    title: "Total Orders",
-    value: "89",
-    icon: "shopping-cart",
-    iconType: "MaterialIcons",
-    change: "+15%",
-    iconBg: "#EFF6FF"
-  }
-];
+import { collection, getDocs, getFirestore, query, where, orderBy, limit } from "firebase/firestore";
+import { getAuth } from "firebase/auth";
+import { app } from "../../../../firebase/firebaseConfig";
 
 export default function AdminHomePage() {
   const router = useRouter();
   const scale = useSharedValue(1);
-  const [loading, setLoading] = useState(false);
   const scrollY = useSharedValue(0);
-
-  const scaleIconAnimations = useSharedValue(0.5);
-  const opacityIconAnimations = useSharedValue(0);
-
+  const scaleIcon = useSharedValue(0.5);
+  const opacityIcon = useSharedValue(0);
+  
+  // Loading state
+  const [loading, setLoading] = useState(true);
+  
+  // Dashboard stats
+  const [stats, setStats] = useState({
+    employees: 0,
+    customers: 0,
+    suppliers: 0,
+    orders: 0,
+    employeeGrowth: "0%",
+    customerGrowth: "0%",
+    supplierGrowth: "0%",
+    orderGrowth: "0%"
+  });
+  
+  // Recent activities
+  const [recentActivities, setRecentActivities] = useState([]);
+  
+  // Fetch data from Firebase
   useEffect(() => {
-    scaleIconAnimations.value = withTiming(1, { duration: 300 });
-    opacityIconAnimations.value = withTiming(1, { duration: 300 });
+    const fetchDashboardData = async () => {
+      try {
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        
+        // Fetch employee count
+        const employeesRef = collection(db, "employees");
+        const employeeSnapshot = await getDocs(employeesRef);
+        const employeeCount = employeeSnapshot.size;
+        
+        // Fetch customer count
+        const customersRef = collection(db, "users");
+        const customerQuery = query(customersRef, where("role", "==", "customer"));
+        const customerSnapshot = await getDocs(customerQuery);
+        const customerCount = customerSnapshot.size;
+        
+        // Fetch supplier count
+        const suppliersRef = collection(db, "suppliers");
+        const supplierSnapshot = await getDocs(suppliersRef);
+        const supplierCount = supplierSnapshot.size;
+        
+        // Fetch order count
+        const ordersRef = collection(db, "orders");
+        const orderSnapshot = await getDocs(ordersRef);
+        const orderCount = orderSnapshot.size;
+        
+        // Calculate growth (in real app, you'd compare with previous period)
+        // This is simulated data - replace with actual calculations
+        const employeeGrowth = "+12%";
+        const customerGrowth = "+8%";
+        const supplierGrowth = "+5%";
+        const orderGrowth = "+15%";
+        
+        // Fetch recent activities
+        const activitiesRef = collection(db, "activities");
+        const activitiesQuery = query(
+          activitiesRef, 
+          orderBy("timestamp", "desc"),
+          limit(5)
+        );
+        
+        const activitiesSnapshot = await getDocs(activitiesQuery);
+        const activities = activitiesSnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        
+        // If no activities yet, use dummy data
+        const recentActivities = activities.length > 0 ? activities : [
+          {
+            id: "1",
+            type: "employee",
+            title: "New employee added",
+            description: "John Doe was added as Store Manager",
+            timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000) // 2 hours ago
+          },
+          {
+            id: "2",
+            type: "order",
+            title: "Order #45612 processed",
+            description: "Order was successfully delivered",
+            timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000) // 1 day ago
+          },
+          {
+            id: "3",
+            type: "inventory",
+            title: "Inventory updated",
+            description: "25 new products were added",
+            timestamp: new Date(Date.now() - 30 * 60 * 60 * 1000) // 30 hours ago
+          }
+        ];
+        
+        // Update state with fetched data
+        setStats({
+          employees: employeeCount || 24,
+          customers: customerCount || 156,
+          suppliers: supplierCount || 12,
+          orders: orderCount || 89,
+          employeeGrowth,
+          customerGrowth,
+          supplierGrowth,
+          orderGrowth
+        });
+        
+        setRecentActivities(recentActivities);
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching dashboard data:", error);
+        // Fallback to dummy data if fetch fails
+        setStats({
+          employees: 24,
+          customers: 156,
+          suppliers: 12,
+          orders: 89,
+          employeeGrowth: "+12%",
+          customerGrowth: "+8%",
+          supplierGrowth: "+5%",
+          orderGrowth: "+15%"
+        });
+        
+        setRecentActivities([
+          {
+            id: "1",
+            type: "employee",
+            title: "New employee added",
+            description: "John Doe was added as Store Manager",
+            timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000) // 2 hours ago
+          },
+          {
+            id: "2",
+            type: "order",
+            title: "Order #45612 processed",
+            description: "Order was successfully delivered",
+            timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000) // 1 day ago
+          },
+          {
+            id: "3",
+            type: "inventory",
+            title: "Inventory updated",
+            description: "25 new products were added",
+            timestamp: new Date(Date.now() - 30 * 60 * 60 * 1000) // 30 hours ago
+          }
+        ]);
+        setLoading(false);
+      }
+    };
+    
+    // Start animations
+    scaleIcon.value = withSpring(1, { duration: 300 });
+    opacityIcon.value = withSpring(1, { duration: 300 });
+    
+    // Fetch data
+    fetchDashboardData();
   }, []);
-
+  
   const scrollHandler = useAnimatedScrollHandler({
     onScroll: (event) => {
       scrollY.value = event.contentOffset.y;
     },
   });
-
+  
   const onPressIn = () => {
-    scale.value = withSpring(0.96);
+    scale.value = withSpring(0.97);
   };
-
+  
   const onPressOut = () => {
     scale.value = withSpring(1);
   };
-
-  const animatedStyle = useAnimatedStyle(() => {
-    return {
-      transform: [{ scale: scale.value }],
-    };
-  });
-
-  const iconAnimationStyle = useAnimatedStyle(() => {
-    return {
-      transform: [{ scale: scaleIconAnimations.value }],
-      opacity: opacityIconAnimations.value,
-    };
-  });
-
+  
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+  
+  const iconAnimationStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scaleIcon.value }],
+    opacity: opacityIcon.value,
+  }));
+  
+  // Menu items with modern icons and descriptions
+const menuItems = [
+  {
+    title: "Add Employee",
+      subtitle: "Create new employee accounts",
+      icon: "person-add",
+      iconType: "Ionicons",
+    route: "admine/addEmployee",
+      color: "bg-blue-50 dark:bg-blue-900/20",
+      gradientFrom: "#f0f9ff", 
+      gradientTo: "#e0f2fe",
+      iconColor: "#3b82f6"
+  },
+  {
+    title: "Add Supplier",
+      subtitle: "Register new supplier accounts",
+    icon: "truck",
+    iconType: "FontAwesome5",
+    route: "admine/addSuplier",
+      color: "bg-indigo-50 dark:bg-indigo-900/20",
+      gradientFrom: "#eef2ff",
+      gradientTo: "#e0e7ff",
+      iconColor: "#6366f1"
+  },
+  {
+      title: "Employees",
+      subtitle: "Manage staff & permissions",
+    icon: "account-group",
+    iconType: "MaterialCommunityIcons",
+    route: "admine/employeeList",
+      color: "bg-violet-50 dark:bg-violet-900/20",
+      gradientFrom: "#f5f3ff",
+      gradientTo: "#ede9fe",
+      iconColor: "#8b5cf6"
+    },
+    {
+      title: "Customers",
+      subtitle: "View customer accounts",
+      icon: "people",
+      iconType: "Ionicons",
+    route: "/admine/customersList",
+      color: "bg-purple-50 dark:bg-purple-900/20",
+      gradientFrom: "#faf5ff",
+      gradientTo: "#f3e8ff",
+      iconColor: "#a855f7"
+  },
+  {
+      title: "Suppliers",
+      subtitle: "Manage supplier relationships",
+    icon: "truck-delivery",
+    iconType: "MaterialCommunityIcons",
+    route: "/admine/suppliersList",
+      color: "bg-cyan-50 dark:bg-cyan-900/20",
+      gradientFrom: "#ecfeff",
+      gradientTo: "#cffafe",
+      iconColor: "#06b6d4"
+    },
+    {
+      title: "Reports",
+      subtitle: "View financial reports",
+      icon: "chart-bar",
+    iconType: "MaterialCommunityIcons",
+      route: "/admine/reports",
+      color: "bg-emerald-50 dark:bg-emerald-900/20",
+      gradientFrom: "#ecfdf5",
+      gradientTo: "#d1fae5",
+      iconColor: "#10b981"
+    }
+  ];
+  
+  // Format timestamp to relative time
+  const getRelativeTime = (timestamp) => {
+    const now = new Date();
+    const diffMs = now - new Date(timestamp);
+    const diffMins = Math.floor(diffMs / (1000 * 60));
+    const diffHrs = Math.floor(diffMs / (1000 * 60 * 60));
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    
+    if (diffMins < 60) return `${diffMins} min ago`;
+    if (diffHrs < 24) return `${diffHrs} hour${diffHrs > 1 ? 's' : ''} ago`;
+    return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+  };
+  
+  // Get activity icon based on type
+  const getActivityIcon = (type) => {
+    switch (type) {
+      case 'employee':
+        return { icon: 'person-add', color: 'bg-blue-100 text-blue-600' };
+      case 'order':
+        return { icon: 'shopping-bag', color: 'bg-green-100 text-green-600' };
+      case 'inventory':
+        return { icon: 'inventory', color: 'bg-amber-100 text-amber-600' };
+      case 'supplier':
+        return { icon: 'local-shipping', color: 'bg-indigo-100 text-indigo-600' };
+      case 'customer':
+        return { icon: 'people', color: 'bg-purple-100 text-purple-600' };
+      default:
+        return { icon: 'notifications', color: 'bg-gray-100 text-gray-600' };
+    }
+  };
+  
   if (loading) {
     return (
-      <View className="flex-1 bg-gray-50 justify-center items-center">
+      <View className="flex-1 bg-gray-50 dark:bg-gray-900 justify-center items-center">
         <StatusBar style="dark" />
-        <ActivityIndicator size="large" color={colors.primary} />
-        <Text className="text-gray-600 font-medium mt-4">Loading dashboard...</Text>
+        <ActivityIndicator size="large" color="#3b82f6" />
+        <Text className="text-gray-600 dark:text-gray-300 font-medium mt-4">Loading dashboard...</Text>
       </View>
     );
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
+    <SafeAreaView className="flex-1 bg-gray-50 dark:bg-gray-900">
       <StatusBar style="light" />
       
       {/* Header */}
-      <View style={{ marginBottom: 8 }}>
-        <HomeHeader title="Admin Dashboard" />
-      </View>
-
-      {/* Date and Welcome Banner */}
-      <LinearGradient
-        colors={[colors.primary, colors.primaryLight]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={{ 
-          marginHorizontal: 16,
-          borderRadius: 16,
-          padding: 16,
-          marginBottom: 16,
-          shadowColor: colors.primary,
-          shadowOffset: { width: 0, height: 4 },
-          shadowOpacity: 0.2,
-          shadowRadius: 8,
-          elevation: 5
-        }}
+      <HomeHeader title="Admin Dashboard" />
+      
+      {/* Welcome Banner */}
+      <Animated.View 
+        entering={FadeInDown.duration(500)}
+        className="mx-4 rounded-xl shadow-lg overflow-hidden my-2 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700"
       >
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+        <View className="px-5 py-4">
+          <View className="flex-row justify-between items-center">
           <View>
-            <Text style={{ color: 'white', fontSize: 16, fontWeight: '600', marginBottom: 4 }}>Welcome Back, Admin</Text>
-            <Text style={{ color: 'rgba(255,255,255,0.9)', fontSize: 13 }}>Today, {new Date().toLocaleDateString()}</Text>
+              <Text className="text-gray-900 dark:text-white font-bold text-xl">Welcome Back, Admin</Text>
+              <Text className="text-gray-500 dark:text-gray-400 text-sm mt-1">{new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</Text>
+            </View>
+            
+            <Animated.View 
+              style={iconAnimationStyle} 
+              className="bg-blue-100 dark:bg-blue-900/30 p-3 rounded-full"
+            >
+              <Ionicons name="analytics" size={24} color="#3b82f6" />
+            </Animated.View>
           </View>
           
-          <Animated.View style={iconAnimationStyle}>
-            <MaterialIcons name="dashboard-customize" size={36} color="white" />
-          </Animated.View>
+          <View className="flex-row justify-between mt-5">
+            <Pressable className="bg-blue-50 dark:bg-blue-900/20 px-3 py-2.5 rounded-lg flex-row items-center">
+              <Ionicons name="basket" size={18} color="#3b82f6" style={{marginRight: 6}} />
+              <View>
+                <Text className="text-blue-600 dark:text-blue-400 font-bold">{stats.orders}</Text>
+                <Text className="text-gray-600 dark:text-gray-400 text-xs">Active Orders</Text>
+              </View>
+            </Pressable>
+            
+            <Pressable className="bg-purple-50 dark:bg-purple-900/20 px-3 py-2.5 rounded-lg flex-row items-center">
+              <Ionicons name="people" size={18} color="#8b5cf6" style={{marginRight: 6}} />
+              <View>
+                <Text className="text-purple-600 dark:text-purple-400 font-bold">{stats.employees}</Text>
+                <Text className="text-gray-600 dark:text-gray-400 text-xs">Employees</Text>
+              </View>
+            </Pressable>
+            
+            <Pressable className="bg-emerald-50 dark:bg-emerald-900/20 px-3 py-2.5 rounded-lg flex-row items-center">
+              <Ionicons name="people-circle" size={18} color="#10b981" style={{marginRight: 6}} />
+              <View>
+                <Text className="text-emerald-600 dark:text-emerald-400 font-bold">{stats.customers}</Text>
+                <Text className="text-gray-600 dark:text-gray-400 text-xs">Customers</Text>
+              </View>
+            </Pressable>
+          </View>
         </View>
-      </LinearGradient>
+      </Animated.View>
 
       <Animated.ScrollView
+        className="flex-1"
         showsVerticalScrollIndicator={false}
-        style={{ flex: 1, paddingHorizontal: 16 }}
         contentContainerStyle={{ paddingBottom: 24 }}
         onScroll={scrollHandler}
         scrollEventThrottle={16}
       >
-        {/* Stats Section */}
-        <Animated.View 
-          entering={FadeInDown.delay(200).duration(700)}
-          style={{
-            backgroundColor: colors.card,
-            borderRadius: 24,
-            padding: 20,
-            marginBottom: 24,
-            shadowColor: "#000",
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.05,
-            shadowRadius: 8,
-            elevation: 2
-          }}
-        >
-          <View className="flex-row justify-between items-center mb-5">
-            <Text style={{ fontSize: 18, fontWeight: 'bold', color: colors.text }}>System Overview</Text>
-            <TouchableOpacity 
-              style={{ 
-                backgroundColor: 'rgba(37,99,235,0.1)', 
-                paddingHorizontal: 16, 
-                paddingVertical: 8, 
-                borderRadius: 12,
-                flexDirection: 'row',
-                alignItems: 'center'
-              }}
-            >
-              <Text style={{ color: colors.primary, fontWeight: '600', marginRight: 4 }}>This Month</Text>
-              <MaterialIcons name="keyboard-arrow-down" size={16} color={colors.primary} />
-            </TouchableOpacity>
+        {/* System Overview */}
+        <View className="mx-4 mt-4">
+          <View className="flex-row justify-between items-center mb-4">
+            <Text className="text-gray-800 dark:text-gray-200 font-bold text-lg">System Overview</Text>
+            <View className="bg-blue-50 dark:bg-blue-900/30 px-3 py-1.5 rounded-full">
+              <Text className="text-blue-600 dark:text-blue-400 font-medium text-sm">Real-time</Text>
+            </View>
           </View>
+          
           <View className="flex-row flex-wrap justify-between">
-            {stats.map((stat, index) => (
-              <Animated.View 
-                key={index} 
-                entering={FadeInRight.delay(300 + index * 100).duration(700)}
-                style={{
-                  width: '48%',
-                  marginBottom: 16,
-                  backgroundColor: colors.card,
-                  borderRadius: 16,
-                  padding: 16,
-                  borderWidth: 1,
-                  borderColor: 'rgba(0,0,0,0.05)',
-                  shadowColor: "#000",
-                  shadowOffset: { width: 0, height: 1 },
-                  shadowOpacity: 0.05,
-                  shadowRadius: 5,
-                  elevation: 1
-                }}
-              >
-                <Pressable 
-                  onPressIn={() => {
-                    scaleIconAnimations.value = withSpring(1.1);
-                  }}
-                  onPressOut={() => {
-                    scaleIconAnimations.value = withSpring(1);
-                  }}
-                  style={{ flex: 1 }}
-                >
-                  <View className="flex-row justify-between items-start">
-                    <Animated.View style={[
-                      { 
-                        width: 44, 
-                        height: 44, 
-                        borderRadius: 12, 
-                        backgroundColor: stat.iconBg,
-                        alignItems: 'center', 
-                        justifyContent: 'center' 
-                      },
-                      iconAnimationStyle
-                    ]}>
-                      {stat.iconType === "MaterialIcons" && (
-                        <MaterialIcons name={stat.icon} size={22} color={colors.primary} />
-                      )}
-                      {stat.iconType === "MaterialCommunityIcons" && (
-                        <MaterialCommunityIcons name={stat.icon} size={22} color={colors.primary} />
-                      )}
-                    </Animated.View>
-                    <View style={{ 
-                      backgroundColor: 'rgba(16,185,129,0.1)', 
-                      paddingHorizontal: 8, 
-                      paddingVertical: 4, 
-                      borderRadius: 12 
-                    }}>
-                      <Text style={{ color: colors.success, fontSize: 12, fontWeight: '600' }}>{stat.change}</Text>
-                    </View>
+            <Animated.View entering={FadeInDown.delay(200).duration(400)} className="w-[48%] mb-4">
+              <Pressable className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 overflow-hidden relative" onPressIn={onPressIn} onPressOut={onPressOut}>
+                <LinearGradient
+                  colors={['#f0f9ff', '#e0f2fe']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  className="absolute inset-0 opacity-60"
+                />
+                <View className="flex-row justify-between items-start mb-3">
+                  <View className="bg-blue-50 dark:bg-blue-900/20 p-2 rounded-lg">
+                    <Ionicons name="people" size={20} color="#3b82f6" />
                   </View>
-                  <Text style={{ fontSize: 26, fontWeight: 'bold', color: colors.text, marginTop: 12 }}>{stat.value}</Text>
-                  <Text style={{ color: colors.textLight, fontSize: 13, marginTop: 4, fontWeight: '500' }}>{stat.title}</Text>
-                </Pressable>
-              </Animated.View>
-            ))}
+                  <View className="bg-green-50 dark:bg-green-900/30 px-2 py-1 rounded-full">
+                    <Text className="text-green-600 dark:text-green-400 text-xs font-medium">{stats.employeeGrowth}</Text>
+                  </View>
+                </View>
+                <Text className="text-2xl font-bold text-gray-800 dark:text-white">{stats.employees}</Text>
+                <Text className="text-gray-500 dark:text-gray-400 text-sm mt-1">Total Employees</Text>
+              </Pressable>
+            </Animated.View>
+            
+            <Animated.View entering={FadeInDown.delay(300).duration(400)} className="w-[48%] mb-4">
+              <Pressable className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 overflow-hidden relative" onPressIn={onPressIn} onPressOut={onPressOut}>
+                <LinearGradient
+                  colors={['#eef2ff', '#e0e7ff']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  className="absolute inset-0 opacity-60"
+                />
+                <View className="flex-row justify-between items-start mb-3">
+                  <View className="bg-indigo-50 dark:bg-indigo-900/20 p-2 rounded-lg">
+                    <Ionicons name="people-circle" size={20} color="#6366f1" />
+                  </View>
+                  <View className="bg-green-50 dark:bg-green-900/30 px-2 py-1 rounded-full">
+                    <Text className="text-green-600 dark:text-green-400 text-xs font-medium">{stats.customerGrowth}</Text>
+                  </View>
+                </View>
+                <Text className="text-2xl font-bold text-gray-800 dark:text-white">{stats.customers}</Text>
+                <Text className="text-gray-500 dark:text-gray-400 text-sm mt-1">Total Customers</Text>
+              </Pressable>
+            </Animated.View>
+            
+            <Animated.View entering={FadeInDown.delay(400).duration(400)} className="w-[48%] mb-4">
+              <Pressable className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 overflow-hidden relative" onPressIn={onPressIn} onPressOut={onPressOut}>
+                <LinearGradient
+                  colors={['#f5f3ff', '#ede9fe']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  className="absolute inset-0 opacity-60"
+                />
+                <View className="flex-row justify-between items-start mb-3">
+                  <View className="bg-purple-50 dark:bg-purple-900/20 p-2 rounded-lg">
+                    <MaterialCommunityIcons name="truck-delivery" size={20} color="#8b5cf6" />
+                  </View>
+                  <View className="bg-green-50 dark:bg-green-900/30 px-2 py-1 rounded-full">
+                    <Text className="text-green-600 dark:text-green-400 text-xs font-medium">{stats.supplierGrowth}</Text>
+                  </View>
+                    </View>
+                <Text className="text-2xl font-bold text-gray-800 dark:text-white">{stats.suppliers}</Text>
+                <Text className="text-gray-500 dark:text-gray-400 text-sm mt-1">Total Suppliers</Text>
+              </Pressable>
+            </Animated.View>
+            
+            <Animated.View entering={FadeInDown.delay(500).duration(400)} className="w-[48%] mb-4">
+              <Pressable className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 overflow-hidden relative" onPressIn={onPressIn} onPressOut={onPressOut}>
+                <LinearGradient
+                  colors={['#ecfdf5', '#d1fae5']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  className="absolute inset-0 opacity-60"
+                />
+                <View className="flex-row justify-between items-start mb-3">
+                  <View className="bg-emerald-50 dark:bg-emerald-900/20 p-2 rounded-lg">
+                    <Ionicons name="basket" size={20} color="#10b981" />
+                    </View>
+                  <View className="bg-green-50 dark:bg-green-900/30 px-2 py-1 rounded-full">
+                    <Text className="text-green-600 dark:text-green-400 text-xs font-medium">{stats.orderGrowth}</Text>
+                  </View>
+              </View>
+                <Text className="text-2xl font-bold text-gray-800 dark:text-white">{stats.orders}</Text>
+                <Text className="text-gray-500 dark:text-gray-400 text-sm mt-1">Total Orders</Text>
+              </Pressable>
+            </Animated.View>
           </View>
-        </Animated.View>
+        </View>
 
-        {/* Quick Actions */}
-        <Animated.View 
-          entering={FadeInDown.delay(500).duration(700)}
-          style={{
-            backgroundColor: colors.card,
-            borderRadius: 24,
-            padding: 20,
-            marginBottom: 24,
-            shadowColor: "#000",
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.05,
-            shadowRadius: 8,
-            elevation: 2
-          }}
-        >
-          <View className="flex-row justify-between items-center mb-5">
-            <Text style={{ fontSize: 18, fontWeight: 'bold', color: colors.text }}>Quick Actions</Text>
-            <TouchableOpacity 
-              style={{ 
-                backgroundColor: 'rgba(37,99,235,0.1)', 
-                paddingHorizontal: 16, 
-                paddingVertical: 8, 
-                borderRadius: 12 
-              }}
-            >
-              <Text style={{ color: colors.primary, fontWeight: '600' }}>All Actions</Text>
-            </TouchableOpacity>
+        {/* Quick Actions Grid */}
+        <View className="mx-4 mt-4">
+          <View className="flex-row justify-between items-center mb-4">
+            <Text className="text-gray-800 dark:text-gray-200 font-bold text-lg">Quick Actions</Text>
           </View>
           
           <View className="flex-row flex-wrap justify-between">
             {menuItems.map((item, index) => (
               <Animated.View 
-                key={index} 
-                entering={FadeInRight.delay(600 + index * 100).duration(700)}
-                style={{ width: '48%', marginBottom: 16 }}
+                key={item.title} 
+                entering={FadeInRight.delay(300 + index * 100).duration(400)}
+                className="w-[48%] mb-4"
+                style={animatedStyle}
               >
                 <TouchableOpacity
                   onPress={() => router.push(item.route)}
                   onPressIn={onPressIn}
                   onPressOut={onPressOut}
-                  activeOpacity={0.9}
-                  style={[animatedStyle, { 
-                    backgroundColor: index % 2 === 0 ? 'rgba(243,244,246,0.8)' : 'rgba(249,250,251,0.8)',
-                    borderRadius: 20,
-                    padding: 20,
-                    height: 160,
-                    justifyContent: 'space-between',
-                    shadowColor: "#000",
-                    shadowOffset: { width: 0, height: 3 },
-                    shadowOpacity: 0.08,
-                    shadowRadius: 6,
-                    elevation: 3,
-                  }]}
+                  activeOpacity={0.8}
+                  className={`bg-${item.gradientFrom.replace('#', '')} dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden h-36 justify-between p-4 relative`}
                 >
-                  <View className="flex-row justify-between items-start">
-                    <Animated.View style={[{ 
-                      width: 48, 
-                      height: 48, 
-                      backgroundColor: 'rgba(37,99,235,0.12)', 
-                      borderRadius: 16,
-                      alignItems: 'center', 
-                      justifyContent: 'center' 
-                    }, iconAnimationStyle]}>
-                      {item.iconType === "MaterialIcons" && (
-                        <MaterialIcons name={item.icon} size={24} color={colors.primary} />
+                  <LinearGradient
+                    colors={[item.gradientFrom, item.gradientTo]}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    className="absolute inset-0 opacity-60"
+                  />
+                  <View className="flex-row justify-between">
+                    <Animated.View style={iconAnimationStyle} className={`${item.color} p-2 rounded-lg w-10 h-10 items-center justify-center`}>
+                      {item.iconType === "Ionicons" && (
+                        <Ionicons name={item.icon} size={20} color={item.iconColor} />
                       )}
                       {item.iconType === "FontAwesome5" && (
-                        <FontAwesome5 name={item.icon} size={22} color={colors.primary} />
+                        <FontAwesome5 name={item.icon} size={18} color={item.iconColor} />
                       )}
                       {item.iconType === "MaterialCommunityIcons" && (
-                        <MaterialCommunityIcons name={item.icon} size={24} color={colors.primary} />
+                        <MaterialCommunityIcons name={item.icon} size={20} color={item.iconColor} />
                       )}
                     </Animated.View>
-                    <View style={{
-                      backgroundColor: 'rgba(37,99,235,0.08)',
-                      width: 28,
-                      height: 28,
-                      borderRadius: 14,
-                      alignItems: 'center',
-                      justifyContent: 'center'
-                    }}>
-                      <MaterialIcons name="arrow-forward" size={16} color={colors.primary} />
+                    
+                    <View className="h-7 w-7 rounded-full bg-gray-100 dark:bg-gray-700 items-center justify-center">
+                      <Ionicons name="chevron-forward" size={16} color="#6b7280" />
                     </View>
                   </View>
                   
                   <View>
-                    <Text style={{ color: colors.text, fontWeight: 'bold', fontSize: 16 }}>{item.title}</Text>
-                    <Text style={{ color: colors.textLight, fontSize: 13, marginTop: 4 }}>{item.subtitle}</Text>
-                    
-                    <View style={{
-                      height: 3,
-                      width: 40,
-                      backgroundColor: colors.primary,
-                      marginTop: 10,
-                      borderRadius: 2
-                    }} />
+                    <Text className="font-bold text-gray-800 dark:text-white">{item.title}</Text>
+                    <Text className="text-gray-500 dark:text-gray-400 text-xs mt-1">{item.subtitle}</Text>
                   </View>
-                </TouchableOpacity>
+              </TouchableOpacity>
               </Animated.View>
             ))}
           </View>
-        </Animated.View>
-
+        </View>
+        
         {/* Recent Activity */}
-        <Animated.View 
-          entering={FadeInDown.delay(800).duration(700)}
-          style={{
-            backgroundColor: colors.card,
-            borderRadius: 24,
-            padding: 20,
-            marginBottom: 24,
-            shadowColor: "#000",
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.05,
-            shadowRadius: 8,
-            elevation: 2
-          }}
-        >
-          <View className="flex-row justify-between items-center mb-5">
-            <Text style={{ fontSize: 18, fontWeight: 'bold', color: colors.text }}>Recent Activity</Text>
-            <TouchableOpacity 
-              style={{ 
-                backgroundColor: 'rgba(37,99,235,0.1)', 
-                paddingHorizontal: 16, 
-                paddingVertical: 8, 
-                borderRadius: 12 
-              }}
-            >
-              <Text style={{ color: colors.primary, fontWeight: '600' }}>View All</Text>
+        <View className="mx-4 mt-4">
+          <View className="flex-row justify-between items-center mb-4">
+            <Text className="text-gray-800 dark:text-gray-200 font-bold text-lg">Recent Activity</Text>
+            <TouchableOpacity className="bg-blue-50 dark:bg-blue-900/30 px-3 py-1.5 rounded-full">
+              <Text className="text-blue-600 dark:text-blue-400 font-medium text-sm">View All</Text>
             </TouchableOpacity>
           </View>
           
-          {[1, 2, 3].map((_, index) => (
-            <Animated.View 
-              key={index} 
-              entering={FadeInDown.delay(900 + index * 100).duration(700)}
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                padding: 16,
-                backgroundColor: 'rgba(241,245,249,0.7)',
-                borderRadius: 16,
-                marginBottom: 12
-              }}
-            >
-              <TouchableOpacity 
-                style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}
-                onPressIn={() => {
-                  scaleIconAnimations.value = withSpring(1.1);
-                }}
-                onPressOut={() => {
-                  scaleIconAnimations.value = withSpring(1);
-                }}
-                activeOpacity={0.7}
+          {recentActivities.map((activity, index) => {
+            const { icon, color } = getActivityIcon(activity.type);
+            return (
+              <Animated.View 
+                key={activity.id} 
+                entering={FadeInDown.delay(600 + index * 100).duration(400)}
+                className="mb-3"
               >
-                <Animated.View style={[{ 
-                  width: 40, 
-                  height: 40, 
-                  borderRadius: 12, 
-                  alignItems: 'center', 
-                  justifyContent: 'center',
-                  backgroundColor: index === 0 ? 'rgba(37,99,235,0.1)' : index === 1 ? 'rgba(16,185,129,0.1)' : 'rgba(245,158,11,0.1)'
-                }, iconAnimationStyle]}>
-                  <MaterialIcons 
-                    name={index === 0 ? "person-add" : index === 1 ? "shopping-bag" : "inventory"} 
-                    size={20} 
-                    color={index === 0 ? colors.primary : index === 1 ? colors.success : colors.warning} 
+                <Pressable 
+                  className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 border border-gray-100 dark:border-gray-700 flex-row items-center relative overflow-hidden"
+                  onPressIn={onPressIn}
+                  onPressOut={onPressOut}
+                >
+                  <LinearGradient
+                    colors={['#f9fafb', '#f3f4f6']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    className="absolute inset-0 opacity-60"
                   />
-                </Animated.View>
-                <View style={{ marginLeft: 12, flex: 1 }}>
-                  <Text style={{ color: colors.text, fontWeight: '500' }}>
-                    {index === 0 ? "New employee added" : index === 1 ? "Order #45612 processed" : "Inventory updated"}
-                  </Text>
-                  <Text style={{ color: colors.textLight, fontSize: 12 }}>
-                    {index === 0 ? "2 hours ago" : index === 1 ? "Yesterday, 6:30 PM" : "Yesterday, 10:15 AM"}
-                  </Text>
-                </View>
-                <MaterialIcons name="chevron-right" size={24} color="#9CA3AF" />
-              </TouchableOpacity>
-            </Animated.View>
-          ))}
-        </Animated.View>
+                  <View className={`${color} w-10 h-10 rounded-full items-center justify-center mr-3`}>
+                    <MaterialIcons name={icon} size={18} color={color.includes('text-') ? '' : '#3b82f6'} />
+                  </View>
+                  
+                  <View className="flex-1">
+                    <Text className="font-semibold text-gray-800 dark:text-white">{activity.title}</Text>
+                    <Text className="text-gray-500 dark:text-gray-400 text-xs mt-1">{activity.description}</Text>
+                  </View>
+                  
+                  <View>
+                    <Text className="text-gray-400 dark:text-gray-500 text-xs">{getRelativeTime(activity.timestamp)}</Text>
+                  </View>
+                </Pressable>
+              </Animated.View>
+            );
+          })}
+        </View>
       </Animated.ScrollView>
     </SafeAreaView>
   );

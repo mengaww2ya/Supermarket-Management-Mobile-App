@@ -34,7 +34,11 @@ const menuOptions = [
     route: "/stockManager/Manage_stock_levels", 
     icon: "inventory", 
     iconType: "MaterialIcons",
-    bgColor: ["#4F46E5", "#6366F1"],
+    bgColor: ["#f0f9ff", "#e0f2fe"],
+    color: "bg-blue-50 dark:bg-blue-900/20",
+    gradientFrom: "#f0f9ff", 
+    gradientTo: "#e0f2fe",
+    iconColor: "#3b82f6",
     description: "Manage inventory levels, restock, and audit your stock"
   },
   { 
@@ -42,7 +46,11 @@ const menuOptions = [
     route: "/stockManager/ProductList", 
     icon: "cube-outline", 
     iconType: "Ionicons",
-    bgColor: ["#4F46E5", "#6366F1"],
+    bgColor: ["#eef2ff", "#e0e7ff"],
+    color: "bg-indigo-50 dark:bg-indigo-900/20",
+    gradientFrom: "#eef2ff",
+    gradientTo: "#e0e7ff",
+    iconColor: "#6366f1",
     description: "View and modify product details, pricing, and images"
   },
   { 
@@ -50,7 +58,11 @@ const menuOptions = [
     route: "/stockManager/ViewCategory", 
     icon: "tag", 
     iconType: "FontAwesome5",
-    bgColor: ["#4F46E5", "#6366F1"],
+    bgColor: ["#f5f3ff", "#ede9fe"],
+    color: "bg-violet-50 dark:bg-violet-900/20",
+    gradientFrom: "#f5f3ff",
+    gradientTo: "#ede9fe",
+    iconColor: "#8b5cf6",
     description: "Manage product categories and classification"
   },
   { 
@@ -58,7 +70,11 @@ const menuOptions = [
     route: "/stockManager/addProduct", 
     icon: "add-box", 
     iconType: "MaterialIcons",
-    bgColor: ["#4F46E5", "#6366F1"],
+    bgColor: ["#faf5ff", "#f3e8ff"],
+    color: "bg-purple-50 dark:bg-purple-900/20",
+    gradientFrom: "#faf5ff",
+    gradientTo: "#f3e8ff",
+    iconColor: "#a855f7",
     description: "Add new products to your inventory system"
   },
   { 
@@ -66,15 +82,23 @@ const menuOptions = [
     route: "/stockManager/Low-stock alerts", 
     icon: "alert-circle-outline", 
     iconType: "Ionicons",
-    bgColor: ["#4F46E5", "#6366F1"],
+    bgColor: ["#fff7ed", "#ffedd5"],
+    color: "bg-orange-50 dark:bg-orange-900/20",
+    gradientFrom: "#fff7ed",
+    gradientTo: "#ffedd5",
+    iconColor: "#f97316",
     description: "View products that need to be restocked soon"
   },
   { 
     name: "Supplier Orders", 
-    route: "/stockManager/Supplier order management", 
+    route: "/stockManager/Supplier_order_management", 
     icon: "truck-delivery", 
     iconType: "MaterialCommunityIcons",
-    bgColor: ["#4F46E5", "#6366F1"],
+    bgColor: ["#ecfdf5", "#d1fae5"],
+    color: "bg-emerald-50 dark:bg-emerald-900/20",
+    gradientFrom: "#ecfdf5",
+    gradientTo: "#d1fae5",
+    iconColor: "#10b981",
     description: "Manage orders from suppliers and deliveries"
   },
 ];
@@ -87,7 +111,10 @@ const stockOptions = [
     route: "/stockManager/addProduct", 
     icon: "add-circle", 
     iconType: "Ionicons",
-    color: ["#f8fafc", "#e0e7ff"],
+    color: "bg-blue-50 dark:bg-blue-900/20",
+    gradientFrom: "#f0f9ff", 
+    gradientTo: "#e0f2fe",
+    iconColor: "#3b82f6",
     textColor: "#4338ca"
   },
   { 
@@ -96,7 +123,10 @@ const stockOptions = [
     route: "/stockManager/ProductList", 
     icon: "view-list", 
     iconType: "MaterialIcons",
-    color: ["#f8fafc", "#e0f2fe"],
+    color: "bg-indigo-50 dark:bg-indigo-900/20",
+    gradientFrom: "#eef2ff",
+    gradientTo: "#e0e7ff",
+    iconColor: "#6366f1",
     textColor: "#0369a1",
     badge: "Products"
   },
@@ -106,7 +136,10 @@ const stockOptions = [
     route: "/stockManager/addCategory", 
     icon: "pricetag", 
     iconType: "Ionicons",
-    color: ["#f8fafc", "#ffedd5"],
+    color: "bg-orange-50 dark:bg-orange-900/20",
+    gradientFrom: "#fff7ed",
+    gradientTo: "#ffedd5",
+    iconColor: "#f97316",
     textColor: "#9a3412",
   },
   { 
@@ -115,7 +148,10 @@ const stockOptions = [
     route: "/stockManager/ViewCategory", 
     icon: "albums", 
     iconType: "Ionicons",
-    color: ["#f8fafc", "#f3e8ff"],
+    color: "bg-purple-50 dark:bg-purple-900/20",
+    gradientFrom: "#faf5ff",
+    gradientTo: "#f3e8ff",
+    iconColor: "#a855f7",
     textColor: "#6b21a8",
     badge: "Categories"
   },
@@ -125,7 +161,10 @@ const stockOptions = [
     route: "/stockManager/Low-stock alerts", 
     icon: "alert-circle", 
     iconType: "Ionicons",
-    color: ["#f8fafc", "#fee2e2"],
+    color: "bg-red-50 dark:bg-red-900/20",
+    gradientFrom: "#fef2f2",
+    gradientTo: "#fee2e2",
+    iconColor: "#ef4444",
     textColor: "#b91c1c",
     badge: "Alerts",
     alertType: true
@@ -136,7 +175,10 @@ const stockOptions = [
     route: "/stockManager/Supplier_order_management", 
     icon: "truck-delivery", 
     iconType: "MaterialCommunityIcons",
-    color: ["#f8fafc", "#dcfce7"],
+    color: "bg-emerald-50 dark:bg-emerald-900/20",
+    gradientFrom: "#ecfdf5",
+    gradientTo: "#d1fae5",
+    iconColor: "#10b981",
     textColor: "#15803d"
   },
 ];
@@ -144,18 +186,13 @@ const stockOptions = [
 // Quick action buttons from Manage_stock_levels.js
 const quickActions = [
   {
-    title: "Scan Barcode",
-    icon: "barcode-scan",
-    iconType: "MaterialCommunityIcons",
-    color: "#e0e7ff",
-    textColor: "#4338ca",
-    action: () => Alert.alert("Scan Barcode", "Barcode scanner will open here")
-  },
-  {
     title: "Check Price",
     icon: "pricetag",
     iconType: "Ionicons",
-    color: "#ffedd5",
+    color: "bg-orange-50 dark:bg-orange-900/20",
+    gradientFrom: "#fff7ed",
+    gradientTo: "#ffedd5",
+    iconColor: "#f97316",
     textColor: "#9a3412",
     action: () => Alert.alert("Price Check", "Price checker will open here")
   },
@@ -163,7 +200,10 @@ const quickActions = [
     title: "Restock",
     icon: "archive",
     iconType: "Ionicons",
-    color: "#dcfce7",
+    color: "bg-emerald-50 dark:bg-emerald-900/20",
+    gradientFrom: "#ecfdf5",
+    gradientTo: "#d1fae5",
+    iconColor: "#10b981",
     textColor: "#15803d",
     action: () => Alert.alert("Restock", "Restock workflow will start here")
   },
@@ -171,7 +211,10 @@ const quickActions = [
     title: "Export",
     icon: "share",
     iconType: "Ionicons",
-    color: "#e0f2fe",
+    color: "bg-blue-50 dark:bg-blue-900/20",
+    gradientFrom: "#f0f9ff", 
+    gradientTo: "#e0f2fe",
+    iconColor: "#3b82f6",
     textColor: "#0369a1",
     action: () => Alert.alert("Export Data", "Export inventory data options will appear here")
   },
@@ -261,6 +304,7 @@ export default function StockManagerHome() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [lastRefreshed, setLastRefreshed] = useState(new Date());
+  const [userName, setUserName] = useState("Stock Manager");
   const [stats, setStats] = useState({
     totalProducts: 0,
     lowStockItems: 0,
@@ -271,6 +315,7 @@ export default function StockManagerHome() {
   const [animatedValue] = useState(new Animated.Value(0));
   
   // Add new animation values for enhanced interactivity
+  const [scale] = useState(new Animated.Value(1));
   const [pulseAnim] = useState(new Animated.Value(1));
   const [headerHeight] = useState(new Animated.Value(140));
   const [scrollY] = useState(new Animated.Value(0));
@@ -514,6 +559,25 @@ export default function StockManagerHome() {
     }
   };
   
+  // Add missing card animation handlers
+  const handleCardPressIn = (index) => {
+    Animated.spring(scale, {
+      toValue: 0.97,
+      useNativeDriver: true,
+      speed: 20,
+      bounciness: 6,
+    }).start();
+  };
+  
+  const handleCardPressOut = (index) => {
+    Animated.spring(scale, {
+      toValue: 1,
+      useNativeDriver: true,
+      speed: 20,
+      bounciness: 6,
+    }).start();
+  };
+  
   // Function to handle refresh animation from Manage_stock_levels.js
   const handleRefresh = () => {
     Vibration.vibrate(20);
@@ -635,6 +699,18 @@ export default function StockManagerHome() {
   const onRefresh = () => {
     setRefreshing(true);
     fetchDashboardData(true);
+  };
+  
+  // Create dashboardData from stats for use in the UI
+  const dashboardData = {
+    totalProducts: stats.totalProducts,
+    lowStockCount: stats.lowStockItems,
+    categoryCount: stats.categories,
+    productGrowth: "+12%",
+    categoryGrowth: "+5%",
+    lowStockChange: -3,
+    pendingOrders: 7,
+    pendingOrdersChange: 2
   };
   
   // Initial data fetch
@@ -879,6 +955,25 @@ export default function StockManagerHome() {
     );
   };
 
+  // Add missing activity press handlers
+  const handleActivityPressIn = (index) => {
+    Animated.spring(activityCardScales[index], {
+      toValue: 0.97,
+      useNativeDriver: true,
+      speed: 20,
+      bounciness: 6,
+    }).start();
+  };
+  
+  const handleActivityPressOut = (index) => {
+    Animated.spring(activityCardScales[index], {
+      toValue: 1,
+      useNativeDriver: true,
+      speed: 20,
+      bounciness: 6,
+    }).start();
+  };
+
   if (loading) {
   return (
       <SafeAreaView className="flex-1 bg-gray-50 justify-center items-center">
@@ -912,1187 +1007,384 @@ export default function StockManagerHome() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
-      <StatusBar barStyle="dark-content" backgroundColor="#f8fafc" />
+    <SafeAreaView className="flex-1 bg-gray-50 dark:bg-gray-900">
+      <StatusBar style="light" />
+      
+      {/* Header */}
       <HomeHeader title="Stock Manager" />
       
-      <ScrollView
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor="#4F46E5"
-            colors={["#4F46E5"]}
-            title="Pull to refresh"
-            titleColor="#9CA3AF"
-          />
-        }
-        showsVerticalScrollIndicator={false}
-        className="flex-1"
+      {/* Welcome Banner */}
+      <Animated.View 
+        style={{ opacity: fadeAnim, transform: [{ translateY: fadeAnim.interpolate({
+          inputRange: [0, 1],
+          outputRange: [20, 0]
+        }) }] }}
+        className="mx-4 rounded-xl shadow-lg overflow-hidden my-2 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700"
       >
-        {/* Dashboard Overview */}
-        <Animated.View className="px-4 pt-4" style={{ 
-          opacity: fadeAnim,
-          transform: [{ translateY: translateAnim }]
-        }}>
-          <View className="flex-row justify-between items-center mb-4 pl-1">
-            <View className="flex-row items-center">
-              <View className="w-1 h-6 bg-indigo-600 rounded-full mr-2" />
-              <Text className="text-xl font-bold text-gray-800">
-                Dashboard Overview
-              </Text>
+        <View className="px-5 py-4">
+          <View className="flex-row justify-between items-center">
+            <View>
+              <Text className="text-gray-900 dark:text-white font-bold text-xl">Welcome Back, {userName}</Text>
+              <Text className="text-gray-500 dark:text-gray-400 text-sm mt-1">{new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</Text>
             </View>
-            <TouchableOpacity
-              className="flex-row items-center bg-indigo-600/10 py-1.5 px-3 rounded-full border border-indigo-100 active:bg-indigo-600/20"
-              onPress={() => {
-                // Add haptic feedback
-                if (Platform.OS === 'ios' || Platform.OS === 'android') {
-                  try {
-                    if (Platform.OS === 'ios') {
-                      const impactLight = require('expo-haptics').ImpactFeedbackStyle.Medium;
-                      require('expo-haptics').impactAsync(impactLight);
-                    } else {
-                      // Android vibration
-                      Vibration.vibrate(15);
-                    }
-                  } catch (err) {
-                    console.log('Haptics not available');
-                  }
-                }
-                
-                // Reload data animation
-                pulseAnim.setValue(1);
-                Animated.timing(pulseAnim, {
-                  toValue: 1.3,
-                  duration: 300,
-                  useNativeDriver: true
-                }).start(() => {
-                  Animated.timing(pulseAnim, {
-                    toValue: 1,
-                    duration: 300,
-                    useNativeDriver: true
-                  }).start();
-                });
-                
-                // Refresh data
-                setLoading(true);
-                fetchDashboardData();
+            
+            <Animated.View 
+              style={{
+                transform: [{ scale: scale.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [0.8, 1]
+                }) }]
               }}
+              className="bg-indigo-100 dark:bg-indigo-900/30 p-3 rounded-full"
             >
-              <Animated.View style={{ 
-                transform: [{ 
-                  rotate: refreshRotate.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: ['0deg', '360deg']
-                  }) 
-                }] 
-              }}>
-                <MaterialIcons name="refresh" size={16} color="#4F46E5" />
-              </Animated.View>
+              <Ionicons name="cube" size={24} color="#6366f1" />
+            </Animated.View>
+          </View>
+          
+          <View className="flex-row justify-between mt-5">
+            <Pressable 
+              className="bg-blue-50 dark:bg-blue-900/20 px-3 py-2.5 rounded-lg flex-row items-center"
+              onPress={() => router.push("/stockManager/ProductList")}
+            >
+              <Ionicons name="cube" size={18} color="#3b82f6" style={{marginRight: 6}} />
               <View>
-                <Text className="text-xs font-semibold text-indigo-600 ml-1.5">
-                  {refreshing ? 'Refreshing...' : 'Refresh'}
-                </Text>
-                {!refreshing && lastRefreshed && (
-                  <Text className="text-[9px] text-gray-500 ml-1.5">
-                    Updated: {lastRefreshed.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
-                  </Text>
-                )}
+                <Text className="text-blue-600 dark:text-blue-400 font-bold">{dashboardData.totalProducts}</Text>
+                <Text className="text-gray-600 dark:text-gray-400 text-xs">Products</Text>
               </View>
-            </TouchableOpacity>
+            </Pressable>
+            
+            <Pressable 
+              className="bg-amber-50 dark:bg-amber-900/20 px-3 py-2.5 rounded-lg flex-row items-center"
+              onPress={() => router.push("/stockManager/Low-stock alerts")}
+            >
+              <Ionicons name="alert-circle" size={18} color="#d97706" style={{marginRight: 6}} />
+              <View>
+                <Text className="text-amber-600 dark:text-amber-400 font-bold">{dashboardData.lowStockCount}</Text>
+                <Text className="text-gray-600 dark:text-gray-400 text-xs">Low Stock</Text>
+              </View>
+            </Pressable>
+            
+            <Pressable
+              className="bg-emerald-50 dark:bg-emerald-900/20 px-3 py-2.5 rounded-lg flex-row items-center"
+              onPress={() => router.push("/stockManager/ViewCategory")}
+            >
+              <Ionicons name="albums" size={18} color="#10b981" style={{marginRight: 6}} />
+              <View>
+                <Text className="text-emerald-600 dark:text-emerald-400 font-bold">{dashboardData.categoryCount}</Text>
+                <Text className="text-gray-600 dark:text-gray-400 text-xs">Categories</Text>
+              </View>
+            </Pressable>
+          </View>
+        </View>
+      </Animated.View>
+      
+      <Animated.ScrollView
+        className="flex-1"
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 24 }}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={["#6366f1"]} />
+        }
+      >
+        {/* Inventory Overview */}
+        <View className="mx-4 mt-4">
+          <View className="flex-row justify-between items-center mb-4">
+            <Text className="text-gray-800 dark:text-gray-200 font-bold text-lg">Inventory Overview</Text>
+            <View className="bg-blue-50 dark:bg-blue-900/30 px-3 py-1.5 rounded-full">
+              <Text className="text-blue-600 dark:text-blue-400 font-medium text-sm">Real-time</Text>
+            </View>
           </View>
           
-          <View style={{ 
-            flexDirection: "row", 
-            justifyContent: "space-between", 
-            flexWrap: "wrap" 
-          }}>
-            {/* Total Products - Enhanced with modern design and better interactivity */}
-            <Animated.View 
-              style={{
-                width: width / 2 - 24,
-                transform: [{ scale: pressedOptionIndex === 'totalProducts' ? 0.96 : 1 }],
-              }}
-            >
-              <TouchableOpacity 
-                className="bg-white rounded-xl p-4 mb-4 shadow-md border border-gray-100 overflow-hidden"
-                style={{
-                  shadowColor: pressedOptionIndex === 'totalProducts' ? "#4F46E5" : "#000",
-                  shadowOffset: { width: 0, height: 2 },
-                  shadowOpacity: pressedOptionIndex === 'totalProducts' ? 0.2 : 0.05,
-                  shadowRadius: 8,
-                  elevation: pressedOptionIndex === 'totalProducts' ? 3 : 2,
-                }}
-                activeOpacity={0.95}
-                onPressIn={() => {
-                  // Add haptic feedback
-                  if (Platform.OS === 'ios' || Platform.OS === 'android') {
-                    try {
-                      if (Platform.OS === 'ios') {
-                        const impactLight = require('expo-haptics').ImpactFeedbackStyle.Light;
-                        require('expo-haptics').impactAsync(impactLight);
-                      } else {
-                        // Android vibration
-                        Vibration.vibrate(5);
-                      }
-                    } catch (err) {
-                      console.log('Haptics not available');
-                    }
-                  }
-                  setPressedOptionIndex('totalProducts');
-                }}
-                onPressOut={() => setPressedOptionIndex(null)}
+          <View className="flex-row flex-wrap justify-between">
+            <Animated.View style={{ opacity: fadeAnim, transform: [{ translateY: fadeAnim.interpolate({
+              inputRange: [0, 1],
+              outputRange: [20, 0]
+            }) }] }} className="w-[48%] mb-4">
+              <Pressable 
+                className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 overflow-hidden relative" 
                 onPress={() => router.push("/stockManager/ProductList")}
-              >
-                {/* Background decoration */}
-                <View className="absolute -right-4 -top-4 w-16 h-16 rounded-full bg-indigo-500/5" />
-                <View className="absolute right-12 bottom-2 w-6 h-6 rounded-full bg-indigo-500/10" />
-                
-                <View className="flex-row justify-between items-start">
-                  <View className="w-[45px] h-[45px] rounded-xl bg-indigo-500/10 justify-center items-center mb-4 shadow"
-                    style={{
-                      shadowColor: "#4F46E5",
-                      shadowOffset: { width: 0, height: 2 },
-                      shadowOpacity: 0.1,
-                      shadowRadius: 4,
-                    }}
-                  >
-                    <Ionicons name="cube" size={24} color="#4F46E5" />
-                  </View>
-                  <View className="w-6 h-6 rounded-full bg-gray-50 justify-center items-center">
-                    <MaterialIcons 
-                      name="arrow-forward" 
-                      size={14} 
-                      color="#4F46E5" 
-                      style={{ 
-                        opacity: pressedOptionIndex === 'totalProducts' ? 1 : 0.6,
-                        transform: [{ translateX: pressedOptionIndex === 'totalProducts' ? 1 : 0 }] 
-                      }} 
-                    />
-                  </View>
-                </View>
-                
-                <Animated.Text className="text-3xl font-bold text-gray-800" 
-                  style={{ 
-                    transform: [{ scale: Animated.add(1, Animated.multiply(pulseAnim, 0.1)) }] 
-                  }}
-                >
-                  {stats.totalProducts}
-                </Animated.Text>
-                
-                <View className="flex-row items-center justify-between mt-1">
-                  <Text className="text-sm text-gray-500">
-                    Total Products
-                  </Text>
-                  <View className="bg-indigo-600/10 px-1.5 py-0.5 rounded-lg border border-indigo-100">
-                    <Text className="text-[10px] font-semibold text-indigo-600">VIEW</Text>
-                  </View>
-                </View>
-              </TouchableOpacity>
-            </Animated.View>
-
-            {/* Low Stock - Enhanced with modern design and better interactivity */}
-            <Animated.View 
-              style={{
-                width: width / 2 - 24,
-                transform: [{ scale: pressedOptionIndex === 'lowStock' ? 0.96 : 1 }],
-              }}
-            >
-              <TouchableOpacity 
-                className="bg-white rounded-xl p-4 mb-4 shadow-md border border-gray-100 overflow-hidden"
-                style={{
-                  shadowColor: pressedOptionIndex === 'lowStock' ? "#EF4444" : "#000",
-                  shadowOffset: { width: 0, height: 2 },
-                  shadowOpacity: pressedOptionIndex === 'lowStock' ? 0.2 : 0.05,
-                  shadowRadius: 8,
-                  elevation: pressedOptionIndex === 'lowStock' ? 3 : 2,
-                }}
-                activeOpacity={0.95}
-                onPressIn={() => {
-                  // Add haptic feedback
-                  if (Platform.OS === 'ios' || Platform.OS === 'android') {
-                    try {
-                      if (Platform.OS === 'ios') {
-                        const impactLight = require('expo-haptics').ImpactFeedbackStyle.Light;
-                        require('expo-haptics').impactAsync(impactLight);
-                      } else {
-                        // Android vibration
-                        Vibration.vibrate(5);
-                      }
-                    } catch (err) {
-                      console.log('Haptics not available');
-                    }
-                  }
-                  setPressedOptionIndex('lowStock');
-                }}
-                onPressOut={() => setPressedOptionIndex(null)}
-                onPress={() => router.push("/stockManager/Low-stock alerts")}
-              >
-                {/* Background decoration */}
-                <View className="absolute -right-4 -top-4 w-16 h-16 rounded-full bg-red-500/5" />
-                <View className="absolute right-12 bottom-2 w-6 h-6 rounded-full bg-red-500/10" />
-                
-                <View className="flex-row justify-between items-start">
-                  <View className="w-[45px] h-[45px] rounded-xl bg-red-500/10 justify-center items-center mb-4 shadow"
-                    style={{
-                      shadowColor: "#EF4444",
-                      shadowOffset: { width: 0, height: 2 },
-                      shadowOpacity: 0.1,
-                      shadowRadius: 4,
-                    }}
-                  >
-                    <Ionicons name="warning" size={24} color="#EF4444" />
-                  </View>
-                  <View className="w-6 h-6 rounded-full bg-gray-50 justify-center items-center">
-                    <MaterialIcons 
-                      name="arrow-forward" 
-                      size={14} 
-                      color="#EF4444" 
-                      style={{ 
-                        opacity: pressedOptionIndex === 'lowStock' ? 1 : 0.6,
-                        transform: [{ translateX: pressedOptionIndex === 'lowStock' ? 1 : 0 }] 
-                      }} 
-                    />
-                  </View>
-                </View>
-                
-                <Animated.Text className="text-3xl font-bold text-gray-800" 
-                  style={{ 
-                    transform: [{ scale: stats.lowStockItems > 0 ? pulseAnim : 1 }] 
-                  }}
-                >
-                  {stats.lowStockItems}
-                </Animated.Text>
-                
-                <View className="flex-row items-center justify-between mt-1">
-                  <Text className="text-sm text-gray-500">
-                    Low Stock Items
-                  </Text>
-                  {stats.lowStockItems > 0 && (
-                    <Animated.View 
-                      className="bg-red-500/10 px-1.5 py-0.5 rounded-lg border border-red-100"
-                      style={{ 
-                        transform: [{ scale: pulseAnim }],
-                        opacity: Animated.add(0.8, Animated.multiply(pulseAnim, 0.2))
-                      }}
-                    >
-                      <Text className="text-[10px] font-semibold text-red-500">ACTION</Text>
-                    </Animated.View>
-                  )}
-                </View>
-              </TouchableOpacity>
-            </Animated.View>
-
-            {/* Categories - Enhanced with modern design */}
-            <Animated.View 
-              style={{
-                width: width / 2 - 24,
-                transform: [{ scale: pressedOptionIndex === 'categories' ? 0.96 : 1 }],
-              }}
-            >
-              <TouchableOpacity 
-                className="bg-white rounded-xl p-4 mb-4 shadow-md border border-gray-100 overflow-hidden"
-                style={{
-                  shadowColor: pressedOptionIndex === 'categories' ? "#F59E0B" : "#000",
-                  shadowOffset: { width: 0, height: 2 },
-                  shadowOpacity: pressedOptionIndex === 'categories' ? 0.2 : 0.05,
-                  shadowRadius: 8,
-                  elevation: pressedOptionIndex === 'categories' ? 3 : 2,
-                }}
-                activeOpacity={0.95}
-                onPressIn={() => {
-                  // Add haptic feedback
-                  if (Platform.OS === 'ios' || Platform.OS === 'android') {
-                    try {
-                      if (Platform.OS === 'ios') {
-                        const impactLight = require('expo-haptics').ImpactFeedbackStyle.Light;
-                        require('expo-haptics').impactAsync(impactLight);
-                      } else {
-                        // Android vibration
-                        Vibration.vibrate(5);
-                      }
-                    } catch (err) {
-                      console.log('Haptics not available');
-                    }
-                  }
-                  setPressedOptionIndex('categories');
-                }}
-                onPressOut={() => setPressedOptionIndex(null)}
-                onPress={() => router.push("/stockManager/ViewCategory")}
-              >
-                {/* Background decoration */}
-                <View className="absolute -right-4 -top-4 w-16 h-16 rounded-full bg-amber-500/5" />
-                <View className="absolute right-12 bottom-2 w-6 h-6 rounded-full bg-amber-500/10" />
-                
-                <View className="flex-row justify-between items-start">
-                  <View className="w-[45px] h-[45px] rounded-xl bg-amber-500/10 justify-center items-center mb-4 shadow"
-                    style={{
-                      shadowColor: "#F59E0B",
-                      shadowOffset: { width: 0, height: 2 },
-                      shadowOpacity: 0.1,
-                      shadowRadius: 4,
-                    }}
-                  >
-                    <FontAwesome5 name="tags" size={20} color="#F59E0B" />
-                  </View>
-                  <View className="w-6 h-6 rounded-full bg-gray-50 justify-center items-center">
-                    <MaterialIcons 
-                      name="arrow-forward" 
-                      size={14} 
-                      color="#F59E0B" 
-                      style={{ 
-                        opacity: pressedOptionIndex === 'categories' ? 1 : 0.6,
-                        transform: [{ translateX: pressedOptionIndex === 'categories' ? 1 : 0 }] 
-                      }} 
-                    />
-                  </View>
-                </View>
-                
-                <Animated.Text className="text-3xl font-bold text-gray-800">
-                  {stats.categories}
-                </Animated.Text>
-                
-                <View className="flex-row items-center justify-between mt-1">
-                  <Text className="text-sm text-gray-500">
-                    Categories
-                  </Text>
-                  <View className="bg-amber-500/10 px-1.5 py-0.5 rounded-lg border border-amber-100">
-                    <Text className="text-[10px] font-semibold text-amber-500">BROWSE</Text>
-                  </View>
-                </View>
-              </TouchableOpacity>
-            </Animated.View>
-
-            {/* Add Product - Modern, attractive design */}
-            <Animated.View 
-              style={{
-                width: width / 2 - 24,
-                transform: [{ scale: pressedOptionIndex === 'addProduct' ? 0.96 : 1 }],
-              }}
-            >
-              <TouchableOpacity 
-                className="bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-xl p-4 mb-4 shadow-md border border-emerald-200 overflow-hidden"
-                style={{
-                  shadowColor: pressedOptionIndex === 'addProduct' ? "#10B981" : "#000",
-                  shadowOffset: { width: 0, height: 2 },
-                  shadowOpacity: pressedOptionIndex === 'addProduct' ? 0.25 : 0.05,
-                  shadowRadius: 8,
-                  elevation: pressedOptionIndex === 'addProduct' ? 4 : 2,
-                }}
-                activeOpacity={0.92}
-                onPressIn={() => {
-                  // Add haptic feedback
-                  if (Platform.OS === 'ios' || Platform.OS === 'android') {
-                    try {
-                      if (Platform.OS === 'ios') {
-                        const impactLight = require('expo-haptics').ImpactFeedbackStyle.Medium;
-                        require('expo-haptics').impactAsync(impactLight);
-                      } else {
-                        // Android vibration
-                        Vibration.vibrate(15);
-                      }
-                    } catch (err) {
-                      console.log('Haptics not available');
-                    }
-                  }
-                  setPressedOptionIndex('addProduct');
-                }}
-                onPressOut={() => setPressedOptionIndex(null)}
-                onPress={() => router.push("/stockManager/addProduct")}
-              >
-                {/* Background decoration */}
-                <View className="absolute -right-4 -top-4 w-16 h-16 rounded-full bg-emerald-500/5" />
-                <View className="absolute right-4 top-12 w-3 h-3 rounded-full bg-emerald-500/20" />
-                <View className="absolute left-12 bottom-2 w-4 h-4 rounded-full bg-emerald-500/10" />
-                
-                <View className="flex-row justify-between items-start">
-                  <Animated.View 
-                    className="w-[45px] h-[45px] rounded-xl bg-emerald-500/20 justify-center items-center mb-4 shadow-sm"
-                    style={{
-                      shadowColor: "#10B981",
-                      shadowOffset: { width: 0, height: 2 },
-                      shadowOpacity: 0.15,
-                      shadowRadius: 4,
-                      transform: [{ 
-                        rotate: pressedOptionIndex === 'addProduct' ? '5deg' : '0deg' 
-                      }]
-                    }}
-                  >
-                    <Ionicons name="add-circle" size={26} color="#10B981" />
-                  </Animated.View>
-                  <View className="w-6 h-6 rounded-full bg-white justify-center items-center">
-                    <MaterialIcons 
-                      name="arrow-forward" 
-                      size={14} 
-                      color="#10B981" 
-                      style={{ 
-                        opacity: pressedOptionIndex === 'addProduct' ? 1 : 0.6,
-                        transform: [{ translateX: pressedOptionIndex === 'addProduct' ? 1 : 0 }] 
-                      }} 
-                    />
-                  </View>
-                </View>
-                
-                <Text className="text-xl font-bold text-emerald-800">
-                  Add Product
-                </Text>
-                
-                <View className="flex-row items-center justify-between mt-1">
-                  <Text className="text-sm text-emerald-700">
-                    Quick Action
-                  </Text>
-                  <View className="bg-white px-1.5 py-0.5 rounded-lg border border-emerald-200">
-                    <Text className="text-[10px] font-semibold text-emerald-600">NEW</Text>
-                  </View>
-                </View>
-              </TouchableOpacity>
-            </Animated.View>
-          </View>
-        </Animated.View>
-
-        {/* Replace Quick Actions section with Recent Activity section */}
-        <Animated.View className="px-4 mb-6" style={{ 
-          opacity: fadeAnim,
-          transform: [{ translateY: translateAnim }]
-        }}>
-          <View className="flex-row justify-between items-center mb-3 pl-1">
-            <View className="flex-row items-center">
-              <View className="w-1 h-6 bg-indigo-600 rounded-full mr-2" />
-              <Text className="text-lg font-semibold text-gray-800">
-                Recent Activity
-              </Text>
-            </View>
-            
-            <TouchableOpacity
-              className="flex-row items-center py-1.5 px-2.5 bg-indigo-50 rounded-lg"
-              onPress={() => fetchActivities()}
-            >
-              <Text className="text-xs text-indigo-600 font-medium mr-1">
-                Refresh
-              </Text>
-              <Ionicons name="refresh" size={14} color="#4F46E5" />
-            </TouchableOpacity>
-          </View>
-          
-          {/* Activity Type Filters */}
-          <ScrollView 
-            horizontal 
-            showsHorizontalScrollIndicator={false} 
-            className="mb-3"
-          >
-            <TouchableOpacity 
-              className={`mr-2 px-3 py-1.5 rounded-full border ${activityFilter === 'all' ? 'bg-indigo-100 border-indigo-200' : 'bg-gray-50 border-gray-200'}`}
-              onPress={() => filterActivities('all')}
-            >
-              <Text className={`text-xs font-medium ${activityFilter === 'all' ? 'text-indigo-700' : 'text-gray-600'}`}>
-                All Activities
-              </Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity 
-              className={`mr-2 px-3 py-1.5 rounded-full border ${activityFilter === 'stock_added' ? 'bg-emerald-100 border-emerald-200' : 'bg-gray-50 border-gray-200'}`}
-              onPress={() => filterActivities('stock_added')}
-            >
-              <Text className={`text-xs font-medium ${activityFilter === 'stock_added' ? 'text-emerald-700' : 'text-gray-600'}`}>
-                Stock Changes
-              </Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity 
-              className={`mr-2 px-3 py-1.5 rounded-full border ${activityFilter === 'price_change' ? 'bg-blue-100 border-blue-200' : 'bg-gray-50 border-gray-200'}`}
-              onPress={() => filterActivities('price_change')}
-            >
-              <Text className={`text-xs font-medium ${activityFilter === 'price_change' ? 'text-blue-700' : 'text-gray-600'}`}>
-                Price Updates
-              </Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity 
-              className={`mr-2 px-3 py-1.5 rounded-full border ${activityFilter === 'low_stock' ? 'bg-red-100 border-red-200' : 'bg-gray-50 border-gray-200'}`}
-              onPress={() => filterActivities('low_stock')}
-            >
-              <Text className={`text-xs font-medium ${activityFilter === 'low_stock' ? 'text-red-700' : 'text-gray-600'}`}>
-                Alerts
-              </Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity 
-              className={`mr-2 px-3 py-1.5 rounded-full border ${activityFilter === 'order_placed' ? 'bg-amber-100 border-amber-200' : 'bg-gray-50 border-gray-200'}`}
-              onPress={() => filterActivities('order_placed')}
-            >
-              <Text className={`text-xs font-medium ${activityFilter === 'order_placed' ? 'text-amber-700' : 'text-gray-600'}`}>
-                Orders
-              </Text>
-            </TouchableOpacity>
-      </ScrollView>
-
-          {/* Activity Cards */}
-          {loadingActivities ? (
-            <View className="bg-white rounded-xl p-4 shadow-sm items-center justify-center" style={{ height: 120 }}>
-              <ActivityIndicator size="small" color="#4F46E5" />
-              <Text className="text-sm text-gray-500 mt-2">Loading activities...</Text>
-            </View>
-          ) : activityData.length === 0 ? (
-            <View className="bg-white rounded-xl p-4 shadow-sm items-center justify-center" style={{ height: 120 }}>
-              <Ionicons name="document-text-outline" size={24} color="#9ca3af" />
-              <Text className="text-sm text-gray-500 mt-2">No activities found</Text>
-            </View>
-          ) : (
-            activityData.map((activity, index) => (
-              <Animated.View 
-                key={`activity-${index}`}
-                style={{
-                  marginBottom: 12,
-                  transform: [{ scale: activityCardScales[index] }],
-                  opacity: fadeAnim
-                }}
-              >
-                <TouchableOpacity
-                  activeOpacity={0.9}
-                  className="bg-white rounded-xl p-4 shadow-sm border border-gray-100"
-                  onPress={() => handleActivityPress(index, activity)}
-                  style={{
-                    shadowColor: activity.textColor,
-                    shadowOffset: { width: 0, height: 2 },
-                    shadowOpacity: 0.1,
-                    shadowRadius: 3,
-                  }}
-                >
-                  <View className="flex-row">
-                    <View 
-                      className="w-10 h-10 rounded-full items-center justify-center mr-3"
-                      style={{ backgroundColor: activity.color }}
-                    >
-                      {renderIcon(activity.icon, activity.iconType, 18, activity.textColor)}
-                    </View>
-                    
-                    <View className="flex-1">
-                      <View className="flex-row justify-between items-center">
-                        <Text className="text-base font-semibold text-gray-800">
-                          {activity.title}
-                        </Text>
-                        <Text className="text-xs text-gray-500">
-                          {formatRelativeTime(activity.timestamp)}
-                        </Text>
-                      </View>
-                      
-                      <Text className="text-sm text-gray-600 mt-0.5">
-                        {activity.description}
-                      </Text>
-                      
-                      <View className="mt-2 pt-2 border-t border-gray-100">
-                        {activity.type === 'stock_added' && (
-                          <View className="flex-row justify-between">
-                            <Text className="text-xs text-gray-500">Product: <Text className="font-medium">{activity.details.productName}</Text></Text>
-                            <Text className="text-xs text-emerald-600 font-medium">+{activity.details.quantity} units</Text>
-                          </View>
-                        )}
-                        
-                        {activity.type === 'price_change' && (
-                          <View className="flex-row justify-between">
-                            <Text className="text-xs text-gray-500">Product: <Text className="font-medium">{activity.details.productName}</Text></Text>
-                            <View className="flex-row">
-                              <Text className="text-xs text-gray-500 line-through mr-2">${activity.details.oldPrice.toFixed(2)}</Text>
-                              <Text className="text-xs text-blue-600 font-medium">${activity.details.newPrice.toFixed(2)}</Text>
-                            </View>
-                          </View>
-                        )}
-                        
-                        {activity.type === 'low_stock' && (
-                          <View className="flex-row justify-between">
-                            <Text className="text-xs text-gray-500">Product: <Text className="font-medium">{activity.details.productName}</Text></Text>
-                            <View className="px-2 py-0.5 bg-red-50 rounded-full border border-red-100">
-                              <Text className="text-xs text-red-600 font-medium">{activity.details.currentStock}/{activity.details.minimumRequired} units</Text>
-                            </View>
-                          </View>
-                        )}
-                        
-                        {activity.type === 'category_added' && (
-                          <View className="flex-row justify-between">
-                            <Text className="text-xs text-gray-500">Category: <Text className="font-medium">{activity.details.categoryName}</Text></Text>
-                            <Text className="text-xs text-purple-600 font-medium">{activity.details.products} products</Text>
-                          </View>
-                        )}
-                        
-                        {activity.type === 'order_placed' && (
-                          <View className="flex-row justify-between">
-                            <Text className="text-xs text-gray-500">Supplier: <Text className="font-medium">{activity.details.supplier}</Text></Text>
-                            <Text className="text-xs text-amber-600 font-medium">${activity.details.orderTotal.toFixed(2)}</Text>
-                          </View>
-                        )}
-                      </View>
-                    </View>
-                  </View>
-                </TouchableOpacity>
-              </Animated.View>
-            ))
-          )}
-        </Animated.View>
-
-        {/* Stock Management Options from Manage_stock_levels.js */}
-        <Animated.View className="px-4 mb-6" style={{ 
-          opacity: fadeAnim,
-          transform: [{ translateY: translateAnim }]
-        }}>
-          <View className="flex-row justify-between items-center mb-3 pl-1">
-            <View className="flex-row items-center">
-              <View className="w-1 h-6 bg-indigo-600 rounded-full mr-2" />
-              <Text className="text-lg font-semibold text-gray-800">
-                Stock Management
-              </Text>
-            </View>
-            
-            <View className="flex-row items-center">
-              <TouchableOpacity
-                className="flex-row items-center py-1.5 px-2.5 mr-2"
-                onPress={() => setShowingFilters(!showingFilters)}
-              >
-                <Text className="text-sm text-gray-500 mr-1">
-                  Filter
-                </Text>
-                <Ionicons 
-                  name={showingFilters ? "chevron-up" : "chevron-down"} 
-                  size={16} 
-                  color="#6B7280" 
-                />
-              </TouchableOpacity>
-            </View>
-          </View>
-
-          {stockOptions.map((option, index) => (
-            <Animated.View 
-              key={`stock-option-${index}`}
-              style={{
-                opacity: fadeAnim,
-                transform: [
-                  { translateY: translateAnim },
-                  { scale: stockOptionScales[index] }
-                ],
-                marginBottom: 12
-              }}
-            >
-              <TouchableOpacity
-                activeOpacity={0.9}
-                onPress={() => handleStockOptionPress(index, option.route)}
-                className="overflow-hidden rounded-xl shadow-sm"
-                style={{
-                  shadowColor: option.textColor,
-                  shadowOffset: { width: 0, height: 2 },
-                  shadowOpacity: stockOptionPressed[index] ? 0.2 : 0.1,
-                  shadowRadius: 4,
-                  elevation: stockOptionPressed[index] ? 3 : 2,
-                }}
+                onPressIn={() => handleCardPressIn(0)}
+                onPressOut={() => handleCardPressOut(0)}
               >
                 <LinearGradient
-                  colors={option.color}
+                  colors={['#f0f9ff', '#e0f2fe']}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 1 }}
-                  className="p-4 border border-gray-100"
-                >
-                  <View className="flex-row items-center">
-                    <View 
-                      className="w-12 h-12 rounded-lg mr-4 items-center justify-center"
-                      style={{ backgroundColor: option.textColor + '20' }}
-                    >
-                      {renderIcon(option.icon, option.iconType, 24, option.textColor)}
-                    </View>
-                    
-                    <View className="flex-1">
-                      <View className="flex-row items-center justify-between">
-                        <Text className="text-base font-semibold" style={{ color: option.textColor }}>
-                          {option.title}
-                        </Text>
-                        
-                        {option.badge && (
-                          <View 
-                            className="px-2 py-1 rounded-full"
-                            style={{ backgroundColor: option.alertType ? '#FEE2E2' : option.textColor + '20' }}
-                          >
-                            <Text 
-                              className="text-xs font-semibold" 
-                              style={{ color: option.alertType ? '#B91C1C' : option.textColor }}
-                            >
-                              {option.badge === "Products" ? `${stats.totalProducts} Products` :
-                               option.badge === "Categories" ? `${stats.categories} Categories` :
-                               option.badge === "Alerts" ? `${stats.lowStockItems} Alerts` :
-                               option.badge}
-                            </Text>
-                          </View>
-                        )}
-                      </View>
-                      
-                      <Text className="text-sm text-gray-600 mt-1" numberOfLines={1}>
-                        {option.description}
-                      </Text>
-                    </View>
-                    
-                    <View className="justify-center">
-                      <MaterialIcons name="chevron-right" size={24} color={option.textColor + '80'} />
-                    </View>
+                  className="absolute inset-0 opacity-60"
+                />
+                <View className="flex-row justify-between items-start mb-3">
+                  <View className="bg-blue-50 dark:bg-blue-900/20 p-2 rounded-lg">
+                    <Ionicons name="cube" size={20} color="#3b82f6" />
                   </View>
-                </LinearGradient>
-              </TouchableOpacity>
+                  <View className="bg-green-50 dark:bg-green-900/30 px-2 py-1 rounded-full">
+                    <Text className="text-green-600 dark:text-green-400 text-xs font-medium">{dashboardData.productGrowth}</Text>
+                  </View>
+                </View>
+                <Text className="text-2xl font-bold text-gray-800 dark:text-white">{dashboardData.totalProducts}</Text>
+                <Text className="text-gray-500 dark:text-gray-400 text-sm mt-1">Total Products</Text>
+              </Pressable>
             </Animated.View>
-          ))}
-        </Animated.View>
-      </ScrollView>
-      
-      {/* Activity Detail Modal */}
-      {showActivityModal && selectedActivity && (
-        <View className="absolute inset-0 justify-center items-center z-50">
-          <Animated.View 
-            className="absolute inset-0 bg-black/50"
-            style={{ opacity: backdropAnimation }}
-            onTouchStart={closeActivityModal}
-          />
-          
-          <Animated.View 
-            className="w-[90%] bg-white rounded-2xl overflow-hidden"
-            style={{
-              transform: [
-                { scale: modalAnimation.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [0.9, 1]
-                }) },
-                { translateY: modalAnimation.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [20, 0]
-                }) }
-              ],
-              opacity: modalAnimation,
-              shadowColor: "#000",
-              shadowOffset: { width: 0, height: 10 },
-              shadowOpacity: 0.25,
-              shadowRadius: 10,
-              elevation: 10,
-            }}
-          >
-            {/* Modal Header */}
-            <View 
-              className="pt-6 pb-4 px-5 rounded-t-2xl border-b border-gray-100"
-              style={{ backgroundColor: selectedActivity.color + '40' }}
-            >
-              <View className="flex-row items-center mb-2">
-                <View 
-                  className="w-12 h-12 rounded-full items-center justify-center mr-4"
-                  style={{ backgroundColor: selectedActivity.color }}
-                >
-                  {renderIcon(selectedActivity.icon, selectedActivity.iconType, 24, selectedActivity.textColor)}
+            
+            <Animated.View style={{ opacity: fadeAnim, transform: [{ translateY: fadeAnim.interpolate({
+              inputRange: [0, 1],
+              outputRange: [20, 0]
+            }) }] }} className="w-[48%] mb-4">
+              <Pressable 
+                className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 overflow-hidden relative" 
+                onPress={() => router.push("/stockManager/ViewCategory")}
+                onPressIn={() => handleCardPressIn(1)}
+                onPressOut={() => handleCardPressOut(1)}
+              >
+                <LinearGradient
+                  colors={['#eef2ff', '#e0e7ff']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  className="absolute inset-0 opacity-60"
+                />
+                <View className="flex-row justify-between items-start mb-3">
+                  <View className="bg-indigo-50 dark:bg-indigo-900/20 p-2 rounded-lg">
+                    <Ionicons name="albums" size={20} color="#6366f1" />
+                  </View>
+                  <View className="bg-green-50 dark:bg-green-900/30 px-2 py-1 rounded-full">
+                    <Text className="text-green-600 dark:text-green-400 text-xs font-medium">{dashboardData.categoryGrowth}</Text>
+                  </View>
+                </View>
+                <Text className="text-2xl font-bold text-gray-800 dark:text-white">{dashboardData.categoryCount}</Text>
+                <Text className="text-gray-500 dark:text-gray-400 text-sm mt-1">Categories</Text>
+              </Pressable>
+            </Animated.View>
+            
+            <Animated.View style={{ opacity: fadeAnim, transform: [{ translateY: fadeAnim.interpolate({
+              inputRange: [0, 1],
+              outputRange: [20, 0]
+            }) }] }} className="w-[48%] mb-4">
+              <Pressable 
+                className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 overflow-hidden relative" 
+                onPress={() => router.push("/stockManager/Low-stock alerts")}
+                onPressIn={() => handleCardPressIn(2)}
+                onPressOut={() => handleCardPressOut(2)}
+              >
+                <LinearGradient
+                  colors={['#fef2f2', '#fee2e2']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  className="absolute inset-0 opacity-60"
+                />
+                <View className="flex-row justify-between items-start mb-3">
+                  <View className="bg-red-50 dark:bg-red-900/20 p-2 rounded-lg">
+                    <Ionicons name="alert-circle" size={20} color="#ef4444" />
+                  </View>
+                  <View className={`${dashboardData.lowStockChange > 0 ? 'bg-red-50 dark:bg-red-900/30' : 'bg-green-50 dark:bg-green-900/30'} px-2 py-1 rounded-full`}>
+                    <Text className={`${dashboardData.lowStockChange > 0 ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'} text-xs font-medium`}>
+                      {dashboardData.lowStockChange > 0 ? '+' : ''}{dashboardData.lowStockChange}%
+                    </Text>
+                  </View>
+                </View>
+                <Text className="text-2xl font-bold text-gray-800 dark:text-white">{dashboardData.lowStockCount}</Text>
+                <Text className="text-gray-500 dark:text-gray-400 text-sm mt-1">Low Stock Items</Text>
+              </Pressable>
+            </Animated.View>
+            
+            <Animated.View style={{ opacity: fadeAnim, transform: [{ translateY: fadeAnim.interpolate({
+              inputRange: [0, 1],
+              outputRange: [20, 0]
+            }) }] }} className="w-[48%] mb-4">
+              <Pressable 
+                className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 overflow-hidden relative" 
+                onPress={() => router.push("/stockManager/Supplier_order_management")}
+                onPressIn={() => handleCardPressIn(3)}
+                onPressOut={() => handleCardPressOut(3)}
+              >
+                <LinearGradient
+                  colors={['#ecfdf5', '#d1fae5']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  className="absolute inset-0 opacity-60"
+                />
+                <View className="flex-row justify-between items-start mb-3">
+                  <View className="bg-emerald-50 dark:bg-emerald-900/20 p-2 rounded-lg">
+                    <MaterialCommunityIcons name="truck-delivery" size={20} color="#10b981" />
+                  </View>
+                  <View className="bg-green-50 dark:bg-green-900/30 px-2 py-1 rounded-full">
+                    <Text className="text-green-600 dark:text-green-400 text-xs font-medium">{dashboardData.pendingOrdersChange}%</Text>
+                  </View>
+                </View>
+                <Text className="text-2xl font-bold text-gray-800 dark:text-white">{dashboardData.pendingOrders}</Text>
+                <Text className="text-gray-500 dark:text-gray-400 text-sm mt-1">Pending Orders</Text>
+              </Pressable>
+            </Animated.View>
+          </View>
         </View>
+        
+        {/* Recent Activities */}
+        <View className="mx-4 mt-4">
+          <View className="flex-row justify-between items-center mb-4">
+            <Text className="text-gray-800 dark:text-gray-200 font-bold text-lg">Recent Activity</Text>
+            <TouchableOpacity 
+              className="bg-blue-50 dark:bg-blue-900/30 px-3 py-1.5 rounded-full"
+              onPress={() => setActivityFilter('all')}
+            >
+              <Text className="text-blue-600 dark:text-blue-400 font-medium text-sm">View All</Text>
+            </TouchableOpacity>
+          </View>
+          
+          {activityData.map((activity, index) => (
+            <Animated.View 
+              key={index} 
+              style={{
+                opacity: fadeAnim,
+                transform: [{
+                  translateY: fadeAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [20 * (index + 1), 0]
+                  })
+                }]
+              }}
+              className="mb-3"
+            >
+              <Pressable 
+                className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 border border-gray-100 dark:border-gray-700 flex-row items-center relative overflow-hidden"
+                onPress={() => handleActivityPress(index, activity)}
+                onPressIn={() => handleActivityPressIn(index)}
+                onPressOut={() => handleActivityPressOut(index)}
+              >
+                <LinearGradient
+                  colors={['#f9fafb', '#f3f4f6']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  className="absolute inset-0 opacity-60"
+                />
+                <View className={`${activity.color} w-10 h-10 rounded-full items-center justify-center mr-3`}>
+                  {activity.iconType === "Ionicons" && <Ionicons name={activity.icon} size={18} color={activity.textColor} />}
+                  {activity.iconType === "MaterialIcons" && <MaterialIcons name={activity.icon} size={18} color={activity.textColor} />}
+                  {activity.iconType === "MaterialCommunityIcons" && <MaterialCommunityIcons name={activity.icon} size={18} color={activity.textColor} />}
+                </View>
                 
                 <View className="flex-1">
-                  <Text className="text-lg font-bold text-gray-800">
-                    {selectedActivity.title}
-                  </Text>
-                  <Text className="text-sm text-gray-600">
-                    {formatRelativeTime(selectedActivity.timestamp)}
-                  </Text>
-                </View>
-                
-                <TouchableOpacity 
-                  className="w-8 h-8 rounded-full bg-gray-100 items-center justify-center"
-                  onPress={closeActivityModal}
-                >
-                  <Ionicons name="close" size={18} color="#64748b" />
-                </TouchableOpacity>
-              </View>
-              
-              <Text className="text-sm text-gray-700 mb-1">
-                {selectedActivity.description}
-              </Text>
-              
-              <Text className="text-xs text-gray-500">
-                {selectedActivity.timestamp.toLocaleString()}
-              </Text>
-            </View>
-            
-            {/* Modal Content */}
-            <View className="p-5">
-              <Text className="text-base font-semibold text-gray-800 mb-3">
-                Activity Details
-              </Text>
-              
-              {selectedActivity.type === 'stock_added' && (
-                <>
-                  <View className="flex-row justify-between items-center mb-3 pb-3 border-b border-gray-100">
-                    <Text className="text-gray-600">Product</Text>
-                    <Text className="text-gray-800 font-medium">{selectedActivity.details.productName}</Text>
-                  </View>
-                  <View className="flex-row justify-between items-center mb-3 pb-3 border-b border-gray-100">
-                    <Text className="text-gray-600">Quantity Added</Text>
-                    <View className="px-2 py-1 bg-emerald-100 rounded-full">
-                      <Text className="text-emerald-700 font-medium">+{selectedActivity.details.quantity} units</Text>
-                    </View>
-                  </View>
-                  <View className="flex-row justify-between items-center mb-3 pb-3 border-b border-gray-100">
-                    <Text className="text-gray-600">Supplier</Text>
-                    <Text className="text-gray-800 font-medium">{selectedActivity.details.supplier}</Text>
-                  </View>
-                </>
-              )}
-              
-              {selectedActivity.type === 'price_change' && (
-                <>
-                  <View className="flex-row justify-between items-center mb-3 pb-3 border-b border-gray-100">
-                    <Text className="text-gray-600">Product</Text>
-                    <Text className="text-gray-800 font-medium">{selectedActivity.details.productName}</Text>
-                  </View>
-                  <View className="flex-row justify-between items-center mb-3 pb-3 border-b border-gray-100">
-                    <Text className="text-gray-600">Previous Price</Text>
-                    <Text className="text-gray-500 line-through">{formatCurrency(selectedActivity.details.oldPrice)}</Text>
-                  </View>
-                  <View className="flex-row justify-between items-center mb-3 pb-3 border-b border-gray-100">
-                    <Text className="text-gray-600">New Price</Text>
-                    <View className="px-2 py-1 bg-blue-100 rounded-full">
-                      <Text className="text-blue-700 font-medium">{formatCurrency(selectedActivity.details.newPrice)}</Text>
-                    </View>
-                  </View>
-                  <View className="flex-row justify-between items-center mb-3 pb-3 border-b border-gray-100">
-                    <Text className="text-gray-600">Change Reason</Text>
-                    <Text className="text-gray-800 font-medium">{selectedActivity.details.reason}</Text>
-                  </View>
-                </>
-              )}
-              
-              {selectedActivity.type === 'low_stock' && (
-                <>
-                  <View className="flex-row justify-between items-center mb-3 pb-3 border-b border-gray-100">
-                    <Text className="text-gray-600">Product</Text>
-                    <Text className="text-gray-800 font-medium">{selectedActivity.details.productName}</Text>
-                  </View>
-                  <View className="flex-row justify-between items-center mb-3 pb-3 border-b border-gray-100">
-                    <Text className="text-gray-600">Current Stock</Text>
-                    <View className="px-2 py-1 bg-red-100 rounded-full">
-                      <Text className="text-red-700 font-medium">{selectedActivity.details.currentStock} units</Text>
-                    </View>
-                  </View>
-                  <View className="flex-row justify-between items-center mb-3 pb-3 border-b border-gray-100">
-                    <Text className="text-gray-600">Minimum Required</Text>
-                    <Text className="text-gray-800 font-medium">{selectedActivity.details.minimumRequired} units</Text>
-                  </View>
-                  <View className="flex-row justify-between items-center mb-3 pb-3 border-b border-gray-100">
-                    <Text className="text-gray-600">Deficit</Text>
-                    <Text className="text-red-600 font-semibold">
-                      {selectedActivity.details.minimumRequired - selectedActivity.details.currentStock} units
-                    </Text>
-                  </View>
-                </>
-              )}
-              
-              {selectedActivity.type === 'category_added' && (
-                <>
-                  <View className="flex-row justify-between items-center mb-3 pb-3 border-b border-gray-100">
-                    <Text className="text-gray-600">Category Name</Text>
-                    <Text className="text-gray-800 font-medium">{selectedActivity.details.categoryName}</Text>
-                  </View>
-                  <View className="flex-row justify-between items-center mb-3 pb-3 border-b border-gray-100">
-                    <Text className="text-gray-600">Products</Text>
-                    <View className="px-2 py-1 bg-purple-100 rounded-full">
-                      <Text className="text-purple-700 font-medium">{selectedActivity.details.products} products</Text>
-                    </View>
-                  </View>
-                </>
-              )}
-              
-              {selectedActivity.type === 'order_placed' && (
-                <>
-                  <View className="flex-row justify-between items-center mb-3 pb-3 border-b border-gray-100">
-                    <Text className="text-gray-600">Supplier</Text>
-                    <Text className="text-gray-800 font-medium">{selectedActivity.details.supplier}</Text>
-                  </View>
-                  <View className="flex-row justify-between items-center mb-3 pb-3 border-b border-gray-100">
-                    <Text className="text-gray-600">Order Total</Text>
-                    <View className="px-2 py-1 bg-amber-100 rounded-full">
-                      <Text className="text-amber-700 font-medium">{formatCurrency(selectedActivity.details.orderTotal)}</Text>
-                    </View>
-                  </View>
-                  <View className="flex-row justify-between items-center mb-3 pb-3 border-b border-gray-100">
-                    <Text className="text-gray-600">Items Ordered</Text>
-                    <Text className="text-gray-800 font-medium">{selectedActivity.details.items} items</Text>
-                  </View>
-                  <View className="flex-row justify-between items-center mb-3 pb-3 border-b border-gray-100">
-                    <Text className="text-gray-600">Average Item Cost</Text>
-                    <Text className="text-gray-800 font-medium">
-                      {formatCurrency(selectedActivity.details.orderTotal / selectedActivity.details.items)}
-                    </Text>
-                  </View>
-                </>
-              )}
-            </View>
-            
-            {/* Modal Footer with Action Buttons */}
-            <View className="p-4 bg-gray-50 border-t border-gray-200 flex-row">
-              <TouchableOpacity 
-                className="flex-1 mr-2 py-3 bg-gray-200 rounded-lg items-center"
-                onPress={closeActivityModal}
-              >
-                <Text className="text-gray-700 font-medium">Close</Text>
-              </TouchableOpacity>
-              
-              {selectedActivity.type === 'low_stock' && (
-                <TouchableOpacity 
-                  className="flex-1 py-3 bg-blue-600 rounded-lg items-center"
-                  onPress={() => {
-                    closeActivityModal();
-                    // Navigate to restock interface
-                    router.push("/stockManager/addProduct");
-                  }}
-                >
-                  <Text className="text-white font-medium">Restock Now</Text>
-                </TouchableOpacity>
-              )}
-              
-              {selectedActivity.type === 'price_change' && (
-                <TouchableOpacity 
-                  className="flex-1 py-3 bg-blue-600 rounded-lg items-center"
-                  onPress={() => {
-                    closeActivityModal();
-                    // Navigate to product detail
-                    router.push("/stockManager/ProductList");
-                  }}
-                >
-                  <Text className="text-white font-medium">View Product</Text>
-                </TouchableOpacity>
-              )}
-              
-              {selectedActivity.type === 'stock_added' && (
-                <TouchableOpacity 
-                  className="flex-1 py-3 bg-blue-600 rounded-lg items-center"
-                  onPress={() => {
-                    closeActivityModal();
-                    // Navigate to inventory
-                    router.push("/stockManager/ProductList");
-                  }}
-                >
-                  <Text className="text-white font-medium">View Inventory</Text>
-                </TouchableOpacity>
-              )}
-              
-              {selectedActivity.type === 'category_added' && (
-                <TouchableOpacity 
-                  className="flex-1 py-3 bg-blue-600 rounded-lg items-center"
-                  onPress={() => {
-                    closeActivityModal();
-                    // Navigate to category list
-                    router.push("/stockManager/ViewCategory");
-                  }}
-                >
-                  <Text className="text-white font-medium">View Categories</Text>
-                </TouchableOpacity>
-              )}
-              
-              {selectedActivity.type === 'order_placed' && (
-                <TouchableOpacity 
-                  className="flex-1 py-3 bg-blue-600 rounded-lg items-center"
-                  onPress={() => {
-                    closeActivityModal();
-                    // Navigate to orders
-                    router.push("/stockManager/Supplier_order_management");
-                  }}
-                >
-                  <Text className="text-white font-medium">View Orders</Text>
-                </TouchableOpacity>
-              )}
-            </View>
-          </Animated.View>
-        </View>
-      )}
-
-      {/* Product Detail Modal */}
-      {showProductModal && selectedProduct && (
-        <View className="absolute inset-0 justify-center items-center z-50">
-          <Animated.View 
-            className="absolute inset-0 bg-black/50"
-            style={{ opacity: productBackdropAnimation }}
-            onTouchStart={closeProductModal}
-          />
-          
-          <Animated.View 
-            className="w-[90%] bg-white rounded-2xl overflow-hidden"
-            style={{
-              transform: [
-                { scale: productModalAnimation.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [0.9, 1]
-                }) },
-                { translateY: productModalAnimation.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [20, 0]
-                }) }
-              ],
-              opacity: productModalAnimation,
-              shadowColor: "#000",
-              shadowOffset: { width: 0, height: 10 },
-              shadowOpacity: 0.25,
-              shadowRadius: 10,
-              elevation: 10,
-              maxHeight: height * 0.8
-            }}
-          >
-            {/* Modal Header with Product Image */}
-            <View className="relative">
-              {selectedProduct.productImage ? (
-                <Image 
-                  source={{ uri: selectedProduct.productImage }} 
-                  className="w-full h-48 bg-gray-200"
-                  resizeMode="cover"
-                />
-              ) : (
-                <View className="w-full h-48 bg-gray-200 items-center justify-center">
-                  <Ionicons name="image-outline" size={48} color="#9ca3af" />
-                  <Text className="text-gray-500 mt-2">No image available</Text>
-                </View>
-              )}
-              
-              {/* Close button */}
-              <TouchableOpacity 
-                className="absolute top-4 right-4 w-8 h-8 rounded-full bg-black/30 items-center justify-center"
-                onPress={closeProductModal}
-              >
-                <Ionicons name="close" size={18} color="#ffffff" />
-              </TouchableOpacity>
-              
-              {/* Product status badge */}
-              {selectedProduct.status && (
-                <View className="absolute top-4 left-4 px-2 py-1 rounded-lg" 
-                  style={{ 
-                    backgroundColor: selectedProduct.status === 'Active' ? '#dcfce7' : '#fee2e2'
-                  }}
-                >
-                  <Text 
-                    className="text-xs font-semibold"
-                    style={{ 
-                      color: selectedProduct.status === 'Active' ? '#15803d' : '#b91c1c'
-                    }}
-                  >
-                    {selectedProduct.status}
-                  </Text>
-                </View>
-              )}
-            </View>
-            
-            {/* Product Info Header */}
-            <View className="p-4 border-b border-gray-100">
-              <View className="flex-row justify-between items-start">
-                <View className="flex-1 mr-2">
-                  <Text className="text-xl font-bold text-gray-800">
-                    {selectedProduct.productName}
-                  </Text>
-                  <Text className="text-sm text-gray-500 mt-1">
-                    {selectedProduct.category || "Uncategorized"}
-                  </Text>
+                  <Text className="font-semibold text-gray-800 dark:text-white">{activity.title}</Text>
+                  <Text className="text-gray-500 dark:text-gray-400 text-xs mt-1">{activity.description}</Text>
                 </View>
                 
                 <View>
-                  {selectedProduct.hasDiscount ? (
-                    <View>
-                      <Text className="text-xs text-gray-500 line-through">
-                        ${parseFloat(selectedProduct.price).toFixed(2)}
-                      </Text>
-                      <Text className="text-lg font-bold text-blue-600">
-                        ${parseFloat(selectedProduct.discountPrice).toFixed(2)}
-                      </Text>
-                    </View>
-                  ) : (
-                    <Text className="text-lg font-bold text-blue-600">
-                      ${parseFloat(selectedProduct.price).toFixed(2)}
-                    </Text>
-                  )}
+                  <Text className="text-gray-400 dark:text-gray-500 text-xs">{formatRelativeTime(activity.timestamp)}</Text>
                 </View>
-              </View>
-            </View>
-            
-            {/* Product Details */}
-            <ScrollView className="p-4" style={{ maxHeight: 280 }}>
-              {/* Stock Information */}
-              <View className="flex-row justify-between items-center mb-4 pb-4 border-b border-gray-100">
-                <Text className="text-gray-600">Stock Quantity</Text>
-                <View 
-                  className="px-2 py-1 rounded-lg"
-                  style={{
-                    backgroundColor: parseInt(selectedProduct.stockQuantity) < 10 ? '#fee2e2' : '#dcfce7'
-                  }}
-                >
-                  <Text 
-                    className="text-sm font-semibold"
-                    style={{
-                      color: parseInt(selectedProduct.stockQuantity) < 10 ? '#b91c1c' : '#15803d'
-                    }}
-                  >
-                    {selectedProduct.stockQuantity} units
-                  </Text>
-                </View>
-              </View>
-              
-              {/* SKU/Barcode */}
-              {selectedProduct.barcode && (
-                <View className="flex-row justify-between items-center mb-4 pb-4 border-b border-gray-100">
-                  <Text className="text-gray-600">Barcode/SKU</Text>
-                  <Text className="text-gray-800 font-medium">{selectedProduct.barcode}</Text>
-                </View>
-              )}
-              
-              {/* Supplier */}
-              {selectedProduct.supplier && (
-                <View className="flex-row justify-between items-center mb-4 pb-4 border-b border-gray-100">
-                  <Text className="text-gray-600">Supplier</Text>
-                  <Text className="text-gray-800 font-medium">{selectedProduct.supplier}</Text>
-                </View>
-              )}
-              
-              {/* Tax Information */}
-              {selectedProduct.taxPercentage && (
-                <View className="flex-row justify-between items-center mb-4 pb-4 border-b border-gray-100">
-                  <Text className="text-gray-600">Tax</Text>
-                  <Text className="text-gray-800 font-medium">{selectedProduct.taxPercentage}%</Text>
-                </View>
-              )}
-              
-              {/* Description */}
-              {selectedProduct.description && (
-                <View className="mb-4 pb-4 border-b border-gray-100">
-                  <Text className="text-gray-600 mb-2">Description</Text>
-                  <Text className="text-gray-800">{selectedProduct.description}</Text>
-                </View>
-              )}
-              
-              {/* Date Added */}
-              {selectedProduct.createdAt && (
-                <View className="flex-row justify-between items-center mb-4 pb-4 border-b border-gray-100">
-                  <Text className="text-gray-600">Added On</Text>
-                  <Text className="text-gray-800 font-medium">
-                    {new Date(selectedProduct.createdAt).toLocaleDateString()}
-                  </Text>
-                </View>
-              )}
-      </ScrollView>
-            
-            {/* Action Buttons */}
-            <View className="p-4 bg-gray-50 border-t border-gray-200 flex-row">
-              <TouchableOpacity 
-                className="flex-1 mr-2 py-3 bg-white border border-gray-300 rounded-lg items-center"
-                onPress={closeProductModal}
-              >
-                <Text className="text-gray-700 font-medium">Close</Text>
-              </TouchableOpacity>
-              
-              <TouchableOpacity 
-                className="flex-1 mr-2 py-3 bg-red-50 border border-red-200 rounded-lg items-center"
-                onPress={() => handleDeleteProduct(selectedProduct.id)}
-              >
-                <Text className="text-red-600 font-medium">Delete</Text>
-              </TouchableOpacity>
-              
-              <TouchableOpacity 
-                className="flex-1 py-3 bg-blue-600 rounded-lg items-center"
-                onPress={() => handleUpdateProduct(selectedProduct.id)}
-              >
-                <Text className="text-white font-medium">Update</Text>
-              </TouchableOpacity>
-            </View>
-          </Animated.View>
+              </Pressable>
+            </Animated.View>
+          ))}
         </View>
-      )}
+
+        {/* Management Tools (Merged) */}
+        <View className="mx-4 mt-4">
+          <View className="flex-row justify-between items-center mb-4">
+            <Text className="text-gray-800 dark:text-gray-200 font-bold text-lg">Management Tools</Text>
+          </View>
+          
+          <View className="flex-row flex-wrap justify-between">
+            {/* Main Management Tools */}
+            {stockOptions.map((option, index) => (
+              <Animated.View
+                key={`stock-${index}`}
+                style={{
+                  opacity: fadeAnim,
+                  transform: [{
+                    translateY: fadeAnim.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [20 * (index + 1), 0]
+                    })
+                  }]
+                }}
+                className="w-[48%] mb-4"
+              >
+                <Pressable
+                  onPress={() => router.push(option.route)}
+                  onPressIn={() => handleCardPressIn(index)}
+                  onPressOut={() => handleCardPressOut(index)}
+                  className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 overflow-hidden relative"
+                >
+                  <LinearGradient
+                    colors={[option.gradientFrom, option.gradientTo]}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    className="absolute inset-0 opacity-60"
+                  />
+                  <View className="flex-row justify-between items-start mb-3">
+                    <View className={`${option.color} p-2 rounded-lg`}>
+                      {option.iconType === "Ionicons" && (
+                        <Ionicons name={option.icon} size={20} color={option.iconColor} />
+                      )}
+                      {option.iconType === "MaterialIcons" && (
+                        <MaterialIcons name={option.icon} size={20} color={option.iconColor} />
+                      )}
+                      {option.iconType === "FontAwesome5" && (
+                        <FontAwesome5 name={option.icon} size={18} color={option.iconColor} />
+                      )}
+                      {option.iconType === "MaterialCommunityIcons" && (
+                        <MaterialCommunityIcons name={option.icon} size={20} color={option.iconColor} />
+                      )}
+                    </View>
+                    {option.badge && (
+                      <View className="bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded-full">
+                        <Text className="text-gray-600 dark:text-gray-400 text-xs font-medium">{option.badge}</Text>
+                      </View>
+                    )}
+                  </View>
+                  <Text className="font-bold text-gray-800 dark:text-white">{option.title}</Text>
+                  <Text className="text-gray-500 dark:text-gray-400 text-xs mt-1" numberOfLines={2}>{option.description}</Text>
+                </Pressable>
+              </Animated.View>
+            ))}
+            
+            {/* Quick Action Tools */}
+            {quickActions.map((action, index) => (
+              <Animated.View
+                key={`action-${index}`}
+                style={{
+                  opacity: fadeAnim,
+                  transform: [{
+                    translateY: fadeAnim.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [20 * (index + stockOptions.length + 1), 0]
+                    })
+                  }]
+                }}
+                className="w-[48%] mb-4"
+              >
+                <Pressable
+                  onPress={() => action.action()}
+                  onPressIn={() => handleCardPressIn(index + stockOptions.length)}
+                  onPressOut={() => handleCardPressOut(index + stockOptions.length)}
+                  className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 overflow-hidden relative"
+                >
+                  <LinearGradient
+                    colors={[action.gradientFrom, action.gradientTo]}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    className="absolute inset-0 opacity-60"
+                  />
+                  <View className="flex-row justify-between items-start mb-3">
+                    <View className={`${action.color} p-2 rounded-lg`}>
+                      {action.iconType === "Ionicons" && (
+                        <Ionicons name={action.icon} size={20} color={action.iconColor} />
+                      )}
+                      {action.iconType === "MaterialCommunityIcons" && (
+                        <MaterialCommunityIcons name={action.icon} size={20} color={action.iconColor} />
+                      )}
+                    </View>
+                  </View>
+                  <Text className="font-bold text-gray-800 dark:text-white">{action.title}</Text>
+                  <Text className="text-gray-500 dark:text-gray-400 text-xs mt-1">{action.title === "Scan Barcode" ? "Scan product barcodes for quick lookup" : 
+                         action.title === "Check Price" ? "Verify current product pricing" :
+                         action.title === "Restock" ? "Quick restock process for products" :
+                         "Export inventory data as reports"}</Text>
+                </Pressable>
+              </Animated.View>
+            ))}
+          </View>
+        </View>
+
+        {/* Rest of the existing UI components */}
+        {/* ... */}
+      </Animated.ScrollView>
     </SafeAreaView>
   );
 }

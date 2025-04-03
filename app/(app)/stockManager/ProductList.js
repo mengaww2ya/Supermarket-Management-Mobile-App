@@ -252,13 +252,35 @@ const ProductList = () => {
     });
   };
   
-  const handleUpdateProduct = (productId) => {
+  const handleUpdateProduct = (product) => {
     closeProductModal();
     
-    // Navigate to add product with product ID parameter for editing
+    // Navigate to add product with all product details for editing
     router.push({
       pathname: "/stockManager/addProduct",
-      params: { id: productId }
+      params: { 
+        editMode: "true",
+        id: product.id,
+        productName: product.productName,
+        description: product.description || "",
+        price: product.price.toString(),
+        discountPrice: product.discountPrice?.toString() || "",
+        hasDiscount: product.hasDiscount ? "true" : "false",
+        discountStartDate: product.discountStartDate || "",
+        discountEndDate: product.discountEndDate || "",
+        stockQuantity: product.stockQuantity?.toString() || "0",
+        unitType: product.unitType || "",
+        brand: product.brand || "",
+        supplier: product.supplier || "",
+        categoryId: product.categoryId || "",
+        status: product.status || "Active",
+        hasSpecialOffer: product.hasSpecialOffer ? "true" : "false",
+        specialOfferQuantity: product.specialOfferDetails?.quantity?.toString() || "",
+        specialOfferDiscount: product.specialOfferDetails?.discountPercentage?.toString() || "",
+        productionDate: product.productionDate || "",
+        expirationDate: product.expirationDate || "",
+        image: product.image || ""
+      }
     });
   };
   
@@ -736,170 +758,246 @@ const ProductList = () => {
               shadowOpacity: 0.25,
               shadowRadius: 10,
               elevation: 10,
-              maxHeight: height * 0.8
+              maxHeight: height * 0.85
             }}
           >
-            {/* Modal Header with Product Image */}
-            <View className="relative">
-              {selectedProduct.productImage ? (
-                <Image 
-                  source={{ uri: selectedProduct.productImage }} 
-                  className="w-full h-48 bg-gray-200"
-                  resizeMode="cover"
-                />
-              ) : (
-                <View className="w-full h-48 bg-gray-200 items-center justify-center">
-                  <Ionicons name="image-outline" size={48} color="#9ca3af" />
-                  <Text className="text-gray-500 mt-2">No image available</Text>
-                </View>
-              )}
-              
-              {/* Close button */}
-              <TouchableOpacity 
-                className="absolute top-4 right-4 w-8 h-8 rounded-full bg-black/30 items-center justify-center"
-                onPress={closeProductModal}
-              >
-                <Ionicons name="close" size={18} color="#ffffff" />
-              </TouchableOpacity>
-              
-              {/* Product status badge */}
-              {selectedProduct.status && (
-                <View className="absolute top-4 left-4 px-2 py-1 rounded-lg" 
-                  style={{ 
-                    backgroundColor: selectedProduct.status === 'Active' ? '#dcfce7' : '#fee2e2'
-                  }}
-                >
-                  <Text 
-                    className="text-xs font-semibold"
-                    style={{ 
-                      color: selectedProduct.status === 'Active' ? '#15803d' : '#b91c1c'
-                    }}
+            <ScrollView bounces={false} showsVerticalScrollIndicator={false}>
+              {/* Modal Header with Product Image */}
+              <View className="relative">
+                {selectedProduct.image ? (
+                  <Image 
+                    source={{ uri: selectedProduct.image }} 
+                    className="w-full h-60 bg-gray-100"
+                    resizeMode="cover"
+                  />
+                ) : (
+                  <LinearGradient 
+                    colors={['#f3f4f6', '#e5e7eb']} 
+                    className="w-full h-60 items-center justify-center"
                   >
-                    {selectedProduct.status}
-                  </Text>
-                </View>
-              )}
-            </View>
-            
-            {/* Product Info Header */}
-            <View className="p-4 border-b border-gray-100">
-              <View className="flex-row justify-between items-start">
-                <View className="flex-1 mr-2">
-                  <Text className="text-xl font-bold text-gray-800">
-                    {selectedProduct.productName}
-                  </Text>
-                  <Text className="text-sm text-gray-500 mt-1">
-                    {getCategoryName(selectedProduct.categoryId) || "Uncategorized"}
+                    <Ionicons name="image-outline" size={60} color="#9ca3af" />
+                    <Text className="text-gray-400 mt-2">No image available</Text>
+                  </LinearGradient>
+                )}
+                
+                {/* Close button */}
+                <TouchableOpacity 
+                  className="absolute top-4 right-4 w-10 h-10 rounded-full bg-black/30 items-center justify-center"
+                  style={{ backdropFilter: 'blur(2px)' }}
+                  onPress={closeProductModal}
+                >
+                  <Ionicons name="close" size={22} color="#ffffff" />
+                </TouchableOpacity>
+                
+                {/* Product status badge */}
+                <View 
+                  className={`absolute top-4 left-4 px-3 py-1.5 rounded-full ${
+                    selectedProduct.status === 'Active' ? 'bg-green-500/90' : 'bg-gray-500/90'
+                  }`}
+                >
+                  <Text className="text-white text-xs font-semibold">
+                    {selectedProduct.status || 'Unknown'}
                   </Text>
                 </View>
                 
-                <View>
-                  {selectedProduct.hasDiscount ? (
-                    <View>
-                      <Text className="text-xs text-gray-500 line-through">
-                        ${parseFloat(selectedProduct.price).toFixed(2)}
-                      </Text>
-                      <Text className="text-lg font-bold text-blue-600">
-                        ${parseFloat(selectedProduct.discountPrice).toFixed(2)}
+                {/* Discount Badge */}
+                {selectedProduct.hasDiscount && selectedProduct.discountPrice && (
+                  <View className="absolute bottom-4 right-4 bg-red-500/90 px-3 py-1.5 rounded-full flex-row items-center">
+                    <FontAwesome5 name="tags" size={12} color="white" style={{marginRight: 4}} />
+                    <Text className="text-white text-xs font-bold">
+                      {Math.round((1 - parseFloat(selectedProduct.discountPrice) / parseFloat(selectedProduct.price)) * 100)}% OFF
+                    </Text>
+                  </View>
+                )}
+              </View>
+              
+              {/* Product Info Header */}
+              <View className="p-5">
+                <Text className="text-2xl font-bold text-gray-800 mb-1">
+                  {selectedProduct.productName}
+                </Text>
+                
+                <View className="flex-row items-center mb-3">
+                  <View className="px-2.5 py-1 bg-indigo-100 rounded-full mr-2">
+                    <Text className="text-xs font-medium text-indigo-700">
+                      {getCategoryName(selectedProduct.categoryId) || "Uncategorized"}
+                    </Text>
+                  </View>
+                  
+                  {selectedProduct.brand && (
+                    <View className="px-2.5 py-1 bg-blue-50 rounded-full">
+                      <Text className="text-xs font-medium text-blue-700">
+                        {selectedProduct.brand}
                       </Text>
                     </View>
-                  ) : (
-                    <Text className="text-lg font-bold text-blue-600">
-                      ${parseFloat(selectedProduct.price).toFixed(2)}
-                    </Text>
                   )}
                 </View>
-              </View>
-            </View>
-            
-            {/* Product Details */}
-            <ScrollView className="p-4" style={{ maxHeight: 280 }}>
-              {/* Stock Information */}
-              <View className="flex-row justify-between items-center mb-4 pb-4 border-b border-gray-100">
-                <Text className="text-gray-600">Stock Quantity</Text>
-                <View 
-                  className="px-2 py-1 rounded-lg"
-                  style={{
-                    backgroundColor: parseInt(selectedProduct.stockQuantity) < 10 ? '#fee2e2' : '#dcfce7'
-                  }}
-                >
-                  <Text 
-                    className="text-sm font-semibold"
-                    style={{
-                      color: parseInt(selectedProduct.stockQuantity) < 10 ? '#b91c1c' : '#15803d'
-                    }}
+                
+                {/* Pricing Information */}
+                <View className="flex-row items-center mb-4">
+                  {selectedProduct.hasDiscount && selectedProduct.discountPrice ? (
+                    <>
+                      <Text className="text-2xl font-bold text-indigo-600">
+                        ETB {parseFloat(selectedProduct.discountPrice).toFixed(2)}
+                      </Text>
+                      <Text className="text-base text-gray-400 line-through ml-2">
+                        ETB {parseFloat(selectedProduct.price).toFixed(2)}
+                      </Text>
+                    </>
+                  ) : (
+                    <Text className="text-2xl font-bold text-indigo-600">
+                      ETB {parseFloat(selectedProduct.price).toFixed(2)}
+                    </Text>
+                  )}
+                  
+                  {selectedProduct.unitType && (
+                    <Text className="text-gray-500 ml-2">/ {selectedProduct.unitType}</Text>
+                  )}
+                </View>
+                
+                {/* Discount Date Period */}
+                {selectedProduct.hasDiscount && selectedProduct.discountStartDate && selectedProduct.discountEndDate && (
+                  <View className="bg-red-50 p-3 rounded-lg mb-4 flex-row items-center">
+                    <Ionicons name="calendar" size={16} color="#ef4444" className="mr-2" />
+                    <Text className="text-red-600 text-xs">
+                      Sale period: {selectedProduct.discountStartDate} to {selectedProduct.discountEndDate}
+                    </Text>
+                  </View>
+                )}
+                
+                {/* Description Card */}
+                <View className="bg-gray-50 rounded-xl p-4 mb-4">
+                  <View className="flex-row items-center mb-2">
+                    <Ionicons name="information-circle" size={18} color="#4b5563" />
+                    <Text className="text-base font-semibold text-gray-700 ml-2">Description</Text>
+                  </View>
+                  <Text className="text-gray-600">
+                    {selectedProduct.description || "No description available"}
+                  </Text>
+                </View>
+                
+                {/* Inventory Information */}
+                <View className="bg-blue-50 rounded-xl p-4 mb-4">
+                  <View className="flex-row items-center mb-3">
+                    <Ionicons name="cube" size={18} color="#1e40af" />
+                    <Text className="text-base font-semibold text-blue-700 ml-2">Inventory</Text>
+                  </View>
+                  
+                  <View className="flex-row flex-wrap">
+                    <View className="w-1/2 mb-3 pr-2">
+                      <Text className="text-xs text-blue-900 mb-1">Current Stock</Text>
+                      <View className="flex-row items-center">
+                        <Text className="text-base font-semibold text-gray-700">
+                          {selectedProduct.stockQuantity || 0} {selectedProduct.unitType || 'units'}
+                        </Text>
+                        {parseInt(selectedProduct.stockQuantity) < 10 && (
+                          <View className="ml-2 px-2 py-0.5 bg-red-100 rounded-full">
+                            <Text className="text-xs font-medium text-red-600">Low</Text>
+                          </View>
+                        )}
+                      </View>
+                    </View>
+                    
+                    {selectedProduct.supplier && (
+                      <View className="w-1/2 mb-3 pl-2">
+                        <Text className="text-xs text-blue-900 mb-1">Supplier</Text>
+                        <Text className="text-base font-semibold text-gray-700">{selectedProduct.supplier}</Text>
+                      </View>
+                    )}
+                    
+                    {selectedProduct.productionDate && (
+                      <View className="w-1/2 pr-2">
+                        <Text className="text-xs text-blue-900 mb-1">Production Date</Text>
+                        <Text className="text-base font-semibold text-gray-700">{selectedProduct.productionDate}</Text>
+                      </View>
+                    )}
+                    
+                    {selectedProduct.expirationDate && (
+                      <View className="w-1/2 pl-2">
+                        <Text className="text-xs text-blue-900 mb-1">Expiration Date</Text>
+                        <Text className="text-base font-semibold text-gray-700">{selectedProduct.expirationDate}</Text>
+                      </View>
+                    )}
+                  </View>
+                </View>
+                
+                {/* Special Offer */}
+                {selectedProduct.hasSpecialOffer && selectedProduct.specialOfferDetails && (
+                  <View className="bg-amber-50 rounded-xl p-4 mb-4">
+                    <View className="flex-row items-center mb-2">
+                      <Ionicons name="pricetag" size={18} color="#b45309" />
+                      <Text className="text-base font-semibold text-amber-700 ml-2">Special Offer</Text>
+                    </View>
+                    
+                    <View className="bg-amber-100 p-3 rounded-lg">
+                      <Text className="text-amber-700 font-medium text-center">
+                        Buy {selectedProduct.specialOfferDetails.quantity}+ units and get {selectedProduct.specialOfferDetails.discountPercentage}% off!
+                      </Text>
+                      
+                      {selectedProduct.price && (
+                        <View className="flex-row justify-center items-center mt-1 pt-1 border-t border-amber-200">
+                          <Text className="text-xs text-amber-600">Regular:</Text>
+                          <Text className="text-xs font-medium text-amber-800 mx-1">
+                            ETB {parseFloat(selectedProduct.price).toFixed(2)}
+                          </Text>
+                          <Text className="text-xs text-amber-600">→</Text>
+                          <Text className="text-xs font-medium text-amber-800 mx-1">
+                            ETB {(parseFloat(selectedProduct.price) * (1 - selectedProduct.specialOfferDetails.discountPercentage / 100)).toFixed(2)}
+                          </Text>
+                          <Text className="text-xs text-amber-600">per unit</Text>
+                        </View>
+                      )}
+                    </View>
+                  </View>
+                )}
+                
+                {/* Meta Information */}
+                <View className="bg-gray-50 rounded-xl p-4 mb-4">
+                  <View className="flex-row items-center mb-3">
+                    <Ionicons name="time-outline" size={18} color="#4b5563" />
+                    <Text className="text-base font-semibold text-gray-700 ml-2">Product Information</Text>
+                  </View>
+                  
+                  <View className="flex-row justify-between items-center">
+                    <Text className="text-xs text-gray-500">Added:</Text>
+                    <Text className="text-xs text-gray-700">
+                      {selectedProduct.dateAdded ? new Date(selectedProduct.dateAdded).toLocaleString() : 'Unknown'}
+                    </Text>
+                  </View>
+                  
+                  <View className="flex-row justify-between items-center mt-2">
+                    <Text className="text-xs text-gray-500">Last Updated:</Text>
+                    <Text className="text-xs text-gray-700">
+                      {selectedProduct.lastUpdated ? new Date(selectedProduct.lastUpdated).toLocaleString() : 'Unknown'}
+                    </Text>
+                  </View>
+                  
+                  <View className="flex-row justify-between items-center mt-2">
+                    <Text className="text-xs text-gray-500">Product ID:</Text>
+                    <Text className="text-xs text-gray-700">{selectedProduct.id || 'Unknown'}</Text>
+                  </View>
+                </View>
+                
+                {/* Action Buttons */}
+                <View className="flex-row space-x-4 mt-2 mb-2">
+                  <TouchableOpacity 
+                    onPress={() => handleDeleteProduct(selectedProduct.id)}
+                    className="flex-1 py-3.5 rounded-xl border border-gray-300 flex-row justify-center items-center"
                   >
-                    {selectedProduct.stockQuantity} units
-                  </Text>
+                    <Ionicons name="trash-outline" size={18} color="#ef4444" />
+                    <Text className="text-red-500 font-medium ml-2">Delete</Text>
+                  </TouchableOpacity>
+                  
+                  <TouchableOpacity 
+                    onPress={() => handleUpdateProduct(selectedProduct)}
+                    className="flex-1 py-3.5 rounded-xl bg-indigo-600 flex-row justify-center items-center"
+                  >
+                    <Ionicons name="create-outline" size={18} color="white" />
+                    <Text className="text-white font-medium ml-2">Edit</Text>
+                  </TouchableOpacity>
                 </View>
               </View>
-              
-              {/* SKU/Barcode */}
-              {selectedProduct.barcode && (
-                <View className="flex-row justify-between items-center mb-4 pb-4 border-b border-gray-100">
-                  <Text className="text-gray-600">Barcode/SKU</Text>
-                  <Text className="text-gray-800 font-medium">{selectedProduct.barcode}</Text>
-                </View>
-              )}
-              
-              {/* Supplier */}
-              {selectedProduct.supplier && (
-                <View className="flex-row justify-between items-center mb-4 pb-4 border-b border-gray-100">
-                  <Text className="text-gray-600">Supplier</Text>
-                  <Text className="text-gray-800 font-medium">{selectedProduct.supplier}</Text>
-                </View>
-              )}
-              
-              {/* Tax Information */}
-              {selectedProduct.taxPercentage && (
-                <View className="flex-row justify-between items-center mb-4 pb-4 border-b border-gray-100">
-                  <Text className="text-gray-600">Tax</Text>
-                  <Text className="text-gray-800 font-medium">{selectedProduct.taxPercentage}%</Text>
-                </View>
-              )}
-              
-              {/* Description */}
-              {selectedProduct.description && (
-                <View className="mb-4 pb-4 border-b border-gray-100">
-                  <Text className="text-gray-600 mb-2">Description</Text>
-                  <Text className="text-gray-800">{selectedProduct.description}</Text>
-                </View>
-              )}
-              
-              {/* Date Added */}
-              {selectedProduct.createdAt && (
-                <View className="flex-row justify-between items-center mb-4 pb-4 border-b border-gray-100">
-                  <Text className="text-gray-600">Added On</Text>
-                  <Text className="text-gray-800 font-medium">
-                    {new Date(selectedProduct.createdAt).toLocaleDateString()}
-                  </Text>
-                </View>
-              )}
             </ScrollView>
-            
-            {/* Action Buttons */}
-            <View className="p-4 bg-gray-50 border-t border-gray-200 flex-row">
-              <TouchableOpacity 
-                className="flex-1 mr-2 py-3 bg-white border border-gray-300 rounded-lg items-center"
-                onPress={closeProductModal}
-              >
-                <Text className="text-gray-700 font-medium">Close</Text>
-              </TouchableOpacity>
-              
-              <TouchableOpacity 
-                className="flex-1 mr-2 py-3 bg-red-50 border border-red-200 rounded-lg items-center"
-                onPress={() => handleDeleteProduct(selectedProduct.id)}
-              >
-                <Text className="text-red-600 font-medium">Delete</Text>
-              </TouchableOpacity>
-              
-              <TouchableOpacity 
-                className="flex-1 py-3 bg-blue-600 rounded-lg items-center"
-                onPress={() => handleUpdateProduct(selectedProduct.id)}
-              >
-                <Text className="text-white font-medium">Update</Text>
-              </TouchableOpacity>
-            </View>
           </Animated.View>
     </View>
       )}

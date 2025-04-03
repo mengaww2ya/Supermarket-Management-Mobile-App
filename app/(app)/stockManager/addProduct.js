@@ -23,7 +23,6 @@ import { useRouter } from 'expo-router';
 import { Ionicons, MaterialCommunityIcons, MaterialIcons, FontAwesome } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { StatusBar } from 'expo-status-bar';
-
 export default function AddProduct() {
   const router = useRouter();
   const [productName, setProductName] = useState("");
