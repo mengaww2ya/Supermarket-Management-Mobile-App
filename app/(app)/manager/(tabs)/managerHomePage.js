@@ -349,7 +349,7 @@ const MetricCard = ({ metric, index }) => {
   return (
     <Animated.View 
       style={{
-        width: "100%",
+        width: "48%",
         marginBottom: 16,
         transform: [{ scale: scaleAnim }],
         opacity: opacityAnim
@@ -359,50 +359,52 @@ const MetricCard = ({ metric, index }) => {
         backgroundColor: "white",
         borderRadius: 16,
         padding: 16,
-        flexDirection: "row",
-        alignItems: "center",
         elevation: 3,
         shadowColor: "#000",
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
-        shadowRadius: 4
+        shadowRadius: 4,
+        height: 130
       }}>
         <View style={{
-          width: 60,
-          height: 60,
-          borderRadius: 12,
+          width: 40,
+          height: 40,
+          borderRadius: 10,
           backgroundColor: `rgba(79, 70, 229, 0.1)`,
           justifyContent: "center",
           alignItems: "center",
-          marginRight: 16
+          marginBottom: 12
         }}>
           {metric.iconType === "MaterialIcons" && (
-            <MaterialIcons name={metric.icon} size={28} color="#4F46E5" />
+            <MaterialIcons name={metric.icon} size={20} color="#4F46E5" />
           )}
-          </View>
+        </View>
         
-        <View style={{ flex: 1 }}>
-          <Text style={{ fontSize: 24, fontWeight: "bold", color: "#1F2937", marginBottom: 4 }}>
+        <View>
+          <Text style={{ fontSize: 20, fontWeight: "bold", color: "#1F2937", marginBottom: 4 }}>
             {metric.value}
-                </Text>
-          <Text style={{ fontSize: 16, color: "#6B7280" }}>
+          </Text>
+          <Text style={{ fontSize: 14, color: "#6B7280" }}>
             {metric.title}
-              </Text>
+          </Text>
         </View>
         
         <View style={{
+          position: "absolute",
+          top: 16,
+          right: 16,
           backgroundColor: metric.status === "positive" ? "rgba(16, 185, 129, 0.1)" : "rgba(239, 68, 68, 0.1)",
-          paddingHorizontal: 12,
-          paddingVertical: 6,
+          paddingHorizontal: 8,
+          paddingVertical: 4,
           borderRadius: 100
         }}>
           <Text style={{
-            fontSize: 14,
+            fontSize: 12,
             color: metric.status === "positive" ? "#10B981" : "#EF4444",
             fontWeight: "600"
           }}>
             {metric.change}
-                </Text>
+          </Text>
         </View>
       </View>
     </Animated.View>
@@ -706,9 +708,11 @@ export default function ManagerHomePage() {
           {/* Performance Metrics */}
           <SectionHeader title="Performance Overview" color="#4F46E5" />
           
-          {performanceMetrics.map((metric, index) => (
-            <MetricCard key={index} metric={metric} index={index} />
-          ))}
+          <View style={{ flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between" }}>
+            {performanceMetrics.map((metric, index) => (
+              <MetricCard key={index} metric={metric} index={index} />
+            ))}
+          </View>
           
           {/* Quick Access */}
           <SectionHeader title="Quick Access" color="#10B981" />

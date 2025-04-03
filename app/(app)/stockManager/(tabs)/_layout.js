@@ -17,12 +17,13 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="Profile" // Ensure this matches the name of your Profile component
+        name="messages"
         options={{
-          title: "Profile",
-          tabBarIcon: ({ color }) => <FontAwesome size={28} name="user" color={color} />,
+          title: "Messages",
+          tabBarIcon: ({ color }) => <FontAwesome size={28} name="comments" color={color} />,
         }}
       />
+     
     </Tabs>
   );
 }

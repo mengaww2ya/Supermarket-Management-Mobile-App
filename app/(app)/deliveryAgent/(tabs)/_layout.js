@@ -1,5 +1,5 @@
 import { Tabs } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, Feather } from "@expo/vector-icons";
 
 export default function Layout() {
   return (
@@ -17,6 +17,16 @@ export default function Layout() {
         options={{
           title: "Home",
           tabBarIcon: ({ color, size }) => <Ionicons name="home-outline" size={size} color={color} />,
+        }}
+      />
+      
+      {/* Messages Tab */}
+      <Tabs.Screen
+        name="messages"
+        options={{
+          title: "Messages",
+          tabBarIcon: ({ color, size }) => <Feather name="message-circle" size={size} color={color} />,
+          tabBarBadge: 0, // This will be dynamic in a real app
         }}
       />
     </Tabs>

@@ -29,6 +29,7 @@ import { useAuth } from '../context/authContext';
 import { getRoomId } from '../utills/common';
 import HomeHeader from '../components/HomeHeader';
 import { blurhash } from '../utills/common';
+import ChatRoomHeader from '../components/ChatRoomHeader';
 
 import { 
   addDoc, 
@@ -76,7 +77,20 @@ const DEFAULT_PROFILE_IMAGE = require('../../assets/images/PrifileDemo.png');
 export default function ChatRoom() {
   const router = useRouter();
   const routeParams = useLocalSearchParams();
-  const item = { ...routeParams }; // Convert to regular object
+  
+  // Add better parameter handling to debug and normalize different parameter formats
+  console.log('[ChatRoom Debug] Received route params:', routeParams);
+  
+  const item = { 
+    ...routeParams,
+    // Ensure we have a normalized structure regardless of how params were passed
+    uid: routeParams.uid || routeParams.recipientId,
+    name: routeParams.name || routeParams.recipientName,
+    chatId: routeParams.chatId
+  };
+  
+  console.log('[ChatRoom Debug] Normalized params:', item);
+  
   const { userData } = useAuth(); // Current logged-in user
   const [messages, setMessages] = useState([]);
   const [text, setText] = useState('');
@@ -98,19 +112,28 @@ export default function ChatRoom() {
 
   // Get room ID from user IDs
   const roomId = getRoomId(userData?.uid, item?.uid);
+  console.log('[ChatRoom Debug] Calculated roomId:', roomId, 'from users:', userData?.uid, item?.uid);
 
   // Fetch user profile once
   useEffect(() => {
     const fetchUserProfile = async () => {
-      if (!item?.uid) return;
+      if (!item?.uid) {
+        console.log('[ChatRoom Debug] No recipient UID found, cannot fetch profile');
+        return;
+      }
       
       try {
+        console.log('[ChatRoom Debug] Fetching profile for user:', item.uid);
         const userDoc = await getDoc(doc(db, 'users', item.uid));
         if (userDoc.exists()) {
-          setUserProfile(userDoc.data());
+          const profile = userDoc.data();
+          console.log('[ChatRoom Debug] User profile found:', profile.name || profile.email);
+          setUserProfile(profile);
+        } else {
+          console.log('[ChatRoom Debug] No user document found for:', item.uid);
         }
       } catch (error) {
-        console.error('Error fetching user profile:', error);
+        console.error('[ChatRoom Debug] Error fetching user profile:', error);
       }
     };
     
@@ -135,41 +158,58 @@ export default function ChatRoom() {
     ]).start();
   }, []);
 
-  // Create/update chat room and listen for messages
+  // Improved message fetching logic for user collections
   useEffect(() => {
-    if (!userData?.uid || !item?.uid) return;
+    if (!userData?.uid) {
+      console.log('[ChatRoom Debug] No current user UID found');
+      return;
+    }
+    
+    if (!item?.uid) {
+      console.log('[ChatRoom Debug] No recipient UID found');
+      return;
+    }
     
     console.log('[Chat Debug] Creating/setting up chat room between users:', {
       currentUser: userData.uid,
       otherUser: item.uid
     });
     
-    // Listen for messages in the users collection
-    const userMessagesQuery = query(
+    // Use the user's chat subcollection to find messages
+    const messagesQuery = query(
       collection(db, 'users', userData.uid, 'chats', item.uid, 'messages'),
       orderBy('createdAt', 'asc')
     );
     
-    console.log(`[Chat Debug] Setting up message listener for user: ${userData.uid} and chat with: ${item.uid}`);
+    console.log(`[Chat Debug] Setting up message listener for: ${userData.uid} <-> ${item.uid}`);
     
-    // Listen for messages from this chat
+    // Listen for messages
     const unsubscribe = onSnapshot(
-      userMessagesQuery, 
-      // Success handler
+      messagesQuery, 
       (snapshot) => {
         console.log(`[Chat Debug] Received ${snapshot.docs.length} messages`);
+        
+        if (snapshot.empty) {
+          console.log('[Chat Debug] No messages found in this chat');
+          setMessages([]);
+          setLoading(false);
+          return;
+        }
+        
         let allMessages = snapshot.docs.map(doc => {
           const data = doc.data();
           console.log('[Chat Debug] Message data:', {
             id: doc.id,
             text: data.text,
             senderId: data.senderId,
-            receiverId: data.receiverId,
-            timestamp: data.createdAt?.toDate?.() || 'No timestamp'
+            receiverId: data.receiverId || data.recipientId,
           });
+          
+          // Normalize data to ensure it has consistent field names
           return {
             id: doc.id,
-            ...data
+            ...data,
+            receiverId: data.receiverId || data.recipientId
           };
         });
         
@@ -187,7 +227,6 @@ export default function ChatRoom() {
         // Mark messages as read
         markMessagesAsRead(snapshot.docs);
       },
-      // Error handler
       (error) => {
         console.error('[Chat Debug] Error in messages snapshot:', error);
         setLoading(false);
@@ -195,55 +234,51 @@ export default function ChatRoom() {
       }
     );
     
-    // Listen for typing status
-    const typingRef = doc(db, 'users', userData.uid, 'chats', item.uid, 'typingStatus', 'status');
-    const typingUnsubscribe = onSnapshot(typingRef, (doc) => {
-      if (doc.exists()) {
-        setUserTyping(doc.data().isTyping || false);
-      }
-    });
-
-    // Auto-scroll on keyboard show
-    const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', scrollToBottom);
-
+    // Cleanup subscription
     return () => {
       unsubscribe();
-      typingUnsubscribe();
-      keyboardDidShowListener.remove();
-      
-      // Clear typing status when leaving
-      setTypingStatus(false);
     };
   }, [userData?.uid, item?.uid]);
   
   // Mark messages as read
   const markMessagesAsRead = async (messageDocs) => {
-    if (!userData?.uid || !item?.uid) return;
+    if (!userData?.uid || !item?.uid) {
+      console.log('[Chat Debug] Missing user IDs for marking messages as read');
+      return;
+    }
     
     try {
+      console.log('[Chat Debug] Checking for unread messages to mark as read');
       const batch = writeBatch(db);
       let hasUnread = false;
       
       // Update each unread message
       messageDocs.forEach(doc => {
         const message = doc.data();
-        if (message.receiverId === userData.uid && !message.read) {
+        // Only mark messages from the other user as read
+        if (message.senderId === item.uid && !message.read) {
+          console.log('[Chat Debug] Marking message as read:', doc.id);
           hasUnread = true;
           batch.update(doc.ref, { read: true });
         }
       });
       
-      // If there were unread messages, update the chat metadata too
+      // If there were unread messages, update the chat metadata
       if (hasUnread) {
-        const chatMetaRef = doc(db, 'users', userData.uid, 'chats', item.uid);
-        batch.update(chatMetaRef, {
-          lastRead: serverTimestamp()
+        console.log('[Chat Debug] Updating last read timestamp for chat');
+        
+        // Update chat metadata in the user's collection
+        const chatRef = doc(db, 'users', userData.uid, 'chats', item.uid);
+        batch.update(chatRef, {
+          lastRead: serverTimestamp(),
+          unreadCount: 0 // Reset unread count
         });
         
         await batch.commit();
+        console.log('[Chat Debug] Successfully marked messages as read');
       }
     } catch (error) {
-      console.error('Error marking messages as read:', error);
+      console.error('[Chat Debug] Error marking messages as read:', error);
     }
   };
 
@@ -507,38 +542,37 @@ export default function ChatRoom() {
     }
   };
 
-  // Send a message
-  const sendMessage = async (additionalData = {}) => {
-    if ((!text.trim() && !additionalData.type) || !userData?.uid || !item?.uid) return;
+  // Updated sendMessage function to use user collections
+  const sendMessage = async () => {
+    if (!text.trim()) {
+      console.log('[Chat Debug] Attempted to send empty message');
+      return;
+    }
+    
+    console.log('[Chat Debug] Preparing to send message:', text);
+    const isTextEmpty = text.trim().length === 0;
+    
+    // Clear input
+    setText('');
+    
+    if (isTextEmpty) {
+      console.log('[Chat Debug] Message was empty after trimming');
+      return;
+    }
     
     try {
-      // Clear input and reset typing status
-      const messageText = text.trim();
-      setText('');
-      inputRef?.current?.clear();
-      setTypingStatus(false);
-      
-      // Prepare message data
+      // Create message data
       const messageData = {
-        text: additionalData.type ? (additionalData.type === 'image' ? 'Sent an image' : '') : messageText,
+        text: text.trim(),
         senderId: userData.uid,
-        senderName: userData.fullName || `${userData.firstName || ''} ${userData.lastName || ''}`,
-        senderPhoto: userData.photoURL || null,
+        senderName: userData.name || userData.email,
         receiverId: item.uid,
-        receiverName: item.fullName || `${item.firstName || ''} ${item.lastName || ''}`,
-        receiverPhoto: item.photoURL || null,
         createdAt: serverTimestamp(),
         read: false,
-        type: additionalData.type || 'text',
-        ...additionalData
+        type: 'text'
       };
       
-      console.log('[Chat Debug] Message data being sent:', {
-        text: messageData.text,
-        type: messageData.type,
-        senderId: messageData.senderId,
-        receiverId: messageData.receiverId,
-      });
+      console.log('[Chat Debug] Message data being sent:', messageData);
       
       // Batch write to ensure consistency
       const batch = writeBatch(db);
@@ -554,59 +588,34 @@ export default function ChatRoom() {
       // 3. Update sender's chat metadata
       const senderChatRef = doc(db, 'users', userData.uid, 'chats', item.uid);
       batch.set(senderChatRef, {
-        participantId: item.uid,
-        participantName: item.fullName || `${item.firstName || ''} ${item.lastName || ''}`,
-        participantPhoto: item.photoURL || null,
-        lastMessage: {
-          text: additionalData.type === 'image' ? 'Sent an image' : 
-                additionalData.type === 'document' ? 'Sent a file' : messageText,
-          senderId: userData.uid,
-          timestamp: serverTimestamp()
-        },
+        lastMessage: text.trim(),
+        lastMessageTimestamp: serverTimestamp(),
         updatedAt: serverTimestamp(),
-        lastRead: serverTimestamp()
+        withUser: item.uid,
+        withUserName: item.name || 'User',
       }, { merge: true });
       
-      // 4. Update recipient's chat metadata
+      // 4. Update recipient's chat metadata with unread count
       const recipientChatRef = doc(db, 'users', item.uid, 'chats', userData.uid);
       batch.set(recipientChatRef, {
-        participantId: userData.uid,
-        participantName: userData.fullName || `${userData.firstName || ''} ${userData.lastName || ''}`,
-        participantPhoto: userData.photoURL || null,
-        lastMessage: {
-          text: additionalData.type === 'image' ? 'Sent an image' : 
-                additionalData.type === 'document' ? 'Sent a file' : messageText,
-          senderId: userData.uid,
-          timestamp: serverTimestamp()
-        },
+        lastMessage: text.trim(),
+        lastMessageTimestamp: serverTimestamp(),
         updatedAt: serverTimestamp(),
+        withUser: userData.uid,
+        withUserName: userData.name || userData.fullName || userData.email || 'User',
         unreadCount: increment(1)
       }, { merge: true });
       
       // Commit all changes
       await batch.commit();
-      console.log('[Chat Debug] Message and metadata added successfully');
+      console.log('[Chat Debug] Message sent successfully');
       
-      // Manually add the message to the local state for immediate feedback
-      const createdAt = new Date();
-      const newMessage = {
-        id: senderMessageRef.id,
-        ...messageData,
-        createdAt: {
-          toDate: () => createdAt
-        }
-      };
-      setMessages(prevMessages => [...prevMessages, newMessage]);
-      
-      // Give haptic feedback
-      if (Platform.OS === 'ios') {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      }
-      
+      // Reset text and scroll to bottom
       scrollToBottom();
+      
     } catch (error) {
       console.error('[Chat Debug] Error sending message:', error);
-      Alert.alert('Message Error', 'Failed to send message. Please try again.');
+      Alert.alert('Error', 'Failed to send message. Please try again.');
     }
   };
 
@@ -846,32 +855,13 @@ export default function ChatRoom() {
       <SafeAreaView className="flex-1 bg-gray-100">
         <StatusBar style="dark" backgroundColor="#f3f4f6" translucent={true} />
         
-        {/* Chat Header */}
-        <View className="flex-row items-center border-b border-gray-200 px-4 py-2 bg-white">
-          <TouchableOpacity onPress={() => router.back()} className="mr-2">
-            <Ionicons name="arrow-back" size={24} color="#374151" />
-          </TouchableOpacity>
-          
-          <Image
-            source={
-              !userProfile?.photoURL 
-                ? DEFAULT_PROFILE_IMAGE 
-                : { uri: userProfile.photoURL }
-            }
-            style={{ height: hp(5), width: hp(5), borderRadius: 100 }}
-            placeholder={blurhash}
-            className="bg-gray-200"
-          />
-          
-          <View className="ml-3 flex-1">
-            <Text className="font-semibold text-gray-900">
-              {userProfile?.fullName || item?.fullName || 'Chat'}
-            </Text>
-            <Text className="text-xs text-gray-500">
-              Loading messages...
-            </Text>
-          </View>
-        </View>
+        <ChatRoomHeader 
+          title={userProfile?.fullName || item?.name || 'Chat'} 
+          photoURL={userProfile?.photoURL} 
+          online={false}
+          typing={false}
+          role={userProfile?.role}
+        />
         
         <View className="flex-1 justify-center items-center">
           <ActivityIndicator size="large" color="#4f46e5" />
@@ -887,36 +877,13 @@ export default function ChatRoom() {
     <SafeAreaView className="flex-1 bg-gray-100">
       <StatusBar style="dark" backgroundColor="#f3f4f6" translucent={true} />
       
-      {/* Chat Header */}
-      <View className="flex-row items-center border-b border-gray-200 px-4 py-2 bg-white">
-        <TouchableOpacity onPress={() => router.back()} className="mr-2">
-          <Ionicons name="arrow-back" size={24} color="#374151" />
-        </TouchableOpacity>
-        
-        <Image
-          source={
-            !userProfile?.photoURL 
-              ? DEFAULT_PROFILE_IMAGE 
-              : { uri: userProfile.photoURL }
-          }
-          style={{ height: hp(5), width: hp(5), borderRadius: 100 }}
-          placeholder={blurhash}
-          className="bg-gray-200"
-        />
-        
-        <View className="ml-3 flex-1">
-          <Text className="font-semibold text-gray-900">
-            {userProfile?.fullName || item?.fullName || 'Chat'}
-          </Text>
-          <Text className="text-xs text-gray-500">
-            {userTyping ? 'Typing...' : userProfile?.status || ''}
-          </Text>
-        </View>
-        
-        <TouchableOpacity className="ml-2 p-2">
-          <Ionicons name="call" size={22} color="#4f46e5" />
-        </TouchableOpacity>
-      </View>
+      <ChatRoomHeader 
+        title={userProfile || item || {name: 'Chat'}} 
+        photoURL={userProfile?.photoURL} 
+        online={false}
+        typing={false}
+        role={userProfile?.role}
+      />
       
       {/* Messages Container */}
       <Animated.View 
@@ -938,7 +905,7 @@ export default function ChatRoom() {
           <FlatList
             ref={flatListRef}
             data={messages}
-            keyExtractor={(item) => item.id}
+            keyExtractor={(item) => `msg_${item.id}_${item.senderId}_${Date.now()}`}
             renderItem={renderMessage}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ padding: 16, paddingBottom: 8 }}

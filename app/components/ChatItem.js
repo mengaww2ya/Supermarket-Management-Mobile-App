@@ -1,121 +1,301 @@
-import { View, Text, TouchableOpacity } from 'react-native';
-import React, { useEffect, useState } from 'react';
-import { Image } from 'expo-image';
+import React, { useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Image, Animated } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
+import * as Haptics from 'expo-haptics';
 import { blurhash, getRoomId } from '../utills/common';
 import { collection, doc, onSnapshot, orderBy, query, where, limit } from 'firebase/firestore';
 import { db } from '../../firebase/firebaseConfig';
-import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 
 const DEFAULT_PROFILE_IMAGE = require('../../assets/images/PrifileDemo.png');
 
-export default function ChatItem({ item, router, noBorder, currentUser }) {
-    const [lastMessage, setLastMessage] = useState(null);
-    const [imageError, setImageError] = useState(false);
-
+export default function ChatItem({ chat, onPress, currentUser, index = 0, animationDelay = 0 }) {
+    const opacityAnim = useRef(new Animated.Value(0)).current;
+    const translateYAnim = useRef(new Animated.Value(20)).current;
+    
+    // Animation effect
     useEffect(() => {
-        if (!currentUser?.uid || !item?.uid) return;
-
-        const roomId = getRoomId(currentUser.uid, item.uid);
+        Animated.parallel([
+            Animated.timing(opacityAnim, {
+                toValue: 1,
+                duration: 500,
+                delay: animationDelay,
+                useNativeDriver: true,
+            }),
+            Animated.timing(translateYAnim, {
+                toValue: 0,
+                duration: 500,
+                delay: animationDelay,
+                useNativeDriver: true,
+            }),
+        ]).start();
+    }, []);
+    
+    const handlePress = () => {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        if (onPress) onPress(chat);
+    };
+    
+    // Format the timestamp
+    const formatTime = (timestamp) => {
+        if (!timestamp) return '';
         
-        // Try using the messages collection first (new structure)
         try {
-            const messagesQuery = query(
-                collection(db, 'messages'),
-                where('roomId', '==', roomId),
-                orderBy('createdAt', 'desc'),
-                limit(1)
-            );
-
-            const unsubscribe = onSnapshot(messagesQuery, 
-                // Success handler
-                (snapshot) => {
-                    if (!snapshot.empty) {
-                        setLastMessage(snapshot.docs[0].data());
-                    } else {
-                        // If no messages in the new structure, try the old structure
-                        checkOldStructure();
-                    }
-                },
-                // Error handler - likely missing index
-                (error) => {
-                    console.log('[Chat Debug] Error in messages query, checking old structure:', error);
-                    checkOldStructure();
-                }
-            );
+            let messageDate;
+            if (timestamp.toDate && typeof timestamp.toDate === 'function') {
+                messageDate = timestamp.toDate();
+            } else if (timestamp instanceof Date) {
+                messageDate = timestamp;
+            } else if (typeof timestamp === 'number') {
+                messageDate = new Date(timestamp);
+            } else {
+                return '';
+            }
             
-            return () => unsubscribe();
+            const now = new Date();
+            
+            // Same day - show time
+            if (messageDate.toDateString() === now.toDateString()) {
+                return messageDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            }
+            
+            // Within last 7 days - show day of week
+            const diffDays = Math.floor((now - messageDate) / (1000 * 60 * 60 * 24));
+            if (diffDays < 7) {
+                return messageDate.toLocaleDateString([], { weekday: 'short' });
+            }
+            
+            // Older - show date
+            return messageDate.toLocaleDateString([], { month: 'short', day: 'numeric' });
         } catch (error) {
-            console.log('[Chat Debug] Error setting up query, checking old structure:', error);
-            checkOldStructure();
+            console.log('Error formatting time:', error);
+            return '';
+        }
+    };
+    
+    // Extract last message
+    const getLastMessage = () => {
+        if (!chat) return '';
+        
+        if (typeof chat.lastMessage === 'string') {
+            return chat.lastMessage;
         }
         
-        // Fallback to check the old chat structure
-        function checkOldStructure() {
-            try {
-        const docRef = doc(db, "chatRoom", roomId);
-        const messageRef = collection(docRef, "messages");
-        const q = query(messageRef, orderBy('createdAt', 'desc'));
-
-                const oldUnsubscribe = onSnapshot(q, (snapshot) => {
-            const allMessages = snapshot.docs.map(doc => doc.data());
-            setLastMessage(allMessages[0] || null);
-        });
-
-                return oldUnsubscribe;
-            } catch (oldError) {
-                console.error('[Chat Debug] Error checking old structure:', oldError);
-                return () => {};
+        // Handle object type lastMessage
+        if (chat.lastMessage && typeof chat.lastMessage === 'object') {
+            if (chat.lastMessage.text) {
+                return typeof chat.lastMessage.text === 'string' 
+                    ? chat.lastMessage.text 
+                    : JSON.stringify(chat.lastMessage.text);
+            }
+            
+            // Try to find text content in any format
+            const possibleTextFields = ['text', 'content', 'message', 'body'];
+            for (const field of possibleTextFields) {
+                if (chat.lastMessage[field] && typeof chat.lastMessage[field] === 'string') {
+                    return chat.lastMessage[field];
+                }
             }
         }
-    }, [currentUser?.uid, item?.uid]);
-
-    const openChatroom = () => {
-        router.push({
-            pathname: '/(app)/chatRoom',
-            params: item,
-        });
+        
+        return 'Start a conversation...';
     };
-
-    const renderTime = () => {
-        if (!lastMessage?.createdAt) return "";
-        const date = new Date(lastMessage.createdAt.toDate());
-        return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    };
-
-    const renderLastMessage = () => {
-        if (lastMessage === undefined) {
-            return <Text style={{ fontSize: hp(1.6) }} className='font-medium text-neutral-500'>Loading...</Text>;
+    
+    // Determine if the message is unread
+    const isUnread = chat.unreadCount && chat.unreadCount > 0;
+    
+    // Get chat name
+    const getChatName = () => {
+        if (!chat) return 'Unknown User';
+        
+        if (chat.name) {
+            return typeof chat.name === 'string' ? chat.name : 'Unknown User';
         }
-        if (!lastMessage) {
-            return <Text style={{ fontSize: hp(1.6) }} className='font-medium text-neutral-500'>Say hi.</Text>;
+        
+        if (chat.otherUser?.name) {
+            return typeof chat.otherUser.name === 'string' ? chat.otherUser.name : 'Unknown User';
         }
-        return (
-            <Text style={{ fontSize: hp(1.6) }} className='font-medium text-neutral-500'>
-                {currentUser?.uid === lastMessage?.uid || currentUser?.uid === lastMessage?.senderId ? 
-                    `You: ${lastMessage.text}` : lastMessage.text}
-            </Text>
-        );
+        
+        if (chat.fullName) {
+            return typeof chat.fullName === 'string' ? chat.fullName : 'Unknown User';
+        }
+        
+        return 'Unknown User';
     };
 
     return (
-        <TouchableOpacity onPress={openChatroom} className={`flex-row justify-between mx-4 items-center gap-3 pb-2 ${noBorder ? '' : ' border-b-neutral-200'}`}>
-            <Image
-                source={imageError || !item?.photoURL ? DEFAULT_PROFILE_IMAGE : { uri: item?.photoURL }}
-                style={{ height: hp(6), width: hp(6), borderRadius: 100 }}
-                placeholder={blurhash}
-                transition={500}
-                resizeMode='cover'
-                onError={() => setImageError(true)}
-            />
-            <View className='flex-1 gap-1'>
-                <View className='flex-row justify-between'>
-                    <Text style={{ fontSize: hp(1.8) }} className='font-semibold text-neutral-800'>{item?.fullName}</Text>
-                    <Text style={{ fontSize: hp(1.6) }} className='font-medium text-neutral-500'>
-                        {renderTime()}
+        <Animated.View
+            style={[
+                styles.container,
+                {
+                    opacity: opacityAnim,
+                    transform: [{ translateY: translateYAnim }],
+                }
+            ]}
+        >
+            <TouchableOpacity
+                style={styles.chatItem}
+                onPress={handlePress}
+                activeOpacity={0.8}
+            >
+                {/* Avatar */}
+                <View style={styles.avatarContainer}>
+                    {chat.photoURL ? (
+                        <Image source={{ uri: chat.photoURL }} style={styles.avatar} />
+                    ) : (
+                        <LinearGradient
+                            colors={['#6366f1', '#8b5cf6']}
+                            style={styles.avatar}
+                            start={{ x: 0, y: 0 }}
+                            end={{ x: 1, y: 1 }}
+                        >
+                            <Text style={styles.avatarText}>
+                                {getChatName().charAt(0).toUpperCase()}
                     </Text>
+                        </LinearGradient>
+                    )}
+                    
+                    {chat.online && (
+                        <View style={styles.onlineIndicator} />
+                    )}
                 </View>
-                {renderLastMessage()}
+                
+                {/* Chat details */}
+                <View style={styles.contentContainer}>
+                    <View style={styles.headerRow}>
+                        <Text 
+                            style={[styles.nameText, isUnread && styles.unreadName]} 
+                            numberOfLines={1}
+                        >
+                            {getChatName()}
+                        </Text>
+                        <Text style={[styles.timeText, isUnread && styles.unreadTime]}>
+                            {formatTime(chat.timestamp || chat.lastMessageTimestamp)}
+                        </Text>
+                    </View>
+                    
+                    <View style={styles.messageRow}>
+                        <Text 
+                            style={[styles.messageText, isUnread && styles.unreadMessage]} 
+                            numberOfLines={1}
+                        >
+                            {getLastMessage()}
+                        </Text>
+                        
+                        {isUnread && (
+                            <View style={styles.unreadBadge}>
+                                <Text style={styles.unreadCount}>
+                                    {chat.unreadCount > 99 ? '99+' : chat.unreadCount}
+                                </Text>
+                            </View>
+                        )}
+                    </View>
             </View>
         </TouchableOpacity>
+        </Animated.View>
     );
 }
+
+const styles = StyleSheet.create({
+    container: {
+        marginBottom: 8,
+        borderRadius: 12,
+        backgroundColor: 'white',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.05,
+        shadowRadius: 2,
+        elevation: 2,
+    },
+    chatItem: {
+        flexDirection: 'row',
+        padding: 12,
+        borderRadius: 12,
+        alignItems: 'center',
+    },
+    avatarContainer: {
+        position: 'relative',
+        marginRight: 12,
+    },
+    avatar: {
+        width: 50,
+        height: 50,
+        borderRadius: 25,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    avatarText: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: 'white',
+    },
+    onlineIndicator: {
+        position: 'absolute',
+        width: 12,
+        height: 12,
+        borderRadius: 6,
+        backgroundColor: '#10b981',
+        borderWidth: 2,
+        borderColor: 'white',
+        bottom: 0,
+        right: 0,
+    },
+    contentContainer: {
+        flex: 1,
+        justifyContent: 'center',
+    },
+    headerRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 4,
+    },
+    nameText: {
+        fontSize: 16,
+        fontWeight: '500',
+        color: '#1f2937',
+        flex: 1,
+    },
+    unreadName: {
+        fontWeight: '700',
+        color: '#111827',
+    },
+    timeText: {
+        fontSize: 12,
+        color: '#9ca3af',
+        marginLeft: 8,
+    },
+    unreadTime: {
+        color: '#6366f1',
+        fontWeight: '600',
+    },
+    messageRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+    },
+    messageText: {
+        fontSize: 14,
+        color: '#6b7280',
+        flex: 1,
+        marginRight: 8,
+    },
+    unreadMessage: {
+        color: '#4b5563',
+        fontWeight: '500',
+    },
+    unreadBadge: {
+        backgroundColor: '#4f46e5',
+        minWidth: 20,
+        height: 20,
+        borderRadius: 10,
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingHorizontal: 6,
+    },
+    unreadCount: {
+        color: 'white',
+        fontSize: 11,
+        fontWeight: 'bold',
+    },
+});
