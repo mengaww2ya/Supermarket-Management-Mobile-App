@@ -57,6 +57,7 @@ export default function CustomerSupportChat() {
   const [newSupportRequest, setNewSupportRequest] = useState(false);
   const [supportTopic, setSupportTopic] = useState('');
   const [supportMessage, setSupportMessage] = useState('');
+  const [tempSupportData, setTempSupportData] = useState({});
   
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(20)).current;
@@ -79,34 +80,139 @@ export default function CustomerSupportChat() {
       }),
     ]).start();
 
-    // Fetch customer support agents
-    const fetchSupportAgents = async () => {
-      try {
-        const q = query(
+    fetchSupportAgents();
+  }, [userData?.uid]);
+
+  // Fetch customer support agents
+  const fetchSupportAgents = async () => {
+    try {
+      setLoading(true);
+      
+      // Look specifically for users with role 'customerAssistance' as defined in the EMPLOYEE_ROLES
+      const q = query(
+        collection(db, 'users'),
+        where('role', '==', 'customerAssistance')
+      );
+      
+      const querySnapshot = await getDocs(q);
+      const agentsList = querySnapshot.docs.map(doc => ({
+        ...doc.data(),
+        id: doc.id
+      }));
+
+      console.log('[Support Debug] Found', agentsList.length, 'customer assistance agents');
+      
+      if (agentsList.length === 0) {
+        console.log('[Support Debug] No customer assistance agents found, trying broader search');
+        
+        // If no customer assistance agents found, try a broader search
+        const backupQuery = query(
           collection(db, 'users'),
-          where('role', 'in', ['admin', 'customerSupport'])
+          where('role', 'in', ['admin', 'manager'])
         );
         
-        const querySnapshot = await getDocs(q);
-        const agentsList = querySnapshot.docs.map(doc => ({
+        const backupSnapshot = await getDocs(backupQuery);
+        const backupAgents = backupSnapshot.docs.map(doc => ({
           ...doc.data(),
           id: doc.id
         }));
         
+        if (backupAgents.length > 0) {
+          console.log('[Support Debug] Found', backupAgents.length, 'backup support agents');
+          setSupportAgents(backupAgents);
+          setFilteredAgents(backupAgents);
+          fetchExistingChats(backupAgents);
+        } else {
+          setLoading(false);
+        }
+        return;
+      }
+      
+      // Filter out agents who are offline if they have a support status
+      const availableAgents = agentsList.filter(agent => 
+        !agent.supportStatus || agent.supportStatus !== 'offline'
+      );
+      
+      if (availableAgents.length === 0) {
+        console.log('[Support Debug] No available agents found. Using all agents regardless of status.');
+        // If no available agents were found, use any agents regardless of status
         setSupportAgents(agentsList);
         setFilteredAgents(agentsList);
-        
-        // Check for existing chats
-        fetchExistingChats(agentsList);
-        
-      } catch (error) {
-        console.error('Error fetching support agents:', error);
-        setLoading(false);
+      } else {
+        console.log('[Support Debug] Found', availableAgents.length, 'available support agents');
+        setSupportAgents(availableAgents);
+        setFilteredAgents(availableAgents);
       }
-    };
+      
+      // Check for existing chats
+      fetchExistingChats(availableAgents.length > 0 ? availableAgents : agentsList);
+      
+    } catch (error) {
+      console.error('Error fetching support agents:', error);
+      setLoading(false);
+    }
+  };
 
-    fetchSupportAgents();
-  }, [userData?.uid]);
+  // Debug function to create test support agents
+  const createTestSupportAgents = async () => {
+    if (!userData?.uid) return;
+    
+    setLoading(true);
+    try {
+      const batch = writeBatch(db);
+      
+      // Create 3 test support agents with the exact role 'customerAssistance' matching EMPLOYEE_ROLES
+      const testAgents = [
+        {
+          uid: 'support-agent-1',
+          firstName: 'John',
+          lastName: 'Support',
+          fullName: 'John Support',
+          email: 'john.support@example.com',
+          role: 'customerAssistance',
+          photoURL: null,
+          createdAt: serverTimestamp()
+        },
+        {
+          uid: 'support-agent-2',
+          firstName: 'Mary',
+          lastName: 'Helper',
+          fullName: 'Mary Helper',
+          email: 'mary.helper@example.com',
+          role: 'customerAssistance',
+          photoURL: null,
+          createdAt: serverTimestamp()
+        },
+        {
+          uid: 'support-agent-3',
+          firstName: 'Support',
+          lastName: 'Manager',
+          fullName: 'Support Manager',
+          email: 'support.manager@example.com',
+          role: 'customerAssistance',
+          photoURL: null,
+          createdAt: serverTimestamp()
+        }
+      ];
+      
+      // Add test agents to the database
+      testAgents.forEach(agent => {
+        const agentRef = doc(db, 'users', agent.uid);
+        batch.set(agentRef, agent);
+      });
+      
+      await batch.commit();
+      Alert.alert('Success', 'Test customer assistance agents created. Pull down to refresh the list.');
+      
+      // Refresh the agent list
+      fetchSupportAgents();
+    } catch (error) {
+      console.error('Error creating test support agents:', error);
+      Alert.alert('Error', 'Failed to create test support agents.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Fetch existing chat rooms
   const fetchExistingChats = async (agentsList) => {
@@ -170,23 +276,44 @@ export default function CustomerSupportChat() {
       return;
     }
     
+    // Close the modal and show the agent list
+    setNewSupportRequest(false);
+    
+    // Store the topic and message for later use
+    setTempSupportData({
+      topic: supportTopic.trim(),
+      message: supportMessage.trim()
+    });
+    
+    // If no agents were loaded or found, fetch them
+    if (supportAgents.length === 0) {
+      fetchSupportAgents();
+    }
+    
+    // Show a brief help message
+    Alert.alert(
+      'Select a Support Agent', 
+      'Please select one of our available support agents below to handle your request.',
+      [{ text: 'OK', onPress: () => {} }]
+    );
+  };
+  
+  // Complete the support request with a selected agent
+  const completeSupportRequest = async (agent) => {
+    if (!userData?.uid || !tempSupportData.topic || !tempSupportData.message) {
+      Alert.alert('Error', 'Missing support request data. Please try again.');
+      return;
+    }
+    
     setLoading(true);
     
-    try {
-      // Find an available support agent (for simplicity, we'll choose the first one)
-      const agent = supportAgents[0];
-      if (!agent) {
-        Alert.alert('No Support Agents', 'There are no support agents available at the moment.');
-        setLoading(false);
-        return;
-      }
-      
+    try {      
       // Create a new chat directly in users collection
       const roomId = getRoomId(userData.uid, agent.uid);
       
       // Prepare message data
       const messageData = {
-        text: supportMessage.trim(),
+        text: tempSupportData.message,
         senderId: userData.uid,
         senderName: userData.fullName || `${userData.firstName || ''} ${userData.lastName || ''}`,
         senderPhoto: userData.photoURL || null,
@@ -196,7 +323,7 @@ export default function CustomerSupportChat() {
         createdAt: serverTimestamp(),
         read: false,
         type: 'text',
-        topic: supportTopic.trim()
+        topic: tempSupportData.topic
       };
       
       // Batch write to ensure consistency
@@ -216,9 +343,9 @@ export default function CustomerSupportChat() {
         participantId: agent.uid,
         participantName: agent.fullName || `${agent.firstName || ''} ${agent.lastName || ''}`,
         participantPhoto: agent.photoURL || null,
-        topic: supportTopic.trim(),
+        topic: tempSupportData.topic,
         lastMessage: {
-          text: supportMessage.trim(),
+          text: tempSupportData.message,
           senderId: userData.uid,
           timestamp: serverTimestamp()
         },
@@ -233,9 +360,9 @@ export default function CustomerSupportChat() {
         participantId: userData.uid,
         participantName: userData.fullName || `${userData.firstName || ''} ${userData.lastName || ''}`,
         participantPhoto: userData.photoURL || null,
-        topic: supportTopic.trim(),
+        topic: tempSupportData.topic,
         lastMessage: {
-          text: supportMessage.trim(),
+          text: tempSupportData.message,
           senderId: userData.uid,
           timestamp: serverTimestamp()
         },
@@ -250,8 +377,8 @@ export default function CustomerSupportChat() {
       // Set active chat
       setActiveChat(agent);
       
-      // Close the new request modal and reset fields
-      setNewSupportRequest(false);
+      // Reset temp data
+      setTempSupportData({});
       setSupportTopic('');
       setSupportMessage('');
       
@@ -260,7 +387,7 @@ export default function CustomerSupportChat() {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       }
       
-      Alert.alert('Request Sent', 'Your support request has been sent. A customer support agent will respond shortly.');
+      Alert.alert('Request Sent', `Your support request has been sent to ${agent.fullName || 'the selected agent'}. They will respond shortly.`);
       
       setLoading(false);
     } catch (error) {
@@ -284,11 +411,20 @@ export default function CustomerSupportChat() {
     const hasChat = lastMessages[item.uid] !== undefined;
     const lastMessage = lastMessages[item.uid];
     const unreadCount = unreadCounts[item.uid] || 0;
+    const hasPendingRequest = tempSupportData.topic && tempSupportData.message;
     
     return (
       <TouchableOpacity
-        className="flex-row items-center bg-white p-4 rounded-xl mb-2 shadow-sm"
-        onPress={() => openChat(item)}
+        className={`flex-row items-center bg-white p-4 rounded-xl mb-2 shadow-sm ${hasPendingRequest ? 'border-2 border-blue-200' : ''}`}
+        onPress={() => {
+          if (hasPendingRequest) {
+            // If we have a pending request, complete it with this agent
+            completeSupportRequest(item);
+          } else {
+            // Otherwise just open the chat
+            openChat(item);
+          }
+        }}
       >
         <Image
           source={!item.photoURL ? DEFAULT_PROFILE_IMAGE : { uri: item.photoURL }}
@@ -313,18 +449,26 @@ export default function CustomerSupportChat() {
           </View>
           
           <Text className="text-xs text-gray-500 mt-0.5">
-            {item.role === 'admin' ? 'Administrator' : 'Customer Support'}
+            {item.role === 'customerAssistance' ? 'Customer Assistance' : 
+             item.role === 'admin' ? 'Administrator' : 
+             item.role === 'manager' ? 'Manager' : 'Support Staff'}
           </Text>
           
           <View className="flex-row justify-between items-center mt-1">
-            <Text className="text-gray-500 text-sm" numberOfLines={1}>
-              {lastMessage 
-                ? (lastMessage.senderId === userData.uid ? 'You: ' : '') + lastMessage.text 
-                : (item.email || 'Support Agent')}
-            </Text>
+            {hasPendingRequest ? (
+              <Text className="text-blue-600 text-sm font-medium">
+                Tap to send your request to this agent
+              </Text>
+            ) : (
+              <Text className="text-gray-500 text-sm" numberOfLines={1}>
+                {lastMessage 
+                  ? (lastMessage.senderId === userData.uid ? 'You: ' : '') + lastMessage.text 
+                  : (item.email || 'Support Agent')}
+              </Text>
+            )}
             
             {/* Unread count */}
-            {unreadCount > 0 && (
+            {unreadCount > 0 && !hasPendingRequest && (
               <View className="bg-blue-500 rounded-full px-2 py-0.5 min-w-[20px] items-center">
                 <Text className="text-white text-xs font-bold">{unreadCount}</Text>
               </View>
@@ -349,6 +493,32 @@ export default function CustomerSupportChat() {
       >
         <Text className="text-white font-semibold">New Support Request</Text>
       </TouchableOpacity>
+    </View>
+  );
+
+  // Render empty list of agents
+  const renderEmptyAgentsList = () => (
+    <View className="flex-1 justify-center items-center p-4">
+      <MaterialIcons name="support-agent" size={50} color="#d1d5db" />
+      <Text className="text-gray-500 mt-3 text-center">
+        No support agents available right now. Please try again later.
+      </Text>
+      <TouchableOpacity 
+        className="mt-4 bg-blue-500 py-2 px-4 rounded-lg"
+        onPress={fetchSupportAgents}
+      >
+        <Text className="text-white">Refresh</Text>
+      </TouchableOpacity>
+      
+      {/* Development/testing only - create test agents */}
+      {__DEV__ && (
+        <TouchableOpacity 
+          className="mt-2 bg-gray-500 py-2 px-4 rounded-lg"
+          onPress={createTestSupportAgents}
+        >
+          <Text className="text-white">Create Test Agents (Dev Only)</Text>
+        </TouchableOpacity>
+      )}
     </View>
   );
 
@@ -396,7 +566,9 @@ export default function CustomerSupportChat() {
                   {activeChat.fullName || `${activeChat.firstName || ''} ${activeChat.lastName || ''}`}
                 </Text>
                 <Text className="text-blue-600 font-medium">
-                  {activeChat.role === 'admin' ? 'Administrator' : 'Customer Support'}
+                  {activeChat.role === 'customerAssistance' ? 'Customer Assistance' : 
+                   activeChat.role === 'admin' ? 'Administrator' : 
+                   activeChat.role === 'manager' ? 'Manager' : 'Support Staff'}
                 </Text>
                 <Text className="text-green-600 text-xs mt-1">
                   Active Support Session
@@ -410,26 +582,80 @@ export default function CustomerSupportChat() {
               </View>
             </TouchableOpacity>
             
-            <Text className="font-semibold text-gray-700 mb-2 mt-4">Other Support Staff</Text>
+            {tempSupportData.topic && tempSupportData.message ? (
+              <View className="bg-blue-50 p-3 rounded-lg mb-4">
+                <Text className="font-semibold text-blue-800 mb-1">Your Support Request</Text>
+                <Text className="text-blue-600 text-sm mb-3">Please select a support agent below to handle your request</Text>
+                <View className="bg-white p-2 rounded-md mb-2">
+                  <Text className="text-xs text-gray-500">Topic</Text>
+                  <Text className="text-gray-800">{tempSupportData.topic}</Text>
+                </View>
+                <View className="bg-white p-2 rounded-md">
+                  <Text className="text-xs text-gray-500">Message</Text>
+                  <Text className="text-gray-800" numberOfLines={2}>{tempSupportData.message}</Text>
+                </View>
+                <TouchableOpacity 
+                  className="mt-3 items-center"
+                  onPress={() => setTempSupportData({})}
+                >
+                  <Text className="text-blue-600">Cancel Request</Text>
+                </TouchableOpacity>
+              </View>
+            ) : null}
+            
+            <Text className="font-semibold text-gray-700 mb-2 mt-4">
+              {tempSupportData.topic && tempSupportData.message ? 'Choose a Support Agent' : 'Other Support Staff'}
+            </Text>
             <FlatList
               data={filteredAgents.filter(agent => agent.uid !== activeChat.uid)}
               keyExtractor={(item) => item.uid}
               renderItem={renderAgentItem}
-              ListEmptyComponent={
-                <Text className="text-gray-500 text-center p-4">No other support agents available</Text>
-              }
+              ListEmptyComponent={renderEmptyAgentsList}
             />
           </>
         ) : (
           <>
-            {/* Show empty state if no active chats */}
-            {renderEmptyState()}
+            {tempSupportData.topic && tempSupportData.message ? (
+              <>
+                <View className="bg-blue-50 p-3 rounded-lg mb-4">
+                  <Text className="font-semibold text-blue-800 mb-1">Your Support Request</Text>
+                  <Text className="text-blue-600 text-sm mb-3">Please select a support agent below to handle your request</Text>
+                  <View className="bg-white p-2 rounded-md mb-2">
+                    <Text className="text-xs text-gray-500">Topic</Text>
+                    <Text className="text-gray-800">{tempSupportData.topic}</Text>
+                  </View>
+                  <View className="bg-white p-2 rounded-md">
+                    <Text className="text-xs text-gray-500">Message</Text>
+                    <Text className="text-gray-800" numberOfLines={2}>{tempSupportData.message}</Text>
+                  </View>
+                  <TouchableOpacity 
+                    className="mt-3 items-center"
+                    onPress={() => setTempSupportData({})}
+                  >
+                    <Text className="text-blue-600">Cancel Request</Text>
+                  </TouchableOpacity>
+                </View>
+                
+                <Text className="font-semibold text-gray-700 mb-2">Choose a Support Agent</Text>
+                <FlatList
+                  data={filteredAgents}
+                  keyExtractor={(item) => item.uid}
+                  renderItem={renderAgentItem}
+                  ListEmptyComponent={renderEmptyAgentsList}
+                />
+              </>
+            ) : (
+              <>
+                {/* Show empty state if no active chats */}
+                {renderEmptyState()}
+              </>
+            )}
           </>
         )}
       </Animated.View>
       
       {/* FAB for new support request */}
-      {!newSupportRequest && activeChat && (
+      {!newSupportRequest && !tempSupportData.topic && activeChat && (
         <TouchableOpacity
           className="absolute right-6 bottom-6 bg-blue-500 w-14 h-14 rounded-full justify-center items-center shadow-lg"
           onPress={() => setNewSupportRequest(true)}
@@ -483,7 +709,7 @@ export default function CustomerSupportChat() {
                 {loading ? (
                   <ActivityIndicator color="white" />
                 ) : (
-                  <Text className="text-white font-bold text-center">Send Request</Text>
+                  <Text className="text-white font-bold text-center">Continue to Select Agent</Text>
                 )}
               </TouchableOpacity>
               
