@@ -40,6 +40,7 @@ export default function Layout() {
       <Tabs.Screen
         name="managerHomePage"
         options={{
+          headerShown: false,
           title: 'Dashboard',
           tabBarIcon: ({ color }) => <Feather name="home" size={22} color={color} />,
           headerRight: () => (

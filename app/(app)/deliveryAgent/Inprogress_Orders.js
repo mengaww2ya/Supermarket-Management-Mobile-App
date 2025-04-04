@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   View,
   Text,
@@ -10,7 +10,9 @@ import {
   Platform,
   Modal,
   TouchableWithoutFeedback,
-  ActivityIndicator
+  ActivityIndicator,
+  Alert,
+  RefreshControl
 } from 'react-native';
 import { Ionicons, Feather, MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -19,6 +21,17 @@ import * as Haptics from 'expo-haptics';
 import HomeHeader from '../../components/HomeHeader';
 import { router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import { db } from "../../../firebase/firebaseConfig";
+import { 
+  collection, 
+  query, 
+  where, 
+  getDocs, 
+  doc, 
+  updateDoc,
+  serverTimestamp 
+} from 'firebase/firestore';
+import { useAuth } from "../../context/authContext";
 
 const { width } = Dimensions.get('window');
 
@@ -37,139 +50,350 @@ export default function InProgressOrdersScreen() {
   const [expandedSections, setExpandedSections] = useState({ customer: true, timeline: true, items: true });
   const [editingStatus, setEditingStatus] = useState(false);
   const [statusOptions] = useState(['Preparing', 'Picked up', 'On the way', 'Arrived', 'Delivered', 'Delayed']);
+  const [inProgressOrders, setInProgressOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   
-  // Sample order data
-  const inProgressOrders = [
-    {
-      id: 'IPO1001',
-      orderNumber: 'ORD7896',
-      status: 'On the way',
-      pickupTime: '10:30 AM',
-      estimatedDeliveryTime: '11:15 AM',
-      customer: {
-        name: 'Sarah Johnson',
-        photo: 'https://randomuser.me/api/portraits/women/44.jpg',
-        address: '456 Elm Road, Kirkos, Addis Ababa',
-        phone: '+251 91 987 6543',
-        note: 'Please call when you arrive.'
-      },
-      restaurant: {
-        name: 'Supermarket Branch #2',
-        address: 'Bole Road, Addis Ababa'
-      },
-      items: [
-        { name: 'Fresh Vegetables Pack', quantity: 1, price: '$8.99' },
-        { name: 'Organic Eggs (12)', quantity: 1, price: '$5.49' },
-        { name: 'Whole Wheat Bread', quantity: 1, price: '$3.99' }
-      ],
-      payment: {
-        method: 'Card',
-        total: '$22.75',
-        isPaid: true
-      },
-      route: {
-        distance: '3.7 km',
-        duration: '15 min'
-      },
-      steps: [
-        { id: 'pickup', title: 'Pickup from Store', time: '10:30 AM', isCompleted: true },
-        { id: 'enroute', title: 'On the way', time: '10:35 AM', isCompleted: true },
-        { id: 'arrival', title: 'Arrival at Destination', time: '10:50 AM', isCompleted: false },
-        { id: 'delivered', title: 'Delivered', time: '', isCompleted: false }
-      ]
-    },
-    {
-      id: 'IPO1002',
-      orderNumber: 'ORD7901',
-      status: 'On the way',
-      pickupTime: '12:15 PM',
-      estimatedDeliveryTime: '12:45 PM',
-      customer: {
-        name: 'Michael Davies',
-        photo: 'https://randomuser.me/api/portraits/men/67.jpg',
-        address: '789 Oak Ave, Arada, Addis Ababa',
-        phone: '+251 91 345 6789',
-        note: 'Leave at door if not answered.'
-      },
-      restaurant: {
-        name: 'Supermarket Branch #1',
-        address: 'Kazanchis, Addis Ababa'
-      },
-      items: [
-        { name: 'Mineral Water (6 Pack)', quantity: 2, price: '$12.00' },
-        { name: 'Fresh Chicken Breast', quantity: 1, price: '$15.30' },
-        { name: 'Rice (5kg)', quantity: 1, price: '$20.50' },
-        { name: 'Cooking Oil (2L)', quantity: 1, price: '$14.50' }
-      ],
-      payment: {
-        method: 'Cash',
-        total: '$62.30',
-        isPaid: false
-      },
-      route: {
-        distance: '5.2 km',
-        duration: '20 min'
-      },
-      steps: [
-        { id: 'pickup', title: 'Pickup from Store', time: '12:15 PM', isCompleted: true },
-        { id: 'enroute', title: 'On the way', time: '12:23 PM', isCompleted: true },
-        { id: 'arrival', title: 'Arrival at Destination', time: '12:40 PM', isCompleted: false },
-        { id: 'delivered', title: 'Delivered', time: '', isCompleted: false }
-      ]
-    },
-    {
-      id: 'IPO1003',
-      orderNumber: 'ORD7923',
-      status: 'Preparing',
-      pickupTime: '1:30 PM',
-      estimatedDeliveryTime: '2:15 PM',
-      customer: {
-        name: 'Jennifer Lopez',
-        photo: 'https://randomuser.me/api/portraits/women/22.jpg',
-        address: '567 Maple Rd, Kirkos, Addis Ababa',
-        phone: '+251 91 234 5678',
-        note: 'Gate code: 1234'
-      },
-      restaurant: {
-        name: 'Supermarket Branch #3',
-        address: 'Meskel Square, Addis Ababa'
-      },
-      items: [
-        { name: 'Frozen Pizza', quantity: 2, price: '$11.98' },
-        { name: 'Ice Cream (1L)', quantity: 1, price: '$5.99' },
-        { name: 'Potato Chips', quantity: 3, price: '$7.50' }
-      ],
-      payment: {
-        method: 'Online',
-        total: '$25.47',
-        isPaid: true
-      },
-      route: {
-        distance: '2.8 km',
-        duration: '12 min'
-      },
-      steps: [
-        { id: 'pickup', title: 'Pickup from Store', time: '', isCompleted: false },
-        { id: 'enroute', title: 'On the way', time: '', isCompleted: false },
-        { id: 'arrival', title: 'Arrival at Destination', time: '', isCompleted: false },
-        { id: 'delivered', title: 'Delivered', time: '', isCompleted: false }
-      ]
-    }
-  ];
+  // Get authentication context
+  const { user } = useAuth();
 
-  // Initialize delivery progress
+  // Fetch in-progress orders from user's tasks collection
+  const fetchInProgressOrders = useCallback(async () => {
+    if (!user || !user.uid) {
+      setError("You must be logged in to view in-progress orders");
+      setLoading(false);
+      setIsRefreshing(false);
+      return;
+    }
+
+    try {
+      setLoading(true);
+      console.log("Fetching in-progress orders for:", user.uid);
+      
+      // Get tasks from user's collection that are in In Progress status
+      const tasksRef = collection(db, `users/${user.uid}/tasks`);
+      
+      // Fetch all tasks then filter by status
+      const basicQuery = query(tasksRef);
+      const querySnapshot = await getDocs(basicQuery);
+      
+      if (querySnapshot.empty) {
+        console.log("No tasks found at all");
+        setInProgressOrders([]);
+        setLoading(false);
+        setIsRefreshing(false);
+        return;
+      }
+      
+      // Filter and process the tasks into a usable format
+      const progressOrders = querySnapshot.docs
+        .map(doc => {
+          const data = doc.data();
+          
+          // Only include tasks with In Progress status
+          if (!data.status || data.status !== 'In Progress') {
+            return null;
+          }
+          
+          // Calculate delivery progress steps
+          const steps = [
+            { 
+              id: 'pickup', 
+              title: 'Pickup from Store', 
+              time: data.startedAt ? new Date(data.startedAt.seconds * 1000).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'}) : '', 
+              isCompleted: true 
+            },
+            { 
+              id: 'enroute', 
+              title: 'On the way', 
+              time: data.onTheWayAt ? new Date(data.onTheWayAt.seconds * 1000).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'}) : '', 
+              isCompleted: data.onTheWayAt ? true : false 
+            },
+            { 
+              id: 'arrival', 
+              title: 'Arrival at Destination', 
+              time: data.arrivedAt ? new Date(data.arrivedAt.seconds * 1000).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'}) : '', 
+              isCompleted: data.arrivedAt ? true : false 
+            },
+            { 
+              id: 'delivered', 
+              title: 'Delivered', 
+              time: data.deliveredAt ? new Date(data.deliveredAt.seconds * 1000).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'}) : '', 
+              isCompleted: data.deliveredAt ? true : false 
+            }
+          ];
+          
+          // Calculate current status based on steps
+          let currentStatus = 'Preparing';
+          if (data.deliveredAt) {
+            currentStatus = 'Delivered';
+          } else if (data.arrivedAt) {
+            currentStatus = 'Arrived';
+          } else if (data.onTheWayAt) {
+            currentStatus = 'On the way';
+          } else if (data.startedAt) {
+            currentStatus = 'Picked up';
+          }
+          
+          if (data.delayed) {
+            currentStatus = 'Delayed';
+          }
+          
+          // Calculate pickup and estimated delivery times
+          const pickupTime = data.startedAt ? 
+            new Date(data.startedAt.seconds * 1000).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'}) : 'Pending';
+          
+          // Estimate delivery time (30 minutes after pickup if not specified)
+          let estimatedTime;
+          if (data.estimatedDelivery) {
+            estimatedTime = new Date(data.estimatedDelivery.seconds * 1000).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
+          } else if (data.startedAt) {
+            const estDate = new Date(data.startedAt.seconds * 1000);
+            estDate.setMinutes(estDate.getMinutes() + 30);
+            estimatedTime = estDate.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
+          } else {
+            estimatedTime = 'Pending';
+          }
+          
+          return {
+            id: doc.id,
+            orderNumber: data.orderRef || data.orderId || doc.id.substring(0, 8),
+            status: currentStatus,
+            pickupTime: pickupTime,
+            estimatedDeliveryTime: estimatedTime,
+            customer: {
+              name: data.customerName || 'Customer',
+              photo: data.customerPhoto || 'https://randomuser.me/api/portraits/lego/1.jpg',
+              address: data.deliveryAddress || 'No address provided',
+              phone: data.customerPhone || 'No phone provided',
+              note: data.customerNote || 'No special instructions'
+            },
+            restaurant: {
+              name: data.pickup || 'Supermarket',
+              address: data.pickupAddress || 'Store location'
+            },
+            items: data.items?.map(item => ({
+              name: item.name || 'Product',
+              quantity: item.quantity || 1,
+              price: `${item.price || 0} Birr`
+            })) || [],
+            payment: {
+              method: data.paymentMethod || 'Unknown',
+              total: `${data.totalAmount || 0} Birr`,
+              isPaid: data.isPaid || false
+            },
+            route: {
+              distance: data.distance || 'Unknown',
+              duration: data.estimatedDuration || 'Calculating...'
+            },
+            steps: steps,
+            rawData: data // Keep original data for reference
+          };
+        })
+        .filter(order => order !== null)
+        .sort((a, b) => {
+          // Sort by startedAt timestamp if available
+          const aStarted = a.rawData.startedAt?.seconds || 0;
+          const bStarted = b.rawData.startedAt?.seconds || 0;
+          return bStarted - aStarted; // Most recent first
+        });
+      
+      console.log(`Found ${progressOrders.length} in-progress orders`);
+      setInProgressOrders(progressOrders);
+      
+      // Initialize delivery progress
+      const initialProgress = {};
+      progressOrders.forEach(order => {
+        // Calculate progress value based on completed steps
+        const completedSteps = order.steps.filter(step => step.isCompleted).length;
+        const totalSteps = order.steps.length;
+        initialProgress[order.id] = (completedSteps / totalSteps) * 100;
+      });
+      setDeliveryProgress(initialProgress);
+      
+    } catch (error) {
+      console.error("Error fetching in-progress orders:", error);
+      setError("Failed to load your in-progress orders. Please try again.");
+    } finally {
+      setLoading(false);
+      setIsRefreshing(false);
+    }
+  }, [user]);
+
+  // Initial fetch
   useEffect(() => {
-    // Create initial progress state for each order
-    const initialProgress = {};
-    inProgressOrders.forEach(order => {
-      // Calculate progress value based on completed steps
-      const completedSteps = order.steps.filter(step => step.isCompleted).length;
-      const totalSteps = order.steps.length;
-      initialProgress[order.id] = (completedSteps / totalSteps) * 100;
-    });
+    fetchInProgressOrders();
+  }, [fetchInProgressOrders]);
+
+  // Handle refresh
+  const handleRefresh = () => {
+    setIsRefreshing(true);
+    fetchInProgressOrders();
+  };
+
+  // Update delivery step
+  const updateDeliveryStep = async (orderId, stepId) => {
+    if (!user || !user.uid) {
+      Alert.alert("Error", "You must be logged in to update delivery status");
+      return;
+    }
     
-    setDeliveryProgress(initialProgress);
+    // Mark step as updating
+    setUpdatingStep(stepId);
     
+    try {
+      const order = inProgressOrders.find(o => o.id === orderId);
+      if (!order) {
+        throw new Error("Order not found");
+      }
+      
+      // Determine which field to update based on step ID
+      const updateData = { lastUpdated: serverTimestamp() };
+      switch (stepId) {
+        case 'enroute':
+          updateData.onTheWayAt = serverTimestamp();
+          updateData.status = 'On the way';
+          break;
+        case 'arrival':
+          updateData.arrivedAt = serverTimestamp();
+          updateData.status = 'Arrived';
+          break;
+        case 'delivered':
+          updateData.deliveredAt = serverTimestamp();
+          updateData.status = 'Delivered';
+          updateData.completedAt = serverTimestamp();
+          break;
+        default:
+          break;
+      }
+      
+      // Update in Firestore
+      const taskRef = doc(db, `users/${user.uid}/tasks`, orderId);
+      await updateDoc(taskRef, updateData);
+      
+      // Update local state - update steps
+      const updatedOrders = inProgressOrders.map(order => {
+        if (order.id === orderId) {
+          // Find current step and all previous steps
+          const updatedSteps = order.steps.map(step => {
+            // If this is the step we just completed or an earlier step, mark as completed
+            if (step.id === stepId || step.isCompleted) {
+              const time = step.id === stepId ? new Date().toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'}) : step.time;
+              return { ...step, isCompleted: true, time };
+            }
+            return step;
+          });
+          
+          // Update status based on step
+          let newStatus = order.status;
+          if (stepId === 'enroute') newStatus = 'On the way';
+          if (stepId === 'arrival') newStatus = 'Arrived';
+          if (stepId === 'delivered') newStatus = 'Delivered';
+          
+          return { ...order, steps: updatedSteps, status: newStatus };
+        }
+        return order;
+      });
+      
+      setInProgressOrders(updatedOrders);
+      
+      // Update progress
+      setDeliveryProgress(prev => {
+        const updated = { ...prev };
+        const order = updatedOrders.find(o => o.id === orderId);
+        if (order) {
+          const completedSteps = order.steps.filter(step => step.isCompleted).length;
+          const totalSteps = order.steps.length;
+          updated[orderId] = (completedSteps / totalSteps) * 100;
+        }
+        return updated;
+      });
+      
+      // If delivery is complete, show confirmation and navigate back after a delay
+      if (stepId === 'delivered') {
+        if (Platform.OS === 'ios') {
+          try {
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+          } catch (e) {
+            // Fallback
+          }
+        }
+        
+        Alert.alert(
+          "Delivery Completed",
+          "The order has been marked as delivered. Great job!",
+          [{ text: "OK" }]
+        );
+        
+        // Close modal and navigate after short delay
+        setTimeout(() => {
+          closeOrderDetails();
+          
+          // Navigate to completed orders after another delay
+          setTimeout(() => {
+            router.push("/deliveryAgent/completed_order");
+          }, 500);
+        }, 1500);
+      }
+      
+    } catch (error) {
+      console.error("Error updating delivery step:", error);
+      Alert.alert("Error", "Failed to update delivery status. Please try again.");
+    } finally {
+      setUpdatingStep(null);
+    }
+  };
+  
+  // Mark order as delayed
+  const markOrderAsDelayed = async (orderId) => {
+    if (!user || !user.uid) {
+      Alert.alert("Error", "You must be logged in to update delivery status");
+      return;
+    }
+    
+    try {
+      // Update in Firestore
+      const taskRef = doc(db, `users/${user.uid}/tasks`, orderId);
+      await updateDoc(taskRef, {
+        delayed: true,
+        delayedAt: serverTimestamp(),
+        status: 'Delayed',
+        lastUpdated: serverTimestamp()
+      });
+      
+      // Update local state
+      const updatedOrders = inProgressOrders.map(order => {
+        if (order.id === orderId) {
+          return { ...order, status: 'Delayed' };
+        }
+        return order;
+      });
+      
+      setInProgressOrders(updatedOrders);
+      
+      if (Platform.OS === 'ios') {
+        try {
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+        } catch (e) {
+          // Fallback
+        }
+      }
+      
+      Alert.alert(
+        "Order Delayed",
+        "The order has been marked as delayed. Please update the customer.",
+        [{ text: "OK" }]
+      );
+      
+    } catch (error) {
+      console.error("Error marking order as delayed:", error);
+      Alert.alert("Error", "Failed to mark order as delayed. Please try again.");
+    }
+  };
+  
+  // Start animations
+  useEffect(() => {
     // Start animations
     Animated.parallel([
       Animated.timing(fadeAnim, {
@@ -183,23 +407,6 @@ export default function InProgressOrdersScreen() {
         useNativeDriver: true,
       })
     ]).start();
-    
-    // Simulate progress updates
-    const interval = setInterval(() => {
-      setDeliveryProgress(prev => {
-        const updated = { ...prev };
-        inProgressOrders.forEach(order => {
-          // Randomly increment progress by 0-1%
-          const increment = Math.random() * 1;
-          if (updated[order.id] < 95) { // Cap at 95% until delivery is confirmed
-            updated[order.id] = Math.min(95, updated[order.id] + increment);
-          }
-        });
-        return updated;
-      });
-    }, 5000);
-    
-    return () => clearInterval(interval);
   }, []);
 
   // Handle order selection
@@ -248,6 +455,7 @@ export default function InProgressOrdersScreen() {
       })
     ]).start(() => {
       setShowOrderDetails(false);
+      setActiveOrder(null);
     });
   };
 
@@ -378,16 +586,8 @@ export default function InProgressOrdersScreen() {
     }, 1000); // Simulate a network delay
   };
 
-  // Toggle section expanded state
+  // Toggle section expansion
   const toggleSection = (section) => {
-    if (Platform.OS === 'ios') {
-      try {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      } catch (e) {
-        // Fallback if haptics not available
-      }
-    }
-    
     setExpandedSections(prev => ({
       ...prev,
       [section]: !prev[section]
@@ -412,411 +612,711 @@ export default function InProgressOrdersScreen() {
     setEditingStatus(false);
   };
 
-  // Render order item
-  const renderOrderItem = ({ item }) => {
+  // Render order card
+  const renderOrderCard = ({ item }) => {
+    // Calculate progress
     const progress = deliveryProgress[item.id] || 0;
+    
     return (
-      <Animated.View
+      <Animated.View 
         style={{
           opacity: fadeAnim,
           transform: [{ translateY }],
+          marginBottom: 16
         }}
-        className="mb-3"
       >
         <TouchableOpacity
+          activeOpacity={0.7}
           onPress={() => handleSelectOrder(item)}
-          className="bg-white rounded-xl shadow-sm border border-gray-100"
-          style={({ pressed }) => [
-            pressed ? { opacity: 0.95, transform: [{ scale: 0.995 }] } : {}
-          ]}
+          style={{
+            backgroundColor: 'white',
+            borderRadius: 16,
+            shadowColor: '#0f172a',
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.08,
+            shadowRadius: 8,
+            elevation: 2,
+            overflow: 'hidden',
+            borderWidth: 1,
+            borderColor: '#f1f5f9'
+          }}
         >
-          <View className="p-4">
-            <View className="flex-row justify-between items-center mb-2">
-              <View className="flex-row items-center">
-                <View className={`w-2.5 h-2.5 rounded-full mr-2 ${progress < 25 ? 'bg-blue-500' : progress < 50 ? 'bg-yellow-500' : progress < 75 ? 'bg-orange-500' : 'bg-green-500'}`} />
-                <Text className="font-bold text-gray-900">{item.orderNumber}</Text>
-              </View>
-              <View className="bg-gray-100 px-2 py-0.5 rounded-full">
-                <Text className="text-xs text-gray-600">{item.status}</Text>
-              </View>
+          {/* Status Bar */}
+          <View style={{
+            flexDirection: 'row',
+            padding: 12,
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            borderBottomWidth: 1,
+            borderBottomColor: '#f1f5f9'
+          }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <View style={{
+                width: 8,
+                height: 8,
+                borderRadius: 4,
+                backgroundColor: item.status === 'Delayed' ? '#ef4444' : '#10b981',
+                marginRight: 6
+              }} />
+              <Text style={{ 
+                fontWeight: '600', 
+                color: item.status === 'Delayed' ? '#ef4444' : '#10b981', 
+                fontSize: 14 
+              }}>
+                {item.status}
+              </Text>
             </View>
             
-            <View className="flex-row items-center mb-3">
+            <Text style={{ color: '#64748b', fontSize: 13 }}>
+              Order #{item.orderNumber}
+            </Text>
+          </View>
+          
+          {/* Content */}
+          <View style={{ padding: 16 }}>
+            {/* Customer Info */}
+            <View style={{ flexDirection: 'row', marginBottom: 16 }}>
               <Image 
-                source={{ uri: item.customer.photo }} 
-                className="w-10 h-10 rounded-full mr-3"
+                source={{ uri: item.customer.photo }}
+                style={{ width: 50, height: 50, borderRadius: 25 }}
               />
-              <View className="flex-1">
-                <Text className="font-medium text-gray-900">{item.customer.name}</Text>
-                <Text className="text-gray-500 text-xs">{item.customer.address}</Text>
+              
+              <View style={{ marginLeft: 12, flex: 1 }}>
+                <Text style={{ fontWeight: 'bold', fontSize: 16, color: '#1e293b', marginBottom: 2 }}>
+                  {item.customer.name}
+                </Text>
+                
+                <Text style={{ color: '#64748b', fontSize: 14 }} numberOfLines={2}>
+                  {item.customer.address}
+                </Text>
               </View>
             </View>
             
-            <View className="h-1.5 bg-gray-100 rounded-full mb-3">
-              <View 
-                className="h-full rounded-full" 
-                style={{ 
-                  width: `${progress}%`,
-                  backgroundColor: progress < 25 ? '#3B82F6' : progress < 50 ? '#F59E0B' : progress < 75 ? '#F97316' : '#10B981'
-                }} 
-              />
+            {/* Progress Tracking */}
+            <View style={{ marginBottom: 16 }}>
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 }}>
+                <Text style={{ color: '#475569', fontSize: 13 }}>Delivery Progress</Text>
+                <Text style={{ color: '#475569', fontSize: 13, fontWeight: '600' }}>
+                  {Math.round(progress)}%
+                </Text>
+              </View>
+              
+              <View style={{ height: 4, backgroundColor: '#e2e8f0', borderRadius: 2, overflow: 'hidden' }}>
+                <Animated.View 
+                  style={{
+                    height: '100%',
+                    width: `${progress}%`,
+                    backgroundColor: item.status === 'Delayed' ? '#f97316' : '#3b82f6',
+                    borderRadius: 2
+                  }}
+                />
+              </View>
             </View>
             
-            <View className="flex-row justify-between">
-              <View className="flex-row items-center">
-                <Feather name="clock" size={14} color="#6B7280" className="mr-1" />
-                <Text className="text-gray-500 text-xs">ETA: {item.estimatedDeliveryTime}</Text>
+            {/* Timing */}
+            <View style={{ 
+              flexDirection: 'row', 
+              justifyContent: 'space-between',
+              padding: 12,
+              backgroundColor: '#f8fafc',
+              borderRadius: 12
+            }}>
+              <View>
+                <Text style={{ color: '#64748b', fontSize: 12, marginBottom: 2 }}>Pickup</Text>
+                <Text style={{ fontWeight: '600', color: '#334155', fontSize: 14 }}>{item.pickupTime}</Text>
               </View>
               
-              <View className="flex-row items-center">
-                <Feather name="map-pin" size={14} color="#6B7280" className="mr-1" />
-                <Text className="text-gray-500 text-xs">{item.route.distance}</Text>
+              <View style={{ 
+                flexDirection: 'row', 
+                alignItems: 'center', 
+                paddingHorizontal: 12 
+              }}>
+                <View style={{ 
+                  width: 6, 
+                  height: 6, 
+                  borderRadius: 3, 
+                  backgroundColor: '#94a3b8' 
+                }} />
+                <View style={{ 
+                  height: 1, 
+                  backgroundColor: '#94a3b8', 
+                  flex: 1, 
+                  marginHorizontal: 4 
+                }} />
+                <FontAwesome5 name="location-arrow" size={10} color="#94a3b8" />
               </View>
               
-              <View className="flex-row items-center">
-                <FontAwesome5 name="money-bill-wave" size={14} color="#6B7280" className="mr-1" />
-                <Text className="text-gray-500 text-xs">{item.payment.total}</Text>
+              <View>
+                <Text style={{ color: '#64748b', fontSize: 12, marginBottom: 2 }}>Estimated Arrival</Text>
+                <Text style={{ fontWeight: '600', color: '#334155', fontSize: 14 }}>{item.estimatedDeliveryTime}</Text>
               </View>
             </View>
+          </View>
+          
+          {/* Action Bar */}
+          <View style={{ 
+            flexDirection: 'row', 
+            borderTopWidth: 1, 
+            borderTopColor: '#f1f5f9' 
+          }}>
+            <TouchableOpacity
+              style={{ 
+                flex: 1, 
+                paddingVertical: 12, 
+                alignItems: 'center', 
+                flexDirection: 'row',
+                justifyContent: 'center'
+              }}
+              onPress={() => {
+                // Navigate action
+                if (Platform.OS === 'ios') {
+                  try {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  } catch (e) {
+                    // Fallback
+                  }
+                }
+              }}
+            >
+              <MaterialIcons name="directions" size={18} color="#3b82f6" />
+              <Text style={{ color: '#3b82f6', fontWeight: '600', marginLeft: 6 }}>Navigate</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity
+              style={{ 
+                flex: 1, 
+                paddingVertical: 12, 
+                alignItems: 'center',
+                flexDirection: 'row',
+                justifyContent: 'center',
+                borderLeftWidth: 1,
+                borderLeftColor: '#f1f5f9'
+              }}
+              onPress={() => {
+                // Call customer action
+                if (Platform.OS === 'ios') {
+                  try {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  } catch (e) {
+                    // Fallback
+                  }
+                }
+              }}
+            >
+              <Feather name="phone" size={18} color="#10b981" />
+              <Text style={{ color: '#10b981', fontWeight: '600', marginLeft: 6 }}>Call</Text>
+            </TouchableOpacity>
           </View>
         </TouchableOpacity>
       </Animated.View>
     );
   };
-
+  
+  // Render empty state
+  const renderEmptyState = () => (
+    <View style={{ 
+      flex: 1, 
+      justifyContent: 'center', 
+      alignItems: 'center', 
+      paddingTop: 60,
+      paddingHorizontal: 20
+    }}>
+      <View style={{ 
+        width: 120, 
+        height: 120, 
+        borderRadius: 60,
+        backgroundColor: '#f1f5f9',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom: 16
+      }}>
+        <Feather name="truck" size={60} color="#94a3b8" />
+      </View>
+      
+      <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#334155', marginBottom: 8 }}>
+        No Active Deliveries
+      </Text>
+      <Text style={{ fontSize: 14, color: '#64748b', textAlign: 'center', marginBottom: 20 }}>
+        You don't have any orders in progress at the moment.
+      </Text>
+      
+      {error && (
+        <TouchableOpacity
+          style={{
+            backgroundColor: '#3b82f6',
+            paddingVertical: 12,
+            paddingHorizontal: 20,
+            borderRadius: 8
+          }}
+          onPress={fetchInProgressOrders}
+        >
+          <Text style={{ color: 'white', fontWeight: 'bold' }}>Refresh</Text>
+        </TouchableOpacity>
+      )}
+    </View>
+  );
+  
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#f8fafc' }} edges={['top']}>
-      <StatusBar style="light" />
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#f8fafc' }}>
+      <StatusBar style="dark" />
       
       <HomeHeader title="In-Progress Orders" showBackButton />
       
-      {/* Order List */}
-      <FlatList
-        data={inProgressOrders}
-        renderItem={renderOrderItem}
-        keyExtractor={item => item.id}
-        contentContainerStyle={{ padding: 16 }}
-        showsVerticalScrollIndicator={false}
-      />
+      {loading ? (
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <ActivityIndicator size="large" color="#3b82f6" />
+          <Text style={{ marginTop: 12, color: '#64748b' }}>Loading orders...</Text>
+        </View>
+      ) : (
+        <FlatList
+          data={inProgressOrders}
+          keyExtractor={(item) => item.id}
+          renderItem={renderOrderCard}
+          contentContainerStyle={{ 
+            padding: 16,
+            flexGrow: 1,
+            paddingBottom: inProgressOrders.length ? 100 : 0
+          }}
+          ListEmptyComponent={renderEmptyState}
+          refreshControl={
+            <RefreshControl
+              refreshing={isRefreshing}
+              onRefresh={handleRefresh}
+              tintColor="#3b82f6"
+              colors={['#3b82f6']}
+            />
+          }
+        />
+      )}
       
       {/* Order Details Modal */}
       <Modal
-        transparent={true}
         visible={showOrderDetails}
+        transparent
         animationType="none"
         onRequestClose={closeOrderDetails}
       >
         <TouchableWithoutFeedback onPress={closeOrderDetails}>
-          <View className="flex-1 bg-black/50 justify-center items-center">
+          <View style={{ 
+            flex: 1, 
+            backgroundColor: 'rgba(15, 23, 42, 0.5)',
+            justifyContent: 'center',
+            alignItems: 'center'
+          }}>
             <TouchableWithoutFeedback>
-              <Animated.View 
-                style={{
-                  opacity: modalOpacityAnim,
-                  transform: [{ scale: modalScaleAnim }],
-                  width: width * 0.9,
-                  maxHeight: '80%',
-                }}
-                className="bg-white rounded-xl shadow-xl"
-              >
+              <Animated.View style={{
+                width: width * 0.9,
+                maxHeight: '85%',
+                backgroundColor: 'white',
+                borderRadius: 20,
+                overflow: 'hidden',
+                transform: [{ scale: modalScaleAnim }],
+                opacity: modalOpacityAnim
+              }}>
                 {activeOrder && (
                   <View>
                     {/* Modal Header */}
-                    <LinearGradient
-                      colors={['#4F46E5', '#7C3AED']}
-                      start={{ x: 0, y: 0 }}
-                      end={{ x: 1, y: 0 }}
-                      className="rounded-t-xl p-4"
-                    >
-                      <View className="flex-row justify-between items-center">
-                        <View className="flex-row items-center">
-                          <View className="bg-white/20 p-1.5 rounded-full mr-2">
-                            <FontAwesome5 name="shipping-fast" size={14} color="white" />
-                          </View>
-                          <Text className="text-white font-bold">Order {activeOrder.orderNumber}</Text>
+                    <View style={{
+                      flexDirection: 'row',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      paddingHorizontal: 16,
+                      paddingVertical: 14,
+                      borderBottomWidth: 1,
+                      borderBottomColor: '#f1f5f9'
+                    }}>
+                      <View>
+                        <Text style={{ fontWeight: 'bold', fontSize: 18, color: '#0f172a' }}>
+                          Order #{activeOrder.orderNumber}
+                        </Text>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 2 }}>
+                          <View style={{
+                            width: 6,
+                            height: 6,
+                            borderRadius: 3,
+                            backgroundColor: activeOrder.status === 'Delayed' ? '#ef4444' : '#10b981',
+                            marginRight: 6
+                          }} />
+                          <Text style={{ 
+                            color: activeOrder.status === 'Delayed' ? '#ef4444' : '#10b981', 
+                            fontWeight: '500',
+                            fontSize: 14
+                          }}>
+                            {activeOrder.status}
+                          </Text>
                         </View>
-                        <TouchableOpacity onPress={closeOrderDetails}>
-                          <Feather name="x" size={20} color="white" />
-                        </TouchableOpacity>
                       </View>
                       
-                      <View className="h-2 bg-white/20 rounded-full my-3 overflow-hidden">
-                        <Animated.View 
-                          className="h-full bg-white rounded-full" 
-                          style={{ width: `${deliveryProgress[activeOrder.id]}%` }} 
-                        />
-                      </View>
-                      
-                      <View className="flex-row justify-between">
-                        <View>
-                          <Text className="text-white/70 text-xs">Status</Text>
-                          <TouchableOpacity 
-                            onPress={() => setEditingStatus(!editingStatus)}
-                            className="flex-row items-center"
+                      <TouchableOpacity onPress={closeOrderDetails}>
+                        <Feather name="x" size={24} color="#64748b" />
+                      </TouchableOpacity>
+                    </View>
+                    
+                    {/* Modal Content - Scrollable */}
+                    <FlatList
+                      data={[{ key: 'content' }]}
+                      renderItem={() => (
+                        <View style={{ padding: 16 }}>
+                          {/* Customer Section */}
+                          <TouchableOpacity
+                            style={{
+                              flexDirection: 'row',
+                              justifyContent: 'space-between',
+                              alignItems: 'center',
+                              marginBottom: 8
+                            }}
+                            onPress={() => toggleSection('customer')}
                           >
-                            <Text className="text-white font-medium mr-1">{activeOrder.status}</Text>
-                            <Feather name="edit-2" size={12} color="white" />
+                            <Text style={{ fontWeight: 'bold', fontSize: 16, color: '#0f172a' }}>
+                              Customer Information
+                            </Text>
+                            <Ionicons 
+                              name={expandedSections.customer ? "chevron-up" : "chevron-down"} 
+                              size={20} 
+                              color="#64748b" 
+                            />
                           </TouchableOpacity>
                           
-                          {/* Status Selection Dropdown */}
-                          {editingStatus && (
-                            <View className="absolute top-12 left-0 bg-white rounded-lg shadow-lg z-10 border border-gray-200">
-                              {statusOptions.map(status => (
-                                <TouchableOpacity
-                                  key={status}
-                                  className={`px-4 py-2 border-b border-gray-100 ${status === activeOrder.status ? 'bg-indigo-50' : ''}`}
-                                  onPress={() => updateOrderStatus(status)}
-                                >
-                                  <Text className={`${status === activeOrder.status ? 'text-indigo-600 font-medium' : 'text-gray-700'}`}>{status}</Text>
-                                </TouchableOpacity>
+                          {expandedSections.customer && (
+                            <View style={{
+                              backgroundColor: '#f8fafc',
+                              borderRadius: 12,
+                              padding: 16,
+                              marginBottom: 16
+                            }}>
+                              <View style={{ flexDirection: 'row', marginBottom: 16 }}>
+                                <Image
+                                  source={{ uri: activeOrder.customer.photo }}
+                                  style={{ width: 50, height: 50, borderRadius: 25 }}
+                                />
+                                
+                                <View style={{ marginLeft: 12 }}>
+                                  <Text style={{ fontWeight: 'bold', color: '#1e293b', fontSize: 16 }}>
+                                    {activeOrder.customer.name}
+                                  </Text>
+                                  
+                                  <TouchableOpacity 
+                                    style={{ 
+                                      flexDirection: 'row', 
+                                      alignItems: 'center',
+                                      marginTop: 6
+                                    }}
+                                  >
+                                    <Feather name="phone" size={14} color="#3b82f6" />
+                                    <Text style={{ color: '#3b82f6', marginLeft: 4, fontSize: 14 }}>
+                                      {activeOrder.customer.phone}
+                                    </Text>
+                                  </TouchableOpacity>
+                                </View>
+                              </View>
+                              
+                              <View style={{ marginBottom: 12 }}>
+                                <Text style={{ color: '#64748b', fontSize: 13, marginBottom: 4 }}>
+                                  Delivery Address
+                                </Text>
+                                <Text style={{ color: '#0f172a', fontSize: 15 }}>
+                                  {activeOrder.customer.address}
+                                </Text>
+                              </View>
+                              
+                              <View>
+                                <Text style={{ color: '#64748b', fontSize: 13, marginBottom: 4 }}>
+                                  Customer Note
+                                </Text>
+                                <View style={{
+                                  backgroundColor: 'white',
+                                  borderRadius: 8,
+                                  padding: 12,
+                                  borderWidth: 1,
+                                  borderColor: '#e2e8f0'
+                                }}>
+                                  <Text style={{ color: '#0f172a', fontSize: 14, fontStyle: 'italic' }}>
+                                    "{activeOrder.customer.note}"
+                                  </Text>
+                                </View>
+                              </View>
+                            </View>
+                          )}
+                          
+                          {/* Timeline Section */}
+                          <TouchableOpacity
+                            style={{
+                              flexDirection: 'row',
+                              justifyContent: 'space-between',
+                              alignItems: 'center',
+                              marginBottom: 8
+                            }}
+                            onPress={() => toggleSection('timeline')}
+                          >
+                            <Text style={{ fontWeight: 'bold', fontSize: 16, color: '#0f172a' }}>
+                              Delivery Timeline
+                            </Text>
+                            <Ionicons 
+                              name={expandedSections.timeline ? "chevron-up" : "chevron-down"} 
+                              size={20} 
+                              color="#64748b" 
+                            />
+                          </TouchableOpacity>
+                          
+                          {expandedSections.timeline && (
+                            <View style={{
+                              backgroundColor: '#f8fafc',
+                              borderRadius: 12,
+                              padding: 16,
+                              marginBottom: 16
+                            }}>
+                              {activeOrder.steps.map((step, index) => (
+                                <View key={step.id} style={{
+                                  flexDirection: 'row',
+                                  marginBottom: index < activeOrder.steps.length - 1 ? 16 : 0
+                                }}>
+                                  {/* Status indicator */}
+                                  <View style={{
+                                    width: 20,
+                                    alignItems: 'center'
+                                  }}>
+                                    <View style={{
+                                      width: 20,
+                                      height: 20,
+                                      borderRadius: 10,
+                                      backgroundColor: step.isCompleted ? '#10b981' : '#e2e8f0',
+                                      justifyContent: 'center',
+                                      alignItems: 'center'
+                                    }}>
+                                      {step.isCompleted ? (
+                                        <Feather name="check" size={12} color="white" />
+                                      ) : (
+                                        <Text style={{ color: '#94a3b8', fontSize: 10, fontWeight: 'bold' }}>
+                                          {index + 1}
+                                        </Text>
+                                      )}
+                                    </View>
+                                    
+                                    {index < activeOrder.steps.length - 1 && (
+                                      <View style={{
+                                        width: 1,
+                                        height: 24,
+                                        backgroundColor: step.isCompleted && activeOrder.steps[index+1].isCompleted ? 
+                                          '#10b981' : '#e2e8f0',
+                                        marginVertical: 4
+                                      }} />
+                                    )}
+                                  </View>
+                                  
+                                  {/* Step details */}
+                                  <View style={{ marginLeft: 12, flex: 1 }}>
+                                    <Text style={{ 
+                                      fontWeight: '600', 
+                                      color: step.isCompleted ? '#0f172a' : '#64748b',
+                                      fontSize: 15
+                                    }}>
+                                      {step.title}
+                                    </Text>
+                                    
+                                    <Text style={{ 
+                                      color: '#64748b', 
+                                      fontSize: 13,
+                                      marginTop: 2
+                                    }}>
+                                      {step.time || 'Pending'}
+                                    </Text>
+                                  </View>
+                                  
+                                  {/* Action button for next step */}
+                                  {!step.isCompleted && activeOrder.steps[index-1]?.isCompleted && (
+                                    <TouchableOpacity
+                                      style={{
+                                        backgroundColor: '#3b82f6',
+                                        paddingHorizontal: 12,
+                                        paddingVertical: 6,
+                                        borderRadius: 6,
+                                        justifyContent: 'center'
+                                      }}
+                                      onPress={() => updateDeliveryStep(activeOrder.id, step.id)}
+                                      disabled={updatingStep === step.id}
+                                    >
+                                      {updatingStep === step.id ? (
+                                        <ActivityIndicator size="small" color="white" />
+                                      ) : (
+                                        <Text style={{ color: 'white', fontWeight: '600', fontSize: 13 }}>
+                                          Complete
+                                        </Text>
+                                      )}
+                                    </TouchableOpacity>
+                                  )}
+                                </View>
                               ))}
                             </View>
                           )}
-                        </View>
-                        
-                        <View>
-                          <Text className="text-white/70 text-xs">ETA</Text>
-                          <Text className="text-white font-medium">{activeOrder.estimatedDeliveryTime}</Text>
-                        </View>
-                      </View>
-                    </LinearGradient>
-                    
-                    {/* Modal Content */}
-                    <View className="max-h-96 overflow-hidden">
-                      <FlatList
-                        scrollEnabled={true}
-                        showsVerticalScrollIndicator={true}
-                        contentContainerStyle={{ padding: 16 }}
-                        ListHeaderComponent={
-                          <>
-                            {/* Customer Info */}
-                            <View className="mb-4">
-                              <TouchableOpacity
-                                onPress={() => toggleSection('customer')}
-                                className="flex-row justify-between items-center mb-2"
-                              >
-                                <Text className="text-gray-900 font-bold text-lg">Customer Information</Text>
-                                <Feather name={expandedSections.customer ? "chevron-up" : "chevron-down"} size={20} color="#6B7280" />
-                              </TouchableOpacity>
+                          
+                          {/* Order Items Section */}
+                          <TouchableOpacity
+                            style={{
+                              flexDirection: 'row',
+                              justifyContent: 'space-between',
+                              alignItems: 'center',
+                              marginBottom: 8
+                            }}
+                            onPress={() => toggleSection('items')}
+                          >
+                            <Text style={{ fontWeight: 'bold', fontSize: 16, color: '#0f172a' }}>
+                              Order Items
+                            </Text>
+                            <Ionicons 
+                              name={expandedSections.items ? "chevron-up" : "chevron-down"} 
+                              size={20} 
+                              color="#64748b" 
+                            />
+                          </TouchableOpacity>
+                          
+                          {expandedSections.items && (
+                            <View style={{
+                              backgroundColor: '#f8fafc',
+                              borderRadius: 12,
+                              padding: 16,
+                              marginBottom: 16
+                            }}>
+                              <View style={{ 
+                                paddingBottom: 12, 
+                                borderBottomWidth: 1, 
+                                borderBottomColor: '#e2e8f0',
+                                marginBottom: 12
+                              }}>
+                                <Text style={{ color: '#64748b', fontSize: 13, marginBottom: 4 }}>
+                                  Pickup from
+                                </Text>
+                                <Text style={{ color: '#0f172a', fontWeight: '600', fontSize: 15 }}>
+                                  {activeOrder.restaurant.name}
+                                </Text>
+                                <Text style={{ color: '#64748b', fontSize: 14, marginTop: 2 }}>
+                                  {activeOrder.restaurant.address}
+                                </Text>
+                              </View>
                               
-                              {expandedSections.customer && (
-                                <>
-                                  <View className="flex-row items-center mb-3">
-                                    <Image 
-                                      source={{ uri: activeOrder.customer.photo }} 
-                                      className="w-14 h-14 rounded-full mr-3"
-                                    />
-                                    <View className="flex-1">
-                                      <Text className="text-gray-900 font-bold text-lg">{activeOrder.customer.name}</Text>
-                                      <Text className="text-gray-500 text-sm">{activeOrder.customer.address}</Text>
-                                    </View>
+                              {/* Item list */}
+                              <Text style={{ color: '#64748b', fontSize: 13, marginBottom: 8 }}>
+                                Items ({activeOrder.items.length})
+                              </Text>
+                              
+                              {activeOrder.items.map((item, index) => (
+                                <View 
+                                  key={index}
+                                  style={{
+                                    flexDirection: 'row',
+                                    justifyContent: 'space-between',
+                                    paddingVertical: 8,
+                                    borderBottomWidth: index < activeOrder.items.length - 1 ? 1 : 0,
+                                    borderBottomColor: '#e2e8f0'
+                                  }}
+                                >
+                                  <View style={{ flex: 1 }}>
+                                    <Text style={{ color: '#0f172a', fontSize: 15 }}>
+                                      {item.name}
+                                    </Text>
                                   </View>
                                   
-                                  {activeOrder.customer.note && (
-                                    <View className="bg-yellow-50 border border-yellow-100 rounded-lg p-3 mb-3">
-                                      <View className="flex-row items-start">
-                                        <Feather name="info" size={16} color="#F59E0B" className="mr-2 mt-0.5" />
-                                        <Text className="text-gray-700 flex-1">{activeOrder.customer.note}</Text>
-                                      </View>
+                                  <Text style={{ color: '#64748b', fontSize: 14, marginHorizontal: 8 }}>
+                                    x{item.quantity}
+                                  </Text>
+                                  
+                                  <Text style={{ color: '#0f172a', fontWeight: '600', fontSize: 14 }}>
+                                    {item.price}
+                                  </Text>
+                                </View>
+                              ))}
+                              
+                              {/* Total */}
+                              <View style={{
+                                flexDirection: 'row',
+                                justifyContent: 'space-between',
+                                marginTop: 12,
+                                paddingTop: 12,
+                                borderTopWidth: 1,
+                                borderTopColor: '#e2e8f0'
+                              }}>
+                                <Text style={{ color: '#0f172a', fontWeight: 'bold', fontSize: 16 }}>
+                                  Total
+                                </Text>
+                                <View style={{ alignItems: 'flex-end' }}>
+                                  <Text style={{ color: '#0f172a', fontWeight: 'bold', fontSize: 16 }}>
+                                    {activeOrder.payment.total}
+                                  </Text>
+                                  <View style={{
+                                    flexDirection: 'row',
+                                    alignItems: 'center',
+                                    marginTop: 4
+                                  }}>
+                                    <Text style={{ color: '#64748b', fontSize: 13, marginRight: 4 }}>
+                                      {activeOrder.payment.method}
+                                    </Text>
+                                    <View style={{
+                                      paddingHorizontal: 6,
+                                      paddingVertical: 2,
+                                      borderRadius: 4,
+                                      backgroundColor: activeOrder.payment.isPaid ? '#dcfce7' : '#fff7ed'
+                                    }}>
+                                      <Text style={{ 
+                                        fontSize: 11, 
+                                        fontWeight: '600',
+                                        color: activeOrder.payment.isPaid ? '#16a34a' : '#f97316'
+                                      }}>
+                                        {activeOrder.payment.isPaid ? 'PAID' : 'COD'}
+                                      </Text>
                                     </View>
-                                  )}
-                                
-                                  <View className="flex-row">
-                                    <TouchableOpacity 
-                                      className="flex-1 flex-row justify-center items-center bg-gray-100 p-2 rounded-l-lg"
-                                      onPress={handleCallCustomer}
-                                    >
-                                      <Feather name="phone" size={18} color="#10B981" className="mr-2" />
-                                      <Text className="text-green-600 font-medium">Call</Text>
-                                    </TouchableOpacity>
-                                    
-                                    <TouchableOpacity 
-                                      className="flex-1 flex-row justify-center items-center bg-gray-100 p-2 rounded-r-lg"
-                                      onPress={handleNavigate}
-                                    >
-                                      <Feather name="map-pin" size={18} color="#4F46E5" className="mr-2" />
-                                      <Text className="text-indigo-600 font-medium">Navigate</Text>
-                                    </TouchableOpacity>
                                   </View>
-                                </>
-                              )}
-                            </View>
-                            
-                            {/* Delivery Timeline */}
-                            <View className="bg-white rounded-xl shadow-sm border border-gray-100 mb-4">
-                              <View className="p-4">
-                                <TouchableOpacity
-                                  onPress={() => toggleSection('timeline')}
-                                  className="flex-row justify-between items-center mb-3"
-                                >
-                                  <Text className="text-gray-900 font-bold">Delivery Timeline</Text>
-                                  <View className="flex-row items-center">
-                                    <TouchableOpacity 
-                                      className="bg-gray-100 px-2 py-1 rounded-lg mr-2"
-                                      onPress={() => {
-                                        alert('Tap each step to update its status. Steps must be completed in order.');
-                                      }}
-                                    >
-                                      <Feather name="info" size={14} color="#4F46E5" />
-                                    </TouchableOpacity>
-                                    <Feather name={expandedSections.timeline ? "chevron-up" : "chevron-down"} size={20} color="#6B7280" />
-                                  </View>
-                                </TouchableOpacity>
-                                
-                                {expandedSections.timeline && (
-                                  <>
-                                    {activeOrder.steps.map((step, index) => (
-                                      <View key={step.id} className="flex-row mb-4 last:mb-0">
-                                        {/* Timeline Connector */}
-                                        <View className="items-center mr-4">
-                                          <TouchableOpacity
-                                            onPress={() => handleUpdateStepStatus(step.id)}
-                                            disabled={updatingStep === step.id}
-                                            className={`w-7 h-7 rounded-full items-center justify-center ${step.isCompleted ? 'bg-green-500' : index > 0 && !activeOrder.steps[index-1].isCompleted ? 'bg-gray-300' : 'bg-indigo-100'}`}
-                                          >
-                                            {updatingStep === step.id ? (
-                                              <ActivityIndicator size="small" color="white" />
-                                            ) : step.isCompleted ? (
-                                              <Feather name="check" size={16} color="white" />
-                                            ) : index > 0 && !activeOrder.steps[index-1].isCompleted ? (
-                                              <Feather name="lock" size={14} color="#9CA3AF" />
-                                            ) : (
-                                              <Feather name="edit-2" size={14} color="#4F46E5" />
-                                            )}
-                                          </TouchableOpacity>
-                                          
-                                          {index < activeOrder.steps.length - 1 && (
-                                            <View 
-                                              className={`w-0.5 h-12 ${step.isCompleted ? 'bg-green-500' : 'bg-gray-200'}`} 
-                                            />
-                                          )}
-                                        </View>
-                                        
-                                        {/* Step Details */}
-                                        <TouchableOpacity 
-                                          className="flex-1 pt-1"
-                                          onPress={() => handleUpdateStepStatus(step.id)}
-                                          disabled={updatingStep !== null || (index > 0 && !activeOrder.steps[index-1].isCompleted)}
-                                        >
-                                          <View className="flex-row items-center">
-                                            <Text className={`font-medium ${step.isCompleted ? 'text-gray-900' : index > 0 && !activeOrder.steps[index-1].isCompleted ? 'text-gray-400' : 'text-indigo-600'}`}>
-                                              {step.title}
-                                            </Text>
-                                            {!step.isCompleted && index === 0 && (
-                                              <View className="ml-2 px-1.5 py-0.5 bg-blue-100 rounded">
-                                                <Text className="text-xs text-blue-700 font-medium">Next</Text>
-                                              </View>
-                                            )}
-                                            {!step.isCompleted && index > 0 && activeOrder.steps[index-1].isCompleted && activeOrder.steps.slice(0, index).every(s => s.isCompleted) && (
-                                              <View className="ml-2 px-1.5 py-0.5 bg-blue-100 rounded">
-                                                <Text className="text-xs text-blue-700 font-medium">Next</Text>
-                                              </View>
-                                            )}
-                                          </View>
-                                          
-                                          <View className="flex-row items-center">
-                                            <Text className={`text-xs ${step.isCompleted ? 'text-gray-500' : index > 0 && !activeOrder.steps[index-1].isCompleted ? 'text-gray-400' : 'text-indigo-400'}`}>
-                                              {step.isCompleted ? step.time : index > 0 && !activeOrder.steps[index-1].isCompleted ? 'Locked' : 'Tap to update'}
-                                            </Text>
-                                            
-                                            {step.isCompleted && (
-                                              <TouchableOpacity 
-                                                className="ml-2"
-                                                onPress={() => handleUpdateStepStatus(step.id)}
-                                              >
-                                                <Text className="text-xs text-indigo-500">Undo</Text>
-                                              </TouchableOpacity>
-                                            )}
-                                          </View>
-                                        </TouchableOpacity>
-                                      </View>
-                                    ))}
-                                  </>
-                                )}
+                                </View>
                               </View>
                             </View>
+                          )}
+                          
+                          {/* Action Buttons */}
+                          <View style={{ 
+                            flexDirection: 'row', 
+                            justifyContent: 'space-between',
+                            marginTop: 8
+                          }}>
+                            <TouchableOpacity
+                              style={{
+                                flex: 1,
+                                backgroundColor: '#ef4444',
+                                borderRadius: 8,
+                                paddingVertical: 12,
+                                alignItems: 'center',
+                                marginRight: 8
+                              }}
+                              onPress={() => markOrderAsDelayed(activeOrder.id)}
+                            >
+                              <Text style={{ color: 'white', fontWeight: 'bold' }}>
+                                Mark as Delayed
+                              </Text>
+                            </TouchableOpacity>
                             
-                            {/* Order Details */}
-                            <View className="bg-white rounded-xl shadow-sm border border-gray-100 mb-4">
-                              <View className="p-4">
-                                <TouchableOpacity
-                                  onPress={() => toggleSection('items')}
-                                  className="flex-row justify-between items-center mb-3"
-                                >
-                                  <Text className="text-gray-900 font-bold">Order Details</Text>
-                                  <Feather name={expandedSections.items ? "chevron-up" : "chevron-down"} size={20} color="#6B7280" />
-                                </TouchableOpacity>
-                                
-                                {expandedSections.items && (
-                                  <>
-                                    {/* Restaurant Info */}
-                                    <View className="bg-gray-50 rounded-lg p-3 mb-3">
-                                      <Text className="text-gray-900 font-medium">{activeOrder.restaurant.name}</Text>
-                                      <Text className="text-gray-500 text-sm">{activeOrder.restaurant.address}</Text>
-                                    </View>
-                                    
-                                    {/* Items */}
-                                    <View className="mb-3">
-                                      {activeOrder.items.map((item, index) => (
-                                        <View 
-                                          key={index} 
-                                          className={`flex-row justify-between py-2 ${index < activeOrder.items.length - 1 ? 'border-b border-gray-100' : ''}`}
-                                        >
-                                          <View className="flex-row items-center">
-                                            <View className="w-6 h-6 bg-gray-100 rounded-full items-center justify-center mr-2">
-                                              <Text className="text-gray-500 text-xs font-bold">{item.quantity}</Text>
-                                            </View>
-                                            <Text className="text-gray-800">{item.name}</Text>
-                                          </View>
-                                          <Text className="text-gray-800 font-medium">{item.price}</Text>
-                                        </View>
-                                      ))}
-                                    </View>
-                                    
-                                    {/* Payment Info */}
-                                    <View className="bg-gray-50 rounded-lg p-3">
-                                      <View className="flex-row justify-between mb-1">
-                                        <Text className="text-gray-500">Payment Method</Text>
-                                        <Text className="text-gray-800 font-medium">{activeOrder.payment.method}</Text>
-                                      </View>
-                                      <View className="flex-row justify-between mb-1">
-                                        <Text className="text-gray-500">Payment Status</Text>
-                                        <View className={`px-2 py-0.5 rounded ${activeOrder.payment.isPaid ? 'bg-green-100' : 'bg-yellow-100'}`}>
-                                          <Text className={`text-xs font-medium ${activeOrder.payment.isPaid ? 'text-green-700' : 'text-yellow-700'}`}>
-                                            {activeOrder.payment.isPaid ? 'Paid' : 'Cash on Delivery'}
-                                          </Text>
-                                        </View>
-                                      </View>
-                                      <View className="flex-row justify-between">
-                                        <Text className="text-gray-900 font-bold">Total</Text>
-                                        <Text className="text-gray-900 font-bold">{activeOrder.payment.total}</Text>
-                                      </View>
-                                    </View>
-                                  </>
-                                )}
-                              </View>
-                            </View>
-                          </>
-                        }
-                        data={[]}
-                        renderItem={() => null}
-                      />
-                    </View>
-                    
-                    {/* Modal Footer */}
-                    <View className="p-4 border-t border-gray-100">
-                      <TouchableOpacity
-                        className="bg-green-600 py-3 rounded-xl items-center"
-                        onPress={() => {
-                          // Find the delivered step and update its status
-                          const deliveredStepId = activeOrder.steps.find(step => step.id === 'delivered')?.id;
-                          if (deliveredStepId) {
-                            handleUpdateStepStatus(deliveredStepId);
-                          }
-                        }}
-                      >
-                        <Text className="text-white font-bold text-lg">Confirm Delivery</Text>
-                      </TouchableOpacity>
-                    </View>
+                            <TouchableOpacity
+                              style={{
+                                flex: 1,
+                                backgroundColor: '#3b82f6',
+                                borderRadius: 8,
+                                paddingVertical: 12,
+                                alignItems: 'center',
+                                marginLeft: 8
+                              }}
+                              onPress={() => {
+                                // Find the next uncompleted step
+                                const nextStep = activeOrder.steps.find(s => !s.isCompleted);
+                                if (nextStep) {
+                                  updateDeliveryStep(activeOrder.id, nextStep.id);
+                                }
+                              }}
+                            >
+                              <Text style={{ color: 'white', fontWeight: 'bold' }}>
+                                Update Status
+                              </Text>
+                            </TouchableOpacity>
+                          </View>
+                        </View>
+                      )}
+                      keyExtractor={item => item.key}
+                    />
                   </View>
                 )}
               </Animated.View>
@@ -824,6 +1324,8 @@ export default function InProgressOrdersScreen() {
           </View>
         </TouchableWithoutFeedback>
       </Modal>
+      
     </SafeAreaView>
   );
 }
+

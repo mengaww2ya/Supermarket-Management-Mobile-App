@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   View,
   Text,
@@ -12,7 +12,8 @@ import {
   Pressable,
   RefreshControl,
   ActivityIndicator,
-  ScrollView
+  ScrollView,
+  Alert
 } from 'react-native';
 import { Ionicons, Feather, MaterialIcons, FontAwesome5, MaterialCommunityIcons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -22,6 +23,19 @@ import { BlurView } from 'expo-blur';
 import HomeHeader from '../../components/HomeHeader';
 import { router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import { db } from "../../../firebase/firebaseConfig";
+import { 
+  collection, 
+  query, 
+  where, 
+  getDocs, 
+  orderBy, 
+  limit, 
+  doc, 
+  updateDoc,
+  serverTimestamp 
+} from 'firebase/firestore';
+import { useAuth } from "../../context/authContext";
 
 const { width, height } = Dimensions.get('window');
 
@@ -31,182 +45,143 @@ export default function AssignedDeliveriesList() {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(0.95)).current;
   
+  // Add headerOpacity animation
+  const headerOpacity = scrollY.interpolate({
+    inputRange: [0, 100],
+    outputRange: [1, 0.9],
+    extrapolate: 'clamp',
+  });
+  
   // State variables
   const [searchQuery, setSearchQuery] = useState('');
+  const [deliveries, setDeliveries] = useState([]);
   const [filteredDeliveries, setFilteredDeliveries] = useState([]);
   const [activeFilter, setActiveFilter] = useState('all');
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [selectedDelivery, setSelectedDelivery] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  
+  // Get authentication context
+  const { user } = useAuth();
   
   // Animation for search bar
   const searchBarAnim = useRef(new Animated.Value(0)).current;
   
-  // Sample data for assigned deliveries
-  const deliveries = [
-    {
-      id: 'DEL1001',
-      customer: {
-        name: 'John Smith',
-        photo: 'https://randomuser.me/api/portraits/men/32.jpg',
-        phone: '+251 91 234 5678',
-        address: '123 Main St, Bole, Addis Ababa'
-      },
-      orderDetails: {
-        orderNumber: 'ORD7892',
-        items: 5,
-        total: '$38.50',
-        paymentMethod: 'Card',
-        isPaid: true
-      },
-      delivery: {
-        status: 'In Progress',
-        assignedTime: '10:30 AM',
-        estimatedArrival: '11:15 AM',
-        distance: '2.4 km',
-        route: {
-          startPoint: 'Supermarket Branch #03',
-          endPoint: 'Bole, Addis Ababa'
-        }
-      },
-      priority: 'high'
-    },
-    {
-      id: 'DEL1002',
-      customer: {
-        name: 'Sarah Johnson',
-        photo: 'https://randomuser.me/api/portraits/women/44.jpg',
-        phone: '+251 91 987 6543',
-        address: '456 Elm Road, Kirkos, Addis Ababa'
-      },
-      orderDetails: {
-        orderNumber: 'ORD7895',
-        items: 3,
-        total: '$22.75',
-        paymentMethod: 'Cash',
-        isPaid: false
-      },
-      delivery: {
-        status: 'Assigned',
-        assignedTime: '11:00 AM',
-        estimatedArrival: '11:45 AM',
-        distance: '3.7 km',
-        route: {
-          startPoint: 'Supermarket Branch #01',
-          endPoint: 'Kirkos, Addis Ababa'
-        }
-      },
-      priority: 'medium'
-    },
-    {
-      id: 'DEL1003',
-      customer: {
-        name: 'Michael Davies',
-        photo: 'https://randomuser.me/api/portraits/men/67.jpg',
-        phone: '+251 91 345 6789',
-        address: '789 Oak Ave, Arada, Addis Ababa'
-      },
-      orderDetails: {
-        orderNumber: 'ORD7899',
-        items: 8,
-        total: '$62.30',
-        paymentMethod: 'Card',
-        isPaid: true
-      },
-      delivery: {
-        status: 'Assigned',
-        assignedTime: '11:45 AM',
-        estimatedArrival: '12:30 PM',
-        distance: '5.2 km',
-        route: {
-          startPoint: 'Supermarket Branch #02',
-          endPoint: 'Arada, Addis Ababa'
-        }
-      },
-      priority: 'medium'
-    },
-    {
-      id: 'DEL1004',
-      customer: {
-        name: 'Emma Williams',
-        photo: 'https://randomuser.me/api/portraits/women/23.jpg',
-        phone: '+251 91 567 8901',
-        address: '321 Pine Blvd, Nifas Silk, Addis Ababa'
-      },
-      orderDetails: {
-        orderNumber: 'ORD7902',
-        items: 12,
-        total: '$85.99',
-        paymentMethod: 'Card',
-        isPaid: true
-      },
-      delivery: {
-        status: 'In Progress',
-        assignedTime: '12:15 PM',
-        estimatedArrival: '1:00 PM',
-        distance: '4.8 km',
-        route: {
-          startPoint: 'Supermarket Branch #01',
-          endPoint: 'Nifas Silk, Addis Ababa'
-        }
-      },
-      priority: 'high'
-    },
-    {
-      id: 'DEL1005',
-      customer: {
-        name: 'Daniel Brown',
-        photo: 'https://randomuser.me/api/portraits/men/94.jpg',
-        phone: '+251 91 678 9012',
-        address: '567 Cedar St, Lideta, Addis Ababa'
-      },
-      orderDetails: {
-        orderNumber: 'ORD7906',
-        items: 2,
-        total: '$15.25',
-        paymentMethod: 'Cash',
-        isPaid: false
-      },
-      delivery: {
-        status: 'Delayed',
-        assignedTime: '9:30 AM',
-        estimatedArrival: '10:45 AM',
-        distance: '3.1 km',
-        route: {
-          startPoint: 'Supermarket Branch #03',
-          endPoint: 'Lideta, Addis Ababa'
-        }
-      },
-      priority: 'low'
-    }
-  ];
-
-  // Initialize filtered deliveries and animations on mount
-  useEffect(() => {
-    setFilteredDeliveries(deliveries || []);
-    
-    // Simulate loading
-    const timer = setTimeout(() => {
+  // Fetch assigned deliveries from user's tasks collection
+  const fetchDeliveries = useCallback(async () => {
+    if (!user || !user.uid) {
+      setError("You must be logged in to view assigned deliveries");
       setLoading(false);
+      setIsRefreshing(false);
+      return;
+    }
+
+    try {
+      setLoading(true);
+      console.log("Fetching assigned deliveries for:", user.uid);
       
-      // Start entrance animations
-      Animated.parallel([
-        Animated.timing(fadeAnim, {
-          toValue: 1,
-          duration: 500,
-          useNativeDriver: true,
-        }),
-        Animated.spring(scaleAnim, {
-          toValue: 1,
-          friction: 8,
-          tension: 40,
-          useNativeDriver: true,
+      // Get tasks from user's collection that are in Pending or Assigned status
+      // Modified query to avoid composite index requirement
+      const tasksRef = collection(db, `users/${user.uid}/tasks`);
+      
+      // First, fetch all tasks - simpler query that doesn't require a composite index
+      const basicQuery = query(tasksRef);
+      const querySnapshot = await getDocs(basicQuery);
+      
+      if (querySnapshot.empty) {
+        console.log("No tasks found at all");
+        setDeliveries([]);
+        setFilteredDeliveries([]);
+        setLoading(false);
+        setIsRefreshing(false);
+        return;
+      }
+      
+      // Filter tasks in JavaScript instead of using where clause with orderBy
+      // This avoids the need for a composite index
+      const assignedDeliveries = querySnapshot.docs
+        .map(doc => {
+          const data = doc.data();
+          
+          // Only include tasks with Pending or Assigned status
+          if (!data.status || !['Pending', 'Assigned'].includes(data.status)) {
+            return null;
+          }
+          
+          // Format the task data to match the UI expectations
+          return {
+            id: doc.id,
+            rawData: data, // Store the original data for reference
+            customer: {
+              name: data.customerName || 'Customer',
+              photo: data.customerPhoto || 'https://randomuser.me/api/portraits/lego/1.jpg',
+              phone: data.customerPhone || 'No phone provided',
+              address: data.deliveryAddress || 'No address provided'
+            },
+            orderDetails: {
+              orderNumber: data.orderRef || data.orderId || doc.id.substring(0, 8),
+              items: data.items?.length || 0,
+              total: `${data.totalAmount || '0'} Birr`,
+              paymentMethod: data.paymentMethod || 'Unknown',
+              isPaid: data.isPaid || false
+            },
+            delivery: {
+              status: data.status || 'Assigned',
+              assignedTime: data.createdAt ? new Date(data.createdAt.seconds * 1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Unknown',
+              estimatedArrival: data.estimatedArrival || 'N/A',
+              distance: data.distance || 'Unknown',
+              route: {
+                startPoint: data.pickup || 'Supermarket',
+                endPoint: data.deliveryAddress || 'Destination'
+              }
+            },
+            priority: data.priority || 'medium',
+            createdAt: data.createdAt // Keep the timestamp for sorting
+          };
         })
-      ]).start();
-    }, 1000);
-    
-    return () => clearTimeout(timer);
+        .filter(task => task !== null) // Remove null entries
+        .sort((a, b) => {
+          // Sort by createdAt timestamp, newest first
+          if (!a.createdAt || !b.createdAt) return 0;
+          return b.createdAt.seconds - a.createdAt.seconds;
+        });
+      
+      console.log(`Found ${assignedDeliveries.length} assigned or pending deliveries`);
+      setDeliveries(assignedDeliveries);
+      setFilteredDeliveries(assignedDeliveries);
+      
+    } catch (error) {
+      console.error("Error fetching assigned deliveries:", error);
+      setError("Failed to load your assigned deliveries. Please try again.");
+    } finally {
+      setLoading(false);
+      setIsRefreshing(false);
+    }
+  }, [user]);
+
+  // Initial fetch
+  useEffect(() => {
+    fetchDeliveries();
+  }, [fetchDeliveries]);
+  
+  // Initialize animations on mount
+  useEffect(() => {
+    // Start entrance animations
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 500,
+        useNativeDriver: true,
+      }),
+      Animated.spring(scaleAnim, {
+        toValue: 1,
+        friction: 8,
+        tension: 40,
+        useNativeDriver: true,
+      })
+    ]).start();
   }, []);
 
   // Update filtered deliveries when search query or filter changes
@@ -227,13 +202,19 @@ export default function AssignedDeliveriesList() {
     if (activeFilter !== 'all') {
       results = results.filter(item => {
         if (activeFilter === 'in-progress') return item.delivery.status === 'In Progress';
-        if (activeFilter === 'new-orders') return item.delivery.status === 'Assigned';
+        if (activeFilter === 'new-orders') return item.delivery.status === 'Assigned' || item.delivery.status === 'Pending';
         return true;
       });
     }
     
     setFilteredDeliveries(results);
-  }, [searchQuery, activeFilter]);
+  }, [searchQuery, activeFilter, deliveries]);
+
+  // Refresh data
+  const handleRefresh = () => {
+    setIsRefreshing(true);
+    fetchDeliveries();
+  };
 
   // Show/hide search bar animation
   const toggleSearch = () => {
@@ -261,129 +242,322 @@ export default function AssignedDeliveriesList() {
       try {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       } catch (e) {
-        // Fallback
+        // Fallback silently
       }
     }
   };
 
-  // Pull to refresh functionality
-  const onRefresh = () => {
-    setIsRefreshing(true);
-    
-    // Simulate refresh
-    setTimeout(() => {
-      setIsRefreshing(false);
-      
-      // Haptic feedback on refresh complete
-      if (Platform.OS === 'ios') {
-        try {
-          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        } catch (e) {
-          // Fallback
-        }
-      }
-    }, 1500);
-  };
-
-  // Set active filter
-  const handleFilterPress = (filter) => {
+  // Handle filter selection
+  const handleFilterSelect = (filter) => {
     // Haptic feedback
     if (Platform.OS === 'ios') {
       try {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       } catch (e) {
-        // Fallback
+        // Fallback silently
       }
     }
     
     setActiveFilter(filter);
   };
 
-  // Open delivery details
-  const handleDeliveryPress = (delivery) => {
+  // Handle delivery selection
+  const handleDeliverySelect = (delivery) => {
+    setSelectedDelivery(delivery);
+    
     // Haptic feedback
     if (Platform.OS === 'ios') {
       try {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       } catch (e) {
-        // Fallback
+        // Fallback silently
+      }
+    }
+  };
+
+  // Start a delivery
+  const handleStartDelivery = async (delivery) => {
+    // Haptic feedback
+    if (Platform.OS === 'ios') {
+      try {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      } catch (e) {
+        // Fallback silently
       }
     }
     
-    setSelectedDelivery(delivery);
-    router.push(`/deliveryAgent/delivery-details?id=${delivery.id}`);
-  };
-
-  // Get priority color
-  const getPriorityColor = (priority) => {
-    switch (priority) {
-      case 'high':
-        return '#EF4444';
-      case 'medium':
-        return '#F59E0B';
-      case 'low':
-        return '#10B981';
-      default:
-        return '#6B7280';
-    }
-  };
-
-  // Get status color
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'In Progress':
-        return '#3B82F6';
-      case 'Assigned':
-        return '#8B5CF6';
-      case 'Delayed':
-        return '#EF4444';
-      default:
-        return '#6B7280';
-    }
-  };
-
-  // Get status icon
-  const getStatusIcon = (status) => {
-    switch (status) {
-      case 'In Progress':
-        return <FontAwesome5 name="shipping-fast" size={14} color="white" />;
-      case 'Assigned':
-        return <Feather name="clock" size={14} color="white" />;
-      case 'Delayed':
-        return <MaterialIcons name="timer-off" size={14} color="white" />;
-      default:
-        return <Feather name="package" size={14} color="white" />;
-    }
-  };
-
-  // Header animation - reduce opacity as scroll increases
-  const headerOpacity = scrollY.interpolate({
-    inputRange: [0, 100],
-    outputRange: [1, 0.9],
-    extrapolate: 'clamp',
-  });
-
-  // Card animations
-  const getItemAnimationStyle = (index) => {
-    return {
-      opacity: fadeAnim,
-      transform: [
-        {
-          translateY: fadeAnim.interpolate({
-            inputRange: [0, 1],
-            outputRange: [50, 0],
-          }),
-        },
-        {
-          scale: fadeAnim.interpolate({
-            inputRange: [0, 1],
-            outputRange: [0.9, 1],
-          }),
+    try {
+      if (!user || !user.uid) {
+        Alert.alert("Error", "You must be logged in to start a delivery");
+        return;
+      }
+      
+      // Update the task in Firestore
+      const taskRef = doc(db, `users/${user.uid}/tasks`, delivery.id);
+      await updateDoc(taskRef, {
+        status: 'In Progress',
+        startedAt: serverTimestamp(),
+        lastUpdated: serverTimestamp()
+      });
+      
+      // Update local state
+      const updatedDeliveries = deliveries.map(item => {
+        if (item.id === delivery.id) {
+          return {
+            ...item,
+            delivery: {
+              ...item.delivery,
+              status: 'In Progress'
+            }
+          };
         }
-      ],
-    };
+        return item;
+      });
+      
+      setDeliveries(updatedDeliveries);
+      
+      // Close detail view if open
+      if (selectedDelivery?.id === delivery.id) {
+        setSelectedDelivery(null);
+      }
+      
+      // Navigate to in-progress orders screen
+      router.push("/deliveryAgent/Inprogress_Orders");
+      
+    } catch (error) {
+      console.error("Error starting delivery:", error);
+      Alert.alert("Error", "Failed to start delivery. Please try again.");
+    }
   };
 
+  // Close detail view
+  const closeDetail = () => {
+    setSelectedDelivery(null);
+  };
+
+  // Format priority indicator
+  const getPriorityColor = (priority) => {
+    switch(priority) {
+      case 'high': return '#f87171';
+      case 'medium': return '#fbbf24';
+      case 'low': return '#60a5fa';
+      default: return '#9ca3af';
+    }
+  };
+
+  // Format payment status
+  const getPaymentStatusColor = (isPaid) => {
+    return isPaid ? '#10b981' : '#f97316';
+  };
+  
+  const getPaymentStatusText = (isPaid) => {
+    return isPaid ? 'Paid' : 'COD';
+  };
+
+  // Format status color
+  const getStatusColor = (status) => {
+    switch(status) {
+      case 'Assigned': return '#6366f1';
+      case 'Pending': return '#f97316';
+      case 'In Progress': return '#0ea5e9';
+      case 'Delayed': return '#ef4444';
+      default: return '#64748b';
+    }
+  };
+
+  // Render delivery item
+  const renderDeliveryItem = ({ item, index }) => (
+    <Animated.View
+      style={{
+        opacity: fadeAnim,
+        transform: [{ scale: scaleAnim }],
+        marginBottom: 16
+      }}
+    >
+      <TouchableOpacity
+        style={{
+          backgroundColor: 'white',
+          borderRadius: 16,
+          padding: 16,
+          shadowColor: '#0f172a',
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.05,
+          shadowRadius: 10,
+          elevation: 2,
+          borderWidth: 1,
+          borderColor: '#f1f5f9',
+          margin: 1
+        }}
+        onPress={() => handleDeliverySelect(item)}
+        activeOpacity={0.7}
+      >
+        {/* Priority indicator */}
+        <View
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: 8,
+            height: '100%',
+            backgroundColor: getPriorityColor(item.priority),
+            borderTopLeftRadius: 16,
+            borderBottomLeftRadius: 16
+          }}
+        />
+        
+        {/* Header */}
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <Text style={{ fontWeight: 'bold', color: '#0f172a', fontSize: 15 }}>
+              {item.orderDetails.orderNumber}
+            </Text>
+            
+            <View
+              style={{
+                backgroundColor: getStatusColor(item.delivery.status),
+                paddingHorizontal: 8,
+                paddingVertical: 3,
+                borderRadius: 12,
+                marginLeft: 8
+              }}
+            >
+              <Text style={{ color: 'white', fontSize: 12, fontWeight: '600' }}>
+                {item.delivery.status}
+              </Text>
+            </View>
+          </View>
+          
+          <View
+            style={{
+              backgroundColor: getPaymentStatusColor(item.orderDetails.isPaid),
+              paddingHorizontal: 8,
+              paddingVertical: 3,
+              borderRadius: 12
+            }}
+          >
+            <Text style={{ color: 'white', fontSize: 12, fontWeight: '600' }}>
+              {getPaymentStatusText(item.orderDetails.isPaid)}
+            </Text>
+          </View>
+        </View>
+        
+        {/* Customer info */}
+        <View style={{ flexDirection: 'row', marginBottom: 12 }}>
+          <Image
+            source={{ uri: item.customer.photo }}
+            style={{
+              width: 45,
+              height: 45,
+              borderRadius: 25,
+              marginRight: 12
+            }}
+          />
+          
+          <View style={{ flex: 1 }}>
+            <Text style={{ fontWeight: '600', color: '#334155', fontSize: 16 }}>
+              {item.customer.name}
+            </Text>
+            
+            <Text style={{ color: '#64748b', fontSize: 14, marginTop: 4 }} numberOfLines={1}>
+              {item.customer.address}
+            </Text>
+          </View>
+        </View>
+        
+        {/* Details */}
+        <View style={{ 
+          flexDirection: 'row', 
+          backgroundColor: '#f8fafc', 
+          borderRadius: 12, 
+          padding: 12,
+          marginBottom: 16,
+          justifyContent: 'space-between'
+        }}>
+          <View style={{ alignItems: 'center' }}>
+            <Text style={{ color: '#64748b', fontSize: 12, marginBottom: 4 }}>Distance</Text>
+            <Text style={{ fontWeight: '600', color: '#334155' }}>{item.delivery.distance}</Text>
+          </View>
+          
+          <View style={{ width: 1, backgroundColor: '#e2e8f0', marginHorizontal: 8 }} />
+          
+          <View style={{ alignItems: 'center' }}>
+            <Text style={{ color: '#64748b', fontSize: 12, marginBottom: 4 }}>Items</Text>
+            <Text style={{ fontWeight: '600', color: '#334155' }}>{item.orderDetails.items}</Text>
+          </View>
+          
+          <View style={{ width: 1, backgroundColor: '#e2e8f0', marginHorizontal: 8 }} />
+          
+          <View style={{ alignItems: 'center' }}>
+            <Text style={{ color: '#64748b', fontSize: 12, marginBottom: 4 }}>Total</Text>
+            <Text style={{ fontWeight: '600', color: '#334155' }}>{item.orderDetails.total}</Text>
+          </View>
+        </View>
+        
+        {/* Action button */}
+        <TouchableOpacity
+          style={{
+            backgroundColor: '#3b82f6',
+            borderRadius: 12,
+            padding: 14,
+            alignItems: 'center'
+          }}
+          onPress={() => handleStartDelivery(item)}
+        >
+          <Text style={{ color: 'white', fontWeight: '600', fontSize: 16 }}>Start Delivery</Text>
+        </TouchableOpacity>
+      </TouchableOpacity>
+    </Animated.View>
+  );
+
+  // Render empty state
+  const renderEmptyState = () => (
+    <View style={{ 
+      flex: 1, 
+      justifyContent: 'center', 
+      alignItems: 'center', 
+      paddingTop: 60,
+      paddingHorizontal: 20
+    }}>
+      {/* Replace image with icon */}
+      <View style={{ 
+        width: 120, 
+        height: 120, 
+        borderRadius: 60,
+        backgroundColor: '#f1f5f9',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom: 16
+      }}>
+        <Feather name="package" size={60} color="#94a3b8" />
+      </View>
+      
+      <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#334155', marginBottom: 8 }}>
+        No Deliveries Found
+      </Text>
+      <Text style={{ fontSize: 14, color: '#64748b', textAlign: 'center', marginBottom: 20 }}>
+        {activeFilter !== 'all' 
+          ? `No ${activeFilter === 'in-progress' ? 'in-progress' : 'new'} deliveries found.` 
+          : 'You don\'t have any assigned deliveries at the moment.'
+        }
+      </Text>
+      {/* Show refresh button if there was an error */}
+      {error && (
+        <TouchableOpacity
+          style={{
+            backgroundColor: '#3b82f6',
+            paddingVertical: 12,
+            paddingHorizontal: 20,
+            borderRadius: 8
+          }}
+          onPress={fetchDeliveries}
+        >
+          <Text style={{ color: 'white', fontWeight: 'bold' }}>Refresh</Text>
+        </TouchableOpacity>
+      )}
+    </View>
+  );
+
+  // Begin component return
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#f8fafc' }} edges={['top']}>
       <StatusBar style="light" />
@@ -450,7 +624,7 @@ export default function AssignedDeliveriesList() {
         >
           <TouchableOpacity
             className={`mr-2 px-4 py-2 rounded-full ${activeFilter === 'all' ? 'bg-indigo-600' : 'bg-white border border-gray-200'}`}
-            onPress={() => handleFilterPress('all')}
+            onPress={() => handleFilterSelect('all')}
           >
             <Text 
               className={`font-medium ${activeFilter === 'all' ? 'text-white' : 'text-gray-700'}`}
@@ -461,7 +635,7 @@ export default function AssignedDeliveriesList() {
           
           <TouchableOpacity
             className={`mr-2 px-4 py-2 rounded-full ${activeFilter === 'in-progress' ? 'bg-blue-600' : 'bg-white border border-gray-200'}`}
-            onPress={() => handleFilterPress('in-progress')}
+            onPress={() => handleFilterSelect('in-progress')}
           >
             <Text 
               className={`font-medium ${activeFilter === 'in-progress' ? 'text-white' : 'text-gray-700'}`}
@@ -472,7 +646,7 @@ export default function AssignedDeliveriesList() {
           
           <TouchableOpacity
             className={`mr-2 px-4 py-2 rounded-full ${activeFilter === 'new-orders' ? 'bg-purple-600' : 'bg-white border border-gray-200'}`}
-            onPress={() => handleFilterPress('new-orders')}
+            onPress={() => handleFilterSelect('new-orders')}
           >
             <Text 
               className={`font-medium ${activeFilter === 'new-orders' ? 'text-white' : 'text-gray-700'}`}
@@ -542,168 +716,13 @@ export default function AssignedDeliveriesList() {
           refreshControl={
             <RefreshControl 
               refreshing={isRefreshing} 
-              onRefresh={onRefresh}
+              onRefresh={handleRefresh}
               tintColor="#4F46E5"
               colors={['#4F46E5']}
             />
           }
-          ListEmptyComponent={
-            <View className="flex-1 justify-center items-center py-20">
-              <Feather name="inbox" size={50} color="#D1D5DB" />
-              <Text className="text-gray-400 mt-4 text-base">No deliveries found</Text>
-              <TouchableOpacity 
-                className="bg-indigo-600 px-4 py-2 rounded-lg mt-3"
-                onPress={() => {
-                  setSearchQuery('');
-                  setActiveFilter('all');
-                }}
-              >
-                <Text className="text-white font-medium">Reset Filters</Text>
-              </TouchableOpacity>
-            </View>
-          }
-          renderItem={({ item, index }) => (
-            <Animated.View style={getItemAnimationStyle(index)}>
-              <Pressable
-                className="bg-white rounded-xl shadow-sm border border-gray-100 mb-4 overflow-hidden"
-                onPress={() => handleDeliveryPress(item)}
-                style={({ pressed }) => [
-                  pressed ? { opacity: 0.95, transform: [{ scale: 0.98 }] } : {}
-                ]}
-              >
-                {/* Priority indicator */}
-                <View 
-                  className="absolute top-0 left-0 bottom-0 w-1.5"
-                  style={{ backgroundColor: getPriorityColor(item.priority) }}
-                />
-                
-                {/* Status badge */}
-                <View className="absolute top-4 right-4 z-10">
-                  <View 
-                    className="flex-row items-center px-2 py-1 rounded-full"
-                    style={{ backgroundColor: getStatusColor(item.delivery.status) }}
-                  >
-                    {getStatusIcon(item.delivery.status)}
-                    <Text className="text-white text-xs font-medium ml-1">{item.delivery.status}</Text>
-                  </View>
-                </View>
-                
-                <View className="px-4 py-4">
-                  {/* Customer info */}
-                  <View className="flex-row mb-3 pl-2 items-center">
-                    <Image 
-                      source={{ uri: item.customer.photo }} 
-                      className="w-12 h-12 rounded-full mr-3"
-                    />
-                    <View className="flex-1">
-                      <View className="flex-row items-center">
-                        <Text className="text-gray-800 font-bold text-lg">{item.customer.name}</Text>
-                      </View>
-                      <Text className="text-gray-500 text-xs">{item.customer.address}</Text>
-                    </View>
-                  </View>
-                  
-                  {/* Order info */}
-                  <View className="flex-row justify-between px-2 pb-3">
-                    <View className="flex-1">
-                      <Text className="text-gray-500 text-xs">Order #</Text>
-                      <Text className="text-gray-800 font-medium">{item.orderDetails.orderNumber}</Text>
-                    </View>
-                    <View className="flex-1">
-                      <Text className="text-gray-500 text-xs">Items</Text>
-                      <Text className="text-gray-800 font-medium">{item.orderDetails.items}</Text>
-                    </View>
-                    <View className="flex-1">
-                      <Text className="text-gray-500 text-xs">Total</Text>
-                      <Text className="text-gray-800 font-medium">{item.orderDetails.total}</Text>
-                    </View>
-                    <View className="flex-1">
-                      <Text className="text-gray-500 text-xs">Payment</Text>
-                      <View className="flex-row items-center">
-                        <Text className="text-gray-800 font-medium mr-1">{item.orderDetails.paymentMethod}</Text>
-                        {item.orderDetails.isPaid ? (
-                          <View className="bg-green-100 px-1.5 py-0.5 rounded">
-                            <Text className="text-green-700 text-xs">Paid</Text>
-                          </View>
-                        ) : (
-                          <View className="bg-amber-100 px-1.5 py-0.5 rounded">
-                            <Text className="text-amber-700 text-xs">COD</Text>
-                          </View>
-                        )}
-                      </View>
-                    </View>
-                  </View>
-                  
-                  {/* Delivery info */}
-                  <View className="bg-gray-50 p-3 rounded-lg">
-                    <View className="flex-row justify-between mb-2">
-                      <View className="flex-row items-center">
-                        <Feather name="clock" size={14} color="#6B7280" className="mr-1" />
-                        <Text className="text-gray-500 text-xs">Assigned at {item.delivery.assignedTime}</Text>
-                      </View>
-                      <View className="flex-row items-center">
-                        <MaterialIcons name="access-time" size={14} color="#6B7280" className="mr-1" />
-                        <Text className="text-gray-500 text-xs">ETA: {item.delivery.estimatedArrival}</Text>
-                      </View>
-                    </View>
-                    
-                    <View className="flex-row items-center">
-                      <View className="bg-indigo-100 p-1 rounded mr-2">
-                        <MaterialIcons name="directions" size={14} color="#4F46E5" />
-                      </View>
-                      <View className="flex-1">
-                        <Text className="text-gray-800 text-xs font-medium">{item.delivery.route.startPoint}</Text>
-                        <Feather name="arrow-down" size={12} color="#9CA3AF" style={{ marginLeft: 3 }} />
-                        <Text className="text-gray-800 text-xs font-medium">{item.delivery.route.endPoint}</Text>
-                      </View>
-                      <View className="bg-blue-100 px-2 py-1 rounded">
-                        <Text className="text-blue-700 text-xs font-medium">{item.delivery.distance}</Text>
-                      </View>
-                    </View>
-                  </View>
-                </View>
-                
-                {/* Action Bar */}
-                <View className="flex-row border-t border-gray-100">
-                  <TouchableOpacity 
-                    className="flex-1 p-3 flex-row justify-center items-center"
-                    onPress={() => {
-                      // Navigate action
-                      if (Platform.OS === 'ios') {
-                        try {
-                          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                        } catch (e) {
-                          // Fallback
-                        }
-                      }
-                    }}
-                  >
-                    <Feather name="map" size={16} color="#4F46E5" />
-                    <Text className="text-indigo-600 font-medium ml-2">Navigate</Text>
-                  </TouchableOpacity>
-                  
-                  <View className="w-px h-full bg-gray-100" />
-                  
-                  <TouchableOpacity 
-                    className="flex-1 p-3 flex-row justify-center items-center"
-                    onPress={() => {
-                      // Call customer action
-                      if (Platform.OS === 'ios') {
-                        try {
-                          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                        } catch (e) {
-                          // Fallback
-                        }
-                      }
-                    }}
-                  >
-                    <Feather name="phone" size={16} color="#10B981" />
-                    <Text className="text-green-600 font-medium ml-2">Call</Text>
-                  </TouchableOpacity>
-                </View>
-              </Pressable>
-            </Animated.View>
-          )}
+          ListEmptyComponent={renderEmptyState}
+          renderItem={renderDeliveryItem}
         />
       )}
     </SafeAreaView>
