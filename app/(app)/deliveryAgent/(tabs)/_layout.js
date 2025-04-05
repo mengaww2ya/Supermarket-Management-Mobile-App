@@ -9,6 +9,7 @@ export default function Layout() {
         tabBarActiveTintColor: "#007bff",
         tabBarInactiveTintColor: "gray",
         tabBarStyle: { backgroundColor: "white", paddingBottom: 5, height: 60 },
+        unmountOnBlur: false,
       }}
     >
       {/* Home Tab */}
