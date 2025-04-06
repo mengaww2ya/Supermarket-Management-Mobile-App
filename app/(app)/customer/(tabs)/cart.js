@@ -245,7 +245,7 @@ export default function Cart() {
                     </Text>
                     <TouchableOpacity 
                         className="bg-green-600 py-3.5 px-6 rounded-xl"
-                        onPress={() => router.push('/customer/(tabs)/homepage+')}
+                        onPress={() => router.push('/customer/(tabs)')}
                     >
                         <Text className="text-white font-bold text-base">
                             Browse Products

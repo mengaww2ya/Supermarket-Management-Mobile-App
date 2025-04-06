@@ -39,6 +39,51 @@ import { format } from 'date-fns';
 import { BlurView } from 'expo-blur';
 import HomeHeader from '../../components/HomeHeader';
 
+// Add helper function to safely format address data - place outside of components
+const getFormattedAddress = (order) => {
+  try {
+    // Handle case where deliveryDetails.address is an object with location info
+    if (order.deliveryDetails?.address && typeof order.deliveryDetails.address === 'object') {
+      // If it has a placeName property, use that
+      if (order.deliveryDetails.address.placeName) {
+        return order.deliveryDetails.address.placeName;
+      }
+      // If it has latitude and longitude, format them
+      if (order.deliveryDetails.address.latitude && order.deliveryDetails.address.longitude) {
+        return `Lat: ${order.deliveryDetails.address.latitude.toFixed(4)}, Long: ${order.deliveryDetails.address.longitude.toFixed(4)}`;
+      }
+      // If it's an object but we don't know its structure, stringify it safely
+      return 'Location data available';
+    }
+    
+    // Handle normal string address
+    if (order.deliveryDetails?.address) {
+      return order.deliveryDetails.address.length > 25 ? 
+        order.deliveryDetails.address.substring(0, 25) + '...' : 
+        order.deliveryDetails.address;
+    }
+    
+    // Fallback to deliveryAddress if present
+    if (order.deliveryAddress) {
+      if (typeof order.deliveryAddress === 'object') {
+        if (order.deliveryAddress.placeName) {
+          return order.deliveryAddress.placeName;
+        }
+        return 'Location data available';
+      }
+      return order.deliveryAddress.length > 25 ? 
+        order.deliveryAddress.substring(0, 25) + '...' : 
+        order.deliveryAddress;
+    }
+    
+    // Final fallback
+    return 'N/A';
+  } catch (err) {
+    console.log('Error formatting address:', err);
+    return 'Address unavailable';
+  }
+};
+
 export default function OrderManagement() {
   const router = useRouter();
   const { width, height } = Dimensions.get('window');
@@ -88,6 +133,17 @@ export default function OrderManagement() {
   useEffect(() => {
     applyFilters();
   }, [orders, searchQuery, statusFilter, sortBy, sortOrder]);
+
+  // Add a new useEffect to clean up modal state
+  useEffect(() => {
+    // Clear selected order when modal is closed
+    if (!detailModalVisible && selectedOrder) {
+      const timer = setTimeout(() => {
+        setSelectedOrder(null);
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [detailModalVisible]);
 
   const menuItems = [
     { title: "Customer Orders", subtitle: "Process and track customer orders" },
@@ -336,39 +392,72 @@ export default function OrderManagement() {
   };
   
   const applyFilters = () => {
-    let filtered = [...orders];
-    
-    // Apply search query filter
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase().trim();
-      filtered = filtered.filter(order => 
-        order.orderNumber?.toLowerCase().includes(query) ||
-        order.customerName?.toLowerCase().includes(query) ||
-        order.email?.toLowerCase().includes(query) ||
-        order.phoneNumber?.toLowerCase().includes(query)
-      );
-    }
-    
-    // Apply status filter
-    if (statusFilter !== 'All') {
-      filtered = filtered.filter(order => order.status === statusFilter);
-    }
-    
-    // Apply sorting
-    filtered.sort((a, b) => {
-      if (sortBy === 'date') {
-        const dateA = a.createdAt ? a.createdAt.toDate() : new Date(0);
-        const dateB = b.createdAt ? b.createdAt.toDate() : new Date(0);
-        return sortOrder === 'asc' ? dateA - dateB : dateB - dateA;
-      } else if (sortBy === 'amount') {
-        const amountA = parseFloat(a.totalAmount);
-        const amountB = parseFloat(b.totalAmount);
-        return sortOrder === 'asc' ? amountA - amountB : amountB - amountA;
+    try {
+      let filtered = [...orders];
+      
+      // Apply search query filter
+      if (searchQuery) {
+        const query = searchQuery.toLowerCase().trim();
+        filtered = filtered.filter(order => 
+          (order.orderNumber?.toLowerCase() || '').includes(query) ||
+          (order.customerName?.toLowerCase() || '').includes(query) ||
+          (order.email?.toLowerCase() || '').includes(query) ||
+          (order.phoneNumber?.toLowerCase() || '').includes(query) ||
+          // Also search in customer details
+          (order.customerDetails?.firstName?.toLowerCase() || '').includes(query) ||
+          (order.customerDetails?.lastName?.toLowerCase() || '').includes(query) ||
+          (order.customerDetails?.email?.toLowerCase() || '').includes(query)
+        );
       }
-      return 0;
-    });
-    
-    setFilteredOrders(filtered);
+      
+      // Apply status filter
+      if (statusFilter !== 'All') {
+        filtered = filtered.filter(order => order.status === statusFilter);
+      }
+      
+      // Apply sorting - with error handling
+      filtered.sort((a, b) => {
+        try {
+          if (sortBy === 'date') {
+            // Safely handle date conversion
+            const getDate = (obj) => {
+              try {
+                if (obj.createdAt) {
+                  if (typeof obj.createdAt.toDate === 'function') {
+                    return obj.createdAt.toDate();
+                  }
+                  if (obj.createdAt instanceof Date) {
+                    return obj.createdAt;
+                  }
+                }
+                return new Date(0); // Default to epoch if no valid date
+              } catch (err) {
+                console.error('Date conversion error:', err);
+                return new Date(0);
+              }
+            };
+            
+            const dateA = getDate(a);
+            const dateB = getDate(b);
+            return sortOrder === 'asc' ? dateA - dateB : dateB - dateA;
+          } else if (sortBy === 'amount') {
+            // Safely parse amounts
+            const amountA = parseFloat(a.totalAmount || '0');
+            const amountB = parseFloat(b.totalAmount || '0');
+            return sortOrder === 'asc' ? amountA - amountB : amountB - amountA;
+          }
+          return 0;
+        } catch (err) {
+          console.error('Sorting error:', err);
+          return 0; // Maintain original order on error
+        }
+      });
+      
+      setFilteredOrders(filtered);
+    } catch (error) {
+      console.error('Filter application error:', error);
+      setFilteredOrders(orders); // Fall back to unfiltered list on error
+    }
   };
 
   const updateOrderStatus = async (orderId, newStatus) => {
@@ -483,54 +572,58 @@ export default function OrderManagement() {
         },
         status: 'Processing', // Update order status to Processing
         lastUpdated: serverTimestamp(),
-        // Add to status history if it exists
-        ...(selectedOrder.orderStatusHistory ? {
-          orderStatusHistory: [
+        // Add to status history if it exists, or create a new one
+        orderStatusHistory: selectedOrder.orderStatusHistory ? 
+          [
             ...selectedOrder.orderStatusHistory,
             { 
               status: 'Processing', 
               timestamp: new Date(),
               note: `Assigned to delivery agent: ${selectedAgent.fullName || selectedAgent.name || selectedAgent.email || 'Delivery Agent'}`
             }
-          ]
-        } : {
-          orderStatusHistory: [
+          ] : 
+          [
             { 
               status: 'Processing', 
               timestamp: new Date(),
               note: `Assigned to delivery agent: ${selectedAgent.fullName || selectedAgent.name || selectedAgent.email || 'Delivery Agent'}`
             }
           ]
-        })
       };
       
-      // Update the order with the assigned delivery agent in main orders collection
+      let updateSuccess = false;
+      let updateErrors = [];
+      
+      // Try to update in main orders collection
       try {
         const orderRef = doc(db, 'orders', selectedOrder.id);
         await updateDoc(orderRef, assignmentData);
         console.log('Successfully updated order in main collection');
+        updateSuccess = true;
       } catch (error) {
         console.error('Error updating order in main collection:', error);
-        // Continue and try user collection even if this fails
+        updateErrors.push(`Main orders update: ${error.message}`);
+        // Continue to try user collection
       }
       
-      // Also update in user's orders collection if it exists there
-      let userCollectionUpdateSuccess = false;
+      // Also update in user's orders collection if it exists
       if (selectedOrder.userId) {
         try {
           const userOrderRef = doc(db, `users/${selectedOrder.userId}/orders`, selectedOrder.id);
           await updateDoc(userOrderRef, assignmentData);
-          userCollectionUpdateSuccess = true;
           console.log('Successfully updated order in user collection');
+          updateSuccess = true;
         } catch (error) {
-          console.log('Order might not exist in user collection:', error);
-          // Not critical if this fails
+          console.log('Error updating order in user collection:', error);
+          updateErrors.push(`User collection update: ${error.message}`);
         }
       }
       
-      // If neither update succeeded, show an error
-      if (!userCollectionUpdateSuccess && selectedOrder.userId) {
-        console.error('Failed to update order in both collections');
+      // Check if any update succeeded
+      if (!updateSuccess) {
+        Alert.alert('Error', 'Failed to update order in any collection. Please try again.');
+        console.error('Update errors:', updateErrors);
+        return;
       }
       
       // Create task for delivery agent
@@ -541,7 +634,7 @@ export default function OrderManagement() {
           orderId: selectedOrder.id,
           orderRef: selectedOrder.orderRef || selectedOrder.orderNumber || selectedOrder.id.substring(0, 8),
           customerName: selectedOrder.customerDetails ? 
-            `${selectedOrder.customerDetails.firstName} ${selectedOrder.customerDetails.lastName}` : 
+            `${selectedOrder.customerDetails.firstName || ''} ${selectedOrder.customerDetails.lastName || ''}`.trim() : 
             (selectedOrder.customerName || 'Customer'),
           deliveryAddress: selectedOrder.deliveryDetails?.address || selectedOrder.deliveryAddress || 'Address not provided',
           status: 'Pending',
@@ -555,7 +648,7 @@ export default function OrderManagement() {
         console.log('Successfully created task for delivery agent');
       } catch (error) {
         console.error('Error creating task for delivery agent:', error);
-        // Not critical if this fails
+        // Not critical if this fails, already alerted user of success
       }
       
       // Update local state
@@ -763,28 +856,29 @@ export default function OrderManagement() {
       try {
         // Handle Firestore timestamp
         if (timestamp && typeof timestamp.toDate === 'function') {
-          return timestamp.toDate().toLocaleString();
+          return format(timestamp.toDate(), 'MMM dd, yyyy - h:mm a');
         }
         
         // Handle JavaScript Date object
         if (timestamp instanceof Date) {
-          return timestamp.toLocaleString();
+          return format(timestamp, 'MMM dd, yyyy - h:mm a');
         }
         
         // Handle timestamp as a number (seconds or milliseconds)
         if (typeof timestamp === 'number') {
-          return new Date(timestamp * (timestamp < 10000000000 ? 1000 : 1)).toLocaleString();
+          const date = new Date(timestamp < 10000000000 ? timestamp * 1000 : timestamp);
+          return format(date, 'MMM dd, yyyy - h:mm a');
         }
         
         // Handle string representation
         if (typeof timestamp === 'string' && !isNaN(Date.parse(timestamp))) {
-          return new Date(timestamp).toLocaleString();
+          return format(new Date(timestamp), 'MMM dd, yyyy - h:mm a');
         }
         
         return 'Unknown date format';
       } catch (error) {
         console.log('Error formatting date:', error);
-        return 'Error with date';
+        return 'Date unavailable';
       }
     };
     
@@ -899,7 +993,14 @@ export default function OrderManagement() {
         animationType="slide"
         transparent={true}
         visible={detailModalVisible}
-        onRequestClose={() => setDetailModalVisible(false)}
+        onRequestClose={() => {
+          setDetailModalVisible(false);
+          setTimeout(() => {
+            if (!detailModalVisible) {
+              setSelectedOrder(null);
+            }
+          }, 300);
+        }}
       >
         <BlurView intensity={90} style={{ flex: 1 }} tint="dark">
           <View style={{ 
@@ -939,7 +1040,14 @@ export default function OrderManagement() {
                 </Text>
               </View>
               <TouchableOpacity 
-                onPress={() => setDetailModalVisible(false)}
+                onPress={() => {
+                  setDetailModalVisible(false);
+                  setTimeout(() => {
+                    if (!detailModalVisible) {
+                      setSelectedOrder(null);
+                    }
+                  }, 300);
+                }}
                 style={{
                   width: 36,
                   height: 36,
@@ -949,7 +1057,7 @@ export default function OrderManagement() {
                   justifyContent: 'center'
                 }}
               >
-                <AntDesign name="close" size={20} color="#fff" />
+                <AntDesign name="close" size={24} color="#FFF" />
               </TouchableOpacity>
             </LinearGradient>
             
@@ -1043,7 +1151,9 @@ export default function OrderManagement() {
                 
                 <View style={{ marginBottom: 10 }}>
                   <Text style={{ fontWeight: '500', color: '#64748b', marginBottom: 4 }}>Address</Text>
-                  <Text style={{ color: '#334155' }}>{selectedOrder.deliveryDetails?.address || 'N/A'}</Text>
+                  <Text style={{ color: '#334155' }}>
+                    {getFormattedAddress(selectedOrder)}
+                  </Text>
                 </View>
                 
                 {selectedOrder.deliveryDetails?.notes && (
@@ -1058,10 +1168,12 @@ export default function OrderManagement() {
                     <Text style={{ fontWeight: '500', color: '#64748b', marginBottom: 4 }}>Location Coordinates</Text>
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                       <Text style={{ color: '#334155' }}>
-                        Lat: {selectedOrder.deliveryDetails.location.latitude?.toFixed(6) || 'N/A'}
+                        Lat: {typeof selectedOrder.deliveryDetails.location.latitude === 'number' ? 
+                          selectedOrder.deliveryDetails.location.latitude.toFixed(6) : 'N/A'}
                       </Text>
                       <Text style={{ color: '#334155' }}>
-                        Long: {selectedOrder.deliveryDetails.location.longitude?.toFixed(6) || 'N/A'}
+                        Long: {typeof selectedOrder.deliveryDetails.location.longitude === 'number' ? 
+                          selectedOrder.deliveryDetails.location.longitude.toFixed(6) : 'N/A'}
                       </Text>
                     </View>
                   </View>
@@ -1818,7 +1930,7 @@ export default function OrderManagement() {
           <MaterialIcons name="person" size={16} color="#757575" style={{ marginRight: 5 }} />
           <Text style={{ color: '#757575' }}>
             {order.customerDetails ? 
-              `${order.customerDetails.firstName} ${order.customerDetails.lastName}` : 
+              `${order.customerDetails.firstName || ''} ${order.customerDetails.lastName || ''}`.trim() : 
               (order.customerName || 'N/A')}
           </Text>
         </View>
@@ -1827,15 +1939,7 @@ export default function OrderManagement() {
           <View style={{ flexDirection: 'row', flex: 1, marginRight: 8 }}>
             <MaterialIcons name="location-on" size={16} color="#757575" style={{ marginRight: 5 }} />
             <Text style={{ color: '#757575' }} numberOfLines={1} ellipsizeMode="tail">
-              {order.deliveryDetails?.address ? 
-                (order.deliveryDetails.address.length > 25 ? 
-                  order.deliveryDetails.address.substring(0, 25) + '...' : 
-                  order.deliveryDetails.address) : 
-                (order.deliveryAddress ? 
-                  (order.deliveryAddress.length > 25 ? 
-                    order.deliveryAddress.substring(0, 25) + '...' : 
-                    order.deliveryAddress) : 
-                  'N/A')}
+              {getFormattedAddress(order)}
             </Text>
           </View>
           
