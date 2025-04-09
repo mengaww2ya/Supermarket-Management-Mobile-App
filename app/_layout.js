@@ -21,16 +21,18 @@ const MainLayout = () => {
             // Redirect based on role if authenticated
             if (userData?.role === 'admin') {
                 router.replace('/admine/(tabs)');
-            } else if (userData?.role === 'customer') {
+            } else if (userData?.role === '') {
                 router.replace('/customer/homepage');
             } else if (userData?.role === 'manager') {
-                router.replace('/manager/(tabs)');
+                router.replace('/manager/(tabscustomer)');
             } else if (userData?.role === 'deliveryAgent') {
                 router.replace('/deliveryAgent/(tabs)');
             } else if (userData?.role === 'stockManager') {
                 router.replace('/stockManager/(tabs)');
             } else if (userData?.role === 'customerAssistance') {
                 router.replace('/customeAssistance/(tabs)');
+            } else if (userData?.role === 'supplier') {
+                router.replace('/suplier/(tabs)');
             }
         }
     }, [isAuthenticated, userData, segments, loading]);

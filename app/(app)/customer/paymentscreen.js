@@ -279,7 +279,7 @@ const PaymentScreen = () => {
           
         } catch (error) {
           console.error('Error opening browser:', error);
-          setIsProcessing(false);
+                        setIsProcessing(false);
           Alert.alert('Error', 'Could not open payment page. Please try again.');
         }
       } else {
@@ -289,24 +289,24 @@ const PaymentScreen = () => {
       console.error('Payment error:', error);
       
       // For demonstration purposes, allow the user to proceed even if Chapa fails
-      Alert.alert(
+                        Alert.alert(
         'Payment System Issue',
         'There seems to be an issue with the payment system. Would you like to proceed as if payment was successful (for testing)?',
-        [
-          {
+                          [
+                            {
             text: 'Proceed (Test Only)',
-            onPress: () => {
+              onPress: () => {
               handlePaymentSuccess(paymentMethod);
-            }
-          },
-          {
-            text: 'Cancel',
-            style: 'cancel',
-            onPress: () => setIsProcessing(false)
-          }
-        ]
-      );
-    }
+                      }
+                    },
+                    {
+                      text: 'Cancel',
+                      style: 'cancel',
+                      onPress: () => setIsProcessing(false)
+                    }
+                  ]
+                );
+              }
   };
 
   const handlePaymentSuccess = async (paymentProvider) => {
