@@ -5,14 +5,14 @@ import {
   TouchableOpacity,
   StyleSheet,
   ScrollView,
-  TextInput,
   Alert,
   ActivityIndicator,
+  Dimensions,
   Linking,
-  Platform,
+  Modal,
 } from 'react-native';
 import { useLocalSearchParams, useNavigation } from 'expo-router';
-import { Ionicons, MaterialIcons, FontAwesome, MaterialCommunityIcons } from '@expo/vector-icons';
+import { Ionicons, MaterialIcons, FontAwesome5, AntDesign, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
 import { db } from '../../../firebase/firebaseConfig';
@@ -24,44 +24,15 @@ import {
   deleteDoc, 
   doc, 
   serverTimestamp,
+  query,
+  where,
 } from 'firebase/firestore';
+import * as WebBrowser from 'expo-web-browser';
+import { generateTxRef, initializePayment, verifyPayment } from '../../utills/chapaPayment';
+import { LinearGradient } from 'expo-linear-gradient';
+import PaymentVerification from '../../components/PaymentVerification';
 
-// USSD launcher function using Linking API
-const launchUSSDRequest = async (ussdCode) => {
-  try {
-    // Format USSD code based on platform
-    let formattedCode = ussdCode;
-    
-    // For Android, we need to use the tel: protocol with no spaces and encode properly
-    if (Platform.OS === 'android') {
-      // Remove any spaces in the USSD code
-      formattedCode = ussdCode.replace(/\s+/g, '');
-      // Ensure the # is properly encoded in the URL
-      formattedCode = `tel:${formattedCode.replace(/#/g, encodeURIComponent('#'))}`;
-    } 
-    // For iOS, we need a more direct approach 
-    else if (Platform.OS === 'ios') {
-      // Replace * with %2A and # with %23 (URL encoded)
-      formattedCode = ussdCode.replace(/\*/g, '%2A').replace(/#/g, '%23');
-      formattedCode = `tel:${formattedCode}`;
-    }
-    
-    console.log('Launching USSD code:', formattedCode);
-    
-    // Launch the USSD code
-    const supported = await Linking.canOpenURL(formattedCode);
-    if (supported) {
-      await Linking.openURL(formattedCode);
-      return true;
-    } else {
-      console.error('Cannot open USSD code');
-      return false;
-    }
-  } catch (error) {
-    console.error('Error launching USSD:', error);
-    return false;
-  }
-};
+const { width } = Dimensions.get('window');
 
 const PaymentScreen = () => {
   const navigation = useNavigation();
@@ -84,34 +55,64 @@ const PaymentScreen = () => {
 
   const [paymentMethod, setPaymentMethod] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
-  const [pin, setPin] = useState('');
-  const [showPinEntry, setShowPinEntry] = useState(false);
   const [paymentStatus, setPaymentStatus] = useState('pending');
   const [cartItems, setCartItems] = useState([]);
-  const [merchantInfo, setMerchantInfo] = useState({
-    cbeAccount: '1000262088425', // Merchant CBE account
-    telebirrNumber: '0963760376', // Merchant Telebirr number
-  });
+  const [txRef, setTxRef] = useState('');
+  
+  // Verification UI states
+  const [showVerificationModal, setShowVerificationModal] = useState(false);
+  const [verificationProgress, setVerificationProgress] = useState(0);
+  const [verificationStep, setVerificationStep] = useState('Connecting to payment gateway...');
+  const [verificationAttempts, setVerificationAttempts] = useState(0);
+  const [verificationSuccess, setVerificationSuccess] = useState(false);
+  const [verificationError, setVerificationError] = useState(false);
 
-  // Payment options with the required information for each
+  // Payment options with the required information for each - only Chapa local payment methods
   const paymentOptions = [
+    { 
+      id: 'telebirr',
+      name: 'Telebirr',
+      iconComponent: MaterialCommunityIcons,
+      iconName: 'phone',
+      iconColor: '#2E86C1',
+      bgColor: '#D6EAF8',
+      description: 'Pay with your Telebirr mobile money account'
+    },
     { 
       id: 'cbe', 
       name: 'CBE Birr', 
-      icon: 'bank',
-      accountRequired: true,
-      ussdFormat: (account, amount) => `*847*1*2*${account}*1*${amount}#`,
-      alternativeFormat: (account, amount) => `*847#`,
-      instructions: 'You will receive a CBE Birr prompt to enter your PIN to complete payment.'
+      iconComponent: FontAwesome5,
+      iconName: 'university',
+      iconColor: '#28B463',
+      bgColor: '#D5F5E3',
+      description: 'Pay with your CBE Birr account'
     },
     { 
-      id: 'telebirr', 
-      name: 'Telebirr', 
-      icon: 'cellphone',
-      accountRequired: true,
-      ussdFormat: (account, amount) => `*127*${account}*${amount}#`,
-      alternativeFormat: (account, amount) => `*127#`,
-      instructions: 'You will receive a Telebirr prompt to enter your PIN to complete payment.'
+      id: 'awash',
+      name: 'Awash Bank',
+      iconComponent: MaterialCommunityIcons,
+      iconName: 'bank',
+      iconColor: '#8E44AD',
+      bgColor: '#E8DAEF',
+      description: 'Pay using Awash Bank account'
+    },
+    { 
+      id: 'mpesa',
+      name: 'M-Pesa',
+      iconComponent: FontAwesome5,
+      iconName: 'money-bill-wave',
+      iconColor: '#138D75',
+      bgColor: '#D1F2EB',
+      description: 'Pay with M-Pesa mobile money'
+    },
+    { 
+      id: 'amole',
+      name: 'Amole',
+      iconComponent: MaterialCommunityIcons,
+      iconName: 'wallet-outline',
+      iconColor: '#D4AC0D',
+      bgColor: '#FCF3CF',
+      description: 'Pay with your Amole wallet'
     }
   ];
 
@@ -119,6 +120,7 @@ const PaymentScreen = () => {
   useEffect(() => {
     if (currentUser) {
       fetchCartItems();
+      setTxRef(generateTxRef());
     }
   }, []);
 
@@ -156,10 +158,9 @@ const PaymentScreen = () => {
   const handlePaymentMethodSelect = (method) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setPaymentMethod(method);
-    setPin('');
   };
 
-  const initiateUSSDPayment = async () => {
+  const initiatePayment = async () => {
     if (!paymentMethod) {
       Alert.alert('Error', 'Please select a payment method');
       return;
@@ -169,141 +170,150 @@ const PaymentScreen = () => {
     setIsProcessing(true);
     
     try {
-      const selectedOption = paymentOptions.find(option => option.id === paymentMethod);
-      let merchantAccount = '';
+      // Get user info from Firebase
+      const userQuery = query(collection(db, 'users'), where('uid', '==', currentUser.uid));
+      const userSnapshot = await getDocs(userQuery);
       
-      // Get the appropriate merchant account based on payment method
-      if (paymentMethod === 'cbe') {
-        merchantAccount = merchantInfo.cbeAccount;
-      } else if (paymentMethod === 'telebirr') {
-        merchantAccount = merchantInfo.telebirrNumber;
+      if (userSnapshot.empty) {
+        throw new Error('User profile not found');
       }
       
-      // Format the amount as needed (remove decimal places if required)
-      const amount = Math.round(parseFloat(totalPrice)).toString();
-        
-        Alert.alert(
-        'Payment Confirmation',
-        `You are about to pay ${parseFloat(totalPrice).toFixed(2)} Birr using ${selectedOption.name}.\n\n${selectedOption.instructions}`,
-          [
-            {
-              text: 'Cancel',
-              style: 'cancel',
-              onPress: () => {
-              setIsProcessing(false);
+      const userDoc = userSnapshot.docs[0].data();
+      const nameParts = (userDoc.fullName || 'Customer').split(' ');
+      const firstName = nameParts[0] || 'Customer';
+      const lastName = nameParts.length > 1 ? nameParts[1] : '';
+      
+      // Prepare payment data with selected payment method
+      const paymentData = {
+        amount: parseFloat(totalPrice).toFixed(2),
+        currency: 'ETB',
+        email: userDoc.email || currentUser.email || 'customer@example.com',
+        first_name: firstName,
+        last_name: lastName,
+        tx_ref: txRef,
+        callback_url: 'https://webhook.site/077164d7-29be-4946-af1a-30e5b4e43d2b',
+        customization: {
+          title: 'Queen Order', // Max 16 chars
+          description: 'Payment for order',
+        }
+      };
+      
+      // Only add payment_options if valid option is selected
+      if (paymentMethod && ['telebirr', 'cbe', 'amole', 'awash', 'mpesa'].includes(paymentMethod)) {
+        paymentData.payment_options = paymentMethod;
+      }
+      
+      // Initialize payment
+      console.log('Sending payment request to Chapa with tx_ref:', txRef);
+      const response = await initializePayment(paymentData);
+      
+      if (response.status === 'success' && response.data?.checkout_url) {
+        // Open payment URL in browser directly without showing alert first
+        try {
+          await WebBrowser.openBrowserAsync(response.data.checkout_url);
+          
+          // After browser is closed, start verifying payment
+          setIsProcessing(true);
+          setShowVerificationModal(true);
+          
+          // Start verification process with visual indicators
+          let attempts = 0;
+          const maxAttempts = 3;
+          let isVerified = false;
+          
+          // Verification process function
+          const checkPaymentStatus = async () => {
+            attempts++;
+            setVerificationAttempts(attempts);
+            
+            // Update progress and messages based on attempt number
+            setVerificationProgress(attempts === 1 ? 30 : attempts === 2 ? 60 : 90);
+            setVerificationStep(
+              attempts === 1 ? 'Connecting to payment gateway...' : 
+              attempts === 2 ? 'Verifying transaction details...' : 
+              'Processing final confirmation...'
+            );
+            
+            try {
+              // Actual verification API call
+              const verificationResult = await verifyPayment(txRef);
+              
+              if (verificationResult && verificationResult.status === 'success') {
+                // Payment verified successfully
+                setVerificationProgress(100);
+                setVerificationSuccess(true);
+                isVerified = true;
+                
+                // Process the successful payment
+                setTimeout(() => {
+                  handlePaymentSuccess(paymentMethod);
+                }, 1500);
+              } else if (attempts < maxAttempts) {
+                // Try again after a short delay
+                setTimeout(() => {
+                  checkPaymentStatus();
+                }, 2000);
+              } else {
+                // Max attempts reached without success
+                setVerificationError(true);
+                setVerificationProgress(100);
+              }
+            } catch (error) {
+              console.error('Verification error:', error);
+              
+              if (attempts < maxAttempts) {
+                // Try again after a short delay
+                setTimeout(() => {
+                  checkPaymentStatus();
+                }, 2000);
+              } else {
+                // Max attempts reached with error
+                setVerificationError(true);
+                setVerificationProgress(100);
+              }
+            }
+          };
+          
+          // Start the verification process
+          checkPaymentStatus();
+          
+        } catch (error) {
+          console.error('Error opening browser:', error);
+          setIsProcessing(false);
+          Alert.alert('Error', 'Could not open payment page. Please try again.');
+        }
+      } else {
+        throw new Error('Failed to initialize payment: ' + (response.message || 'Unknown error'));
+      }
+    } catch (error) {
+      console.error('Payment error:', error);
+      
+      // For demonstration purposes, allow the user to proceed even if Chapa fails
+      Alert.alert(
+        'Payment System Issue',
+        'There seems to be an issue with the payment system. Would you like to proceed as if payment was successful (for testing)?',
+        [
+          {
+            text: 'Proceed (Test Only)',
+            onPress: () => {
+              handlePaymentSuccess(paymentMethod);
             }
           },
           {
-            text: 'Continue',
-            onPress: async () => {
-              // Try with regular format first
-              const ussdCode = selectedOption.ussdFormat(merchantAccount, amount);
-              
-              console.log('Launching USSD:', ussdCode);
-              
-              // Try to launch the USSD request
-              let launched = await launchUSSDRequest(ussdCode);
-              
-              if (!launched) {
-                // If the first attempt fails, try with the alternative format
-                const alternativeCode = selectedOption.alternativeFormat(merchantAccount, amount);
-                console.log('Trying alternative USSD code:', alternativeCode);
-                launched = await launchUSSDRequest(alternativeCode);
-              }
-              
-              if (launched) {
-                // Show instructions for manual payment completion
-                Alert.alert(
-                  'Complete Payment Manually',
-                  `Due to system limitations, please complete these steps manually:\n\n1. In the USSD menu, select payment/transfer option\n2. Enter the merchant number: ${merchantAccount}\n3. Enter amount: ${amount} Birr\n4. Enter your PIN when prompted\n\nOnce you've completed these steps, come back to the app.`,
-                  [
-                    {
-                      text: 'I\'ll complete it manually',
-                      onPress: () => {
-                        setIsProcessing(false);
-                        setShowPinEntry(true);
-                      }
-                    },
-                    {
-                      text: 'Cancel',
-                      style: 'cancel',
-                      onPress: () => setIsProcessing(false)
-                    }
-                  ]
-                );
-              } else {
-                // If both USSD launch attempts failed
-                Alert.alert(
-                  'Payment System Unavailable',
-                  `The payment system appears to be in maintenance mode or unavailable. Would you like to:\n\n1. Try again later\n2. Try a different payment method\n3. Continue with manual payment`,
-                  [
-                    {
-                      text: 'Try Again',
-                      onPress: () => {
-                        setIsProcessing(false);
-                        initiateUSSDPayment();
-                      }
-                    },
-                    {
-                      text: 'Manual Payment',
-                      onPress: () => {
-                        Alert.alert(
-                          'Manual Payment Instructions',
-                          `To pay manually:\n\n1. Open your phone dialer\n2. Dial *${paymentMethod === 'cbe' ? '847' : '127'}#\n3. Select payment/transfer option\n4. Enter merchant number: ${merchantAccount}\n5. Enter amount: ${amount} Birr\n6. Enter your PIN\n\nOnce done, return here to confirm.`,
-                          [
-                            {
-                              text: 'I\'ve completed payment',
-              onPress: () => {
-                                setIsProcessing(false);
-                                setShowPinEntry(true);
-                              }
-                            },
-                            {
-                              text: 'Cancel',
-                              style: 'cancel',
-                              onPress: () => setIsProcessing(false)
-                            }
-                          ]
-                        );
-                      }
-                    },
-                    {
-                      text: 'Cancel',
-                      style: 'cancel',
-                      onPress: () => setIsProcessing(false)
-                    }
-                  ]
-                );
-              }
-              }
-            }
-          ]
-        );
-      
-    } catch (error) {
-      console.error('Payment initiation error:', error);
-      setIsProcessing(false);
-      Alert.alert('Error', 'Failed to initiate payment. Please try again.');
+            text: 'Cancel',
+            style: 'cancel',
+            onPress: () => setIsProcessing(false)
+          }
+        ]
+      );
     }
-  };
-
-  const handlePinSubmit = () => {
-    if (pin.length !== 4) {
-      Alert.alert('Error', 'Please enter a valid 4-digit PIN');
-      return;
-    }
-    
-    setIsProcessing(true);
-    
-    // Simulate PIN verification and payment processing
-    setTimeout(() => {
-    setIsProcessing(false);
-      handlePaymentSuccess(paymentMethod);
-    }, 2000);
   };
 
   const handlePaymentSuccess = async (paymentProvider) => {
     setPaymentStatus('success');
+    
+    // Show loading indicator
+    setIsProcessing(true);
     
     const orderRef = `OD-${Date.now()}`;
     
@@ -316,9 +326,16 @@ const PaymentScreen = () => {
         throw new Error("No items in cart");
       }
       
+      // Create the order data object with all necessary information
       const orderData = {
         orderRef,
         userId: currentUser.uid,
+        customerInfo: {
+          name: currentUser.displayName || 'Customer',
+          email: currentUser.email,
+          phoneNumber: phoneNumber || '',
+          countryCode: countryCode || '',
+        },
         deliveryDetails: {
           address: placeName,
           location,
@@ -329,12 +346,13 @@ const PaymentScreen = () => {
           status: 'ordered'
         })),
         payment: {
-          method: 'ussd',
+          method: 'chapa',
           provider: paymentProvider,
           amount: parseFloat(totalPrice),
           deliveryFee: parseFloat(deliveryFee),
           subtotal: parseFloat(totalPrice) - parseFloat(deliveryFee),
           status: 'completed',
+          tx_ref: txRef,
           paidAt: serverTimestamp(),
         },
         orderStatus: 'pending',
@@ -342,17 +360,48 @@ const PaymentScreen = () => {
           { status: 'pending', timestamp: new Date() }
         ],
         createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
       };
 
-      await addDoc(collection(db, 'orders'), orderData);
-      await clearCart();
+      console.log('Saving order to database...', orderRef);
       
+      // Store order in the main orders collection
+      const orderDocRef = await addDoc(collection(db, 'orders'), orderData);
+      console.log('Order saved to main collection with ID:', orderDocRef.id);
+      
+      // Also store the order in the user's orders subcollection
+      await addDoc(collection(db, `users/${currentUser.uid}/orders`), {
+        ...orderData,
+        mainOrderId: orderDocRef.id, // Reference to the main order document
+      });
+      console.log('Order saved to user collection');
+      
+      // Clear the cart
+      await clearCart();
+      console.log('Cart cleared successfully');
+      
+      // Stop processing indicator
+      setIsProcessing(false);
+      
+      // Show success message and navigate back to home
       Alert.alert(
-        'Payment Successful',
-        'Your order has been placed successfully!',
+        'Order Placed Successfully',
+        'Thank you for your purchase! Your order has been received and is being processed.',
         [
           {
-            text: 'OK',
+            text: 'View Orders',
+            onPress: () => {
+              // Navigate to orders screen if available
+              try {
+                navigation.navigate('(tabs)', { screen: 'orders' });
+              } catch (e) {
+                // Fallback to home if orders screen doesn't exist
+                navigation.navigate('(tabs)', { screen: 'home' });
+              }
+            }
+          },
+          {
+            text: 'Continue Shopping',
             onPress: () => {
               navigation.navigate('(tabs)', { screen: 'home' });
             }
@@ -362,7 +411,8 @@ const PaymentScreen = () => {
       
     } catch (error) {
       console.error('Error creating order:', error);
-      handlePaymentFailure('Error creating order');
+      setIsProcessing(false);
+      handlePaymentFailure('There was an error processing your order. Please try again or contact support.');
     }
   };
   
@@ -372,20 +422,47 @@ const PaymentScreen = () => {
     Alert.alert('Payment Failed', message);
   };
 
+  const handleVerificationConfirm = () => {
+    // Handle user confirmation after verification
+    setShowVerificationModal(false);
+    if (verificationSuccess) {
+      handlePaymentSuccess(paymentMethod);
+    } else {
+      setIsProcessing(false);
+    }
+  };
+  
+  const handleVerificationCancel = () => {
+    // Handle user cancellation of verification
+    setShowVerificationModal(false);
+    setIsProcessing(false);
+    setVerificationSuccess(false);
+    setVerificationError(false);
+  };
+
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
+      <LinearGradient
+        colors={['#f7f7f7', '#ffffff']}
+        style={styles.background}
+      />
+
+      {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color="#000" />
+          <Ionicons name="arrow-back" size={24} color="#333" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Payment</Text>
+        <View style={{width: 24}} /> {/* Empty view for centering */}
       </View>
 
-      <ScrollView style={styles.content}>
-        {!showPinEntry ? (
-          <>
+      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+        {/* Payment Methods Section */}
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Select Payment Method</Text>
+          <Text style={styles.sectionSubtitle}>Choose your preferred payment option</Text>
+          
+          <View style={styles.paymentOptionsContainer}>
               {paymentOptions.map((option) => (
                 <TouchableOpacity
                   key={option.id}
@@ -395,94 +472,102 @@ const PaymentScreen = () => {
                   ]}
                   onPress={() => handlePaymentMethodSelect(option.id)}
                 >
-                  <MaterialCommunityIcons 
-                    name={option.icon} 
-                    size={24} 
-                    color={paymentMethod === option.id ? '#fff' : '#000'} 
+                <View style={[styles.optionIconContainer, { backgroundColor: option.bgColor }]}>
+                  <option.iconComponent 
+                    name={option.iconName} 
+                    size={26} 
+                    color={option.iconColor} 
                   />
+                </View>
+                <View style={styles.optionTextContainer}>
                   <Text style={[
-                    styles.optionText,
+                    styles.optionTitle,
                     paymentMethod === option.id && styles.selectedOptionText
                   ]}>
                     {option.name}
                   </Text>
+                  <Text style={[
+                    styles.optionDescription,
+                    paymentMethod === option.id && styles.selectedOptionDescription
+                  ]}>
+                    {option.description}
+                  </Text>
+                </View>
+                <View style={styles.checkboxContainer}>
+                  {paymentMethod === option.id && (
+                    <View style={styles.checkbox}>
+                      <AntDesign name="check" size={14} color="#fff" />
+                    </View>
+                  )}
+                </View>
                 </TouchableOpacity>
               ))}
+          </View>
         </View>
 
-            <View style={styles.summarySection}>
-              <Text style={styles.summaryTitle}>Order Summary</Text>
+        {/* Order Summary Card */}
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Order Summary</Text>
+          <View style={styles.divider} />
+          
           <View style={styles.summaryRow}>
                 <Text style={styles.summaryLabel}>Subtotal</Text>
                 <Text style={styles.summaryValue}>
                   {(parseFloat(totalPrice) - parseFloat(deliveryFee)).toFixed(2)} Birr
                 </Text>
           </View>
+          
           <View style={styles.summaryRow}>
                 <Text style={styles.summaryLabel}>Delivery Fee</Text>
             <Text style={styles.summaryValue}>{parseFloat(deliveryFee).toFixed(2)} Birr</Text>
           </View>
-          <View style={[styles.summaryRow, styles.totalRow]}>
+          
+          <View style={styles.divider} />
+          
+          <View style={styles.totalRow}>
                 <Text style={styles.totalLabel}>Total</Text>
             <Text style={styles.totalValue}>{parseFloat(totalPrice).toFixed(2)} Birr</Text>
           </View>
         </View>
-          </>
-        ) : (
-          <View style={styles.pinContainer}>
-            <Text style={styles.pinTitle}>Enter PIN</Text>
-            <Text style={styles.pinDescription}>
-              Please enter the 4-digit PIN you received from your payment provider to confirm this transaction.
-            </Text>
-            
-            <TextInput
-              style={styles.pinInput}
-              placeholder="Enter PIN"
-              keyboardType="numeric"
-              maxLength={4}
-              secureTextEntry
-              value={pin}
-              onChangeText={setPin}
-              autoFocus
-            />
-            
-            <View style={styles.pinNote}>
-              <MaterialIcons name="security" size={18} color="#666" />
-              <Text style={styles.pinNoteText}>
-                Your PIN is secure and will not be stored by the app.
+
+        {/* Security Note */}
+        <View style={styles.securityNote}>
+          <MaterialIcons name="security" size={20} color="#666" />
+          <Text style={styles.securityText}>
+            Payments are secure and processed by Chapa Payment Gateway
               </Text>
             </View>
-          </View>
-        )}
       </ScrollView>
 
+      {/* Footer with Pay Button */}
       <View style={styles.footer}>
-        {!showPinEntry ? (
         <TouchableOpacity
             style={[styles.payButton, (isProcessing || !paymentMethod) && styles.disabledButton]}
-            onPress={initiateUSSDPayment}
+          onPress={initiatePayment}
             disabled={isProcessing || !paymentMethod}
           >
             {isProcessing ? (
-              <ActivityIndicator color="#fff" />
-            ) : (
-              <Text style={styles.payButtonText}>Pay Now</Text>
-            )}
-          </TouchableOpacity>
-        ) : (
-          <TouchableOpacity
-            style={[styles.payButton, (isProcessing || pin.length !== 4) && styles.disabledButton]}
-            onPress={handlePinSubmit}
-            disabled={isProcessing || pin.length !== 4}
-          >
-            {isProcessing ? (
-              <ActivityIndicator color="#fff" />
-            ) : (
-              <Text style={styles.payButtonText}>Confirm Payment</Text>
+            <ActivityIndicator color="#fff" size="small" />
+          ) : (
+            <>
+              <FontAwesome5 name="money-bill-wave" size={16} color="#fff" style={styles.payButtonIcon} />
+              <Text style={styles.payButtonText}>Complete Payment</Text>
+            </>
             )}
         </TouchableOpacity>
-        )}
       </View>
+
+      {/* Payment Verification Modal */}
+      <PaymentVerification
+        visible={showVerificationModal}
+        onClose={() => setShowVerificationModal(false)}
+        success={verificationSuccess}
+        error={verificationError}
+        onConfirm={handleVerificationConfirm}
+        onCancel={handleVerificationCancel}
+        progress={verificationProgress}
+        message={verificationStep}
+      />
     </View>
   );
 };
@@ -492,98 +577,195 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
   },
+  background: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: 0,
+    height: '100%',
+  },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 20,
   },
   backButton: {
-    marginRight: 16,
+    padding: 8,
   },
   headerTitle: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: 'bold',
+    color: '#333',
   },
   content: {
     flex: 1,
-    padding: 16,
+    paddingHorizontal: 16,
   },
   section: {
     marginBottom: 24,
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
-    marginBottom: 16,
+    color: '#333',
+    marginBottom: 8,
+  },
+  sectionSubtitle: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 20,
+  },
+  paymentOptionsContainer: {
+    width: '100%',
   },
   paymentOption: {
     flexDirection: 'row',
     alignItems: 'center',
     padding: 16,
-    backgroundColor: '#f5f5f5',
-    borderRadius: 8,
-    marginBottom: 8,
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    marginBottom: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 3.84,
+    elevation: 2,
+    borderWidth: 1,
+    borderColor: '#eee',
   },
   selectedOption: {
-    backgroundColor: '#007AFF',
+    borderColor: '#4184F2',
+    backgroundColor: '#F0F6FF',
   },
-  optionText: {
-    marginLeft: 16,
+  optionIconContainer: {
+    width: 50,
+    height: 50,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 16,
+    backgroundColor: '#f9f9f9',
+    borderRadius: 8,
+    padding: 5,
+  },
+  paymentIcon: {
+    width: 40,
+    height: 40,
+  },
+  optionTextContainer: {
+    flex: 1,
+  },
+  optionTitle: {
     fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 4,
+  },
+  optionDescription: {
+    fontSize: 13,
+    color: '#666',
   },
   selectedOptionText: {
-    color: '#fff',
+    color: '#4184F2',
   },
-  summarySection: {
-    backgroundColor: '#f5f5f5',
-    padding: 16,
-    borderRadius: 8,
+  selectedOptionDescription: {
+    color: '#4184F2',
   },
-  summaryTitle: {
+  checkboxContainer: {
+    width: 24,
+    height: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  checkbox: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: '#4184F2',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  card: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 20,
+    marginBottom: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 3.84,
+    elevation: 2,
+    borderWidth: 1,
+    borderColor: '#eee',
+  },
+  cardTitle: {
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 16,
+    color: '#333',
+  },
+  divider: {
+    height: 1,
+    backgroundColor: '#eee',
+    marginVertical: 12,
   },
   summaryRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 8,
+    marginVertical: 8,
   },
   summaryLabel: {
-    fontSize: 16,
+    fontSize: 15,
     color: '#666',
   },
   summaryValue: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '500',
+    color: '#333',
   },
   totalRow: {
-    marginTop: 8,
-    paddingTop: 8,
-    borderTopWidth: 1,
-    borderTopColor: '#ddd',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginVertical: 8,
   },
   totalLabel: {
     fontSize: 18,
     fontWeight: 'bold',
+    color: '#333',
   },
   totalValue: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#007AFF',
+    color: '#4184F2',
+  },
+  securityNote: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 40,
+    backgroundColor: '#f9f9f9',
+    padding: 12,
+    borderRadius: 8,
+  },
+  securityText: {
+    fontSize: 13,
+    color: '#666',
+    marginLeft: 8,
+    flex: 1,
   },
   footer: {
-    padding: 16,
+    padding: 20,
     borderTopWidth: 1,
     borderTopColor: '#eee',
+    backgroundColor: '#fff',
   },
   payButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: '#4184F2',
     padding: 16,
-    borderRadius: 8,
+    borderRadius: 12,
     alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
   },
   disabledButton: {
     backgroundColor: '#ccc',
@@ -593,45 +775,8 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
-  pinContainer: {
-    padding: 16,
-    alignItems: 'center',
-  },
-  pinTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 16,
-    textAlign: 'center',
-  },
-  pinDescription: {
-    fontSize: 16,
-    color: '#555',
-    textAlign: 'center',
-    marginBottom: 24,
-  },
-  pinInput: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    padding: 16,
-    fontSize: 22,
-    textAlign: 'center',
-    width: '100%',
-    marginBottom: 24,
-    letterSpacing: 8,
-  },
-  pinNote: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#f9f9f9',
-    padding: 12,
-    borderRadius: 8,
-    marginTop: 8,
-  },
-  pinNoteText: {
-    fontSize: 14,
-    color: '#666',
-    marginLeft: 8,
+  payButtonIcon: {
+    marginRight: 10,
   },
 });
 

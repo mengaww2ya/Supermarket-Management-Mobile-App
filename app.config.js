@@ -16,8 +16,11 @@ export default {
       firebaseMessagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
       firebaseAppId: process.env.FIREBASE_APP_ID,
       // firebaseMeasurementId: process.env.FIREBASE_MEASUREMENT_ID,
-
       
+      // Chapa Payment configuration
+      chapaPublicKey: process.env.CHAPA_PUBLIC_KEY,
+      chapaSecretKey: process.env.CHAPA_SECRET_KEY,
+      chapaEncryptionKey: process.env.CHAPA_ENCRYPTION_KEY,
     },
     
     android: {

@@ -1,11 +1,9 @@
 {
   "expo": {
-    "name": "my-expo-app",
-    "slug": "my-expo-app",
-    "scheme": "my-expo-app",
-
+    "name": "QUEEN",
+    "slug": "QUEEN",
+    "scheme": "queenapp",
     "version": "1.0.0",
-    "web": {},
     "experiments": {
       "tsconfigPaths": true
     },
@@ -13,8 +11,10 @@
       "expo-router"
     ],
     "orientation": "portrait",
+    "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
+      "image": "./assets/splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -22,12 +22,18 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.queen.supermarket"
     },
     "android": {
       "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.queen.supermarket"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
     }
   }
 }
