@@ -385,7 +385,7 @@ export default function ManageDelivery() {
   // If map is showing, render only that
   if (selectedDelivery) {
     return (
-      <View style={styles.container}>
+        <View style={styles.container}>
         <StatusBar barStyle="dark-content" />
         
         {/* Header */}
@@ -402,7 +402,7 @@ export default function ManageDelivery() {
             style={styles.map}
             resizeMode="cover"
           />
-          <TouchableOpacity
+            <TouchableOpacity
             style={styles.closeMapButton}
             onPress={() => setSelectedDelivery(null)}
             activeOpacity={0.8}

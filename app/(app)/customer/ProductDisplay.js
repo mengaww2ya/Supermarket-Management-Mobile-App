@@ -76,10 +76,28 @@ export default function ProductDisplay() {
     try {
       const productsRef = collection(db, "Products");
       const snapshot = await getDocs(productsRef);
-      return snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
+      
+      // Get current date for expiration check
+      const currentDate = new Date();
+      
+      // Filter out expired products and those marked as deleted
+      return snapshot.docs
+        .map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }))
+        .filter(product => {
+          // Check if product is deleted
+          if (product.isDeleted) return false;
+          
+          // Check if product has expiration date and is expired
+          if (product.expirationDate && product.expirationDate.toDate) {
+            const expiryDate = product.expirationDate.toDate();
+            if (expiryDate < currentDate) return false;
+          }
+          
+          return true;
+        });
     } catch (error) {
       console.error("Error fetching all products:", error);
       return [];
@@ -117,12 +135,26 @@ export default function ProductDisplay() {
         if (querySnapshot.empty) {
           setFilteredProducts([]);
         } else {
+          // Get current date for expiration check
+          const currentDate = new Date();
+          
           const products = querySnapshot.docs
             .map(doc => ({
               id: doc.id,
               ...doc.data(),
             }))
-            .filter(product => product.stockQuantity > 0);
+            .filter(product => {
+              // Check if product is deleted
+              if (product.isDeleted) return false;
+              
+              // Check if product has expiration date and is expired
+              if (product.expirationDate && product.expirationDate.toDate) {
+                const expiryDate = product.expirationDate.toDate();
+                if (expiryDate < currentDate) return false;
+              }
+              
+              return product.stockQuantity > 0;
+            });
           
           setFilteredProducts(products);
         }

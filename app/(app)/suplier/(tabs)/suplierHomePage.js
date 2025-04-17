@@ -337,7 +337,7 @@ export default function SupplierHome() {
         title="Supplier Dashboard"
       />
       
-      <ScrollView 
+      <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 30 }}
         refreshControl={
@@ -502,7 +502,7 @@ export default function SupplierHome() {
                 entering={FadeInRight.delay(300 + index * 100).duration(400)}
                 style={styles.menuCard}
               >
-                <TouchableOpacity
+            <TouchableOpacity
                   onPress={() => navigateTo(card.path)}
                   activeOpacity={0.8}
                   style={styles.menuCardTouchable}
@@ -546,8 +546,8 @@ export default function SupplierHome() {
                       )}
                     </View>
                     <Text style={styles.menuCardDescription}>{card.description}</Text>
-                  </View>
-                </TouchableOpacity>
+              </View>
+            </TouchableOpacity>
               </Animated.View>
             ))}
           </View>

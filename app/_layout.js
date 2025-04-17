@@ -21,10 +21,10 @@ const MainLayout = () => {
             // Redirect based on role if authenticated
             if (userData?.role === 'admin') {
                 router.replace('/admine/(tabs)');
-            } else if (userData?.role === '') {
-                router.replace('/customer/homepage');
+            } else if (userData?.role === 'customer') {
+                router.replace('/customer/(tabs)');
             } else if (userData?.role === 'manager') {
-                router.replace('/manager/(tabscustomer)');
+                router.replace('/manager/(tabs)');
             } else if (userData?.role === 'deliveryAgent') {
                 router.replace('/deliveryAgent/(tabs)');
             } else if (userData?.role === 'stockManager') {

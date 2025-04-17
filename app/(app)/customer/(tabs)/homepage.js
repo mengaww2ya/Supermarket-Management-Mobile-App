@@ -76,7 +76,7 @@ const AnimatedCategoryItem = ({ item, index, onPress }) => {
           colors={['#f0f9ff', '#fff']}
           style={{ position: 'absolute', width: '100%', height: '100%' }}
         />
-        <Text style={{ fontSize: 16, fontWeight: 'bold', textAlign: 'center', color: '#3B82F6' }}>
+        <Text style={{ fontSize: 16, fontWeight: 'bold', textAlign: 'center', color: '#4B5563' }}>
           {item.categoryName}
         </Text>
         <View style={{ width: '100%', height: 96, marginVertical: 8 }}>
@@ -303,11 +303,28 @@ export default function Homepage() {
         ...doc.data(),
       }));
       
+      // Get current date for expiration check
+      const currentDate = new Date();
+      
+      // Filter out expired products and those marked as deleted
+      const validProducts = allProducts.filter(product => {
+        // Check if product is deleted
+        if (product.isDeleted) return false;
+        
+        // Check if product has expiration date and is expired
+        if (product.expirationDate && product.expirationDate.toDate) {
+          const expiryDate = product.expirationDate.toDate();
+          if (expiryDate < currentDate) return false;
+        }
+        
+        return true;
+      });
+      
       // Filter categories that have at least one product with stock > 0
       const categoriesWithStock = [];
       
       for (const category of categoryList) {
-        const productsInCategory = allProducts.filter(
+        const productsInCategory = validProducts.filter(
           product => product.categoryId === category.id && product.stockQuantity > 0
         );
         
@@ -337,7 +354,18 @@ export default function Homepage() {
             id: doc.id,
             ...doc.data(),
           }))
-          .filter(product => product.stockQuantity > 0)
+          .filter(product => {
+            // Check if product is deleted
+            if (product.isDeleted) return false;
+            
+            // Check if product has expiration date and is expired
+            if (product.expirationDate && product.expirationDate.toDate) {
+              const expiryDate = product.expirationDate.toDate();
+              if (expiryDate < currentDate) return false;
+            }
+            
+            return product.stockQuantity > 0;
+          })
           .sort((a, b) => b.stockQuantity - a.stockQuantity)
           .slice(0, 6);
         
@@ -346,7 +374,7 @@ export default function Homepage() {
         console.error("Error fetching simple discount products:", error);
         
         // Fallback to memory filtering from all products
-        const discountProductsWithStock = allProducts
+        const discountProductsWithStock = validProducts
           .filter(product => product.discountPrice > 0 && product.stockQuantity > 0)
           .sort((a, b) => b.stockQuantity - a.stockQuantity)
           .slice(0, 6);
@@ -368,7 +396,18 @@ export default function Homepage() {
             id: doc.id,
             ...doc.data(),
           }))
-          .filter(product => !product.discountPrice || product.discountPrice === 0)
+          .filter(product => {
+            // Check if product is deleted
+            if (product.isDeleted) return false;
+            
+            // Check if product has expiration date and is expired
+            if (product.expirationDate && product.expirationDate.toDate) {
+              const expiryDate = product.expirationDate.toDate();
+              if (expiryDate < currentDate) return false;
+            }
+            
+            return !product.discountPrice || product.discountPrice === 0;
+          })
           .sort((a, b) => b.stockQuantity - a.stockQuantity)
           .slice(0, 6);
         
@@ -377,7 +416,7 @@ export default function Homepage() {
         console.error("Error fetching simple standard products:", error);
         
         // Fallback to memory filtering from all products
-        const standardProductsWithStock = allProducts
+        const standardProductsWithStock = validProducts
           .filter(product => (!product.discountPrice || product.discountPrice === 0) && product.stockQuantity > 0)
           .sort((a, b) => b.stockQuantity - a.stockQuantity)
           .slice(0, 6);
@@ -764,7 +803,7 @@ export default function Homepage() {
                 <Text style={{ 
                   fontSize: 20, 
                   fontWeight: 'bold',
-                  color: '#10B981'
+                  color: '#48BB78'
                 }}>
                   Standard Categories
                 </Text>
@@ -810,12 +849,12 @@ export default function Homepage() {
                   justifyContent: 'center',
                   marginRight: 10
                 }}>
-                  <Ionicons name="star" size={18} color="#3B82F6" />
+                  <Ionicons name="star" size={18} color="#48BB78" />
                 </View>
                 <Text style={{ 
                   fontSize: 20, 
                   fontWeight: 'bold',
-                  color: '#3B82F6'
+                  color: '#48BB78'
                 }}>
                   Featured Products
                 </Text>
@@ -823,7 +862,7 @@ export default function Homepage() {
                   style={{ marginLeft: 'auto' }}
                   onPress={handleSeeAllFeaturedProducts}
                 >
-                  <Text style={{ fontSize: 14, fontWeight: '500', color: '#3B82F6' }}>
+                  <Text style={{ fontSize: 14, fontWeight: '500', color: '#48BB78' }}>
                     See All
                   </Text>
                 </TouchableOpacity>

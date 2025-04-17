@@ -170,8 +170,8 @@ const OrderCard = ({ order, onPress, onStatusChange }) => {
         <View style={[styles.statusBadge, { backgroundColor: statusColor.bg }]}>
           <Text style={[styles.statusText, { color: statusColor.text }]}>
             {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
-          </Text>
-        </View>
+                </Text>
+              </View>
       </View>
       
       <View style={styles.orderStoreRow}>
@@ -215,8 +215,8 @@ const OrderCard = ({ order, onPress, onStatusChange }) => {
         >
           <Feather name="arrow-right-circle" size={16} color="#3B82F6" />
           <Text style={[styles.actionButtonText, { color: '#3B82F6' }]}>Next Stage</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
+            </TouchableOpacity>
+            <TouchableOpacity
           style={[styles.actionButton, { backgroundColor: '#FEF2F2' }]}
           onPress={() => onStatusChange(order.id, 'cancel')}
         >
@@ -417,8 +417,8 @@ export default function ManageOrder() {
             </TouchableOpacity>
           )}
         </View>
-        
-        <TouchableOpacity 
+
+            <TouchableOpacity
           style={styles.filterButton} 
           onPress={openFilterModal}
           activeOpacity={0.7}
@@ -553,7 +553,7 @@ export default function ManageOrder() {
                       count={getOrderCountByStatus('cancelled')}
                       onPress={() => handleFilterSelect('cancelled')} 
                     />
-                  </ScrollView>
+      </ScrollView>
                 </Animated.View>
               </TouchableWithoutFeedback>
             </Animated.View>

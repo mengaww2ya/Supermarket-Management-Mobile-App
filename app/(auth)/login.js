@@ -93,14 +93,7 @@ export default function Login() {
             transform: [{ translateY: slideAnim }],
           }}
         >
-          <Animatable.Text 
-            animation="fadeInUp"
-            duration={1500}
-            className="text-lg font-semibold mb-8 text-center text-gray-600"
-            style={{ fontSize: wp('4%') }}
-          >
-            Fill the form below to log in
-          </Animatable.Text>
+         
 
           <Animatable.View 
             animation="fadeInLeft"
@@ -182,7 +175,7 @@ export default function Login() {
               )}
             </Pressable>
 
-            <TouchableOpacity className="py-2 mb-3">
+            <TouchableOpacity className="py-2 mb-3" onPress={() => router.push('/(auth)/forgot-password')}>
               <Text className="text-blue-500 text-center text-base">
                 Forgot password?
               </Text>
@@ -198,19 +191,6 @@ export default function Login() {
             >
               <Text className="text-center text-gray-700 text-base font-semibold">
                 I don't have an account? Sign up
-              </Text>
-            </Pressable>
-
-            {/* Developer Button */}
-            <Pressable 
-              className={`bg-blue-500 py-4 rounded-xl w-full shadow-lg ${
-                loading ? 'opacity-70' : ''
-              }`}
-              onPress={() => router.push('/screans/developingHompage')}
-              disabled={loading}
-            >
-              <Text className="text-center text-white text-lg font-bold">
-                I am Developer
               </Text>
             </Pressable>
           </Animatable.View>

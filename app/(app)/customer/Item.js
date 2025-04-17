@@ -71,13 +71,54 @@ export default function Item() {
       const docSnap = await getDoc(docRef);
       
       if (docSnap.exists()) {
-        setProduct({ id: docSnap.id, ...docSnap.data() });
+        const productData = { id: docSnap.id, ...docSnap.data() };
+        
+        // Check if product is deleted
+        if (productData.isDeleted) {
+          setError("This product is no longer available");
+          setTimeout(() => {
+            router.back();
+          }, 2000);
+          return;
+        }
+        
+        // Check if product is expired
+        if (productData.expirationDate && productData.expirationDate.toDate) {
+          const expiryDate = productData.expirationDate.toDate();
+          const currentDate = new Date();
+          
+          if (expiryDate < currentDate) {
+            setError("This product has expired and is no longer available");
+            setTimeout(() => {
+              router.back();
+            }, 2000);
+            return;
+          }
+        }
+        
+        // Check if product has stock
+        if (productData.stockQuantity <= 0) {
+          setError("This product is out of stock");
+          setTimeout(() => {
+            router.back();
+          }, 2000);
+          return;
+        }
+        
+        setProduct(productData);
+        setError(null);
       } else {
         setError("Product not found");
+        setTimeout(() => {
+          router.back();
+        }, 2000);
       }
     } catch (err) {
       console.error("Error fetching product:", err);
-      setError("Failed to load product");
+      setError("Failed to load product. Please try again later.");
+      setTimeout(() => {
+        router.back();
+      }, 2000);
     } finally {
       setLoading(false);
     }

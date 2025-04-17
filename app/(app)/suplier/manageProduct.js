@@ -86,8 +86,8 @@ const ManagementCard = ({ title, description, icon, iconBgColor, onPress, index 
         
         <View style={styles.arrowContainer}>
           <Ionicons name="chevron-forward" size={20} color="#a3a3a3" />
-        </View>
-      </TouchableOpacity>
+              </View>
+            </TouchableOpacity>
     </Animated.View>
   );
 };
@@ -108,7 +108,7 @@ const StatCard = ({ title, value, icon, color, index }) => {
       
       <View style={[styles.statIconContainer, { backgroundColor: `${color}30` }]}>
         {icon}
-      </View>
+              </View>
       
       <Text style={styles.statValue}>{value}</Text>
       <Text style={styles.statTitle}>{title}</Text>
@@ -308,7 +308,7 @@ export default function InventoryManagement() {
               index={index}
             />
           ))}
-        </View>
+          </View>
         
         <View style={styles.managementOptionsContainer}>
           {managementOptions.map((option, index) => (

@@ -6,6 +6,7 @@ import {
   signOut,
   onAuthStateChanged,
   updateProfile,
+  sendPasswordResetEmail,
 } from "firebase/auth";
 import { doc, setDoc, getDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
@@ -328,6 +329,28 @@ export default function AuthContextProvider({ children }) {
       setLoading(false);
     }
   };
+  const resetPassword = async (email) => {
+    setLoading(true);
+    try {
+      await sendPasswordResetEmail(auth, email);
+      Alert.alert(
+        "Success",
+        "Password reset email has been sent. Please check your inbox."
+      );
+    } catch (error) {
+      console.error("Reset Password Error:", error.message);
+      let errorMessage = "Failed to send reset email. Please try again.";
+      if (error.code === 'auth/user-not-found') {
+        errorMessage = "No user found with this email.";
+      } else if (error.code === 'auth/invalid-email') {
+        errorMessage = "Invalid email address.";
+      }
+      Alert.alert("Error", errorMessage);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const contextValue = {
     user,
@@ -342,6 +365,7 @@ export default function AuthContextProvider({ children }) {
     registerCustomer,
     registerEmployee,
     registerSupplier,
+    resetPassword,
     updateUserProfile: Register,
     updateUserData: Register,
     isAdmin: userData?.role === 'admin',

@@ -6,19 +6,23 @@ import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-nat
 import { useAuth } from 'app/context/authContext';
 import { Feather, Ionicons, MaterialIcons, FontAwesome5, AntDesign, Entypo, MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { router, usePathname } from 'expo-router';
+import { useRouter, usePathname } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { BlurView } from 'expo-blur';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { auth, db } from '../../firebase/firebaseConfig';
+import { doc, getDoc } from 'firebase/firestore';
 
 const { width, height } = Dimensions.get('window');
 
-export default function HomeHeader({ title, showBackButton = false, onBackPress, rightIcon }) {  
+export default function HomeHeader({ title, showBackButton = false, onBackPress, rightIcon }) {
+  const router = useRouter();
   const { user, signOut } = useAuth();
   const [showMenu, setShowMenu] = useState(false);
+  const [profileImage, setProfileImage] = useState(null);
   const pathname = usePathname();
   const insets = useSafeAreaInsets();
-  
+
   // Animation values
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const translateY = useRef(new Animated.Value(-10)).current;
@@ -27,7 +31,7 @@ export default function HomeHeader({ title, showBackButton = false, onBackPress,
   const menuFadeAnim = useRef(new Animated.Value(0)).current;
   const profileImageAnim = useRef(new Animated.Value(1)).current;
   const glowAnim = useRef(new Animated.Value(0)).current;
-  
+
   // Animation for decorative elements
   const bubbleAnim1 = useRef(new Animated.Value(1)).current;
   const bubbleAnim2 = useRef(new Animated.Value(1)).current;
@@ -36,11 +40,11 @@ export default function HomeHeader({ title, showBackButton = false, onBackPress,
   const particleAnim2 = useRef(new Animated.Value(0)).current;
   const particleAnim3 = useRef(new Animated.Value(0)).current;
   const rotateAnim = useRef(new Animated.Value(0)).current;
-  
+
   // Add title animation
   const titleAnim = useRef(new Animated.Value(0)).current;
   const underlineWidth = useRef(new Animated.Value(0)).current;
-  
+
   // Start animations on component mount
   useEffect(() => {
     // Entrance animations
@@ -73,15 +77,18 @@ export default function HomeHeader({ title, showBackButton = false, onBackPress,
         useNativeDriver: false,
       })
     ]).start();
-    
+
     // Start bubble animations
     animateBubbles();
     // Start particle animations
     animateParticles();
     // Start glow animation
     animateGlow();
+
+    // Fetch user profile image
+    fetchUserProfileImage();
   }, []);
-  
+
   // Animate decorative bubbles
   const animateBubbles = () => {
     // Create a looping animation for the bubbles
@@ -134,14 +141,14 @@ export default function HomeHeader({ title, showBackButton = false, onBackPress,
       ])
     ).start();
   };
-  
+
   // Animate floating particles
   const animateParticles = () => {
     // Reset positions
     particleAnim1.setValue(0);
     particleAnim2.setValue(0);
     particleAnim3.setValue(0);
-    
+
     // Create staggered animations for particles
     Animated.stagger(300, [
       Animated.timing(particleAnim1, {
@@ -164,7 +171,7 @@ export default function HomeHeader({ title, showBackButton = false, onBackPress,
       animateParticles();
     });
   };
-  
+
   // Animate glow effect
   const animateGlow = () => {
     Animated.loop(
@@ -182,7 +189,38 @@ export default function HomeHeader({ title, showBackButton = false, onBackPress,
       ])
     ).start();
   };
-  
+
+  // Fetch user profile image
+  const fetchUserProfileImage = async () => {
+    try {
+      if (!auth.currentUser) return;
+
+      const userId = auth.currentUser.uid;
+
+      // First try users collection
+      const userDoc = await getDoc(doc(db, 'users', userId));
+      if (userDoc.exists()) {
+        const data = userDoc.data();
+        if (data.profilePicture) {
+          setProfileImage(data.profilePicture);
+          return;
+        }
+      }
+
+      // If not found in users, try customers collection
+      const customerDoc = await getDoc(doc(db, 'customers', userId));
+      if (customerDoc.exists()) {
+        const data = customerDoc.data();
+        if (data.profilePicture) {
+          setProfileImage(data.profilePicture);
+          return;
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching profile image:", error);
+    }
+  };
+
   // Handle profile button press
   const handleProfilePress = () => {
     // Provide haptic feedback
@@ -196,7 +234,7 @@ export default function HomeHeader({ title, showBackButton = false, onBackPress,
     } else {
       Vibration.vibrate(20);
     }
-    
+
     // Animate profile image
     Animated.sequence([
       Animated.timing(profileImageAnim, {
@@ -210,10 +248,10 @@ export default function HomeHeader({ title, showBackButton = false, onBackPress,
         useNativeDriver: true,
       })
     ]).start();
-    
+
     // Show menu
     setShowMenu(true);
-    
+
     // Animate menu entrance
     Animated.parallel([
       Animated.timing(menuScaleAnim, {
@@ -228,7 +266,7 @@ export default function HomeHeader({ title, showBackButton = false, onBackPress,
       })
     ]).start();
   };
-  
+
   // Handle closing the menu
   const handleCloseMenu = () => {
     // Animate menu exit
@@ -247,7 +285,7 @@ export default function HomeHeader({ title, showBackButton = false, onBackPress,
       setShowMenu(false);
     });
   };
-  
+
   // Handle profile navigation
   const handleProfile = () => {
     handleCloseMenu();
@@ -268,7 +306,7 @@ export default function HomeHeader({ title, showBackButton = false, onBackPress,
       } else {
         Vibration.vibrate(100);
       }
-      
+
       await signOut();
       handleCloseMenu();
       router.replace('/login');
@@ -276,7 +314,7 @@ export default function HomeHeader({ title, showBackButton = false, onBackPress,
       console.error('Logout error:', error);
     }
   };
-  
+
   // Handle back button press
   const handleBack = () => {
     // Provide haptic feedback
@@ -290,7 +328,7 @@ export default function HomeHeader({ title, showBackButton = false, onBackPress,
     } else {
       Vibration.vibrate(15);
     }
-    
+
     if (onBackPress) {
       onBackPress();
     } else {
@@ -319,44 +357,35 @@ export default function HomeHeader({ title, showBackButton = false, onBackPress,
           ],
         }}
       >
-        <LinearGradient
-          colors={['#4338CA', '#6366F1', '#7C3AED']}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 0.8 }}
-          className="rounded-b-3xl shadow-xl"
+        <View
+          className="bg-green-500 py-4 rounded-b-3xl shadow-lg"
           style={{
-            shadowColor: "#4F46E5",
-            shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.3,
-            shadowRadius: 8,
-            elevation: 8,
-            overflow: 'hidden',
             paddingTop: insets.top > 0 ? insets.top : 14,
             paddingBottom: 20,
           }}
         >
           {/* Decorative Bubbles */}
-          <Animated.View 
+          <Animated.View
             className="absolute -top-8 -right-8 w-32 h-32 rounded-full bg-white/10"
             style={{
               transform: [{ scale: bubbleAnim1 }]
             }}
           />
-          <Animated.View 
+          <Animated.View
             className="absolute bottom-4 left-8 w-16 h-16 rounded-full bg-white/10"
             style={{
               transform: [{ scale: bubbleAnim2 }]
             }}
           />
-          <Animated.View 
+          <Animated.View
             className="absolute top-12 right-20 w-8 h-8 rounded-full bg-white/20"
             style={{
               transform: [{ scale: bubbleAnim3 }]
             }}
           />
-          
+
           {/* Floating particles */}
-          <Animated.View 
+          <Animated.View
             className="absolute w-3 h-3 rounded-full bg-white/40"
             style={{
               top: 15,
@@ -366,19 +395,20 @@ export default function HomeHeader({ title, showBackButton = false, onBackPress,
                 outputRange: [0, 1, 1, 0]
               }),
               transform: [
-                { 
+                {
                   translateY: particleAnim1.interpolate({
                     inputRange: [0, 1],
                     outputRange: [0, -30]
                   })
                 },
-                { 
+                {
                   translateX: particleAnim1.interpolate({
                     inputRange: [0, 0.3, 0.7, 1],
                     outputRange: [0, 10, -10, 0]
                   })
                 },
-                { scale: particleAnim1.interpolate({
+                {
+                  scale: particleAnim1.interpolate({
                     inputRange: [0, 0.2, 0.8, 1],
                     outputRange: [0.7, 1, 1, 0.7]
                   })
@@ -386,7 +416,7 @@ export default function HomeHeader({ title, showBackButton = false, onBackPress,
               ]
             }}
           />
-          <Animated.View 
+          <Animated.View
             className="absolute w-2 h-2 rounded-full bg-white/30"
             style={{
               top: 25,
@@ -396,19 +426,20 @@ export default function HomeHeader({ title, showBackButton = false, onBackPress,
                 outputRange: [0, 1, 1, 0]
               }),
               transform: [
-                { 
+                {
                   translateY: particleAnim2.interpolate({
                     inputRange: [0, 1],
                     outputRange: [0, -25]
                   })
                 },
-                { 
+                {
                   translateX: particleAnim2.interpolate({
                     inputRange: [0, 0.3, 0.7, 1],
                     outputRange: [0, -10, 10, 0]
                   })
                 },
-                { scale: particleAnim2.interpolate({
+                {
+                  scale: particleAnim2.interpolate({
                     inputRange: [0, 0.2, 0.8, 1],
                     outputRange: [0.8, 1, 1, 0.8]
                   })
@@ -416,7 +447,7 @@ export default function HomeHeader({ title, showBackButton = false, onBackPress,
               ]
             }}
           />
-          <Animated.View 
+          <Animated.View
             className="absolute w-2.5 h-2.5 rounded-full bg-white/50"
             style={{
               bottom: 20,
@@ -426,19 +457,20 @@ export default function HomeHeader({ title, showBackButton = false, onBackPress,
                 outputRange: [0, 1, 1, 0]
               }),
               transform: [
-                { 
+                {
                   translateY: particleAnim3.interpolate({
                     inputRange: [0, 1],
                     outputRange: [0, -20]
                   })
                 },
-                { 
+                {
                   translateX: particleAnim3.interpolate({
                     inputRange: [0, 0.3, 0.7, 1],
                     outputRange: [0, 8, -8, 0]
                   })
                 },
-                { scale: particleAnim3.interpolate({
+                {
+                  scale: particleAnim3.interpolate({
                     inputRange: [0, 0.2, 0.8, 1],
                     outputRange: [0.8, 1, 1, 0.8]
                   })
@@ -446,11 +478,11 @@ export default function HomeHeader({ title, showBackButton = false, onBackPress,
               ]
             }}
           />
-          
+
           {/* Rotating geometric shape */}
-          <Animated.View 
+          <Animated.View
             style={{
-          position: 'absolute',
+              position: 'absolute',
               top: 30,
               left: 20,
               width: 18,
@@ -463,12 +495,12 @@ export default function HomeHeader({ title, showBackButton = false, onBackPress,
               ]
             }}
           />
-          
+
           <View className="flex-row items-center justify-between px-5 pt-2">
             {/* Left: Back Button or Empty Space */}
             <View style={{ width: hp(4.5) }}>
               {showBackButton && (
-                <TouchableOpacity 
+                <TouchableOpacity
                   onPress={handleBack}
                   className="w-10 h-10 rounded-full items-center justify-center overflow-hidden"
                   activeOpacity={0.85}
@@ -480,13 +512,13 @@ export default function HomeHeader({ title, showBackButton = false, onBackPress,
                 </TouchableOpacity>
               )}
             </View>
-              
+
             {/* Center: Title with animated underline */}
             <Animated.View className="items-center"
               style={{
                 opacity: titleAnim,
                 transform: [
-                  { 
+                  {
                     translateY: titleAnim.interpolate({
                       inputRange: [0, 1],
                       outputRange: [5, 0]
@@ -495,16 +527,16 @@ export default function HomeHeader({ title, showBackButton = false, onBackPress,
                 ]
               }}
             >
-              <Text className="font-bold text-white text-xl text-center tracking-wide" 
-                style={{ 
-                  textShadowColor: 'rgba(0,0,0,0.2)', 
-                  textShadowOffset: { width: 0, height: 2 }, 
-                  textShadowRadius: 3 
+              <Text className="font-bold text-white text-xl text-center tracking-wide"
+                style={{
+                  textShadowColor: 'rgba(0,0,0,0.2)',
+                  textShadowOffset: { width: 0, height: 2 },
+                  textShadowRadius: 3
                 }}
               >
                 {title}
               </Text>
-              <Animated.View 
+              <Animated.View
                 className="bg-white/40 h-[3px] rounded-full mt-1"
                 style={{
                   width: underlineWidth.interpolate({
@@ -514,9 +546,9 @@ export default function HomeHeader({ title, showBackButton = false, onBackPress,
                 }}
               />
             </Animated.View>
-            
+
             {/* Right: Profile Picture or Custom Icon */}
-            <Animated.View 
+            <Animated.View
               style={{
                 transform: [{ scale: profileImageAnim }],
                 shadowColor: "#000",
@@ -537,11 +569,11 @@ export default function HomeHeader({ title, showBackButton = false, onBackPress,
                   <Ionicons name={rightIcon.name} size={22} color="#ffffff" />
                 </TouchableOpacity>
               ) : (
-          <TouchableOpacity 
+                <TouchableOpacity
                   onPress={handleProfilePress}
                   activeOpacity={0.85}
                 >
-                  <Animated.View 
+                  <Animated.View
                     className="relative"
                     style={{
                       shadowColor: "#ffffff",
@@ -555,28 +587,28 @@ export default function HomeHeader({ title, showBackButton = false, onBackPress,
                         outputRange: [3, 6]
                       }),
                     }}
-          >
-            <Image
-              style={{ 
-                        height: hp(4.8), 
+                  >
+                    <Image
+                      style={{
+                        height: hp(4.8),
                         width: hp(4.8),
                         borderRadius: hp(2.4),
-                borderWidth: 2,
-                borderColor: 'white'
-              }}
-              source={{ uri: user?.profileUrl } || ProfileImgPlaceholder}
-              placeholder={blurhash}
-              transition={500}
+                        borderWidth: 2,
+                        borderColor: 'white'
+                      }}
+                      source={profileImage ? { uri: profileImage } : ProfileImgPlaceholder}
+                      placeholder={blurhash}
+                      transition={500}
                       contentFit="cover"
-            />
+                    />
                     {/* Online indicator */}
                     <View className="absolute -right-1 -bottom-1 w-3.5 h-3.5 rounded-full bg-emerald-400 border-[1.5px] border-white" />
                   </Animated.View>
-          </TouchableOpacity>
+                </TouchableOpacity>
               )}
             </Animated.View>
           </View>
-          
+
           {/* Navigation Breadcrumb - Optional, only show for deeper paths */}
           {pathname && pathname.split('/').length > 2 && (
             <View className="overflow-hidden mx-4 mt-3 rounded-lg" style={styles.glassmorphism}>
@@ -591,35 +623,37 @@ export default function HomeHeader({ title, showBackButton = false, onBackPress,
               </View>
             </View>
           )}
-        </LinearGradient>
+        </View>
       </Animated.View>
 
-          {/* Menu Modal */}
-          <Modal
-            visible={showMenu}
-            transparent={true}
+      {/* Menu Modal */}
+      <Modal
+        visible={showMenu}
+        transparent={true}
         animationType="none"
         onRequestClose={handleCloseMenu}
-          >
-            <TouchableOpacity 
-              style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)' }}
-              activeOpacity={1}
+      >
+        <TouchableOpacity
+          style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)' }}
+          activeOpacity={1}
           onPress={handleCloseMenu}
-            >
-          <Animated.View 
+        >
+          <Animated.View
             style={{
-                position: 'absolute',
-                top: hp(8),
-                right: 15,
+              position: 'absolute',
+              top: hp(8),
+              right: 15,
               opacity: menuFadeAnim,
               transform: [
                 { scale: menuScaleAnim },
-                { translateY: menuFadeAnim.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [-20, 0]
-                })}
+                {
+                  translateY: menuFadeAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [-20, 0]
+                  })
+                }
               ],
-                backgroundColor: 'white',
+              backgroundColor: 'white',
               borderRadius: 24,
               padding: 0,
               minWidth: 240,
@@ -642,25 +676,25 @@ export default function HomeHeader({ title, showBackButton = false, onBackPress,
               <View className="absolute top-2 right-2 w-12 h-12 rounded-full bg-white/5" />
               <View className="absolute bottom-3 left-12 w-8 h-8 rounded-full bg-white/5" />
               <View className="absolute -bottom-4 right-16 w-16 h-16 rounded-full bg-white/5" />
-              
+
               <View className="flex-row items-center">
                 <View className="relative">
                   <Image
-                    style={{ 
-                      height: hp(6.5), 
+                    style={{
+                      height: hp(6.5),
                       width: hp(6.5),
                       borderRadius: hp(3.25),
                       borderWidth: 3,
                       borderColor: 'white'
                     }}
-                    source={{ uri: user?.profileUrl } || ProfileImgPlaceholder}
+                    source={profileImage ? { uri: profileImage } : ProfileImgPlaceholder}
                     placeholder={blurhash}
                     transition={500}
                     contentFit="cover"
                   />
                   <View className="absolute -right-1 -bottom-1 w-4 h-4 rounded-full bg-emerald-400 border-2 border-white" />
                 </View>
-                  <View className="ml-3">
+                <View className="ml-3">
                   <Text className="font-bold text-lg text-white">{displayName}</Text>
                   <Text className="text-sm text-white/80">{user?.email}</Text>
                 </View>
@@ -669,12 +703,12 @@ export default function HomeHeader({ title, showBackButton = false, onBackPress,
 
             <View className="px-1 py-2">
               {/* Menu Item: View Profile */}
-                <TouchableOpacity 
+              <TouchableOpacity
                 className="flex-row items-center py-3.5 px-4 mx-1 rounded-xl active:bg-gray-100"
-                  onPress={handleProfile}
-                >
+                onPress={handleProfile}
+              >
                 <View className="w-10 h-10 rounded-full bg-indigo-100 items-center justify-center mr-3">
-                    <Feather name="user" size={hp(2.2)} color="#4F46E5" />
+                  <Feather name="user" size={hp(2.2)} color="#4F46E5" />
                 </View>
                 <View className="flex-1">
                   <Text className="font-semibold text-gray-800">Profile</Text>
@@ -682,9 +716,9 @@ export default function HomeHeader({ title, showBackButton = false, onBackPress,
                 </View>
                 <Feather name="chevron-right" size={18} color="#9CA3AF" />
               </TouchableOpacity>
-              
+
               {/* Menu Item: Settings */}
-              <TouchableOpacity 
+              <TouchableOpacity
                 className="flex-row items-center py-3.5 px-4 mx-1 rounded-xl active:bg-gray-100"
                 onPress={() => {
                   handleCloseMenu();
@@ -700,9 +734,9 @@ export default function HomeHeader({ title, showBackButton = false, onBackPress,
                 </View>
                 <Feather name="chevron-right" size={18} color="#9CA3AF" />
               </TouchableOpacity>
-              
+
               {/* Menu Item: Notifications */}
-              <TouchableOpacity 
+              <TouchableOpacity
                 className="flex-row items-center py-3.5 px-4 mx-1 rounded-xl active:bg-gray-100"
                 onPress={() => {
                   handleCloseMenu();
@@ -721,12 +755,12 @@ export default function HomeHeader({ title, showBackButton = false, onBackPress,
                 </View>
                 <Feather name="chevron-right" size={18} color="#9CA3AF" />
               </TouchableOpacity>
-              
+
               {/* Menu Divider */}
               <View className="h-[1px] bg-gray-200 mx-4 my-1" />
-              
+
               {/* Menu Item: Help Center */}
-              <TouchableOpacity 
+              <TouchableOpacity
                 className="flex-row items-center py-3.5 px-4 mx-1 rounded-xl active:bg-gray-100"
                 onPress={() => {
                   handleCloseMenu();
@@ -741,25 +775,25 @@ export default function HomeHeader({ title, showBackButton = false, onBackPress,
                   <Text className="text-xs text-gray-500">Support and FAQ</Text>
                 </View>
                 <Feather name="chevron-right" size={18} color="#9CA3AF" />
-                </TouchableOpacity>
+              </TouchableOpacity>
 
               {/* Menu Item: Logout */}
-                <TouchableOpacity 
+              <TouchableOpacity
                 className="flex-row items-center py-3.5 px-4 mx-1 mt-1 mb-1 rounded-xl bg-red-50 active:bg-red-100"
-                  onPress={handleLogout}
-                >
+                onPress={handleLogout}
+              >
                 <View className="w-10 h-10 rounded-full bg-red-100 items-center justify-center mr-3">
-                    <AntDesign name="logout" size={hp(2.2)} color="#EF4444" />
-                  </View>
+                  <AntDesign name="logout" size={hp(2.2)} color="#EF4444" />
+                </View>
                 <View className="flex-1">
                   <Text className="font-semibold text-red-500">Logout</Text>
                   <Text className="text-xs text-red-400">Sign out of your account</Text>
                 </View>
-                </TouchableOpacity>
-              </View>
+              </TouchableOpacity>
+            </View>
           </Animated.View>
-            </TouchableOpacity>
-          </Modal>
+        </TouchableOpacity>
+      </Modal>
     </>
   );
 }

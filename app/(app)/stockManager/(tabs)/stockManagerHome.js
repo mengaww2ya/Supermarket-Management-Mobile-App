@@ -181,6 +181,32 @@ const stockOptions = [
     iconColor: "#10b981",
     textColor: "#15803d"
   },
+  { 
+    title: "Expiration Notification ",
+    description: "Create new products with images and inventory data",
+    route: "/stockManager/expire", 
+    icon: "add-circle", 
+    iconType: "Ionicons",
+    color: "bg-blue-50 dark:bg-blue-900/20",
+    gradientFrom: "#f0f9ff", 
+    gradientTo: "#e0f2fe",
+    iconColor: "#3b82f6",
+    textColor: "#4338ca"
+  },
+  { 
+    title: "expired products",
+    description: "View products that deleted",
+    route: "/stockManager/deleted", 
+    icon: "alert-circle", 
+    iconType: "Ionicons",
+    color: "bg-red-50 dark:bg-red-900/20",
+    gradientFrom: "#fef2f2",
+    gradientTo: "#fee2e2",
+    iconColor: "#ef4444",
+    textColor: "#b91c1c",
+    badge: "Alerts",
+    alertType: true
+  },
 ];
 
 // Quick action buttons from Manage_stock_levels.js
