@@ -14,6 +14,9 @@ const MainLayout = () => {
         const inAuthGroup = segments[0] === '(auth)';
         const inAppGroup = segments[0] === '(app)';
 
+        // Don't redirect if we're on the forgot password screen
+        if (segments[1] === 'forgot-password') return;
+
         if (!isAuthenticated && !inAuthGroup) {
             // Redirect to login if not authenticated
             router.replace('/login');

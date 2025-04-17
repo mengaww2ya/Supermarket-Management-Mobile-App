@@ -6,6 +6,7 @@ import {
   signOut,
   onAuthStateChanged,
   updateProfile,
+  sendPasswordResetEmail,
 } from "firebase/auth";
 import { doc, setDoc, getDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
@@ -117,7 +118,7 @@ export default function AuthContextProvider({ children }) {
         'firstName', 'lastName', 'email', 'phone', 'address',
         'dateOfBirth', 'gender', 'nationalId'
       ];
-      
+
       const missingFields = requiredFields.filter(field => !userData[field]);
       if (missingFields.length > 0) {
         throw new Error(`Missing required fields: ${missingFields.join(', ')}`);
@@ -188,7 +189,7 @@ export default function AuthContextProvider({ children }) {
       const requiredFields = [
         'companyName', 'contactPerson', 'email', 'phone', 'address'
       ];
-      
+
       const missingFields = requiredFields.filter(field => !supplierData[field]);
       if (missingFields.length > 0) {
         throw new Error(`Missing required fields: ${missingFields.join(', ')}`);
@@ -213,13 +214,13 @@ export default function AuthContextProvider({ children }) {
         phone: supplierData.phone,
         address: supplierData.address,
         companyName: supplierData.companyName,
-        
+
         // Optional fields
         website: supplierData.website || '',
         taxId: supplierData.taxId || '',
         productType: supplierData.productType || '',
         yearEstablished: supplierData.yearEstablished || '',
-        
+
         // System Fields
         role: 'supplier',
         createdAt: new Date(),
@@ -304,12 +305,11 @@ export default function AuthContextProvider({ children }) {
       console.error("Login Error:", error.message);
       let errorMessage = "Failed to log in. Please check your credentials.";
       if (error.code === 'auth/user-not-found') {
-        errorMessage = "No user found with this email.";
+        errorMessage = "No user found with this email";
       } else if (error.code === 'auth/wrong-password') {
-        errorMessage = "Incorrect password.";
+        errorMessage = "Wrong password. Please insert the correct password";
       }
-      Alert.alert("Error", errorMessage);
-      throw error;
+      throw new Error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -324,6 +324,29 @@ export default function AuthContextProvider({ children }) {
     } catch (error) {
       console.error("Logout Error:", error.message);
       Alert.alert("Error", "Failed to log out. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const resetPassword = async (email) => {
+    setLoading(true);
+    try {
+      await sendPasswordResetEmail(auth, email);
+      Alert.alert(
+        "Success",
+        "Password reset email has been sent. Please check your inbox."
+      );
+    } catch (error) {
+      console.error("Reset Password Error:", error.message);
+      let errorMessage = "Failed to send reset email. Please try again.";
+      if (error.code === 'auth/user-not-found') {
+        errorMessage = "No user found with this email.";
+      } else if (error.code === 'auth/invalid-email') {
+        errorMessage = "Invalid email address.";
+      }
+      Alert.alert("Error", errorMessage);
+      throw error;
     } finally {
       setLoading(false);
     }
@@ -344,6 +367,7 @@ export default function AuthContextProvider({ children }) {
     registerSupplier,
     updateUserProfile: Register,
     updateUserData: Register,
+    resetPassword,     // Add the resetPassword function
     isAdmin: userData?.role === 'admin',
     isManager: userData?.role === 'manager',
     isCustomer: userData?.role === 'customer',

@@ -10,7 +10,7 @@ const firebaseConfig = {
   storageBucket: Constants.expoConfig.extra.firebaseStorageBucket,
   messagingSenderId: Constants.expoConfig.extra.firebaseMessagingSenderId,
   appId: Constants.expoConfig.extra.firebaseAppId,
-   measurementId: Constants.expoConfig.extra.firebaseMeasurementId,
+  measurementId: Constants.expoConfig.extra.firebaseMeasurementId,
 };
 const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
 const auth = getAuth(app);  // ✅ Changed from initializeAuth

@@ -10,6 +10,7 @@ import {
   Animated,
   KeyboardAvoidingView,
   Platform,
+  Modal,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -24,6 +25,8 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [fadeAnim] = useState(new Animated.Value(0));
   const [slideAnim] = useState(new Animated.Value(50));
+  const [showErrorModal, setShowErrorModal] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
   const router = useRouter();
   const { signIn, loading } = useAuth();
 
@@ -45,7 +48,8 @@ export default function Login() {
   // Handle login
   const handleLogin = async () => {
     if (!email || !password) {
-      Alert.alert('Error', 'Please fill in all fields');
+      setErrorMessage('Please fill in all fields');
+      setShowErrorModal(true);
       return;
     }
 
@@ -53,17 +57,18 @@ export default function Login() {
       await signIn(email, password);
       // Navigation will be handled by the root layout based on role
     } catch (error) {
-      // Error handling is done in the context
+      setErrorMessage(error.message);
+      setShowErrorModal(true);
     }
   };
 
   return (
     <SafeAreaView className="flex-1 bg-gray-100">
-      <KeyboardAvoidingView 
+      <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         className="flex-1"
       >
-        <View className="bg-yellow-400 p-5 items-center rounded-b-3xl shadow-lg">
+        <View className="bg-green-500 p-5 items-center rounded-b-3xl shadow-lg">
           <Animatable.View
             animation="bounceIn"
             duration={1500}
@@ -73,10 +78,10 @@ export default function Login() {
               name="shopping-cart"
               type="font-awesome"
               size={40}
-              color="#FFDC2B"
+              color="#22C55E"
             />
           </Animatable.View>
-          <Animatable.Text 
+          <Animatable.Text
             animation="fadeInDown"
             duration={1500}
             className="text-2xl font-bold text-black text-center mb-2"
@@ -86,14 +91,14 @@ export default function Login() {
           </Animatable.Text>
         </View>
 
-        <Animated.View 
+        <Animated.View
           className="flex-1 justify-center items-center px-5"
           style={{
             opacity: fadeAnim,
             transform: [{ translateY: slideAnim }],
           }}
         >
-          <Animatable.Text 
+          <Animatable.Text
             animation="fadeInUp"
             duration={1500}
             className="text-lg font-semibold mb-8 text-center text-gray-600"
@@ -102,7 +107,7 @@ export default function Login() {
             Fill the form below to log in
           </Animatable.Text>
 
-          <Animatable.View 
+          <Animatable.View
             animation="fadeInLeft"
             duration={1500}
             className="flex-row items-center bg-white rounded-xl mb-4 w-full shadow-md"
@@ -126,7 +131,7 @@ export default function Login() {
             />
           </Animatable.View>
 
-          <Animatable.View 
+          <Animatable.View
             animation="fadeInRight"
             duration={1500}
             className="flex-row items-center bg-white rounded-xl mb-4 w-full shadow-md"
@@ -160,16 +165,15 @@ export default function Login() {
             </TouchableOpacity>
           </Animatable.View>
 
-          <Animatable.View 
+          <Animatable.View
             animation="fadeInUp"
             duration={1500}
             className="w-full mt-5"
           >
             {/* Login Button */}
-            <Pressable 
-              className={`bg-green-500 py-4 rounded-xl w-full mb-3 shadow-lg ${
-                loading ? 'opacity-70' : ''
-              }`}
+            <Pressable
+              className={`bg-green-500 py-4 rounded-xl w-full mb-3 shadow-lg ${loading ? 'opacity-70' : ''
+                }`}
               onPress={handleLogin}
               disabled={loading}
             >
@@ -182,17 +186,19 @@ export default function Login() {
               )}
             </Pressable>
 
-            <TouchableOpacity className="py-2 mb-3">
+            <TouchableOpacity
+              className="py-2 mb-3"
+              onPress={() => router.push('/(auth)/forgot-password')}
+            >
               <Text className="text-blue-500 text-center text-base">
                 Forgot password?
               </Text>
             </TouchableOpacity>
 
             {/* Sign-Up Button */}
-            <Pressable 
-              className={`bg-gray-200 py-4 rounded-xl w-full mb-3 shadow-md ${
-                loading ? 'opacity-70' : ''
-              }`}
+            <Pressable
+              className={`bg-gray-200 py-4 rounded-xl w-full mb-3 shadow-md ${loading ? 'opacity-70' : ''
+                }`}
               onPress={() => router.push('/(auth)/signup')}
               disabled={loading}
             >
@@ -200,21 +206,44 @@ export default function Login() {
                 I don't have an account? Sign up
               </Text>
             </Pressable>
-
-            {/* Developer Button */}
-            <Pressable 
-              className={`bg-blue-500 py-4 rounded-xl w-full shadow-lg ${
-                loading ? 'opacity-70' : ''
-              }`}
-              onPress={() => router.push('/screans/developingHompage')}
-              disabled={loading}
-            >
-              <Text className="text-center text-white text-lg font-bold">
-                I am Developer
-              </Text>
-            </Pressable>
           </Animatable.View>
         </Animated.View>
+
+        {/* Custom Error Modal */}
+        <Modal
+          visible={showErrorModal}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setShowErrorModal(false)}
+        >
+          <View className="flex-1 justify-center items-center bg-black/50">
+            <Animatable.View
+              animation="bounceIn"
+              duration={500}
+              className="bg-white rounded-2xl p-6 w-4/5 shadow-lg"
+            >
+              <View className="items-center mb-4">
+                <Icon
+                  name="exclamation-circle"
+                  type="font-awesome"
+                  size={40}
+                  color="#22C55E"
+                />
+              </View>
+              <Text className="text-center text-gray-700 text-lg mb-4">
+                {errorMessage}
+              </Text>
+              <Pressable
+                className="bg-[#22C55E] py-3 rounded-xl"
+                onPress={() => setShowErrorModal(false)}
+              >
+                <Text className="text-center text-white text-base font-semibold">
+                  OK
+                </Text>
+              </Pressable>
+            </Animatable.View>
+          </View>
+        </Modal>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );

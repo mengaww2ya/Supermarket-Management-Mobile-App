@@ -69,8 +69,8 @@ export default function Signup() {
 
   const handleSignup = async () => {
     // Validate form
-    if (!formData.email || !formData.password || !formData.confirmPassword || 
-        !formData.firstName || !formData.lastName || !formData.phone || !formData.address) {
+    if (!formData.email || !formData.password || !formData.confirmPassword ||
+      !formData.firstName || !formData.lastName || !formData.phone || !formData.address) {
       Alert.alert('Error', 'Please fill in all fields');
       return;
     }
@@ -99,7 +99,7 @@ export default function Signup() {
       };
 
       await registerCustomer(formData.email, formData.password, userData);
-      
+
       Alert.alert('Success', 'Account created successfully!');
       router.push('/customer/homepage');
     } catch (error) {
@@ -110,11 +110,11 @@ export default function Signup() {
 
   return (
     <SafeAreaView className="flex-1 bg-gray-100">
-      <KeyboardAvoidingView 
+      <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         className="flex-1"
       >
-        <View className="bg-yellow-400 p-5 items-center rounded-b-3xl shadow-lg">
+        <View className="bg-green-500 p-5 items-center rounded-b-3xl shadow-lg">
           <Animatable.View
             animation="bounceIn"
             duration={1500}
@@ -124,10 +124,10 @@ export default function Signup() {
               name="user-plus"
               type="font-awesome"
               size={40}
-              color="#FFDC2B"
+              color="#22C55E"
             />
           </Animatable.View>
-          <Animatable.Text 
+          <Animatable.Text
             animation="fadeInDown"
             duration={1500}
             className="text-2xl font-bold text-black text-center mb-2"
@@ -137,12 +137,12 @@ export default function Signup() {
           </Animatable.Text>
         </View>
 
-        <ScrollView 
+        <ScrollView
           className="flex-1"
           contentContainerStyle={{ padding: 20 }}
           showsVerticalScrollIndicator={false}
         >
-          <Animated.View 
+          <Animated.View
             style={{
               opacity: fadeAnim,
               transform: [{ translateY: slideAnim }],
@@ -176,7 +176,7 @@ export default function Signup() {
             </Animatable.View> */}
 
             {/* Form Fields */}
-            <Animatable.View 
+            <Animatable.View
               animation="fadeInLeft"
               duration={1500}
               className="space-y-4"
@@ -316,15 +316,14 @@ export default function Signup() {
             </Animatable.View>
 
             {/* Buttons */}
-            <Animatable.View 
+            <Animatable.View
               animation="fadeInUp"
               duration={1500}
               className="mt-6 space-y-4"
             >
-              <Pressable 
-                className={`bg-green-500 py-4 rounded-xl w-full shadow-lg ${
-                  loading ? 'opacity-70' : ''
-                }`}
+              <Pressable
+                className={`bg-green-500 py-4 rounded-xl w-full shadow-lg ${loading ? 'opacity-70' : ''
+                  }`}
                 onPress={handleSignup}
                 disabled={loading}
               >
@@ -337,7 +336,7 @@ export default function Signup() {
                 )}
               </Pressable>
 
-              <Pressable 
+              <Pressable
                 className="bg-gray-200 py-4 rounded-xl w-full shadow-md"
                 onPress={() => router.back()}
               >

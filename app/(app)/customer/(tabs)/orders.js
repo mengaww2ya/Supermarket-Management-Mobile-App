@@ -23,11 +23,11 @@ import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import { router } from 'expo-router';
 import { db } from "../../../../firebase/firebaseConfig";
-import { 
-  collection, 
-  query, 
-  where, 
-  getDocs, 
+import {
+  collection,
+  query,
+  where,
+  getDocs,
   orderBy,
   limit,
   doc,
@@ -61,7 +61,7 @@ export default function CustomerOrdersScreen() {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [orderDetailVisible, setOrderDetailVisible] = useState(false);
   const [filterModalVisible, setFilterModalVisible] = useState(false);
-  
+
   // Get authentication context
   const { user } = useAuth();
 
@@ -80,10 +80,10 @@ export default function CustomerOrdersScreen() {
     const now = new Date();
     const yesterday = new Date(now);
     yesterday.setDate(yesterday.getDate() - 1);
-    
+
     const lastWeek = new Date(now);
     lastWeek.setDate(lastWeek.getDate() - 7);
-    
+
     return [
       {
         id: 'order-1',
@@ -201,17 +201,17 @@ export default function CustomerOrdersScreen() {
     try {
       setLoading(true);
       setError(null);
-      
+
       if (!user?.uid) {
         setError("Please log in to view your orders");
         setLoading(false);
         return;
       }
-      
+
       // Get only the current user's orders
       const ordersCollectionRef = collection(db, "users", user.uid, "orders");
       const ordersSnapshot = await getDocs(ordersCollectionRef);
-      
+
       if (ordersSnapshot.empty) {
         console.log("No orders found for this user");
         setOrders([]);
@@ -219,35 +219,35 @@ export default function CustomerOrdersScreen() {
         setLoading(false);
         return;
       }
-      
+
       const userOrders = ordersSnapshot.docs.map(doc => {
         const data = doc.data();
-        
+
         // Format date fields from Firestore timestamps
-        const date = data.createdAt?.toDate ? data.createdAt.toDate() : 
-                      data.date?.toDate ? data.date.toDate() : new Date();
+        const date = data.createdAt?.toDate ? data.createdAt.toDate() :
+          data.date?.toDate ? data.date.toDate() : new Date();
         const deliveryDate = data.deliveryDate?.toDate ? data.deliveryDate.toDate() : null;
         const estimatedDelivery = data.estimatedDelivery?.toDate ? data.estimatedDelivery.toDate() : null;
-        const lastUpdated = data.lastUpdated?.toDate ? data.lastUpdated.toDate() : 
-                              data.updatedAt?.toDate ? data.updatedAt.toDate() : null;
-        
+        const lastUpdated = data.lastUpdated?.toDate ? data.lastUpdated.toDate() :
+          data.updatedAt?.toDate ? data.updatedAt.toDate() : null;
+
         // Get payment info
         const payment = data.payment || {};
         const paymentMethod = payment.method || 'N/A';
-        
+
         // Get customer details
         const customerDetails = data.customerDetails || {};
-        
+
         // Get delivery details
         const deliveryDetails = data.deliveryDetails || {};
         const deliveryAddress = deliveryDetails.address || 'N/A';
-        
+
         // Get delivery agent
         const deliveryAgent = data.deliveryAgent || {};
-        
+
         // Get items
         const items = Array.isArray(data.items) ? data.items : [];
-        
+
         return {
           id: doc.id,
           customerId: user.uid,
@@ -275,20 +275,20 @@ export default function CustomerOrdersScreen() {
           cancellationReason: data.cancellationReason || '',
         };
       });
-      
+
       // Sort orders by date (newest first)
       userOrders.sort((a, b) => b.date - a.date);
-      
+
       console.log(`Found ${userOrders.length} orders for this user`);
       setOrders(userOrders);
-      
+
       // Apply initial filtering based on the active tab
       filterOrdersByTab(userOrders, activeTab);
-      
+
     } catch (error) {
       console.error("Error fetching orders:", error);
       setError("Failed to load orders. Please try again.");
-      
+
       // Use mock data as fallback ONLY in development
       if (__DEV__) {
         console.log("Using mock data as fallback in development");
@@ -311,7 +311,7 @@ export default function CustomerOrdersScreen() {
       setFilteredOrders(ordersList);
       return;
     }
-    
+
     const filtered = ordersList.filter(order => order.status === tab);
     setFilteredOrders(filtered);
   }, []);
@@ -322,9 +322,9 @@ export default function CustomerOrdersScreen() {
       filterOrdersByTab(orders, activeTab);
       return;
     }
-    
+
     const searchLower = query.toLowerCase().trim();
-    
+
     const filtered = orders.filter(order => {
       return (
         order.orderNumber.toLowerCase().includes(searchLower) ||
@@ -332,7 +332,7 @@ export default function CustomerOrdersScreen() {
         order.items.some(item => item.name.toLowerCase().includes(searchLower))
       );
     });
-    
+
     setFilteredOrders(filtered);
   }, [orders, activeTab, filterOrdersByTab]);
 
@@ -345,7 +345,7 @@ export default function CustomerOrdersScreen() {
   // Effect to fetch orders on mount and when tab changes
   useEffect(() => {
     fetchOrders();
-    
+
     // Animate entrance
     Animated.parallel([
       Animated.timing(fadeAnim, {
@@ -392,7 +392,7 @@ export default function CustomerOrdersScreen() {
   useEffect(() => {
     if (filterModalVisible) {
       Animated.timing(filterModalAnim, {
-        toValue: 1, 
+        toValue: 1,
         duration: 300,
         useNativeDriver: true,
       }).start();
@@ -408,12 +408,12 @@ export default function CustomerOrdersScreen() {
   // Render header with search and filter options
   const renderHeader = () => {
     const activeTabLabel = tabs.find(tab => tab.id === activeTab)?.label || 'All Orders';
-    
+
     return (
       <View style={styles.header}>
         <Text style={styles.headerTitle}>My Orders</Text>
         <Text style={styles.headerSubtitle}>Track and manage all your orders</Text>
-        
+
         <View style={styles.searchAndFilterContainer}>
           {isSearchVisible ? (
             <View style={styles.searchBar}>
@@ -433,7 +433,7 @@ export default function CustomerOrdersScreen() {
               ) : null}
             </View>
           ) : (
-            <Pressable 
+            <Pressable
               style={styles.searchBar}
               onPress={() => setIsSearchVisible(true)}
             >
@@ -441,11 +441,11 @@ export default function CustomerOrdersScreen() {
               <Text style={{ color: '#94a3b8', flex: 1 }}>Search orders...</Text>
             </Pressable>
           )}
-          
-          <Pressable 
+
+          <Pressable
             style={[
               styles.filterButton,
-              activeTab !== 'all' && { 
+              activeTab !== 'all' && {
                 backgroundColor: '#eff6ff',
                 borderColor: '#3b82f6'
               }
@@ -453,10 +453,10 @@ export default function CustomerOrdersScreen() {
             onPress={() => setFilterModalVisible(true)}
           >
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <Feather 
-                name="filter" 
-                size={20} 
-                color={activeTab !== 'all' ? '#3b82f6' : '#64748b'} 
+              <Feather
+                name="filter"
+                size={20}
+                color={activeTab !== 'all' ? '#3b82f6' : '#64748b'}
               />
               {activeTab !== 'all' && (
                 <View style={{
@@ -472,7 +472,7 @@ export default function CustomerOrdersScreen() {
             </View>
           </Pressable>
         </View>
-        
+
         {activeTab !== 'all' && (
           <View style={{
             flexDirection: 'row',
@@ -509,7 +509,7 @@ export default function CustomerOrdersScreen() {
 
   // Function to get status color based on order status
   const getStatusColor = (status) => {
-    switch(status) {
+    switch (status) {
       case 'pending':
         return {
           bg: '#fef3c7',
@@ -561,19 +561,19 @@ export default function CustomerOrdersScreen() {
   // Render tabs for filtering orders by status
   const renderTabs = () => (
     <View style={styles.tabsContainer}>
-      <ScrollView 
+      <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.tabScrollView}
       >
         {tabs.map(tab => (
-          <TouchableOpacity 
+          <TouchableOpacity
             key={tab.id}
             style={[
               styles.tabButton,
               activeTab === tab.id && {
-                backgroundColor: activeTab === 'cancelled' 
-                  ? '#fee2e2' 
+                backgroundColor: activeTab === 'cancelled'
+                  ? '#fee2e2'
                   : activeTab === 'delivered'
                     ? '#dcfce7'
                     : '#eff6ff'
@@ -586,9 +586,9 @@ export default function CustomerOrdersScreen() {
           >
             <Text style={[
               styles.tabText,
-              activeTab === tab.id && { 
-                color: activeTab === 'cancelled' 
-                  ? '#dc2626' 
+              activeTab === tab.id && {
+                color: activeTab === 'cancelled'
+                  ? '#dc2626'
                   : activeTab === 'delivered'
                     ? '#16a34a'
                     : '#2563eb',
@@ -609,17 +609,17 @@ export default function CustomerOrdersScreen() {
     const statusColors = getStatusColor(item.status || 'pending');
     const statusText = (item.status || 'pending').charAt(0).toUpperCase() + (item.status || 'pending').slice(1);
     const formattedDate = item.date ? formatDate(item.date) : 'Unknown date';
-    
+
     // Ensure items exists and is an array
     const itemsArray = Array.isArray(item.items) ? item.items : [];
-    
+
     // Limit items to preview
     const itemsToShow = itemsArray.slice(0, 3);
     const extraItems = itemsArray.length > 3 ? itemsArray.length - 3 : 0;
-    
+
     // Default image for items without images
     const defaultItemImage = 'https://via.placeholder.com/60?text=Item';
-    
+
     return (
       <Animated.View
         style={[
@@ -646,34 +646,34 @@ export default function CustomerOrdersScreen() {
                 <Text style={styles.orderDate}>{formattedDate}</Text>
               </View>
             </View>
-            
+
             <View style={[styles.statusBadge, { backgroundColor: statusColors.bg }]}>
               <Text style={[styles.statusText, { color: statusColors.text }]}>
                 {statusText}
               </Text>
             </View>
           </View>
-          
+
           <View style={styles.orderCardBody}>
             {/* Items preview */}
             <View style={styles.itemsPreviewContainer}>
               {itemsToShow.length > 0 ? (
                 <>
                   {itemsToShow.map((item, index) => (
-                    <Image 
+                    <Image
                       key={item.id || index}
                       source={{ uri: item.image || defaultItemImage }}
                       style={[styles.itemPreviewImage, index === 0 && { marginLeft: 0 }]}
                       defaultSource={{ uri: defaultItemImage }}
                     />
                   ))}
-                  
+
                   {extraItems > 0 && (
                     <View style={styles.moreItemsContainer}>
                       <Text style={styles.moreItemsText}>+{extraItems}</Text>
                     </View>
                   )}
-                  
+
                   <Text style={styles.itemCountText}>
                     {itemsArray.length} {itemsArray.length === 1 ? 'item' : 'items'}
                   </Text>
@@ -682,7 +682,7 @@ export default function CustomerOrdersScreen() {
                 <Text style={styles.itemCountText}>No items</Text>
               )}
             </View>
-            
+
             {/* Order details */}
             <View style={styles.orderInfoContainer}>
               <View style={styles.orderInfoRow}>
@@ -691,14 +691,14 @@ export default function CustomerOrdersScreen() {
                   {item.deliveryAddress || 'No address provided'}
                 </Text>
               </View>
-              
+
               <View style={styles.orderInfoRow}>
                 <Feather name="credit-card" size={16} color="#94a3b8" style={styles.orderInfoIcon} />
                 <Text style={styles.orderInfoText}>
                   {item.paymentMethod || 'Payment info not available'}
                 </Text>
               </View>
-              
+
               {item.status === 'shipping' && item.estimatedDelivery && (
                 <View style={styles.estimatedDeliveryContainer}>
                   <Feather name="clock" size={16} color="#0d9488" style={styles.orderInfoIcon} />
@@ -709,19 +709,19 @@ export default function CustomerOrdersScreen() {
               )}
             </View>
           </View>
-          
+
           <View style={styles.orderFooter}>
             <View style={styles.orderTotal}>
               <Text style={styles.orderTotalText}>Total</Text>
               <Text style={styles.orderTotalAmount}>
-                {typeof item.totalAmount === 'number' 
-                  ? item.totalAmount.toFixed(2) 
+                {typeof item.totalAmount === 'number'
+                  ? item.totalAmount.toFixed(2)
                   : parseFloat(item.totalAmount || '0').toFixed(2)} Birr
               </Text>
             </View>
-            
+
             <View style={styles.orderActions}>
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={styles.viewDetailsButton}
                 onPress={() => {
                   setSelectedOrder(item);
@@ -734,9 +734,9 @@ export default function CustomerOrdersScreen() {
                   View Details
                 </Text>
               </TouchableOpacity>
-              
+
               {item.status === 'shipping' && (
-                <TouchableOpacity 
+                <TouchableOpacity
                   style={styles.trackOrderButton}
                   onPress={() => {
                     // Navigate to tracking page
@@ -752,9 +752,9 @@ export default function CustomerOrdersScreen() {
                   </Text>
                 </TouchableOpacity>
               )}
-              
+
               {item.status === 'delivered' && (
-                <TouchableOpacity 
+                <TouchableOpacity
                   style={styles.reviewOrderButton}
                   onPress={() => {
                     // Navigate to review page
@@ -770,9 +770,9 @@ export default function CustomerOrdersScreen() {
                   </Text>
                 </TouchableOpacity>
               )}
-              
+
               {item.status === 'pending' && (
-                <TouchableOpacity 
+                <TouchableOpacity
                   style={styles.cancelOrderButton}
                   onPress={() => {
                     // Show cancel confirmation
@@ -789,26 +789,26 @@ export default function CustomerOrdersScreen() {
                               // Get reference to the order document
                               const userRef = doc(db, "users", user.uid);
                               const orderRef = doc(collection(userRef, "orders"), item.id);
-                              
+
                               // Update order status to cancelled
                               await updateDoc(orderRef, {
                                 status: 'cancelled',
                                 cancellationReason: 'Customer requested cancellation',
                                 updatedAt: new Date()
                               });
-                              
+
                               // Update local state
-                              const updatedOrders = orders.map(order => 
-                                order.id === item.id 
-                                  ? { 
-                                      ...order, 
-                                      status: 'cancelled', 
-                                      cancellationReason: 'Customer requested cancellation' 
-                                    }
+                              const updatedOrders = orders.map(order =>
+                                order.id === item.id
+                                  ? {
+                                    ...order,
+                                    status: 'cancelled',
+                                    cancellationReason: 'Customer requested cancellation'
+                                  }
                                   : order
                               );
                               setOrders(updatedOrders);
-                              
+
                               // Show success message
                               Alert.alert(
                                 'Order Cancelled',
@@ -848,20 +848,20 @@ export default function CustomerOrdersScreen() {
         style={styles.noOrdersImage}
         resizeMode="contain"
       />
-      
+
       <Text style={styles.noOrdersTitle}>
         {searchQuery.trim() || activeTab !== 'all'
           ? 'No orders found'
           : 'No orders yet'}
       </Text>
-      
+
       <Text style={styles.noOrdersText}>
         {searchQuery.trim() || activeTab !== 'all'
           ? 'Try changing your filters or search query'
           : 'Browse our products and place your first order'}
       </Text>
-      
-      <TouchableOpacity 
+
+      <TouchableOpacity
         style={styles.shopNowButton}
         onPress={() => router.push("/(app)/customer/(tabs)/homepage")}
       >
@@ -874,10 +874,10 @@ export default function CustomerOrdersScreen() {
   // Render order detail modal
   const renderOrderDetailModal = () => {
     if (!selectedOrder) return null;
-    
+
     const orderStatusColors = getStatusColor(selectedOrder.status || 'pending');
     const statusText = (selectedOrder.status || 'pending').charAt(0).toUpperCase() + (selectedOrder.status || 'pending').slice(1);
-    
+
     return (
       <View style={styles.modal}>
         {/* Background pressable for closing the modal */}
@@ -892,24 +892,24 @@ export default function CustomerOrdersScreen() {
             opacity: orderModalAnim,
           }}
         >
-          <Pressable 
+          <Pressable
             style={{ flex: 1 }}
             onPress={() => {
               setOrderDetailVisible(false);
             }}
           />
         </Animated.View>
-        
-        <Animated.View 
+
+        <Animated.View
           style={[
             styles.modalContent,
             {
               transform: [
-                { 
+                {
                   scale: orderModalAnim.interpolate({
                     inputRange: [0, 1],
                     outputRange: [0.9, 1]
-                  }) 
+                  })
                 }
               ],
               opacity: orderModalAnim
@@ -925,17 +925,17 @@ export default function CustomerOrdersScreen() {
                 borderTopRightRadius: 20,
               }}
             >
-              <View style={{ 
-                flexDirection: 'row', 
-                justifyContent: 'space-between', 
-                alignItems: 'center' 
+              <View style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'center'
               }}>
                 <View style={styles.orderNumberPill}>
                   <Text style={styles.orderNumberPillText}>
                     {selectedOrder.orderRef || `Order #${selectedOrder.id.slice(0, 6)}`}
                   </Text>
                 </View>
-                
+
                 <TouchableOpacity
                   style={{
                     width: 40,
@@ -952,16 +952,16 @@ export default function CustomerOrdersScreen() {
                   <Feather name="x" size={20} color="white" />
                 </TouchableOpacity>
               </View>
-              
-              <Text style={{ 
-                fontSize: 24, 
-                fontWeight: 'bold', 
+
+              <Text style={{
+                fontSize: 24,
+                fontWeight: 'bold',
                 color: 'white',
                 marginTop: 12
               }}>
                 Order Details
               </Text>
-              
+
               <View style={styles.orderDetailStatusContainer}>
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                   {selectedOrder.orderStatus === 'pending' && <Feather name="clock" size={18} color="white" style={{ marginRight: 8 }} />}
@@ -969,25 +969,25 @@ export default function CustomerOrdersScreen() {
                   {selectedOrder.orderStatus === 'shipping' && <Feather name="truck" size={18} color="white" style={{ marginRight: 8 }} />}
                   {selectedOrder.orderStatus === 'delivered' && <Feather name="check-circle" size={18} color="white" style={{ marginRight: 8 }} />}
                   {selectedOrder.orderStatus === 'cancelled' && <Feather name="x-circle" size={18} color="white" style={{ marginRight: 8 }} />}
-                  
+
                   <Text style={{ fontSize: 16, fontWeight: '600', color: 'white' }}>
                     {selectedOrder.orderStatus || statusText}
                   </Text>
                 </View>
-                
+
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                   <Feather name="calendar" size={14} color="rgba(255, 255, 255, 0.8)" style={{ marginRight: 6 }} />
                   <Text style={{ fontSize: 14, color: 'rgba(255, 255, 255, 0.8)' }}>
-                    {selectedOrder.createdAt ? formatDate(selectedOrder.createdAt) : 
-                     selectedOrder.date ? formatDate(selectedOrder.date) : 'Unknown date'}
+                    {selectedOrder.createdAt ? formatDate(selectedOrder.createdAt) :
+                      selectedOrder.date ? formatDate(selectedOrder.date) : 'Unknown date'}
                   </Text>
                 </View>
               </View>
-              
+
               {/* Add last updated information if available */}
               {(selectedOrder.lastUpdated || selectedOrder.updatedAt) && (
-                <View style={{ 
-                  marginTop: 8, 
+                <View style={{
+                  marginTop: 8,
                   backgroundColor: 'rgba(255, 255, 255, 0.2)',
                   paddingHorizontal: 12,
                   paddingVertical: 6,
@@ -996,27 +996,27 @@ export default function CustomerOrdersScreen() {
                   <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                     <Feather name="refresh-cw" size={12} color="rgba(255, 255, 255, 0.9)" style={{ marginRight: 6 }} />
                     <Text style={{ fontSize: 12, color: 'rgba(255, 255, 255, 0.9)' }}>
-                      Last updated: {selectedOrder.lastUpdated ? formatDate(selectedOrder.lastUpdated) : 
-                                  selectedOrder.updatedAt ? formatDate(selectedOrder.updatedAt) : 'Unknown'}
+                      Last updated: {selectedOrder.lastUpdated ? formatDate(selectedOrder.lastUpdated) :
+                        selectedOrder.updatedAt ? formatDate(selectedOrder.updatedAt) : 'Unknown'}
                     </Text>
                   </View>
                 </View>
               )}
-              
+
               {/* Order progress tracker */}
               {selectedOrder.orderStatus !== 'cancelled' && (
                 <View style={styles.orderProgressTracker}>
                   <View style={styles.orderProgressLine}>
                     <View style={[
                       styles.orderProgressLineFill,
-                      { 
-                        width: selectedOrder.orderStatus === 'pending' ? '0%' : 
-                               selectedOrder.orderStatus === 'Processing' ? '33%' :
-                               selectedOrder.orderStatus === 'shipping' ? '66%' : '100%'
+                      {
+                        width: selectedOrder.orderStatus === 'pending' ? '0%' :
+                          selectedOrder.orderStatus === 'Processing' ? '33%' :
+                            selectedOrder.orderStatus === 'shipping' ? '66%' : '100%'
                       }
                     ]} />
                   </View>
-                  
+
                   <View style={styles.orderProgressSteps}>
                     <View style={styles.orderProgressStep}>
                       <View style={[
@@ -1027,11 +1027,11 @@ export default function CustomerOrdersScreen() {
                       </View>
                       <Text style={styles.orderProgressText}>Order Placed</Text>
                     </View>
-                    
+
                     <View style={styles.orderProgressStep}>
                       <View style={[
                         styles.orderProgressDot,
-                        { 
+                        {
                           backgroundColor: selectedOrder.orderStatus === 'pending' ? 'rgba(255, 255, 255, 0.3)' : 'white'
                         }
                       ]}>
@@ -1042,31 +1042,31 @@ export default function CustomerOrdersScreen() {
                         { opacity: selectedOrder.orderStatus === 'pending' ? 0.6 : 1 }
                       ]}>Processing</Text>
                     </View>
-                    
+
                     <View style={styles.orderProgressStep}>
                       <View style={[
                         styles.orderProgressDot,
-                        { 
-                          backgroundColor: (selectedOrder.orderStatus === 'pending' || selectedOrder.orderStatus === 'Processing') 
+                        {
+                          backgroundColor: (selectedOrder.orderStatus === 'pending' || selectedOrder.orderStatus === 'Processing')
                             ? 'rgba(255, 255, 255, 0.3)' : 'white'
                         }
                       ]}>
-                        {(selectedOrder.orderStatus !== 'pending' && selectedOrder.orderStatus !== 'Processing') && 
+                        {(selectedOrder.orderStatus !== 'pending' && selectedOrder.orderStatus !== 'Processing') &&
                           <Feather name="check" size={12} color="#0ea5e9" />
                         }
                       </View>
                       <Text style={[
                         styles.orderProgressText,
-                        { 
+                        {
                           opacity: (selectedOrder.orderStatus === 'pending' || selectedOrder.orderStatus === 'Processing') ? 0.6 : 1
                         }
                       ]}>Shipping</Text>
                     </View>
-                    
+
                     <View style={styles.orderProgressStep}>
                       <View style={[
                         styles.orderProgressDot,
-                        { 
+                        {
                           backgroundColor: selectedOrder.orderStatus === 'delivered' ? 'white' : 'rgba(255, 255, 255, 0.3)'
                         }
                       ]}>
@@ -1081,7 +1081,7 @@ export default function CustomerOrdersScreen() {
                 </View>
               )}
             </LinearGradient>
-            
+
             <View style={styles.orderDetailContent}>
               {/* Customer Details */}
               {(selectedOrder.customerDetails || selectedOrder.customer) && (
@@ -1092,119 +1092,119 @@ export default function CustomerOrdersScreen() {
                       Customer Information
                     </Text>
                   </View>
-                  
+
                   <View style={styles.orderDetailRow}>
                     <View style={[styles.orderDetailIcon, { backgroundColor: '#f0f9ff' }]}>
                       <Feather name="user" size={16} color="#0ea5e9" />
                     </View>
-                    
+
                     <View style={{ flex: 1 }}>
                       <Text style={styles.orderDetailLabel}>
                         Name
                       </Text>
                       <Text style={styles.orderDetailValue}>
-                        {selectedOrder.customerDetails ? 
-                          `${selectedOrder.customerDetails.firstName || ''} ${selectedOrder.customerDetails.lastName || ''}` : 
-                          selectedOrder.customer ? 
-                          `${selectedOrder.customer.firstName || ''} ${selectedOrder.customer.lastName || ''}` : 
-                          'Not available'}
+                        {selectedOrder.customerDetails ?
+                          `${selectedOrder.customerDetails.firstName || ''} ${selectedOrder.customerDetails.lastName || ''}` :
+                          selectedOrder.customer ?
+                            `${selectedOrder.customer.firstName || ''} ${selectedOrder.customer.lastName || ''}` :
+                            'Not available'}
                       </Text>
                     </View>
                   </View>
-                  
+
                   <View style={styles.orderDetailRow}>
                     <View style={[styles.orderDetailIcon, { backgroundColor: '#f0f9ff' }]}>
                       <Feather name="mail" size={16} color="#0ea5e9" />
                     </View>
-                    
+
                     <View style={{ flex: 1 }}>
                       <Text style={styles.orderDetailLabel}>
                         Email
                       </Text>
                       <Text style={styles.orderDetailValue}>
-                        {selectedOrder.customerDetails ? 
-                          selectedOrder.customerDetails.email : 
-                          selectedOrder.customer ? 
-                          selectedOrder.customer.email : 
-                          'Not available'}
+                        {selectedOrder.customerDetails ?
+                          selectedOrder.customerDetails.email :
+                          selectedOrder.customer ?
+                            selectedOrder.customer.email :
+                            'Not available'}
                       </Text>
                     </View>
                   </View>
-                  
+
                   <View style={styles.orderDetailRow}>
                     <View style={[styles.orderDetailIcon, { backgroundColor: '#f0f9ff' }]}>
                       <Feather name="phone" size={16} color="#0ea5e9" />
                     </View>
-                    
+
                     <View style={{ flex: 1 }}>
                       <Text style={styles.orderDetailLabel}>
                         Phone
                       </Text>
                       <Text style={styles.orderDetailValue}>
-                        {selectedOrder.customerDetails ? 
-                          selectedOrder.customerDetails.phoneNumber : 
-                          selectedOrder.customer ? 
-                          selectedOrder.customer.phoneNumber : 
-                          'Not available'}
+                        {selectedOrder.customerDetails ?
+                          selectedOrder.customerDetails.phoneNumber :
+                          selectedOrder.customer ?
+                            selectedOrder.customer.phoneNumber :
+                            'Not available'}
                       </Text>
                     </View>
                   </View>
 
                   {/* Additional customer information if available */}
-                  {((selectedOrder.customerDetails && selectedOrder.customerDetails.address) || 
+                  {((selectedOrder.customerDetails && selectedOrder.customerDetails.address) ||
                     (selectedOrder.customer && selectedOrder.customer.address)) && (
-                    <View style={styles.orderDetailRow}>
-                      <View style={[styles.orderDetailIcon, { backgroundColor: '#f0f9ff' }]}>
-                        <Feather name="map" size={16} color="#0ea5e9" />
+                      <View style={styles.orderDetailRow}>
+                        <View style={[styles.orderDetailIcon, { backgroundColor: '#f0f9ff' }]}>
+                          <Feather name="map" size={16} color="#0ea5e9" />
+                        </View>
+
+                        <View style={{ flex: 1 }}>
+                          <Text style={styles.orderDetailLabel}>
+                            Address
+                          </Text>
+                          <Text style={styles.orderDetailValue}>
+                            {selectedOrder.customerDetails && selectedOrder.customerDetails.address ?
+                              selectedOrder.customerDetails.address :
+                              selectedOrder.customer && selectedOrder.customer.address ?
+                                selectedOrder.customer.address : 'Not available'}
+                          </Text>
+                        </View>
                       </View>
-                      
-                      <View style={{ flex: 1 }}>
-                        <Text style={styles.orderDetailLabel}>
-                          Address
-                        </Text>
-                        <Text style={styles.orderDetailValue}>
-                          {selectedOrder.customerDetails && selectedOrder.customerDetails.address ? 
-                            selectedOrder.customerDetails.address : 
-                            selectedOrder.customer && selectedOrder.customer.address ? 
-                            selectedOrder.customer.address : 'Not available'}
-                        </Text>
-                      </View>
-                    </View>
-                  )}
+                    )}
                 </View>
               )}
-              
+
               {/* Delivery Details */}
               <View style={styles.orderDetailCard}>
                 <Text style={styles.orderDetailCardTitle}>
                   Delivery Information
                 </Text>
-                
+
                 {(selectedOrder.deliveryDetails || selectedOrder.deliveryAddress) && (
                   <View style={styles.orderDetailRow}>
                     <View style={[styles.orderDetailIcon, { backgroundColor: '#f0fdf4' }]}>
                       <Feather name="map-pin" size={16} color="#16a34a" />
                     </View>
-                    
+
                     <View style={{ flex: 1 }}>
                       <Text style={styles.orderDetailLabel}>
                         Delivery Address
                       </Text>
                       <Text style={styles.orderDetailValue}>
-                        {selectedOrder.deliveryDetails ? 
-                          selectedOrder.deliveryDetails.address : 
+                        {selectedOrder.deliveryDetails ?
+                          selectedOrder.deliveryDetails.address :
                           selectedOrder.deliveryAddress || 'Address not available'}
                       </Text>
                     </View>
                   </View>
                 )}
-                
+
                 {(selectedOrder.deliveryDetails && selectedOrder.deliveryDetails.notes) && (
                   <View style={styles.orderDetailRow}>
                     <View style={[styles.orderDetailIcon, { backgroundColor: '#f0fdf4' }]}>
                       <Feather name="file-text" size={16} color="#16a34a" />
                     </View>
-                    
+
                     <View style={{ flex: 1 }}>
                       <Text style={styles.orderDetailLabel}>
                         Delivery Notes
@@ -1215,44 +1215,44 @@ export default function CustomerOrdersScreen() {
                     </View>
                   </View>
                 )}
-                
+
                 {(selectedOrder.payment || selectedOrder.paymentMethod) && (
                   <View style={styles.orderDetailRow}>
                     <View style={[styles.orderDetailIcon, { backgroundColor: '#eff6ff' }]}>
                       <Feather name="credit-card" size={16} color="#3b82f6" />
                     </View>
-                    
+
                     <View style={{ flex: 1 }}>
                       <Text style={styles.orderDetailLabel}>
                         Payment Method
                       </Text>
                       <Text style={styles.orderDetailValue}>
-                        {selectedOrder.payment ? 
-                          `${selectedOrder.payment.method || 'Not specified'} ${selectedOrder.payment.provider ? `(${selectedOrder.payment.provider})` : ''}` : 
+                        {selectedOrder.payment ?
+                          `${selectedOrder.payment.method || 'Not specified'} ${selectedOrder.payment.provider ? `(${selectedOrder.payment.provider})` : ''}` :
                           selectedOrder.paymentMethod || 'Not specified'}
                       </Text>
                     </View>
                   </View>
                 )}
-                
+
                 {/* Add payment provider as separate item if available */}
                 {selectedOrder.payment && selectedOrder.payment.provider && (
                   <View style={styles.orderDetailRow}>
                     <View style={[styles.orderDetailIcon, { backgroundColor: '#eef2ff' }]}>
                       <FontAwesome5 name="money-check" size={16} color="#4f46e5" />
                     </View>
-                    
+
                     <View style={{ flex: 1 }}>
                       <Text style={styles.orderDetailLabel}>
                         Payment Provider
                       </Text>
-                      <Text style={[styles.orderDetailValue, {color: '#4f46e5', fontWeight: '700'}]}>
+                      <Text style={[styles.orderDetailValue, { color: '#4f46e5', fontWeight: '700' }]}>
                         {selectedOrder.payment.provider}
                       </Text>
                     </View>
                   </View>
                 )}
-                
+
                 {/* Delivery Agent Information */}
                 {selectedOrder.deliveryAgent && (
                   <View style={[styles.orderDetailHighlight, { backgroundColor: '#f0fdfa' }]}>
@@ -1262,7 +1262,7 @@ export default function CustomerOrdersScreen() {
                         Delivery Agent
                       </Text>
                     </View>
-                    
+
                     <View style={styles.deliveryAgentCard}>
                       <View style={styles.deliveryAgentAvatar}>
                         <FontAwesome5 name="user-alt" size={14} color="#0d9488" />
@@ -1284,7 +1284,7 @@ export default function CustomerOrdersScreen() {
                     </View>
                   </View>
                 )}
-                
+
                 {/* Order Status History */}
                 {(selectedOrder.orderStatusHistory && selectedOrder.orderStatusHistory.length > 0) ? (
                   <View style={[styles.orderDetailHighlight, { backgroundColor: '#f5f3ff' }]}>
@@ -1294,7 +1294,7 @@ export default function CustomerOrdersScreen() {
                         Status History
                       </Text>
                     </View>
-                    
+
                     {selectedOrder.orderStatusHistory.map((statusItem, index) => (
                       <View key={index} style={{
                         flexDirection: 'row',
@@ -1335,7 +1335,7 @@ export default function CustomerOrdersScreen() {
                         Status History
                       </Text>
                     </View>
-                    
+
                     <View style={{
                       flexDirection: 'row',
                       paddingVertical: 6
@@ -1353,30 +1353,30 @@ export default function CustomerOrdersScreen() {
                           {selectedOrder.orderStatus || selectedOrder.status || 'Current Status'}
                         </Text>
                         <Text style={{ fontSize: 12, color: '#6b7280' }}>
-                          {selectedOrder.createdAt ? formatDate(selectedOrder.createdAt) : 
-                           selectedOrder.date ? formatDate(selectedOrder.date) : 'Unknown date'}
+                          {selectedOrder.createdAt ? formatDate(selectedOrder.createdAt) :
+                            selectedOrder.date ? formatDate(selectedOrder.date) : 'Unknown date'}
                         </Text>
                       </View>
                     </View>
                   </View>
                 )}
               </View>
-              
+
               {/* Order Items */}
               <View style={styles.orderDetailCard}>
                 <Text style={styles.orderDetailCardTitle}>
                   Order Items ({Array.isArray(selectedOrder.items) ? selectedOrder.items.length : 0})
                 </Text>
-                
+
                 {Array.isArray(selectedOrder.items) && selectedOrder.items.length > 0 ? (
                   selectedOrder.items.map((item, index) => (
-                    <Animated.View 
+                    <Animated.View
                       key={item.id || index}
                       style={[
                         styles.orderItemRow,
-                        { 
+                        {
                           opacity: fadeAnim,
-                          transform: [{ 
+                          transform: [{
                             translateY: fadeAnim.interpolate({
                               inputRange: [0, 1],
                               outputRange: [20, 0]
@@ -1385,18 +1385,18 @@ export default function CustomerOrdersScreen() {
                         }
                       ]}
                     >
-                      <Image 
+                      <Image
                         source={{ uri: item.image || 'https://via.placeholder.com/60?text=Item' }}
                         style={styles.orderItemImage}
                         resizeMode="cover"
                         defaultSource={{ uri: 'https://via.placeholder.com/60?text=Item' }}
                       />
-                      
+
                       <View style={styles.orderItemDetails}>
                         <Text style={styles.orderItemName}>
                           {item.productName || item.name || `Item ${index + 1}`}
                         </Text>
-                        
+
                         <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 4 }}>
                           <View style={{ flexDirection: 'row' }}>
                             <View style={styles.orderItemQuantityBadge}>
@@ -1405,9 +1405,9 @@ export default function CustomerOrdersScreen() {
                               </Text>
                             </View>
                             {item.unitType && (
-                              <Text style={{ 
-                                marginLeft: 8, 
-                                fontSize: 12, 
+                              <Text style={{
+                                marginLeft: 8,
+                                fontSize: 12,
                                 color: '#6b7280',
                                 alignSelf: 'center'
                               }}>
@@ -1416,14 +1416,14 @@ export default function CustomerOrdersScreen() {
                             )}
                           </View>
                           <Text style={styles.orderItemPrice}>
-                            {typeof item.totalPrice === 'number' 
+                            {typeof item.totalPrice === 'number'
                               ? item.totalPrice.toFixed(2)
-                              : typeof item.price === 'number' 
-                                ? (item.price * (item.quantity || 1)).toFixed(2) 
+                              : typeof item.price === 'number'
+                                ? (item.price * (item.quantity || 1)).toFixed(2)
                                 : parseFloat(item.price || '0').toFixed(2)} Birr
                           </Text>
                         </View>
-                        
+
                         {item.status && (
                           <View style={{
                             flexDirection: 'row',
@@ -1434,9 +1434,9 @@ export default function CustomerOrdersScreen() {
                               width: 8,
                               height: 8,
                               borderRadius: 4,
-                              backgroundColor: item.status === 'ordered' ? '#10b981' : 
-                                              item.status === 'processing' ? '#f59e0b' : 
-                                              item.status === 'cancelled' ? '#ef4444' : '#6b7280',
+                              backgroundColor: item.status === 'ordered' ? '#10b981' :
+                                item.status === 'processing' ? '#f59e0b' :
+                                  item.status === 'cancelled' ? '#ef4444' : '#6b7280',
                               marginRight: 4
                             }} />
                             <Text style={{
@@ -1457,7 +1457,7 @@ export default function CustomerOrdersScreen() {
                     <Text style={styles.noItemsText}>No item details available</Text>
                   </View>
                 )}
-                
+
                 <View style={styles.orderSummary}>
                   {selectedOrder.payment && (
                     <>
@@ -1466,25 +1466,25 @@ export default function CustomerOrdersScreen() {
                           Subtotal
                         </Text>
                         <Text style={styles.orderSummaryValue}>
-                          {selectedOrder.payment.subtotal?.toFixed(2) || 
-                            (typeof selectedOrder.totalAmount === 'number' 
-                              ? (selectedOrder.totalAmount * 0.85).toFixed(2) 
+                          {selectedOrder.payment.subtotal?.toFixed(2) ||
+                            (typeof selectedOrder.totalAmount === 'number'
+                              ? (selectedOrder.totalAmount * 0.85).toFixed(2)
                               : (parseFloat(selectedOrder.totalAmount || '0') * 0.85).toFixed(2))} Birr
                         </Text>
                       </View>
-                      
+
                       <View style={styles.orderSummaryRow}>
                         <Text style={styles.orderSummaryLabel}>
                           Delivery Fee
                         </Text>
                         <Text style={styles.orderSummaryValue}>
                           {selectedOrder.payment.deliveryFee?.toFixed(2) ||
-                            (typeof selectedOrder.totalAmount === 'number' 
-                              ? (selectedOrder.totalAmount * 0.1).toFixed(2) 
+                            (typeof selectedOrder.totalAmount === 'number'
+                              ? (selectedOrder.totalAmount * 0.1).toFixed(2)
                               : (parseFloat(selectedOrder.totalAmount || '0') * 0.1).toFixed(2))} Birr
                         </Text>
                       </View>
-                      
+
                       {selectedOrder.payment.tax && (
                         <View style={styles.orderSummaryRow}>
                           <Text style={styles.orderSummaryLabel}>
@@ -1495,30 +1495,30 @@ export default function CustomerOrdersScreen() {
                           </Text>
                         </View>
                       )}
-                      
+
                       <View style={styles.orderTotalRow}>
                         <Text style={styles.orderTotalLabel}>
                           Total
                         </Text>
                         <Text style={styles.orderTotalValue}>
-                          {selectedOrder.payment.amount?.toFixed(2) || 
-                            (typeof selectedOrder.totalAmount === 'number' 
-                              ? selectedOrder.totalAmount.toFixed(2) 
+                          {selectedOrder.payment.amount?.toFixed(2) ||
+                            (typeof selectedOrder.totalAmount === 'number'
+                              ? selectedOrder.totalAmount.toFixed(2)
                               : parseFloat(selectedOrder.totalAmount || '0').toFixed(2))} Birr
                         </Text>
                       </View>
-                      
+
                       {selectedOrder.payment.provider && (
                         <View style={styles.orderSummaryRow}>
                           <Text style={styles.orderSummaryLabel}>
                             Payment Provider
                           </Text>
-                          <Text style={[styles.orderSummaryValue, {color: '#3b82f6'}]}>
+                          <Text style={[styles.orderSummaryValue, { color: '#3b82f6' }]}>
                             {selectedOrder.payment.provider}
                           </Text>
                         </View>
                       )}
-                      
+
                       {selectedOrder.payment.transactionId && (
                         <View style={styles.orderSummaryRow}>
                           <Text style={styles.orderSummaryLabel}>
@@ -1533,7 +1533,7 @@ export default function CustomerOrdersScreen() {
                   )}
                 </View>
               </View>
-              
+
               {/* Action Buttons */}
               <View style={styles.orderActionButtons}>
                 {(selectedOrder.orderStatus === 'pending' || selectedOrder.orderStatus === 'Processing') && (
@@ -1558,7 +1558,7 @@ export default function CustomerOrdersScreen() {
                                 // Get reference to the order document
                                 const userRef = doc(db, "users", user.uid);
                                 const orderRef = doc(collection(userRef, "orders"), selectedOrder.id);
-                                
+
                                 // Update order status to cancelled
                                 await updateDoc(orderRef, {
                                   status: 'cancelled',
@@ -1574,29 +1574,29 @@ export default function CustomerOrdersScreen() {
                                     }
                                   ]
                                 });
-                                
+
                                 // Update local state
-                                const updatedOrders = orders.map(order => 
-                                  order.id === selectedOrder.id 
-                                    ? { 
-                                        ...order, 
-                                        status: 'cancelled',
-                                        orderStatus: 'cancelled',
-                                        cancellationReason: 'Customer requested cancellation',
-                                        orderStatusHistory: [
-                                          ...(order.orderStatusHistory || []),
-                                          {
-                                            status: 'cancelled',
-                                            timestamp: new Date(),
-                                            note: 'Customer requested cancellation'
-                                          }
-                                        ]
-                                      }
+                                const updatedOrders = orders.map(order =>
+                                  order.id === selectedOrder.id
+                                    ? {
+                                      ...order,
+                                      status: 'cancelled',
+                                      orderStatus: 'cancelled',
+                                      cancellationReason: 'Customer requested cancellation',
+                                      orderStatusHistory: [
+                                        ...(order.orderStatusHistory || []),
+                                        {
+                                          status: 'cancelled',
+                                          timestamp: new Date(),
+                                          note: 'Customer requested cancellation'
+                                        }
+                                      ]
+                                    }
                                     : order
                                 );
                                 setOrders(updatedOrders);
                                 setFilteredOrders(updatedOrders);
-                                
+
                                 // Show success message
                                 Alert.alert(
                                   'Order Cancelled',
@@ -1621,7 +1621,7 @@ export default function CustomerOrdersScreen() {
                     </Text>
                   </TouchableOpacity>
                 )}
-                
+
                 {selectedOrder.orderStatus === 'shipping' && (
                   <TouchableOpacity
                     style={styles.primaryActionButton}
@@ -1661,37 +1661,39 @@ export default function CustomerOrdersScreen() {
           opacity: filterModalAnim,
         }}
       >
-        <Pressable 
+        <Pressable
           style={{ flex: 1 }}
           onPress={() => setFilterModalVisible(false)}
         />
       </Animated.View>
-      
-      <Animated.View 
+
+      <Animated.View
         style={[
           styles.filterModalContent,
           {
             transform: [
-              { translateY: filterModalAnim.interpolate({
-                inputRange: [0, 1],
-                outputRange: [height * 0.5, 0]
-              })}
+              {
+                translateY: filterModalAnim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [height * 0.5, 0]
+                })
+              }
             ]
           }
         ]}
       >
         <View style={styles.filterModalHandle} />
-        
-        <View style={{ 
-          flexDirection: 'row', 
-          justifyContent: 'space-between', 
+
+        <View style={{
+          flexDirection: 'row',
+          justifyContent: 'space-between',
           alignItems: 'center',
           marginBottom: 20,
         }}>
           <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#0f172a' }}>
             Filter Orders
           </Text>
-          
+
           <TouchableOpacity
             style={{
               width: 40,
@@ -1706,19 +1708,19 @@ export default function CustomerOrdersScreen() {
             <Feather name="x" size={20} color="#64748b" />
           </TouchableOpacity>
         </View>
-        
-        <Text style={{ 
-          fontSize: 16, 
-          fontWeight: '600', 
+
+        <Text style={{
+          fontSize: 16,
+          fontWeight: '600',
           color: '#334155',
           marginBottom: 16,
         }}>
           Order Status
         </Text>
-        
+
         <View style={styles.filterOptionsContainer}>
           {tabs.map(tab => (
-            <TouchableOpacity 
+            <TouchableOpacity
               key={tab.id}
               style={[
                 styles.filterOptionCard,
@@ -1741,14 +1743,14 @@ export default function CustomerOrdersScreen() {
                 {tab.id === 'cancelled' && <Feather name="x-circle" size={18} color={getStatusColor(tab.id).text} />}
                 {tab.id === 'all' && <Feather name="layers" size={18} color={getStatusColor(tab.id).text} />}
               </View>
-              
+
               <Text style={[
                 styles.filterOptionText,
                 activeTab === tab.id && styles.filterOptionTextActive
               ]}>
                 {tab.label}
               </Text>
-              
+
               {activeTab === tab.id && (
                 <View style={styles.filterOptionCheckmark}>
                   <Feather name="check" size={16} color="#fff" />
@@ -1757,7 +1759,7 @@ export default function CustomerOrdersScreen() {
             </TouchableOpacity>
           ))}
         </View>
-        
+
         <View style={styles.filterButtonsContainer}>
           <TouchableOpacity
             style={styles.resetFilterButton}
@@ -1768,7 +1770,7 @@ export default function CustomerOrdersScreen() {
           >
             <Text style={styles.resetFilterButtonText}>Reset</Text>
           </TouchableOpacity>
-          
+
           <TouchableOpacity
             style={styles.applyFilterButton}
             onPress={() => {
@@ -1801,14 +1803,14 @@ export default function CustomerOrdersScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#f8fafc" />
-      
+
       {renderHeader()}
-      
+
       <AnimatedFlatList
         data={filteredOrders}
         keyExtractor={(item) => item.id}
         renderItem={renderOrderCard}
-        contentContainerStyle={{ 
+        contentContainerStyle={{
           paddingBottom: 24,
           flexGrow: 1,
         }}
@@ -1827,7 +1829,7 @@ export default function CustomerOrdersScreen() {
           />
         }
       />
-      
+
       {orderDetailVisible && selectedOrder && renderOrderDetailModal()}
       {filterModalVisible && renderFilterModal()}
     </SafeAreaView>
@@ -1837,48 +1839,74 @@ export default function CustomerOrdersScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8fafc',
+    backgroundColor: '#f0fdf4', // Light green background
   },
   header: {
-    paddingHorizontal: 16,
-    paddingVertical: 16,
-    backgroundColor: 'white',
-    borderBottomWidth: 1,
-    borderBottomColor: '#f1f5f9',
+    padding: 16,
+    backgroundColor: '#22C55E', // Light green header
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
   headerTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#1e293b',
+    color: '#fff',
     marginBottom: 4,
   },
   headerSubtitle: {
     fontSize: 14,
-    color: '#64748b',
+    color: '#fff',
+    opacity: 0.9,
+    marginBottom: 16,
   },
   searchAndFilterContainer: {
     flexDirection: 'row',
-    marginTop: 12,
+    alignItems: 'center',
+    marginBottom: 8,
   },
   searchBar: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f1f5f9',
-    borderRadius: 12,
+    backgroundColor: '#fff',
+    borderRadius: 10,
     paddingHorizontal: 12,
-    paddingVertical: 10,
-    marginRight: 8,
+    paddingVertical: 8,
+    marginRight: 12,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 1.41,
+    elevation: 2,
   },
   filterButton: {
-    width: 42,
-    height: 42,
-    borderRadius: 12,
-    backgroundColor: '#f1f5f9',
-    justifyContent: 'center',
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#fff',
     alignItems: 'center',
+    justifyContent: 'center',
     borderWidth: 1,
-    borderColor: '#e2e8f0',
+    borderColor: '#ddd',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 1.41,
+    elevation: 2,
   },
   tabsContainer: {
     paddingVertical: 12,

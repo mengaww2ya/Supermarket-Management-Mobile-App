@@ -12,14 +12,15 @@ export default function Layout() {
         headerTitleAlign: "center", // Centers the title
         headerTitleStyle: {
           fontSize: 25,
-          color: "blue",
+          color: "#059669",
         },
         headerLeft: () => (
           <TouchableOpacity style={{ marginLeft: 15 }}>
-            <FontAwesome name="bars" size={24} color="blue" />
+            <FontAwesome name="bars" size={24} color="#059669" />
           </TouchableOpacity>
         ),
-
+        tabBarActiveTintColor: "#059669",
+        tabBarInactiveTintColor: "#9CA3AF",
       }}
     >
       //home tab

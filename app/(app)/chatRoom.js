@@ -1,10 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { 
-  View, 
-  TextInput, 
-  TouchableOpacity, 
-  Alert, 
-  Keyboard, 
+import {
+  View,
+  TextInput,
+  TouchableOpacity,
+  Alert,
+  Keyboard,
   Text,
   Platform,
   ActivityIndicator,
@@ -31,44 +31,46 @@ import HomeHeader from '../components/HomeHeader';
 import { blurhash } from '../utills/common';
 import ChatRoomHeader from '../components/ChatRoomHeader';
 
-import { 
-  addDoc, 
-  collection, 
-  doc, 
-  onSnapshot, 
-  orderBy, 
-  query, 
-  serverTimestamp, 
-  setDoc, 
-  updateDoc, 
+import {
+  addDoc,
+  collection,
+  doc,
+  onSnapshot,
+  orderBy,
+  query,
+  serverTimestamp,
+  setDoc,
+  updateDoc,
   Timestamp,
   getDoc,
   increment,
   where,
   writeBatch,
-  getDocs
+  getDocs,
+  limit,
+  startAfter
 } from 'firebase/firestore';
 import { db, storage } from '../../firebase/firebaseConfig';
-import { getDownloadURL, ref, uploadBytesResumable } from 'firebase/storage';
+import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 
 const REACTION_EMOJIS = ['👍', '❤️', '😂', '😮', '😢', '🙏'];
 const EMOJI_LIST = [
-  '😀', '😃', '😄', '😁', '😆', '😅', '🤣', '😂', '🙂', '🙃', '😉', '😊', 
-  '😇', '🥰', '😍', '🤩', '😘', '😗', '😚', '😙', '🥲', '😋', '😛', '😜', 
-  '😝', '🤑', '🤗', '🤭', '🤫', '🤔', '🤐', '🤨', '😐', '😑', '😶', '😶‍🌫️', 
-  '😏', '😒', '🙄', '😬', '😮‍💨', '🤥', '😌', '😔', '😪', '🤤', '😴', '😷', 
-  '🤒', '🤕', '🤢', '🤮', '🤧', '🥵', '🥶', '🥴', '😵', '😵‍💫', '🤯', '🤠', 
-  '🥳', '🥸', '😎', '🤓', '🧐', '😕', '😟', '🙁', '☹️', '😮', '😯', '😲', 
-  '😳', '🥺', '😦', '😧', '😨', '😰', '😥', '😢', '😭', '😱', '😖', '😣', 
-  '😞', '😓', '😩', '😫', '🥱', '😤', '😡', '😠', '🤬', '😈', '👿', '💀', 
-  '☠️', '💩', '🤡', '👹', '👺', '👻', '👽', '👾', '🤖', '😺', '😸', '😹', 
-  '😻', '😼', '😽', '🙀', '😿', '😾', '💋', '👋', '🤚', '🖐️', '✋', '🖖', 
-  '👌', '🤌', '🤏', '✌️', '🤞', '🤟', '🤘', '🤙', '👈', '👉', '👆', '🖕', 
-  '👇', '☝️', '👍', '👎', '✊', '👊', '🤛', '🤜', '👏', '🙌', '👐', '🤲', 
-  '🤝', '🙏', '✍️', '💅', '🤳', '💪', '🦾', '🦿', '🦵', '🦶', '👂', '🦻', 
+  '😀', '😃', '😄', '😁', '😆', '😅', '🤣', '😂', '🙂', '🙃', '😉', '😊',
+  '😇', '🥰', '😍', '🤩', '😘', '😗', '😚', '😙', '🥲', '😋', '😛', '😜',
+  '😝', '🤑', '🤗', '🤭', '🤫', '🤔', '🤐', '🤨', '😐', '😑', '😶', '😶‍🌫️',
+  '😏', '😒', '🙄', '😬', '😮‍💨', '🤥', '😌', '😔', '😪', '🤤', '😴', '😷',
+  '🤒', '🤕', '🤢', '🤮', '🤧', '🥵', '🥶', '🥴', '😵', '😵‍💫', '🤯', '🤠',
+  '🥳', '🥸', '😎', '🤓', '🧐', '😕', '😟', '🙁', '☹️', '😮', '😯', '😲',
+  '😳', '🥺', '😦', '😧', '😨', '😰', '😥', '😢', '😭', '😱', '😖', '😣',
+  '😞', '😓', '😩', '😫', '🥱', '😤', '😡', '😠', '🤬', '😈', '👿', '💀',
+  '☠️', '💩', '🤡', '👹', '👺', '👻', '👽', '👾', '🤖', '😺', '😸', '😹',
+  '😻', '😼', '😽', '🙀', '😿', '😾', '💋', '👋', '🤚', '🖐️', '✋', '🖖',
+  '👌', '🤌', '🤏', '✌️', '🤞', '🤟', '🤘', '🤙', '👈', '👉', '👆', '🖕',
+  '👇', '☝️', '👍', '👎', '✊', '👊', '🤛', '🤜', '👏', '🙌', '👐', '🤲',
+  '🤝', '🙏', '✍️', '💅', '🤳', '💪', '🦾', '🦿', '🦵', '🦶', '👂', '🦻',
   '👃', '🧠', '🫀', '🫁', '🦷', '🦴', '👀', '👁️', '👅', '👄', '💋', '🩸',
-  '❤️', '🧡', '💛', '💚', '💙', '💜', '🖤', '🤍', '🤎', '💔', '❣️', '💕', 
-  '💞', '💓', '💗', '💖', '💘', '💝', '💟', '♥️', '💯', '💢', '💥', '💫', 
+  '❤️', '🧡', '💛', '💚', '💙', '💜', '🖤', '🤍', '🤎', '💔', '❣️', '💕',
+  '💞', '💓', '💗', '💖', '💘', '💝', '💟', '♥️', '💯', '💢', '💥', '💫',
   '💦', '💨', '🕳️', '💣', '💬', '🗯️', '💭', '💤', '👋', '🎉', '🎊'
 ];
 
@@ -77,20 +79,20 @@ const DEFAULT_PROFILE_IMAGE = require('../../assets/images/PrifileDemo.png');
 export default function ChatRoom() {
   const router = useRouter();
   const routeParams = useLocalSearchParams();
-  
+
   // Add better parameter handling to debug and normalize different parameter formats
   console.log('[ChatRoom Debug] Received route params:', routeParams);
-  
-  const item = { 
+
+  const item = {
     ...routeParams,
     // Ensure we have a normalized structure regardless of how params were passed
     uid: routeParams.uid || routeParams.recipientId,
     name: routeParams.name || routeParams.recipientName,
     chatId: routeParams.chatId
   };
-  
+
   console.log('[ChatRoom Debug] Normalized params:', item);
-  
+
   const { userData } = useAuth(); // Current logged-in user
   const [messages, setMessages] = useState([]);
   const [text, setText] = useState('');
@@ -103,6 +105,10 @@ export default function ChatRoom() {
   const [showAttachmentOptions, setShowAttachmentOptions] = useState(false);
   const [fileUploading, setFileUploading] = useState(false);
   const [showReactions, setShowReactions] = useState(false);
+  const [lastVisible, setLastVisible] = useState(null);
+  const [allMessagesLoaded, setAllMessagesLoaded] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const MESSAGES_PER_PAGE = 20;
 
   const inputRef = useRef(null);
   const flatListRef = useRef(null);
@@ -121,7 +127,7 @@ export default function ChatRoom() {
         console.log('[ChatRoom Debug] No recipient UID found, cannot fetch profile');
         return;
       }
-      
+
       try {
         console.log('[ChatRoom Debug] Fetching profile for user:', item.uid);
         const userDoc = await getDoc(doc(db, 'users', item.uid));
@@ -136,7 +142,7 @@ export default function ChatRoom() {
         console.error('[ChatRoom Debug] Error fetching user profile:', error);
       }
     };
-    
+
     if (!userProfile) {
       fetchUserProfile();
     }
@@ -158,72 +164,57 @@ export default function ChatRoom() {
     ]).start();
   }, []);
 
-  // Improved message fetching logic for user collections
+  // Improved message fetching logic with pagination
   useEffect(() => {
-    if (!userData?.uid) {
-      console.log('[ChatRoom Debug] No current user UID found');
+    if (!userData?.uid || !item?.uid) {
+      console.log('[Chat Debug] Missing user IDs');
       return;
     }
-    
-    if (!item?.uid) {
-      console.log('[ChatRoom Debug] No recipient UID found');
-      return;
-    }
-    
-    console.log('[Chat Debug] Creating/setting up chat room between users:', {
-      currentUser: userData.uid,
-      otherUser: item.uid
-    });
-    
-    // Use the user's chat subcollection to find messages
+
+    console.log('[Chat Debug] Setting up initial message fetch');
+
+    // Initial query with limit
     const messagesQuery = query(
       collection(db, 'users', userData.uid, 'chats', item.uid, 'messages'),
-      orderBy('createdAt', 'asc')
+      orderBy('createdAt', 'desc'),
+      limit(MESSAGES_PER_PAGE)
     );
-    
-    console.log(`[Chat Debug] Setting up message listener for: ${userData.uid} <-> ${item.uid}`);
-    
-    // Listen for messages
+
     const unsubscribe = onSnapshot(
-      messagesQuery, 
+      messagesQuery,
       (snapshot) => {
         console.log(`[Chat Debug] Received ${snapshot.docs.length} messages`);
-        
+
         if (snapshot.empty) {
           console.log('[Chat Debug] No messages found in this chat');
           setMessages([]);
           setLoading(false);
+          setAllMessagesLoaded(true);
           return;
         }
-        
+
+        // Set the last visible document for pagination
+        setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
+
         let allMessages = snapshot.docs.map(doc => {
           const data = doc.data();
-          console.log('[Chat Debug] Message data:', {
-            id: doc.id,
-            text: data.text,
-            senderId: data.senderId,
-            receiverId: data.receiverId || data.recipientId,
-          });
-          
-          // Normalize data to ensure it has consistent field names
           return {
             id: doc.id,
             ...data,
             receiverId: data.receiverId || data.recipientId
           };
         });
-        
-        // Sort messages by timestamp
+
+        // Sort messages by timestamp (newest first, then reverse for display)
         allMessages.sort((a, b) => {
-          const timeA = a.createdAt?.toDate?.() || a.createdAt || new Date(0);
           const timeB = b.createdAt?.toDate?.() || b.createdAt || new Date(0);
-          return timeA - timeB;
+          const timeA = a.createdAt?.toDate?.() || a.createdAt || new Date(0);
+          return timeB - timeA;
         });
-        
-        console.log('[Chat Debug] Final messages count after processing:', allMessages.length);
-        setMessages(allMessages);
+
+        setMessages(allMessages.reverse());
         setLoading(false);
-        
+
         // Mark messages as read
         markMessagesAsRead(snapshot.docs);
       },
@@ -233,25 +224,71 @@ export default function ChatRoom() {
         setMessages([]);
       }
     );
-    
-    // Cleanup subscription
-    return () => {
-      unsubscribe();
-    };
+
+    return () => unsubscribe();
   }, [userData?.uid, item?.uid]);
-  
+
+  // Load more messages function
+  const loadMoreMessages = async () => {
+    if (isLoadingMore || allMessagesLoaded || !lastVisible) return;
+
+    setIsLoadingMore(true);
+    console.log('[Chat Debug] Loading more messages');
+
+    try {
+      const moreMessagesQuery = query(
+        collection(db, 'users', userData.uid, 'chats', item.uid, 'messages'),
+        orderBy('createdAt', 'desc'),
+        startAfter(lastVisible),
+        limit(MESSAGES_PER_PAGE)
+      );
+
+      const snapshot = await getDocs(moreMessagesQuery);
+
+      if (snapshot.empty) {
+        setAllMessagesLoaded(true);
+        setIsLoadingMore(false);
+        return;
+      }
+
+      setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
+
+      const moreMessages = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+        receiverId: doc.data().receiverId || doc.data().recipientId
+      }));
+
+      // Sort and add to existing messages
+      moreMessages.sort((a, b) => {
+        const timeB = b.createdAt?.toDate?.() || b.createdAt || new Date(0);
+        const timeA = a.createdAt?.toDate?.() || a.createdAt || new Date(0);
+        return timeB - timeA;
+      });
+
+      setMessages(prevMessages => [...moreMessages.reverse(), ...prevMessages]);
+
+      // Mark new messages as read
+      markMessagesAsRead(snapshot.docs);
+    } catch (error) {
+      console.error('[Chat Debug] Error loading more messages:', error);
+    } finally {
+      setIsLoadingMore(false);
+    }
+  };
+
   // Mark messages as read
   const markMessagesAsRead = async (messageDocs) => {
     if (!userData?.uid || !item?.uid) {
       console.log('[Chat Debug] Missing user IDs for marking messages as read');
       return;
     }
-    
+
     try {
       console.log('[Chat Debug] Checking for unread messages to mark as read');
       const batch = writeBatch(db);
       let hasUnread = false;
-      
+
       // Update each unread message
       messageDocs.forEach(doc => {
         const message = doc.data();
@@ -262,18 +299,18 @@ export default function ChatRoom() {
           batch.update(doc.ref, { read: true });
         }
       });
-      
+
       // If there were unread messages, update the chat metadata
       if (hasUnread) {
         console.log('[Chat Debug] Updating last read timestamp for chat');
-        
+
         // Update chat metadata in the user's collection
         const chatRef = doc(db, 'users', userData.uid, 'chats', item.uid);
         batch.update(chatRef, {
           lastRead: serverTimestamp(),
           unreadCount: 0 // Reset unread count
         });
-        
+
         await batch.commit();
         console.log('[Chat Debug] Successfully marked messages as read');
       }
@@ -292,7 +329,7 @@ export default function ChatRoom() {
   // Update typing status
   const setTypingStatus = async (isTyping) => {
     if (!userData?.uid || !item?.uid) return;
-    
+
     try {
       const typingRef = doc(db, 'users', userData.uid, 'chats', item.uid, 'typingStatus', 'status');
       await setDoc(typingRef, {
@@ -307,15 +344,15 @@ export default function ChatRoom() {
   // Handle text input changes
   const handleTextChange = (value) => {
     setText(value);
-    
+
     // Show typing indicator
     setTypingStatus(true);
-    
+
     // Clear previous timeout
     if (typingTimeoutRef.current) {
       clearTimeout(typingTimeoutRef.current);
     }
-    
+
     // Set timeout to stop typing indicator after 1.5 seconds of inactivity
     typingTimeoutRef.current = setTimeout(() => {
       setTypingStatus(false);
@@ -336,14 +373,14 @@ export default function ChatRoom() {
     if (Platform.OS === 'ios') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
-    
+
     try {
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         quality: 0.8,
         allowsEditing: true,
       });
-      
+
       if (!result.canceled && result.assets[0].uri) {
         await sendImage(result.assets[0].uri);
       }
@@ -355,51 +392,92 @@ export default function ChatRoom() {
 
   // Upload and send image message
   const sendImage = async (uri) => {
-    if (!uri || !userData?.uid || !item?.uid) return;
-    
+    if (!uri || !userData?.uid || !item?.uid) {
+      console.log('[Chat Debug] Missing required data for image upload');
+      return;
+    }
+
     setImageUploading(true);
-    
+
     try {
       // Create roomId for storage path
       const roomId = getRoomId(userData.uid, item.uid);
-      
+      console.log('[Chat Debug] Room ID for image upload:', roomId);
+
       // Convert image to blob
       const response = await fetch(uri);
+      if (!response.ok) {
+        throw new Error('Failed to fetch image');
+      }
       const blob = await response.blob();
-      
-      // Create storage reference
-      const storageRef = ref(storage, `chat_images/${roomId}/${Date.now()}.jpg`);
-      
+      console.log('[Chat Debug] Image blob created successfully');
+
+      // Create storage reference with proper path
+      const timestamp = Date.now();
+      const imageRef = ref(storage, `chat_images/${roomId}/${timestamp}.jpg`);
+      console.log('[Chat Debug] Storage reference created:', imageRef.fullPath);
+
       // Upload image
-      const uploadTask = uploadBytesResumable(storageRef, blob);
-      
-      // Monitor upload
-      uploadTask.on('state_changed',
-        (snapshot) => {
-          // Progress tracking could be implemented here
-          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-          console.log(`[Chat Debug] Upload is ${progress}% done`);
-        },
-        (error) => {
-          console.error('[Chat Debug] Image upload error:', error);
-          Alert.alert('Error', 'Failed to upload image. Please try again.');
-          setImageUploading(false);
-        },
-        async () => {
-          // Upload completed successfully
-          const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-          console.log('[Chat Debug] Image uploaded successfully, URL:', downloadURL);
-          
-          // Send message with image
-          await sendMessage({
-            type: 'image',
-            imageUrl: downloadURL,
-            text: 'Sent an image'
-          });
-          
-          setImageUploading(false);
-        }
-      );
+      console.log('[Chat Debug] Starting image upload...');
+      const uploadResult = await uploadBytes(imageRef, blob);
+      console.log('[Chat Debug] Image uploaded successfully');
+
+      // Get download URL
+      const downloadURL = await getDownloadURL(uploadResult.ref);
+      console.log('[Chat Debug] Got download URL:', downloadURL);
+
+      // Create message data
+      const messageData = {
+        text: 'Sent an image',
+        senderId: userData.uid,
+        senderName: userData.name || userData.email,
+        receiverId: item.uid,
+        createdAt: serverTimestamp(),
+        read: false,
+        type: 'image',
+        imageUrl: downloadURL
+      };
+
+      // Batch write to ensure consistency
+      const batch = writeBatch(db);
+
+      // 1. Add message to sender's collection
+      const senderMessageRef = doc(collection(db, 'users', userData.uid, 'chats', item.uid, 'messages'));
+      batch.set(senderMessageRef, messageData);
+
+      // 2. Add message to recipient's collection
+      const recipientMessageRef = doc(collection(db, 'users', item.uid, 'chats', userData.uid, 'messages'));
+      batch.set(recipientMessageRef, messageData);
+
+      // 3. Update sender's chat metadata
+      const senderChatRef = doc(db, 'users', userData.uid, 'chats', item.uid);
+      batch.set(senderChatRef, {
+        lastMessage: 'Sent an image',
+        lastMessageTimestamp: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+        withUser: item.uid,
+        withUserName: item.name || 'User',
+      }, { merge: true });
+
+      // 4. Update recipient's chat metadata with unread count
+      const recipientChatRef = doc(db, 'users', item.uid, 'chats', userData.uid);
+      batch.set(recipientChatRef, {
+        lastMessage: 'Sent an image',
+        lastMessageTimestamp: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+        withUser: userData.uid,
+        withUserName: userData.name || userData.fullName || userData.email || 'User',
+        unreadCount: increment(1)
+      }, { merge: true });
+
+      // Commit all changes
+      await batch.commit();
+      console.log('[Chat Debug] Image message sent successfully');
+
+      // Reset state and scroll to bottom
+      setImageUploading(false);
+      scrollToBottom();
+
     } catch (error) {
       console.error('[Chat Debug] Error sending image:', error);
       Alert.alert('Error', 'Failed to send image. Please try again.');
@@ -412,13 +490,13 @@ export default function ChatRoom() {
     if (Platform.OS === 'ios') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
-    
+
     try {
       const result = await DocumentPicker.getDocumentAsync({
         copyToCacheDirectory: true,
         multiple: false
       });
-      
+
       if (result.canceled === false && result.assets && result.assets.length > 0) {
         await sendFile(result.assets[0]);
       }
@@ -429,30 +507,30 @@ export default function ChatRoom() {
       setShowAttachmentOptions(false);
     }
   };
-  
+
   // Upload and send file message
   const sendFile = async (file) => {
     if (!file || !userData?.uid || !item?.uid) return;
-    
+
     setFileUploading(true);
-    
+
     try {
       // Create roomId for storage path
       const roomId = getRoomId(userData.uid, item.uid);
-      
+
       // Create a blob from the file
       const response = await fetch(file.uri);
       const blob = await response.blob();
-      
+
       // Get file extension
       const fileExt = file.name.split('.').pop().toLowerCase() || 'file';
-      
+
       // Create storage reference
       const storageRef = ref(storage, `chat_files/${roomId}/${Date.now()}.${fileExt}`);
-      
+
       // Upload file
       const uploadTask = uploadBytesResumable(storageRef, blob);
-      
+
       // Monitor upload
       uploadTask.on('state_changed',
         (snapshot) => {
@@ -469,7 +547,7 @@ export default function ChatRoom() {
           // Upload completed successfully
           const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
           console.log('[Chat Debug] File uploaded successfully, URL:', downloadURL);
-          
+
           // File type detection
           let fileType = 'document';
           if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(fileExt)) {
@@ -481,7 +559,7 @@ export default function ChatRoom() {
           } else if (['pdf'].includes(fileExt)) {
             fileType = 'pdf';
           }
-          
+
           // Send message with file
           await sendMessage({
             type: fileType,
@@ -491,7 +569,7 @@ export default function ChatRoom() {
             fileType: file.mimeType,
             text: `Sent a ${fileType === 'document' ? 'file' : fileType}`
           });
-          
+
           setFileUploading(false);
         }
       );
@@ -513,28 +591,28 @@ export default function ChatRoom() {
   // Add reaction to a message
   const addReaction = async (messageId, reaction) => {
     if (!userData?.uid || !messageId) return;
-    
+
     try {
       // Update reaction in sender's messages collection
       const messageRef = doc(db, 'users', userData.uid, 'chats', item.uid, 'messages', messageId);
       await updateDoc(messageRef, {
         [`reactions.${userData.uid}`]: reaction
       });
-      
+
       // Also update in recipient's collection
       const recipientMessageRef = doc(db, 'users', item.uid, 'chats', userData.uid, 'messages', messageId);
       await updateDoc(recipientMessageRef, {
         [`reactions.${userData.uid}`]: reaction
       });
-      
+
       setShowReactions(false);
       setReactionMessage(null);
-      
+
       // Give haptic feedback for reaction
       if (Platform.OS === 'ios') {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       }
-      
+
       console.log('[Chat Debug] Added reaction to message:', messageId);
     } catch (error) {
       console.error('[Chat Debug] Error adding reaction:', error);
@@ -548,18 +626,18 @@ export default function ChatRoom() {
       console.log('[Chat Debug] Attempted to send empty message');
       return;
     }
-    
+
     console.log('[Chat Debug] Preparing to send message:', text);
     const isTextEmpty = text.trim().length === 0;
-    
+
     // Clear input
     setText('');
-    
+
     if (isTextEmpty) {
       console.log('[Chat Debug] Message was empty after trimming');
       return;
     }
-    
+
     try {
       // Create message data
       const messageData = {
@@ -571,20 +649,20 @@ export default function ChatRoom() {
         read: false,
         type: 'text'
       };
-      
+
       console.log('[Chat Debug] Message data being sent:', messageData);
-      
+
       // Batch write to ensure consistency
       const batch = writeBatch(db);
-      
+
       // 1. Add message to sender's collection
       const senderMessageRef = doc(collection(db, 'users', userData.uid, 'chats', item.uid, 'messages'));
       batch.set(senderMessageRef, messageData);
-      
+
       // 2. Add message to recipient's collection
       const recipientMessageRef = doc(collection(db, 'users', item.uid, 'chats', userData.uid, 'messages'));
       batch.set(recipientMessageRef, messageData);
-      
+
       // 3. Update sender's chat metadata
       const senderChatRef = doc(db, 'users', userData.uid, 'chats', item.uid);
       batch.set(senderChatRef, {
@@ -594,7 +672,7 @@ export default function ChatRoom() {
         withUser: item.uid,
         withUserName: item.name || 'User',
       }, { merge: true });
-      
+
       // 4. Update recipient's chat metadata with unread count
       const recipientChatRef = doc(db, 'users', item.uid, 'chats', userData.uid);
       batch.set(recipientChatRef, {
@@ -605,14 +683,14 @@ export default function ChatRoom() {
         withUserName: userData.name || userData.fullName || userData.email || 'User',
         unreadCount: increment(1)
       }, { merge: true });
-      
+
       // Commit all changes
       await batch.commit();
       console.log('[Chat Debug] Message sent successfully');
-      
+
       // Reset text and scroll to bottom
       scrollToBottom();
-      
+
     } catch (error) {
       console.error('[Chat Debug] Error sending message:', error);
       Alert.alert('Error', 'Failed to send message. Please try again.');
@@ -625,7 +703,7 @@ export default function ChatRoom() {
     const showAvatar = !isCurrentUser && (index === 0 || messages[index - 1]?.senderId !== item.senderId);
     const messageDate = item.createdAt?.toDate();
     const messageTime = messageDate ? messageDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
-    
+
     // Format file size
     const formatFileSize = (bytes) => {
       if (!bytes) return '';
@@ -633,29 +711,29 @@ export default function ChatRoom() {
       if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
       return (bytes / 1048576).toFixed(1) + ' MB';
     };
-    
+
     // Check for date change to show date separator
     const showDateSeparator = () => {
       if (index === 0) return true;
-      
+
       const currentDate = item.createdAt?.toDate();
       const prevDate = messages[index - 1]?.createdAt?.toDate();
-      
+
       if (!currentDate || !prevDate) return false;
-      
+
       return (
         currentDate.getDate() !== prevDate.getDate() ||
         currentDate.getMonth() !== prevDate.getMonth() ||
         currentDate.getFullYear() !== prevDate.getFullYear()
       );
     };
-    
+
     // Render file content based on type
     const renderFileContent = () => {
       switch (item.type) {
         case 'image':
           return (
-            <TouchableOpacity 
+            <TouchableOpacity
               activeOpacity={0.9}
               onPress={() => {
                 // Implement image preview
@@ -672,7 +750,7 @@ export default function ChatRoom() {
           );
         case 'pdf':
           return (
-            <TouchableOpacity 
+            <TouchableOpacity
               activeOpacity={0.8}
               onPress={() => {
                 // Open PDF viewer
@@ -694,7 +772,7 @@ export default function ChatRoom() {
           );
         case 'document':
           return (
-            <TouchableOpacity 
+            <TouchableOpacity
               activeOpacity={0.8}
               onPress={() => {
                 // Open document
@@ -716,7 +794,7 @@ export default function ChatRoom() {
           );
         case 'audio':
           return (
-            <TouchableOpacity 
+            <TouchableOpacity
               activeOpacity={0.8}
               onPress={() => {
                 // Play audio
@@ -738,7 +816,7 @@ export default function ChatRoom() {
           );
         case 'video':
           return (
-            <TouchableOpacity 
+            <TouchableOpacity
               activeOpacity={0.8}
               onPress={() => {
                 // Play video
@@ -760,17 +838,17 @@ export default function ChatRoom() {
           );
         default:
           return (
-            <Text 
+            <Text
               className={`${isCurrentUser ? 'text-blue-800' : 'text-gray-800'} text-base`}
             >
               {item.text}
             </Text>
           );
-    }
-  };
+      }
+    };
 
-  return (
-    <>
+    return (
+      <>
         {showDateSeparator() && (
           <View className="items-center my-4">
             <Text className="text-xs text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
@@ -778,13 +856,13 @@ export default function ChatRoom() {
             </Text>
           </View>
         )}
-        
-        <View 
+
+        <View
           className={`flex-row mb-3 ${isCurrentUser ? 'justify-end' : 'justify-start'}`}
         >
           {/* Other user's avatar */}
           {!isCurrentUser && showAvatar ? (
-            <TouchableOpacity 
+            <TouchableOpacity
               className="mr-2 items-end self-end"
               onPress={() => {
                 // Handle view profile action
@@ -796,11 +874,11 @@ export default function ChatRoom() {
                 placeholder={blurhash}
                 className="bg-gray-200"
               />
-                        </TouchableOpacity>
+            </TouchableOpacity>
           ) : (
             !isCurrentUser && <View style={{ width: hp(4) + 8 }} />
           )}
-          
+
           <View className="max-w-[75%]">
             {/* Long press to react to message */}
             <Pressable
@@ -815,54 +893,53 @@ export default function ChatRoom() {
             >
               {/* Message Bubble */}
               <View
-                className={`p-3 px-4 rounded-2xl ${
-                  isCurrentUser 
-                    ? 'bg-blue-50 border border-blue-100 rounded-tr-none' 
-                    : 'bg-gray-50 border border-gray-100 rounded-tl-none'
-                }`}
+                className={`p-3 px-4 rounded-2xl ${isCurrentUser
+                  ? 'bg-blue-50 border border-blue-100 rounded-tr-none'
+                  : 'bg-gray-50 border border-gray-100 rounded-tl-none'
+                  }`}
               >
                 {renderFileContent()}
-                
+
                 {/* Message Time */}
-                <Text 
+                <Text
                   className={`text-xs mt-1 ${isCurrentUser ? 'text-blue-400' : 'text-gray-500'}`}
                 >
                   {messageTime}
                 </Text>
               </View>
             </Pressable>
-            
+
             {/* Reactions display */}
             {item.reactions && Object.keys(item.reactions).length > 0 && (
-              <View 
+              <View
                 className={`flex-row mt-1 ${isCurrentUser ? 'justify-end' : 'justify-start'}`}
               >
                 {Object.entries(item.reactions).map(([uid, reaction]) => (
                   <View key={uid} className="bg-white rounded-full shadow-sm border border-gray-100 px-1.5 py-0.5 mr-1">
                     <Text>{reaction}</Text>
-                    </View>
+                  </View>
                 ))}
-                </View>
+              </View>
             )}
-            </View>
+          </View>
         </View>
       </>
-  );
-};
+    );
+  };
 
   if (loading) {
     return (
       <SafeAreaView className="flex-1 bg-gray-100">
         <StatusBar style="dark" backgroundColor="#f3f4f6" translucent={true} />
-        
-        <ChatRoomHeader 
-          title={userProfile?.fullName || item?.name || 'Chat'} 
-          photoURL={userProfile?.photoURL} 
+
+        <ChatRoomHeader
+          title={userProfile?.fullName || item?.name || 'Chat'}
+          photoURL={userProfile?.photoURL}
           online={false}
           typing={false}
           role={userProfile?.role}
         />
-        
+
         <View className="flex-1 justify-center items-center">
           <ActivityIndicator size="large" color="#4f46e5" />
           <Text className="text-gray-600 mt-4 font-medium">Loading your conversation</Text>
@@ -876,17 +953,17 @@ export default function ChatRoom() {
   return (
     <SafeAreaView className="flex-1 bg-gray-100">
       <StatusBar style="dark" backgroundColor="#f3f4f6" translucent={true} />
-      
-      <ChatRoomHeader 
-        title={userProfile || item || {name: 'Chat'}} 
-        photoURL={userProfile?.photoURL} 
+
+      <ChatRoomHeader
+        title={userProfile || item || { name: 'Chat' }}
+        photoURL={userProfile?.photoURL}
         online={false}
         typing={false}
         role={userProfile?.role}
       />
-      
+
       {/* Messages Container */}
-      <Animated.View 
+      <Animated.View
         className="flex-1"
         style={{
           opacity: fadeAnim,
@@ -909,21 +986,34 @@ export default function ChatRoom() {
             renderItem={renderMessage}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ padding: 16, paddingBottom: 8 }}
+            onEndReached={loadMoreMessages}
+            onEndReachedThreshold={0.5}
+            inverted={false}
+            ListHeaderComponent={isLoadingMore ? (
+              <View className="py-4 items-center">
+                <ActivityIndicator size="small" color="#4f46e5" />
+                <Text className="text-xs text-gray-500 mt-2">Loading more messages...</Text>
+              </View>
+            ) : allMessagesLoaded ? (
+              <View className="py-4 items-center">
+                <Text className="text-xs text-gray-500">No more messages</Text>
+              </View>
+            ) : null}
           />
         )}
       </Animated.View>
-      
+
       {/* Input Area */}
       <View className="border-t border-gray-200 px-3 py-2 bg-white">
         <View className="flex-row items-center">
-          <TouchableOpacity 
+          <TouchableOpacity
             className="p-2 mr-1"
             onPress={() => setShowAttachmentOptions(true)}
             disabled={imageUploading || fileUploading}
           >
             <Feather name="paperclip" size={22} color={imageUploading || fileUploading ? "#9ca3af" : "#4f46e5"} />
           </TouchableOpacity>
-          
+
           <View className="flex-1 bg-gray-50 rounded-full px-3 py-1 mr-2 flex-row items-center border border-gray-200">
             <TextInput
               ref={inputRef}
@@ -934,15 +1024,15 @@ export default function ChatRoom() {
               multiline
               maxHeight={100}
             />
-            
-            <TouchableOpacity 
+
+            <TouchableOpacity
               className="p-1"
               onPress={() => setShowEmojiPicker(!showEmojiPicker)}
             >
               <Feather name={showEmojiPicker ? "keyboard" : "smile"} size={22} color="#4f46e5" />
             </TouchableOpacity>
           </View>
-          
+
           <TouchableOpacity
             className={`p-2 rounded-full ${text.trim() ? 'bg-blue-500' : 'bg-gray-200'}`}
             onPress={() => sendMessage()}
@@ -951,7 +1041,7 @@ export default function ChatRoom() {
             <Feather name="send" size={20} color={text.trim() ? "white" : "#9ca3af"} />
           </TouchableOpacity>
         </View>
-        
+
         {(imageUploading || fileUploading) && (
           <View className="flex-row items-center justify-center py-1">
             <ActivityIndicator size="small" color="#4f46e5" />
@@ -960,15 +1050,15 @@ export default function ChatRoom() {
             </Text>
           </View>
         )}
-        
+
         {/* Custom Emoji Keyboard */}
         {showEmojiPicker && (
           <View className="h-48 bg-white border-t border-gray-200 pt-2">
             <ScrollView className="flex-1 px-2">
               <View className="flex-row flex-wrap justify-center">
                 {EMOJI_LIST.map((emoji, index) => (
-                  <TouchableOpacity 
-                    key={index} 
+                  <TouchableOpacity
+                    key={index}
                     className="p-2"
                     onPress={() => handleEmojiSelect(emoji)}
                   >
@@ -980,7 +1070,7 @@ export default function ChatRoom() {
           </View>
         )}
       </View>
-      
+
       {/* Attachment Options Modal */}
       <Modal
         visible={showAttachmentOptions}
@@ -988,7 +1078,7 @@ export default function ChatRoom() {
         animationType="slide"
         onRequestClose={() => setShowAttachmentOptions(false)}
       >
-        <TouchableOpacity 
+        <TouchableOpacity
           style={{ flex: 1 }}
           activeOpacity={1}
           onPress={() => setShowAttachmentOptions(false)}
@@ -996,11 +1086,11 @@ export default function ChatRoom() {
           <View className="flex-1 justify-end bg-black/50">
             <View className="bg-white rounded-t-3xl p-6">
               <View className="w-12 h-1 bg-gray-300 rounded-full self-center mb-6" />
-              
+
               <Text className="text-lg font-semibold text-gray-700 mb-4">Share Content</Text>
-              
+
               <View className="flex-row flex-wrap justify-around">
-                <TouchableOpacity 
+                <TouchableOpacity
                   className="items-center m-2 w-20"
                   onPress={handleImagePick}
                 >
@@ -1009,8 +1099,8 @@ export default function ChatRoom() {
                   </View>
                   <Text className="text-sm text-gray-700">Photo</Text>
                 </TouchableOpacity>
-                
-                <TouchableOpacity 
+
+                <TouchableOpacity
                   className="items-center m-2 w-20"
                   onPress={handleDocumentPick}
                 >
@@ -1019,8 +1109,8 @@ export default function ChatRoom() {
                   </View>
                   <Text className="text-sm text-gray-700">Document</Text>
                 </TouchableOpacity>
-                
-                <TouchableOpacity 
+
+                <TouchableOpacity
                   className="items-center m-2 w-20"
                   onPress={() => {
                     // Handle camera
@@ -1032,8 +1122,8 @@ export default function ChatRoom() {
                   </View>
                   <Text className="text-sm text-gray-700">Camera</Text>
                 </TouchableOpacity>
-                
-                <TouchableOpacity 
+
+                <TouchableOpacity
                   className="items-center m-2 w-20"
                   onPress={() => {
                     // Handle contact
@@ -1046,8 +1136,8 @@ export default function ChatRoom() {
                   <Text className="text-sm text-gray-700">Contact</Text>
                 </TouchableOpacity>
               </View>
-              
-              <TouchableOpacity 
+
+              <TouchableOpacity
                 className="bg-gray-100 py-3 rounded-full mt-6"
                 onPress={() => setShowAttachmentOptions(false)}
               >
@@ -1057,7 +1147,7 @@ export default function ChatRoom() {
           </View>
         </TouchableOpacity>
       </Modal>
-      
+
       {/* Emoji Reaction Picker */}
       <Modal
         visible={showReactions}
@@ -1068,7 +1158,7 @@ export default function ChatRoom() {
           setReactionMessage(null);
         }}
       >
-        <Pressable 
+        <Pressable
           className="flex-1 bg-black/30 justify-center items-center"
           onPress={() => {
             setShowReactions(false);
