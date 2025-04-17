@@ -125,7 +125,7 @@ const ChangePassword = () => {
                     >
                         <View style={styles.sectionContainer}>
                             <View style={styles.sectionHeader}>
-                                <MaterialIcons name="lock-outline" size={22} color="#22C55E" />
+                                <MaterialIcons name="lock-outline" size={22} color="#FF6B00" />
                                 <Text style={styles.sectionTitle}>Password Information</Text>
                             </View>
 
@@ -140,7 +140,7 @@ const ChangePassword = () => {
                                     styles.inputWrapper,
                                     errors.currentPassword && styles.inputError
                                 ]}>
-                                    <Ionicons name="lock-closed-outline" size={20} color="#22C55E" style={styles.inputIcon} />
+                                    <Ionicons name="lock-closed-outline" size={20} color="#FF6B00" style={styles.inputIcon} />
                                     <TextInput
                                         style={styles.input}
                                         placeholder="Enter your current password"
@@ -176,7 +176,7 @@ const ChangePassword = () => {
                                     styles.inputWrapper,
                                     errors.newPassword && styles.inputError
                                 ]}>
-                                    <Ionicons name="lock-closed-outline" size={20} color="#22C55E" style={styles.inputIcon} />
+                                    <Ionicons name="lock-closed-outline" size={20} color="#FF6B00" style={styles.inputIcon} />
                                     <TextInput
                                         style={styles.input}
                                         placeholder="Enter your new password"
@@ -212,7 +212,7 @@ const ChangePassword = () => {
                                     styles.inputWrapper,
                                     errors.confirmPassword && styles.inputError
                                 ]}>
-                                    <Ionicons name="lock-closed-outline" size={20} color="#22C55E" style={styles.inputIcon} />
+                                    <Ionicons name="lock-closed-outline" size={20} color="#FF6B00" style={styles.inputIcon} />
                                     <TextInput
                                         style={styles.input}
                                         placeholder="Confirm your new password"
@@ -374,12 +374,12 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: '#22C55E',
+        backgroundColor: '#FF6B00',
         paddingVertical: 14,
         borderRadius: 12,
         marginTop: 8,
         marginBottom: 24,
-        shadowColor: "#22C55E",
+        shadowColor: "#FF6B00",
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.3,
         shadowRadius: 6,

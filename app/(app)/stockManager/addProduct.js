@@ -24,6 +24,7 @@ import { useRouter } from 'expo-router';
 import { Ionicons, MaterialCommunityIcons, MaterialIcons, FontAwesome } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { StatusBar } from 'expo-status-bar';
+import * as Haptics from 'expo-haptics';
 
 export default function AddProduct() {
   const router = useRouter();
@@ -141,7 +142,7 @@ export default function AddProduct() {
       // Provide haptic feedback
       if (Platform.OS === 'ios') {
         try {
-          require('expo-haptics').impactAsync(require('expo-haptics').ImpactFeedbackStyle.Medium);
+          await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
         } catch (e) {
           Vibration.vibrate(50);
         }
@@ -164,6 +165,13 @@ export default function AddProduct() {
       ]).start();
 
       const currentDate = new Date().toISOString();
+      const expiryDateObj = new Date(expiryDate);
+      const threeMonthsFromNow = new Date();
+      threeMonthsFromNow.setMonth(threeMonthsFromNow.getMonth() + 3);
+
+      // Check if product is approaching expiration
+      const isApproachingExpiry = expiryDateObj <= threeMonthsFromNow;
+      const isExpired = expiryDateObj <= new Date();
 
       const newProduct = {
         productName,
@@ -179,7 +187,7 @@ export default function AddProduct() {
         supplier,
         categoryId: selectedCategory,
         image,
-        status: status ? "Active" : "Inactive",
+        status: isExpired ? "Expired" : (isApproachingExpiry ? "Approaching Expiry" : "Active"),
         dateAdded: currentDate,
         lastUpdated: currentDate,
         hasSpecialOffer,
@@ -189,13 +197,23 @@ export default function AddProduct() {
         } : null,
         productionDate: productionDate.toISOString(),
         expirationDate: expiryDate.toISOString(),
+        isApproachingExpiry,
+        isExpired
       };
 
       await addDoc(collection(db, 'Products'), newProduct);
 
+      // Show appropriate alert based on expiration status
+      let alertMessage = "Product added successfully!";
+      if (isExpired) {
+        alertMessage += "\nNote: This product is already expired and will not be visible to customers.";
+      } else if (isApproachingExpiry) {
+        alertMessage += "\nNote: This product is approaching expiration (within 3 months).";
+      }
+
       Alert.alert(
         "Success",
-        "Product added successfully!",
+        alertMessage,
         [
           {
             text: "Add Another",

@@ -328,7 +328,6 @@ export default function AuthContextProvider({ children }) {
       setLoading(false);
     }
   };
-
   const resetPassword = async (email) => {
     setLoading(true);
     try {
@@ -365,6 +364,7 @@ export default function AuthContextProvider({ children }) {
     registerCustomer,
     registerEmployee,
     registerSupplier,
+    resetPassword,
     updateUserProfile: Register,
     updateUserData: Register,
     resetPassword,     // Add the resetPassword function

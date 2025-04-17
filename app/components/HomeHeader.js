@@ -6,7 +6,7 @@ import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-nat
 import { useAuth } from 'app/context/authContext';
 import { Feather, Ionicons, MaterialIcons, FontAwesome5, AntDesign, Entypo, MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { router, usePathname } from 'expo-router';
+import { useRouter, usePathname } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { BlurView } from 'expo-blur';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -16,6 +16,7 @@ import { doc, getDoc } from 'firebase/firestore';
 const { width, height } = Dimensions.get('window');
 
 export default function HomeHeader({ title, showBackButton = false, onBackPress, rightIcon }) {
+  const router = useRouter();
   const { user, signOut } = useAuth();
   const [showMenu, setShowMenu] = useState(false);
   const [profileImage, setProfileImage] = useState(null);
@@ -356,18 +357,9 @@ export default function HomeHeader({ title, showBackButton = false, onBackPress,
           ],
         }}
       >
-        <LinearGradient
-          colors={['#22C55E', '#4ADE80', '#86EFAC']}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 0.8 }}
-          className="rounded-b-3xl shadow-xl"
+        <View
+          className="bg-green-500 py-4 rounded-b-3xl shadow-lg"
           style={{
-            shadowColor: "#22C55E",
-            shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.3,
-            shadowRadius: 8,
-            elevation: 8,
-            overflow: 'hidden',
             paddingTop: insets.top > 0 ? insets.top : 14,
             paddingBottom: 20,
           }}
@@ -631,7 +623,7 @@ export default function HomeHeader({ title, showBackButton = false, onBackPress,
               </View>
             </View>
           )}
-        </LinearGradient>
+        </View>
       </Animated.View>
 
       {/* Menu Modal */}

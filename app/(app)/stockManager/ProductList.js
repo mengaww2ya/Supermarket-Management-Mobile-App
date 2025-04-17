@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import {
   View,
   Text,
@@ -12,15 +12,20 @@ import {
   Vibration,
   Platform,
   Dimensions,
-  Alert
+  Alert,
+  StyleSheet,
+  FlatList
 } from 'react-native';
 import { db } from '../../../firebase/firebaseConfig';
-import { collection, getDocs, query, where, orderBy, doc, deleteDoc, writeBatch } from 'firebase/firestore';
+import { collection, getDocs, query, where, orderBy, doc, deleteDoc, writeBatch, updateDoc, onSnapshot } from 'firebase/firestore';
 import { useRouter } from 'expo-router';
-import { Ionicons, MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons, FontAwesome5, MaterialIcons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useFocusEffect } from '@react-navigation/native';
+import * as Notifications from 'expo-notifications';
+import * as Haptics from 'expo-haptics';
 
 const { width, height } = Dimensions.get('window');
 const imageSize = 100; // Fixed size for the product image
@@ -44,6 +49,8 @@ const ProductList = () => {
   const [isSelectMode, setIsSelectMode] = useState(false);
   const [selectedProducts, setSelectedProducts] = useState([]);
   const [selectAll, setSelectAll] = useState(false);
+  const [expiredProducts, setExpiredProducts] = useState([]);
+  const [approachingExpiryProducts, setApproachingExpiryProducts] = useState([]);
 
   // Animation values
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -54,6 +61,86 @@ const ProductList = () => {
 
   // Animated card scale values
   const scaleAnims = useRef({}).current;
+
+  // Initialize scale animations for each product
+  useEffect(() => {
+    if (products.length > 0) {
+      products.forEach(product => {
+        if (!scaleAnims[product.id]) {
+          scaleAnims[product.id] = new Animated.Value(1);
+        }
+      });
+    }
+  }, [products]);
+
+  // Request notification permissions
+  useEffect(() => {
+    (async () => {
+      if (Platform.OS === 'android') {
+        await Notifications.setNotificationChannelAsync('default', {
+          name: 'default',
+          importance: Notifications.AndroidImportance.MAX,
+          vibrationPattern: [0, 250, 250, 250],
+        });
+      }
+
+      const { status: existingStatus } = await Notifications.getPermissionsAsync();
+      let finalStatus = existingStatus;
+      if (existingStatus !== 'granted') {
+        const { status } = await Notifications.requestPermissionsAsync();
+        finalStatus = status;
+      }
+    })();
+  }, []);
+
+  // Function to check product expiration
+  const checkProductExpiration = useCallback((product) => {
+    try {
+      const now = new Date();
+      const expiryDate = new Date(product.expirationDate);
+      const threeMonthsFromNow = new Date();
+      threeMonthsFromNow.setMonth(threeMonthsFromNow.getMonth() + 3);
+
+      // Check if the date is valid
+      if (isNaN(expiryDate.getTime())) {
+        console.warn(`Invalid expiration date for product ${product.id}: ${product.expirationDate}`);
+        return { isExpired: false, isApproachingExpiry: false };
+      }
+
+      const isExpired = expiryDate <= now;
+      const isApproachingExpiry = expiryDate <= threeMonthsFromNow && !isExpired;
+
+      return { isExpired, isApproachingExpiry };
+    } catch (error) {
+      console.error(`Error checking expiration for product ${product.id}:`, error);
+      return { isExpired: false, isApproachingExpiry: false };
+    }
+  }, []);
+
+  // Function to send notification
+  const sendNotification = async (title, body) => {
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title,
+        body,
+        sound: true,
+      },
+      trigger: null,
+    });
+  };
+
+  // Function to update product status
+  const updateProductStatus = async (productId, status) => {
+    try {
+      const productRef = doc(db, 'Products', productId);
+      await updateDoc(productRef, {
+        status,
+        lastUpdated: new Date().toISOString(),
+      });
+    } catch (error) {
+      console.error('Error updating product status:', error);
+    }
+  };
 
   useEffect(() => {
     Animated.parallel([
@@ -83,25 +170,79 @@ const ProductList = () => {
     }
   }, [selectedProducts, filteredProducts, isSelectMode]);
 
+  // Set up real-time listener for products
+  useEffect(() => {
+    const productsRef = collection(db, 'Products');
+    const q = query(productsRef, where('status', '!=', 'Deleted'));
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const productsData = [];
+      snapshot.forEach((doc) => {
+        productsData.push({ id: doc.id, ...doc.data() });
+      });
+      setProducts(productsData);
+      setFilteredProducts(productsData);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  // Check products on focus
+  useFocusEffect(
+    useCallback(() => {
+      fetchProducts();
+    }, [checkProductExpiration])
+  );
+
   const fetchProducts = async () => {
     try {
       setIsLoading(true);
-      const querySnapshot = await getDocs(collection(db, "Products"));
-      const productList = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-        // Create scale animation for each product
-        scaleAnim: new Animated.Value(1)
-      }));
+      const productsRef = collection(db, 'Products');
+      const q = query(productsRef, where('status', '!=', 'Deleted'));
+      const querySnapshot = await getDocs(q);
 
-      // Store scale animations
-      productList.forEach(product => {
-        scaleAnims[product.id] = new Animated.Value(1);
+      const productsData = [];
+      const expired = [];
+      const approachingExpiry = [];
+
+      querySnapshot.forEach((doc) => {
+        const product = { id: doc.id, ...doc.data() };
+        const { isExpired, isApproachingExpiry } = checkProductExpiration(product);
+
+        if (isExpired && product.status !== 'Expired') {
+          expired.push(product);
+          updateProductStatus(product.id, 'Expired');
+        } else if (isApproachingExpiry && product.status !== 'Approaching Expiry') {
+          approachingExpiry.push(product);
+          updateProductStatus(product.id, 'Approaching Expiry');
+        }
+
+        productsData.push(product);
       });
 
-      setProducts(productList);
+      setProducts(productsData);
+      setFilteredProducts(productsData);
+      setExpiredProducts(expired);
+      setApproachingExpiryProducts(approachingExpiry);
+
+      // Send notifications for new expired or approaching expiry products
+      if (expired.length > 0) {
+        sendNotification(
+          'Expired Products Alert',
+          `${expired.length} product(s) have expired and been removed from active inventory.`
+        );
+      }
+
+      if (approachingExpiry.length > 0) {
+        sendNotification(
+          'Products Approaching Expiry',
+          `${approachingExpiry.length} product(s) will expire within 3 months.`
+        );
+      }
+
     } catch (error) {
-      console.error("Error fetching products:", error);
+      console.error('Error fetching products:', error);
+      Alert.alert('Error', 'Failed to fetch products');
     } finally {
       setIsLoading(false);
     }
@@ -128,9 +269,7 @@ const ProductList = () => {
     // Provide haptic feedback on refresh completion
     if (Platform.OS === 'ios') {
       try {
-        require('expo-haptics').notificationAsync(
-          require('expo-haptics').NotificationFeedbackType.Success
-        );
+        await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       } catch (e) {
         Vibration.vibrate(30);
       }
@@ -180,6 +319,10 @@ const ProductList = () => {
   };
 
   const handlePressIn = (id) => {
+    if (!scaleAnims[id]) {
+      scaleAnims[id] = new Animated.Value(1);
+    }
+
     setPressedCardId(id);
 
     // Scale down animation
@@ -192,9 +335,7 @@ const ProductList = () => {
     // Haptic feedback
     if (Platform.OS === 'ios') {
       try {
-        require('expo-haptics').impactAsync(
-          require('expo-haptics').ImpactFeedbackStyle.Light
-        );
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       } catch (e) {
         Vibration.vibrate(20);
       }
@@ -204,6 +345,10 @@ const ProductList = () => {
   };
 
   const handlePressOut = (id) => {
+    if (!scaleAnims[id]) {
+      scaleAnims[id] = new Animated.Value(1);
+    }
+
     // Scale up animation
     Animated.spring(scaleAnims[id], {
       toValue: 1,
@@ -216,7 +361,7 @@ const ProductList = () => {
     // Add haptic feedback
     if (Platform.OS === 'ios') {
       try {
-        require('expo-haptics').impactAsync(require('expo-haptics').ImpactFeedbackStyle.Medium);
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       } catch (e) {
         Vibration.vibrate(50);
       }
@@ -325,9 +470,7 @@ const ProductList = () => {
               // Provide haptic feedback
               if (Platform.OS === 'ios') {
                 try {
-                  require('expo-haptics').notificationAsync(
-                    require('expo-haptics').NotificationFeedbackType.Success
-                  );
+                  await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
                 } catch (e) {
                   Vibration.vibrate(50);
                 }
@@ -483,9 +626,7 @@ const ProductList = () => {
               // Provide haptic feedback
               if (Platform.OS === 'ios') {
                 try {
-                  require('expo-haptics').notificationAsync(
-                    require('expo-haptics').NotificationFeedbackType.Success
-                  );
+                  await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
                 } catch (e) {
                   Vibration.vibrate(50);
                 }
@@ -1216,5 +1357,29 @@ const ProductList = () => {
     </SafeAreaView>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#f3f4f6',
+  },
+  productCard: {
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    marginBottom: 10,
+    overflow: 'hidden',
+  },
+  expiredCard: {
+    opacity: 0.7,
+    backgroundColor: '#ffebee',
+  },
+  approachingExpiryCard: {
+    borderColor: '#ffa000',
+    borderWidth: 2,
+  },
+  productList: {
+    padding: 10,
+  },
+});
 
 export default ProductList;

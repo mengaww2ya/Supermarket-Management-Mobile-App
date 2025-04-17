@@ -98,14 +98,7 @@ export default function Login() {
             transform: [{ translateY: slideAnim }],
           }}
         >
-          <Animatable.Text
-            animation="fadeInUp"
-            duration={1500}
-            className="text-lg font-semibold mb-8 text-center text-gray-600"
-            style={{ fontSize: wp('4%') }}
-          >
-            Fill the form below to log in
-          </Animatable.Text>
+
 
           <Animatable.View
             animation="fadeInLeft"
@@ -186,10 +179,7 @@ export default function Login() {
               )}
             </Pressable>
 
-            <TouchableOpacity
-              className="py-2 mb-3"
-              onPress={() => router.push('/(auth)/forgot-password')}
-            >
+            <TouchableOpacity className="py-2 mb-3" onPress={() => router.push('/(auth)/forgot-password')}>
               <Text className="text-blue-500 text-center text-base">
                 Forgot password?
               </Text>
@@ -208,42 +198,6 @@ export default function Login() {
             </Pressable>
           </Animatable.View>
         </Animated.View>
-
-        {/* Custom Error Modal */}
-        <Modal
-          visible={showErrorModal}
-          transparent={true}
-          animationType="fade"
-          onRequestClose={() => setShowErrorModal(false)}
-        >
-          <View className="flex-1 justify-center items-center bg-black/50">
-            <Animatable.View
-              animation="bounceIn"
-              duration={500}
-              className="bg-white rounded-2xl p-6 w-4/5 shadow-lg"
-            >
-              <View className="items-center mb-4">
-                <Icon
-                  name="exclamation-circle"
-                  type="font-awesome"
-                  size={40}
-                  color="#22C55E"
-                />
-              </View>
-              <Text className="text-center text-gray-700 text-lg mb-4">
-                {errorMessage}
-              </Text>
-              <Pressable
-                className="bg-[#22C55E] py-3 rounded-xl"
-                onPress={() => setShowErrorModal(false)}
-              >
-                <Text className="text-center text-white text-base font-semibold">
-                  OK
-                </Text>
-              </Pressable>
-            </Animatable.View>
-          </View>
-        </Modal>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );

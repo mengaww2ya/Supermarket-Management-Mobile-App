@@ -25,7 +25,7 @@ const MainLayout = () => {
             if (userData?.role === 'admin') {
                 router.replace('/admine/(tabs)');
             } else if (userData?.role === 'customer') {
-                router.replace('/customer/homepage');
+                router.replace('/customer/(tabs)');
             } else if (userData?.role === 'manager') {
                 router.replace('/manager/(tabs)');
             } else if (userData?.role === 'deliveryAgent') {
@@ -34,6 +34,8 @@ const MainLayout = () => {
                 router.replace('/stockManager/(tabs)');
             } else if (userData?.role === 'customerAssistance') {
                 router.replace('/customeAssistance/(tabs)');
+            } else if (userData?.role === 'supplier') {
+                router.replace('/suplier/(tabs)');
             }
         }
     }, [isAuthenticated, userData, segments, loading]);
