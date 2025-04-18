@@ -29,10 +29,38 @@ export default function NewChat() {
     const insets = useSafeAreaInsets();
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
-    const [activeTab, setActiveTab] = useState('delivery'); // 'delivery' or 'manager'
+    const [activeTab, setActiveTab] = useState('customer'); // Default to 'customer'
     const [users, setUsers] = useState([]);
     const [filteredUsers, setFilteredUsers] = useState([]);
     const [showFilterDropdown, setShowFilterDropdown] = useState(false);
+
+    // Define user categories with their icons, colors, and database role names
+    const userCategories = {
+        customer: {
+            title: 'Customer Assistance',
+            icon: 'people',
+            color: '#f59e0b', // Amber
+            dbRole: 'customerAssistance' // Actual role name in the database
+        },
+        manager: {
+            title: 'Managers',
+            icon: 'business',
+            color: '#7c3aed', // Purple
+            dbRole: 'manager'
+        },
+        stockManager: {
+            title: 'Stock Managers',
+            icon: 'cube',
+            color: '#0891b2', // Cyan
+            dbRole: 'stockManager'
+        },
+        delivery: {
+            title: 'Delivery Agents',
+            icon: 'bicycle',
+            color: '#059669', // Green
+            dbRole: 'deliveryAgent' // Actual role name in the database
+        }
+    };
 
     useEffect(() => {
         fetchUsers();
@@ -65,11 +93,14 @@ export default function NewChat() {
                 return;
             }
 
-            // Query users with the selected role
+            // Get the correct database role name from our mapping
+            const roleToQuery = userCategories[activeTab].dbRole;
+            console.log(`Fetching users with role: ${roleToQuery}`);
+
             const usersRef = collection(db, 'users');
             const q = query(
                 usersRef,
-                where('role', '==', activeTab)
+                where('role', '==', roleToQuery)
             );
 
             const snapshot = await getDocs(q);
@@ -82,6 +113,7 @@ export default function NewChat() {
                 }))
                 .filter(user => user.id !== currentUserId);
 
+            console.log(`Found ${usersData.length} users with role ${roleToQuery}`);
             setUsers(usersData);
             setFilteredUsers(usersData);
             setLoading(false);
@@ -184,10 +216,21 @@ export default function NewChat() {
     };
 
     const renderUserItem = ({ item }) => {
-        // Determine background color based on role
-        const bgColor = item.role === 'delivery' ? '#d1fae5' : '#ede9fe';
-        const iconName = item.role === 'delivery' ? 'bicycle' : 'business';
-        const iconColor = item.role === 'delivery' ? '#059669' : '#7c3aed';
+        // Find which category this user belongs to based on their role
+        let categoryKey = null;
+        for (const [key, category] of Object.entries(userCategories)) {
+            if (category.dbRole === item.role) {
+                categoryKey = key;
+                break;
+            }
+        }
+
+        // Default to customer category if we can't find a match
+        const category = categoryKey ? userCategories[categoryKey] : userCategories.customer;
+
+        const bgColor = category.color + '20'; // Add transparency for background
+        const iconName = category.icon;
+        const iconColor = category.color;
 
         return (
             <TouchableOpacity
@@ -210,27 +253,30 @@ export default function NewChat() {
         );
     };
 
-    const renderEmptyState = () => (
-        <View style={styles.emptyState}>
-            <Ionicons
-                name={activeTab === 'delivery' ? 'bicycle' : 'people'}
-                size={50}
-                color="#9ca3af"
-            />
-            <Text style={styles.emptyText}>
-                {searchQuery
-                    ? `No ${activeTab === 'delivery' ? 'delivery agents' : 'managers'} matching "${searchQuery}"`
-                    : `No ${activeTab === 'delivery' ? 'delivery agents' : 'managers'} available`
-                }
-            </Text>
-            <Text style={styles.emptySubtext}>
-                {searchQuery
-                    ? 'Try a different search term'
-                    : 'Check back later or contact support'
-                }
-            </Text>
-        </View>
-    );
+    const renderEmptyState = () => {
+        const category = userCategories[activeTab];
+        return (
+            <View style={styles.emptyState}>
+                <Ionicons
+                    name={category.icon}
+                    size={50}
+                    color="#9ca3af"
+                />
+                <Text style={styles.emptyText}>
+                    {searchQuery
+                        ? `No ${category.title.toLowerCase()} matching "${searchQuery}"`
+                        : `No ${category.title.toLowerCase()} available`
+                    }
+                </Text>
+                <Text style={styles.emptySubtext}>
+                    {searchQuery
+                        ? 'Try a different search term'
+                        : 'Check back later or contact support'
+                    }
+                </Text>
+            </View>
+        );
+    };
 
     return (
         <View style={[styles.container, { paddingTop: insets.top }]}>
@@ -251,7 +297,7 @@ export default function NewChat() {
                         <Ionicons name="search-outline" size={20} color="#9ca3af" style={styles.searchIcon} />
                         <TextInput
                             style={styles.searchInput}
-                            placeholder={`Search ${activeTab === 'delivery' ? 'delivery agents' : 'managers'}...`}
+                            placeholder={`Search ${userCategories[activeTab].title}...`}
                             value={searchQuery}
                             onChangeText={setSearchQuery}
                             placeholderTextColor="#9ca3af"
@@ -277,30 +323,29 @@ export default function NewChat() {
 
                 {showFilterDropdown && (
                     <View style={styles.filterDropdown}>
-                        <TouchableOpacity
-                            style={[styles.filterOption, activeTab === 'delivery' && styles.activeFilterOption]}
-                            onPress={() => {
-                                setActiveTab('delivery');
-                                setShowFilterDropdown(false);
-                            }}
-                        >
-                            <Ionicons name="bicycle" size={18} color="#059669" style={styles.filterOptionIcon} />
-                            <Text style={[styles.filterOptionText, activeTab === 'delivery' && styles.activeFilterText]}>
-                                Delivery Agents
-                            </Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            style={[styles.filterOption, activeTab === 'manager' && styles.activeFilterOption]}
-                            onPress={() => {
-                                setActiveTab('manager');
-                                setShowFilterDropdown(false);
-                            }}
-                        >
-                            <Ionicons name="business" size={18} color="#7c3aed" style={styles.filterOptionIcon} />
-                            <Text style={[styles.filterOptionText, activeTab === 'manager' && styles.activeFilterText]}>
-                                Managers
-                            </Text>
-                        </TouchableOpacity>
+                        {Object.entries(userCategories).map(([key, category]) => (
+                            <TouchableOpacity
+                                key={key}
+                                style={[styles.filterOption, activeTab === key && styles.activeFilterOption]}
+                                onPress={() => {
+                                    setActiveTab(key);
+                                    setShowFilterDropdown(false);
+                                }}
+                            >
+                                <Ionicons
+                                    name={category.icon}
+                                    size={18}
+                                    color={category.color}
+                                    style={styles.filterOptionIcon}
+                                />
+                                <Text style={[
+                                    styles.filterOptionText,
+                                    activeTab === key && styles.activeFilterText
+                                ]}>
+                                    {category.title}
+                                </Text>
+                            </TouchableOpacity>
+                        ))}
                     </View>
                 )}
             </View>
@@ -309,7 +354,7 @@ export default function NewChat() {
                 {loading ? (
                     <View style={styles.loadingContainer}>
                         <ActivityIndicator size="large" color="#3b82f6" />
-                        <Text style={styles.loadingText}>Loading {activeTab === 'delivery' ? 'delivery agents' : 'managers'}...</Text>
+                        <Text style={styles.loadingText}>Loading {userCategories[activeTab].title}...</Text>
                     </View>
                 ) : (
                     <FlatList

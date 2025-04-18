@@ -25,7 +25,7 @@ export default function Layout() {
       <Tabs.Screen
         name="suplierHomePage"
         options={{
-          headerShown:false,
+          headerShown: false,
           title: "Home",
           tabBarIcon: ({ color }) => <FontAwesome size={24} name="home" color={color} />,
         }}
@@ -34,7 +34,7 @@ export default function Layout() {
       <Tabs.Screen
         name="categories"
         options={{
-          headerShown:false,
+          headerShown: false,
           title: "Categories",
           tabBarIcon: ({ color }) => <MaterialCommunityIcons size={24} name="view-grid" color={color} />,
         }}
@@ -43,7 +43,7 @@ export default function Layout() {
       <Tabs.Screen
         name="chat"
         options={{
-          headerShown:false,
+          headerShown: false,
           title: "Chat",
           tabBarIcon: ({ color }) => <Ionicons size={24} name="chatbubbles" color={color} />,
         }}
