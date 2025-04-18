@@ -14,11 +14,11 @@ import {
 import { useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons, MaterialCommunityIcons, FontAwesome5, MaterialIcons, Feather } from '@expo/vector-icons';
-import Animated, { 
-  useSharedValue, 
-  useAnimatedStyle, 
-  withTiming, 
-  withSpring, 
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+  withSpring,
   Easing,
   withSequence,
   withDelay,
@@ -42,7 +42,7 @@ const InteractiveCard = ({ onPress, colors, icon, title, description, index, not
   const translateY = useSharedValue(0);
   const iconScale = useSharedValue(1);
   const cardOpacity = useSharedValue(0.95);
-  
+
   const handlePressIn = () => {
     'worklet';
     scale.value = withTiming(0.97, { duration: 200 });
@@ -50,13 +50,13 @@ const InteractiveCard = ({ onPress, colors, icon, title, description, index, not
     cardOpacity.value = withTiming(1, { duration: 200 });
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
   };
-  
+
   const handlePressOut = () => {
     'worklet';
     scale.value = withTiming(1, { duration: 300 });
     iconScale.value = withTiming(1, { duration: 200 });
     cardOpacity.value = withTiming(0.95, { duration: 300 });
-    
+
     // Add a little bounce effect
     rotate.value = withSequence(
       withTiming(-0.01, { duration: 100 }),
@@ -64,19 +64,19 @@ const InteractiveCard = ({ onPress, colors, icon, title, description, index, not
       withTiming(0, { duration: 100 })
     );
   };
-  
+
   // Staggered animation on mount
   useEffect(() => {
     translateY.value = 50;
     translateY.value = withDelay(
       100 * index,
-      withTiming(0, { 
+      withTiming(0, {
         duration: 600,
         easing: Easing.bezier(0.25, 0.1, 0.25, 1)
       })
     );
   }, []);
-  
+
   const cardStyle = useAnimatedStyle(() => {
     return {
       transform: [
@@ -87,13 +87,13 @@ const InteractiveCard = ({ onPress, colors, icon, title, description, index, not
       opacity: cardOpacity.value
     };
   });
-  
+
   const iconStyle = useAnimatedStyle(() => {
     return {
       transform: [{ scale: iconScale.value }]
     };
   });
-  
+
   return (
     <Animated.View style={[styles.cardContainer, cardStyle]}>
       <TouchableOpacity
@@ -113,7 +113,7 @@ const InteractiveCard = ({ onPress, colors, icon, title, description, index, not
             <Animated.View style={[styles.cardIcon, iconStyle]}>
               {icon}
             </Animated.View>
-            
+
             <View style={styles.cardTextContent}>
               <View style={styles.cardTitleContainer}>
                 <Text style={styles.cardTitle}>{title}</Text>
@@ -141,21 +141,21 @@ const AnimatedChart = () => {
     useSharedValue(0),
     useSharedValue(0),
   ];
-  
+
   useEffect(() => {
     const heights = [60, 85, 45, 70, 90];
-    
+
     heights.forEach((height, index) => {
       barHeights[index].value = withDelay(
         200 + (index * 100),
-        withTiming(height, { 
+        withTiming(height, {
           duration: 1000,
           easing: Easing.bezier(0.25, 0.1, 0.25, 1)
         })
       );
     });
   }, []);
-  
+
   return (
     <View style={styles.chartContainer}>
       {barHeights.map((height, index) => {
@@ -164,15 +164,15 @@ const AnimatedChart = () => {
             height: height.value,
           };
         });
-        
+
         return (
           <View key={index} style={styles.chartBarWrapper}>
-            <Animated.View 
+            <Animated.View
               style={[
-                styles.chartBar, 
+                styles.chartBar,
                 barStyle,
                 { backgroundColor: index % 2 === 0 ? '#5E7CE2' : '#26A96C' }
-              ]} 
+              ]}
             />
           </View>
         );
@@ -185,14 +185,14 @@ export default function SupplierHome() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const [refreshing, setRefreshing] = useState(false);
-  
+
   // Animation values
   const headerAnimation = useSharedValue(0);
   const cardsAnimation = useSharedValue(0);
   const gradientPosition = useSharedValue(0);
   const scaleIcon = useSharedValue(0.5);
   const opacityIcon = useSharedValue(0);
-  
+
   // Add dummy stats
   const [stats, setStats] = useState({
     products: 23,
@@ -204,40 +204,40 @@ export default function SupplierHome() {
     deliveryGrowth: "+8%",
     revenueGrowth: "+16.2%"
   });
-  
+
   useEffect(() => {
     // Animate elements on mount
-    headerAnimation.value = withTiming(1, { 
-      duration: 800, 
-      easing: Easing.bezier(0.25, 0.1, 0.25, 1) 
+    headerAnimation.value = withTiming(1, {
+      duration: 800,
+      easing: Easing.bezier(0.25, 0.1, 0.25, 1)
     });
-    
-    cardsAnimation.value = withTiming(1, { 
-      duration: 1000, 
-      easing: Easing.bezier(0.25, 0.1, 0.25, 1) 
+
+    cardsAnimation.value = withTiming(1, {
+      duration: 1000,
+      easing: Easing.bezier(0.25, 0.1, 0.25, 1)
     });
-    
+
     // Start animated gradient
     startGradientAnimation();
-    
+
     // Animate icons
     scaleIcon.value = withSpring(1, { duration: 300 });
     opacityIcon.value = withSpring(1, { duration: 300 });
   }, []);
-  
+
   // Function to trigger the gradient animation
   const startGradientAnimation = () => {
     gradientPosition.value = withSequence(
       withTiming(1, { duration: 8000 }),
       withTiming(0, { duration: 8000 })
     );
-    
+
     // Loop the animation
     setTimeout(() => {
       startGradientAnimation();
     }, 16000);
   };
-  
+
   // Animated background gradient
   const gradientStyle = useAnimatedStyle(() => {
     const backgroundColor = interpolateColor(
@@ -249,38 +249,40 @@ export default function SupplierHome() {
         'rgba(249, 249, 252, 1)'
       ]
     );
-    
+
     return {
       backgroundColor
     };
   });
-  
+
   // Animated styles
   const headerAnimStyle = useAnimatedStyle(() => {
     return {
       opacity: headerAnimation.value,
-      transform: [{ translateY: interpolate(
-        headerAnimation.value,
-        [0, 1],
-        [-30, 0],
-        Extrapolate.CLAMP
-      ) }]
+      transform: [{
+        translateY: interpolate(
+          headerAnimation.value,
+          [0, 1],
+          [-30, 0],
+          Extrapolate.CLAMP
+        )
+      }]
     };
   });
-  
+
   const navigateTo = (path) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     router.push(`/suplier/${path}`);
   };
-  
+
   const onRefresh = React.useCallback(() => {
     setRefreshing(true);
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    
+
     // Simulate data refresh
     setTimeout(() => {
       setRefreshing(false);
-      
+
       // Trigger a small animation to indicate refresh completed
       headerAnimation.value = withSequence(
         withTiming(0.8, { duration: 200 }),
@@ -288,12 +290,12 @@ export default function SupplierHome() {
       );
     }, 1500);
   }, []);
-  
+
   // Card data with notification counts
   const cards = [
     {
-      title: "Inventory Management",
-      description: "Add, update, and track your inventory",
+      title: "Product Management",
+      description: "Add and view your products",
       icon: <MaterialCommunityIcons name="package-variant-closed" size={24} color="#3b82f6" />,
       colors: ['#f0f4fd', '#e6eeff'],
       path: 'manageProduct',
@@ -328,15 +330,15 @@ export default function SupplierHome() {
   return (
     <View style={[styles.container]}>
       <StatusBar barStyle="light" />
-      
+
       {/* Animated Background */}
       <Animated.View style={[styles.background, gradientStyle]} />
-      
+
       {/* Header */}
-      <HomeHeader 
+      <HomeHeader
         title="Supplier Dashboard"
       />
-      
+
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 30 }}
@@ -350,7 +352,7 @@ export default function SupplierHome() {
         }
       >
         {/* Welcome Banner */}
-        <Animated.View 
+        <Animated.View
           entering={FadeInDown.duration(500)}
           style={[styles.welcomeBanner, headerAnimStyle]}
         >
@@ -360,7 +362,7 @@ export default function SupplierHome() {
                 <Text style={styles.welcomeTitle}>Welcome Back, Supplier</Text>
                 <Text style={styles.welcomeDate}>{new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</Text>
               </View>
-              
+
               <Animated.View style={[styles.welcomeIcon, {
                 transform: [{ scale: scaleIcon.value }],
                 opacity: opacityIcon.value
@@ -368,35 +370,35 @@ export default function SupplierHome() {
                 <MaterialIcons name="analytics" size={24} color="#3b82f6" />
               </Animated.View>
             </View>
-            
+
             <View style={styles.quickStatsRow}>
               <Pressable style={styles.quickStat}>
-                <Ionicons name="basket" size={18} color="#3b82f6" style={{marginRight: 6}} />
+                <Ionicons name="basket" size={18} color="#3b82f6" style={{ marginRight: 6 }} />
                 <View>
                   <Text style={styles.quickStatValue}>{stats.orders}</Text>
                   <Text style={styles.quickStatLabel}>Active Orders</Text>
                 </View>
               </Pressable>
-              
-              <Pressable style={[styles.quickStat, {backgroundColor: 'rgba(139, 92, 246, 0.1)'}]}>
-                <MaterialCommunityIcons name="package-variant" size={18} color="#8b5cf6" style={{marginRight: 6}} />
+
+              <Pressable style={[styles.quickStat, { backgroundColor: 'rgba(139, 92, 246, 0.1)' }]}>
+                <MaterialCommunityIcons name="package-variant" size={18} color="#8b5cf6" style={{ marginRight: 6 }} />
                 <View>
-                  <Text style={[styles.quickStatValue, {color: '#8b5cf6'}]}>{stats.products}</Text>
+                  <Text style={[styles.quickStatValue, { color: '#8b5cf6' }]}>{stats.products}</Text>
                   <Text style={styles.quickStatLabel}>Products</Text>
                 </View>
               </Pressable>
-              
-              <Pressable style={[styles.quickStat, {backgroundColor: 'rgba(16, 185, 129, 0.1)'}]}>
-                <FontAwesome5 name="truck" size={16} color="#10b981" style={{marginRight: 6}} />
+
+              <Pressable style={[styles.quickStat, { backgroundColor: 'rgba(16, 185, 129, 0.1)' }]}>
+                <FontAwesome5 name="truck" size={16} color="#10b981" style={{ marginRight: 6 }} />
                 <View>
-                  <Text style={[styles.quickStatValue, {color: '#10b981'}]}>{stats.deliveries}</Text>
+                  <Text style={[styles.quickStatValue, { color: '#10b981' }]}>{stats.deliveries}</Text>
                   <Text style={styles.quickStatLabel}>Deliveries</Text>
                 </View>
               </Pressable>
             </View>
           </View>
         </Animated.View>
-        
+
         {/* System Overview */}
         <View style={styles.overviewSection}>
           <View style={styles.sectionHeader}>
@@ -405,7 +407,7 @@ export default function SupplierHome() {
               <Text style={styles.realTimeText}>Real-time</Text>
             </View>
           </View>
-          
+
           <View style={styles.statsGrid}>
             {/* Products Stat */}
             <Animated.View entering={FadeInDown.delay(200).duration(400)} style={styles.statCard}>
@@ -416,7 +418,7 @@ export default function SupplierHome() {
                 style={styles.gradientBackground}
               />
               <View style={styles.statCardHeader}>
-                <View style={[styles.statCardIcon, {backgroundColor: 'rgba(59, 130, 246, 0.1)'}]}>
+                <View style={[styles.statCardIcon, { backgroundColor: 'rgba(59, 130, 246, 0.1)' }]}>
                   <MaterialCommunityIcons name="package-variant" size={20} color="#3b82f6" />
                 </View>
                 <View style={styles.growthBadge}>
@@ -426,7 +428,7 @@ export default function SupplierHome() {
               <Text style={styles.statCardValue}>{stats.products}</Text>
               <Text style={styles.statCardLabel}>Total Products</Text>
             </Animated.View>
-            
+
             {/* Orders Stat */}
             <Animated.View entering={FadeInDown.delay(300).duration(400)} style={styles.statCard}>
               <LinearGradient
@@ -436,7 +438,7 @@ export default function SupplierHome() {
                 style={styles.gradientBackground}
               />
               <View style={styles.statCardHeader}>
-                <View style={[styles.statCardIcon, {backgroundColor: 'rgba(99, 102, 241, 0.1)'}]}>
+                <View style={[styles.statCardIcon, { backgroundColor: 'rgba(99, 102, 241, 0.1)' }]}>
                   <Ionicons name="receipt-outline" size={20} color="#6366f1" />
                 </View>
                 <View style={styles.growthBadge}>
@@ -446,7 +448,7 @@ export default function SupplierHome() {
               <Text style={styles.statCardValue}>{stats.orders}</Text>
               <Text style={styles.statCardLabel}>Active Orders</Text>
             </Animated.View>
-            
+
             {/* Deliveries Stat */}
             <Animated.View entering={FadeInDown.delay(400).duration(400)} style={styles.statCard}>
               <LinearGradient
@@ -456,7 +458,7 @@ export default function SupplierHome() {
                 style={styles.gradientBackground}
               />
               <View style={styles.statCardHeader}>
-                <View style={[styles.statCardIcon, {backgroundColor: 'rgba(139, 92, 246, 0.1)'}]}>
+                <View style={[styles.statCardIcon, { backgroundColor: 'rgba(139, 92, 246, 0.1)' }]}>
                   <FontAwesome5 name="truck" size={18} color="#8b5cf6" />
                 </View>
                 <View style={styles.growthBadge}>
@@ -466,7 +468,7 @@ export default function SupplierHome() {
               <Text style={styles.statCardValue}>{stats.deliveries}</Text>
               <Text style={styles.statCardLabel}>Deliveries</Text>
             </Animated.View>
-            
+
             {/* Revenue Stat */}
             <Animated.View entering={FadeInDown.delay(500).duration(400)} style={styles.statCard}>
               <LinearGradient
@@ -476,7 +478,7 @@ export default function SupplierHome() {
                 style={styles.gradientBackground}
               />
               <View style={styles.statCardHeader}>
-                <View style={[styles.statCardIcon, {backgroundColor: 'rgba(16, 185, 129, 0.1)'}]}>
+                <View style={[styles.statCardIcon, { backgroundColor: 'rgba(16, 185, 129, 0.1)' }]}>
                   <Ionicons name="cash-outline" size={20} color="#10b981" />
                 </View>
                 <View style={styles.growthBadge}>
@@ -488,21 +490,21 @@ export default function SupplierHome() {
             </Animated.View>
           </View>
         </View>
-        
+
         {/* Management Console */}
         <View style={styles.managementSection}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Management Console</Text>
           </View>
-          
+
           <View style={styles.menuGrid}>
             {cards.map((card, index) => (
-              <Animated.View 
-                key={index} 
+              <Animated.View
+                key={index}
                 entering={FadeInRight.delay(300 + index * 100).duration(400)}
                 style={styles.menuCard}
               >
-            <TouchableOpacity
+                <TouchableOpacity
                   onPress={() => navigateTo(card.path)}
                   activeOpacity={0.8}
                   style={styles.menuCardTouchable}
@@ -513,29 +515,31 @@ export default function SupplierHome() {
                     end={{ x: 1, y: 1 }}
                     style={styles.menuCardGradient}
                   />
-                  
+
                   <View style={styles.menuCardHeader}>
-                    <Animated.View 
+                    <Animated.View
                       style={[
                         styles.menuCardIcon,
                         useAnimatedStyle(() => ({
-                          transform: [{ scale: interpolate(
-                            headerAnimation.value,
-                            [0, 1],
-                            [0.5, 1],
-                            Extrapolate.CLAMP
-                          ) }],
+                          transform: [{
+                            scale: interpolate(
+                              headerAnimation.value,
+                              [0, 1],
+                              [0.5, 1],
+                              Extrapolate.CLAMP
+                            )
+                          }],
                         }))
                       ]}
                     >
                       {card.icon}
                     </Animated.View>
-                    
+
                     <View style={styles.menuCardChevron}>
                       <Ionicons name="chevron-forward" size={16} color="#6b7280" />
                     </View>
                   </View>
-                  
+
                   <View style={styles.menuCardContent}>
                     <View style={styles.menuCardTitleContainer}>
                       <Text style={styles.menuCardTitle}>{card.title}</Text>
@@ -546,8 +550,8 @@ export default function SupplierHome() {
                       )}
                     </View>
                     <Text style={styles.menuCardDescription}>{card.description}</Text>
-              </View>
-            </TouchableOpacity>
+                  </View>
+                </TouchableOpacity>
               </Animated.View>
             ))}
           </View>
@@ -621,7 +625,7 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: 'bold',
   },
-  
+
   // Welcome Banner Styles
   welcomeBanner: {
     marginHorizontal: 16,
@@ -685,7 +689,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#666',
   },
-  
+
   // Overview Styles
   overviewSection: {
     paddingHorizontal: 16,
@@ -776,7 +780,7 @@ const styles = StyleSheet.create({
     color: '#777',
     marginTop: 4,
   },
-  
+
   // Management Console Styles
   managementSection: {
     paddingHorizontal: 16,

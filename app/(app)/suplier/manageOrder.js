@@ -14,14 +14,14 @@ import {
   TextInput,
   TouchableWithoutFeedback,
 } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons, MaterialIcons, Feather, Entypo, AntDesign } from '@expo/vector-icons';
-import Animated, { 
-  useSharedValue, 
-  useAnimatedStyle, 
-  withTiming, 
-  interpolate, 
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+  interpolate,
   Easing,
   FadeInDown,
   FadeIn
@@ -119,14 +119,14 @@ const FilterCategory = ({ title, active, count, onPress }) => {
 const OrderCard = ({ order, onPress, onStatusChange }) => {
   // Animation values
   const animation = useSharedValue(0);
-  
+
   useEffect(() => {
-    animation.value = withTiming(1, { 
-      duration: 400, 
+    animation.value = withTiming(1, {
+      duration: 400,
       easing: Easing.bezier(0.25, 0.1, 0.25, 1),
     });
   }, []);
-  
+
   const animStyle = useAnimatedStyle(() => {
     return {
       opacity: animation.value,
@@ -149,7 +149,7 @@ const OrderCard = ({ order, onPress, onStatusChange }) => {
   };
 
   const statusColor = getStatusColor(order.status);
-  
+
   // Format date
   const formatDate = (dateStr) => {
     const date = new Date(dateStr);
@@ -157,7 +157,7 @@ const OrderCard = ({ order, onPress, onStatusChange }) => {
   };
 
   return (
-    <AnimatedTouchable 
+    <AnimatedTouchable
       style={[styles.orderCard, animStyle]}
       onPress={onPress}
       activeOpacity={0.97}
@@ -170,15 +170,15 @@ const OrderCard = ({ order, onPress, onStatusChange }) => {
         <View style={[styles.statusBadge, { backgroundColor: statusColor.bg }]}>
           <Text style={[styles.statusText, { color: statusColor.text }]}>
             {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
-                </Text>
-              </View>
+          </Text>
+        </View>
       </View>
-      
+
       <View style={styles.orderStoreRow}>
         <Ionicons name="storefront-outline" size={16} color="#666" />
         <Text style={styles.orderStore}>{order.store}</Text>
       </View>
-      
+
       <View style={styles.orderDetailRow}>
         <View style={styles.orderDetailItem}>
           <Text style={styles.orderDetailLabel}>Items</Text>
@@ -190,7 +190,7 @@ const OrderCard = ({ order, onPress, onStatusChange }) => {
           <Text style={styles.orderDetailValue}>${order.totalAmount.toFixed(2)}</Text>
         </View>
       </View>
-      
+
       <View style={styles.orderItemsPreview}>
         {order.items.slice(0, 2).map((item, index) => (
           <View key={index} style={styles.orderItemRow}>
@@ -207,16 +207,16 @@ const OrderCard = ({ order, onPress, onStatusChange }) => {
           </TouchableOpacity>
         )}
       </View>
-      
+
       <View style={styles.orderActions}>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={[styles.actionButton, { backgroundColor: '#EFF6FF' }]}
           onPress={() => onStatusChange(order.id, 'next')}
         >
           <Feather name="arrow-right-circle" size={16} color="#3B82F6" />
           <Text style={[styles.actionButtonText, { color: '#3B82F6' }]}>Next Stage</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
+        </TouchableOpacity>
+        <TouchableOpacity
           style={[styles.actionButton, { backgroundColor: '#FEF2F2' }]}
           onPress={() => onStatusChange(order.id, 'cancel')}
         >
@@ -231,57 +231,69 @@ const OrderCard = ({ order, onPress, onStatusChange }) => {
 export default function ManageOrder() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const [activeTab, setActiveTab] = useState('all');
+  const params = useLocalSearchParams();
+  const { filter } = params;
+
+  // States
+  const [activeFilter, setActiveFilter] = useState('all');
   const [orders, setOrders] = useState(SAMPLE_ORDERS);
-  const [filteredOrders, setFilteredOrders] = useState(SAMPLE_ORDERS); // Initialize with all orders
-  const [isLoading, setIsLoading] = useState(false);
-  const [showFilterModal, setShowFilterModal] = useState(false);
+  const [filterModalVisible, setFilterModalVisible] = useState(false);
+  const [searchVisible, setSearchVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  
+  const [detailsVisible, setDetailsVisible] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState(null);
+
+  useEffect(() => {
+    // If a filter parameter is provided, set it as the active filter
+    if (filter === 'lowStock') {
+      setActiveFilter('pending');
+    }
+  }, [filter]);
+
   // Animation values for modal
   const modalAnimation = useSharedValue(0);
-  
+
   // Calculate counts for each status
   const getOrderCountByStatus = (status) => {
     return orders.filter(order => status === 'all' || order.status === status).length;
   };
-  
+
   // Filter orders when tab changes or search query changes
   useEffect(() => {
     if (!orders || orders.length === 0) return; // Guard against empty orders
-    
+
     setIsLoading(true);
-    
+
     // Apply filters immediately for better responsiveness
     let filtered = [...orders];
-    
+
     // Apply status filter
-    if (activeTab !== 'all') {
-      filtered = filtered.filter(order => order.status === activeTab);
+    if (activeFilter !== 'all') {
+      filtered = filtered.filter(order => order.status === activeFilter);
     }
-    
+
     // Apply search filter if there's a query
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(order => 
+      filtered = filtered.filter(order =>
         order.id.toLowerCase().includes(query) ||
         order.store.toLowerCase().includes(query)
       );
     }
-    
+
     // Short timeout to allow the UI to update
     setTimeout(() => {
       setFilteredOrders(filtered);
       setIsLoading(false);
     }, 100);
-  }, [activeTab, orders, searchQuery]);
-  
+  }, [activeFilter, orders, searchQuery]);
+
   const handleStatusChange = (orderId, action) => {
     setOrders(prevOrders => {
       return prevOrders.map(order => {
         if (order.id === orderId) {
           let newStatus = order.status;
-          
+
           if (action === 'next') {
             // Move to next status
             if (order.status === 'pending') newStatus = 'processing';
@@ -290,51 +302,51 @@ export default function ManageOrder() {
           } else if (action === 'cancel') {
             newStatus = 'cancelled';
           }
-          
+
           return { ...order, status: newStatus };
         }
         return order;
       });
     });
   };
-  
+
   const handleOrderPress = (order) => {
     console.log('Order pressed:', order.id);
     // Navigate to order details
     // router.push(`/suplier/order-details?id=${order.id}`);
   };
-  
+
   // Handle filter selection
   const handleFilterSelect = (filter) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    setActiveTab(filter);
+    setActiveFilter(filter);
     // Close modal after selection - use the proper close function
     closeFilterModal();
   };
-  
+
   // Show filter modal
   const openFilterModal = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    setShowFilterModal(true);
+    setFilterModalVisible(true);
     modalAnimation.value = withTiming(1, { duration: 300 });
   };
-  
+
   // Hide filter modal
   const closeFilterModal = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     modalAnimation.value = withTiming(0, { duration: 200 });
     setTimeout(() => {
-      setShowFilterModal(false);
+      setFilterModalVisible(false);
     }, 200);
   };
-  
+
   // Modal animation styles
   const modalContainerStyle = useAnimatedStyle(() => {
     return {
       opacity: modalAnimation.value,
     };
   });
-  
+
   const modalContentStyle = useAnimatedStyle(() => {
     return {
       transform: [
@@ -353,17 +365,17 @@ export default function ManageOrder() {
   return (
     <View style={styles.container}>
       <StatusBar barStyle="dark-content" />
-      
+
       {/* Header */}
-      <HomeHeader 
-        title="Manage Orders" 
-        showBackButton={true} 
+      <HomeHeader
+        title="Manage Orders"
+        showBackButton={true}
         onBackPress={() => {
           Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
           router.back();
         }}
       />
-      
+
       {/* Order Stats */}
       <View style={styles.statsContainer}>
         <View style={styles.statCard}>
@@ -375,7 +387,7 @@ export default function ManageOrder() {
             <Text style={styles.statLabel}>Total Orders</Text>
           </View>
         </View>
-        
+
         <View style={styles.statCard}>
           <View style={[styles.statIconBg, { backgroundColor: '#FFF4DE' }]}>
             <MaterialIcons name="pending-actions" size={22} color="#FFA940" />
@@ -385,7 +397,7 @@ export default function ManageOrder() {
             <Text style={styles.statLabel}>Pending</Text>
           </View>
         </View>
-        
+
         <View style={styles.statCard}>
           <View style={[styles.statIconBg, { backgroundColor: '#F6FFED' }]}>
             <Feather name="truck" size={22} color="#52C41A" />
@@ -396,7 +408,7 @@ export default function ManageOrder() {
           </View>
         </View>
       </View>
-      
+
       {/* Search and Filter Bar */}
       <View style={styles.searchContainer}>
         <View style={styles.searchInputContainer}>
@@ -409,7 +421,7 @@ export default function ManageOrder() {
             placeholderTextColor="#999"
           />
           {searchQuery.length > 0 && (
-            <TouchableOpacity 
+            <TouchableOpacity
               onPress={handleClearSearch}
               hitSlop={{ top: 10, right: 10, bottom: 10, left: 10 }}
             >
@@ -418,28 +430,28 @@ export default function ManageOrder() {
           )}
         </View>
 
-            <TouchableOpacity
-          style={styles.filterButton} 
+        <TouchableOpacity
+          style={styles.filterButton}
           onPress={openFilterModal}
           activeOpacity={0.7}
         >
           <Ionicons name="filter" size={22} color="#5E7CE2" />
-          {activeTab !== 'all' && (
+          {activeFilter !== 'all' && (
             <View style={styles.filterActiveIndicator} />
           )}
         </TouchableOpacity>
       </View>
-      
+
       {/* Active filter indicator */}
-      {activeTab !== 'all' && (
+      {activeFilter !== 'all' && (
         <View style={styles.activeFilterContainer}>
           <Text style={styles.activeFilterLabel}>Active filter:</Text>
           <View style={styles.activeFilterChip}>
             <Text style={styles.activeFilterChipText}>
-              {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}
+              {activeFilter.charAt(0).toUpperCase() + activeFilter.slice(1)}
             </Text>
-            <TouchableOpacity 
-              onPress={() => setActiveTab('all')}
+            <TouchableOpacity
+              onPress={() => setActiveFilter('all')}
               hitSlop={{ top: 10, right: 10, bottom: 10, left: 10 }}
             >
               <Ionicons name="close-circle" size={16} color="#5E7CE2" />
@@ -447,7 +459,7 @@ export default function ManageOrder() {
           </View>
         </View>
       )}
-      
+
       {/* Order List */}
       <View style={styles.orderListContainer}>
         {isLoading ? (
@@ -460,8 +472,8 @@ export default function ManageOrder() {
             data={filteredOrders}
             keyExtractor={(item) => item.id}
             renderItem={({ item }) => (
-              <OrderCard 
-                order={item} 
+              <OrderCard
+                order={item}
                 onPress={() => handleOrderPress(item)}
                 onStatusChange={handleStatusChange}
               />
@@ -479,81 +491,81 @@ export default function ManageOrder() {
           </View>
         )}
       </View>
-      
+
       {/* Floating Action Button */}
-      <TouchableOpacity 
+      <TouchableOpacity
         style={styles.fab}
         activeOpacity={0.8}
       >
         <AntDesign name="plus" size={24} color="#fff" />
       </TouchableOpacity>
-      
+
       {/* Filter Modal */}
-      {showFilterModal && (
+      {filterModalVisible && (
         <Modal
           transparent={true}
-          visible={showFilterModal}
+          visible={filterModalVisible}
           animationType="none"
           onRequestClose={closeFilterModal}
         >
           <TouchableWithoutFeedback onPress={closeFilterModal}>
             <Animated.View style={[styles.modalOverlay, modalContainerStyle]}>
               <TouchableWithoutFeedback>
-                <Animated.View 
+                <Animated.View
                   style={[styles.modalContent, modalContentStyle]}
                   entering={FadeIn.duration(300)}
                 >
                   <View style={styles.modalHeader}>
                     <Text style={styles.modalTitle}>Filter Orders</Text>
-                    <TouchableOpacity 
+                    <TouchableOpacity
                       onPress={closeFilterModal}
                       hitSlop={{ top: 10, right: 10, bottom: 10, left: 10 }}
                     >
                       <Ionicons name="close" size={24} color="#333" />
                     </TouchableOpacity>
                   </View>
-                  
-                  <ScrollView 
+
+                  <ScrollView
                     style={styles.modalBody}
                     showsVerticalScrollIndicator={false}
                   >
-                    <FilterCategory 
-                      title="All Orders" 
-                      active={activeTab === 'all'} 
+                    <FilterCategory
+                      title="All Orders"
+                      active={activeFilter === 'all'}
                       count={getOrderCountByStatus('all')}
-                      onPress={() => handleFilterSelect('all')} 
+                      onPress={() => handleFilterSelect('all')}
                     />
-                    <FilterCategory 
-                      title="Pending" 
-                      active={activeTab === 'pending'} 
+                    <FilterCategory
+                      title="Pending"
+                      active={activeFilter === 'pending'}
                       count={getOrderCountByStatus('pending')}
-                      onPress={() => handleFilterSelect('pending')} 
+                      onPress={() => handleFilterSelect('pending')}
                     />
-                    <FilterCategory 
-                      title="Processing" 
-                      active={activeTab === 'processing'} 
+                    <FilterCategory
+                      title="Processing"
+                      active={activeFilter === 'processing'}
                       count={getOrderCountByStatus('processing')}
-                      onPress={() => handleFilterSelect('processing')} 
+                      onPress={() => handleFilterSelect('processing')}
                     />
-                    <FilterCategory 
-                      title="Shipped" 
-                      active={activeTab === 'shipped'} 
+                    <FilterCategory
+                      title="Shipped"
+                      active={activeFilter === 'shipped'}
                       count={getOrderCountByStatus('shipped')}
-                      onPress={() => handleFilterSelect('shipped')} 
+                      onPress={() => handleFilterSelect('shipped')}
                     />
-                    <FilterCategory 
-                      title="Delivered" 
-                      active={activeTab === 'delivered'} 
+                    <FilterCategory
+                      title="Delivered"
+                      active={activeFilter === 'delivered'}
                       count={getOrderCountByStatus('delivered')}
-                      onPress={() => handleFilterSelect('delivered')} 
+                      onPress={() => handleFilterSelect('delivered')}
                     />
-                    <FilterCategory 
-                      title="Cancelled" 
-                      active={activeTab === 'cancelled'} 
+                    <FilterCategory
+                      title="Cancelled"
+                      active={activeFilter === 'cancelled'}
                       count={getOrderCountByStatus('cancelled')}
-                      onPress={() => handleFilterSelect('cancelled')} 
+                      onPress={() => handleFilterSelect('cancelled')}
                     />
-      </ScrollView>
+                  </ScrollView>
                 </Animated.View>
               </TouchableWithoutFeedback>
             </Animated.View>

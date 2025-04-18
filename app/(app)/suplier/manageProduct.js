@@ -11,21 +11,21 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
-import { 
-  Ionicons, 
-  MaterialCommunityIcons, 
-  FontAwesome5, 
-  AntDesign, 
-  Feather, 
+import {
+  Ionicons,
+  MaterialCommunityIcons,
+  FontAwesome5,
+  AntDesign,
+  Feather,
   MaterialIcons,
   Octicons,
   Entypo
 } from '@expo/vector-icons';
-import Animated, { 
-  useSharedValue, 
-  useAnimatedStyle, 
-  withTiming, 
-  withSpring, 
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+  withSpring,
   Easing,
   FadeInDown,
   FadeInRight,
@@ -44,18 +44,18 @@ const { width, height } = Dimensions.get("window");
 const ManagementCard = ({ title, description, icon, iconBgColor, onPress, index }) => {
   const scale = useSharedValue(1);
   const cardOpacity = useSharedValue(1);
-  
+
   const handlePressIn = () => {
     'worklet';
     scale.value = withTiming(0.97, { duration: 200 });
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
   };
-  
+
   const handlePressOut = () => {
     'worklet';
     scale.value = withTiming(1, { duration: 300 });
   };
-  
+
   const cardStyle = useAnimatedStyle(() => {
     return {
       transform: [{ scale: scale.value }],
@@ -64,7 +64,7 @@ const ManagementCard = ({ title, description, icon, iconBgColor, onPress, index 
   });
 
   return (
-    <Animated.View 
+    <Animated.View
       entering={FadeInDown.delay(50 * index).duration(400)}
       style={[styles.managementCard, cardStyle]}
     >
@@ -78,16 +78,16 @@ const ManagementCard = ({ title, description, icon, iconBgColor, onPress, index 
         <View style={[styles.iconContainer, { backgroundColor: iconBgColor }]}>
           {icon}
         </View>
-        
+
         <View style={styles.cardContent}>
           <Text style={styles.cardTitle}>{title}</Text>
           <Text style={styles.cardDescription}>{description}</Text>
         </View>
-        
+
         <View style={styles.arrowContainer}>
           <Ionicons name="chevron-forward" size={20} color="#a3a3a3" />
-              </View>
-            </TouchableOpacity>
+        </View>
+      </TouchableOpacity>
     </Animated.View>
   );
 };
@@ -95,7 +95,7 @@ const ManagementCard = ({ title, description, icon, iconBgColor, onPress, index 
 // Stat card component
 const StatCard = ({ title, value, icon, color, index }) => {
   return (
-    <Animated.View 
+    <Animated.View
       entering={FadeInDown.delay(100 * index).duration(400)}
       style={[styles.statCard]}
     >
@@ -105,11 +105,11 @@ const StatCard = ({ title, value, icon, color, index }) => {
         end={{ x: 1, y: 1 }}
         style={styles.statGradient}
       />
-      
+
       <View style={[styles.statIconContainer, { backgroundColor: `${color}30` }]}>
         {icon}
-              </View>
-      
+      </View>
+
       <Text style={styles.statValue}>{value}</Text>
       <Text style={styles.statTitle}>{title}</Text>
     </Animated.View>
@@ -120,16 +120,16 @@ export default function InventoryManagement() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const [refreshing, setRefreshing] = useState(false);
-  
+
   const scrollY = useSharedValue(0);
-  
+
   // Scroll handler for animations
   const scrollHandler = useAnimatedScrollHandler({
     onScroll: (event) => {
       scrollY.value = event.contentOffset.y;
     },
   });
-  
+
   // Animated styles for header shadow
   const headerStyle = useAnimatedStyle(() => {
     return {
@@ -141,18 +141,18 @@ export default function InventoryManagement() {
       ),
     };
   });
-  
+
   // Handle refresh
   const onRefresh = React.useCallback(() => {
     setRefreshing(true);
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    
+
     // Simulate data refresh
     setTimeout(() => {
       setRefreshing(false);
     }, 1500);
   }, []);
-  
+
   // Inventory stats data
   const stats = [
     {
@@ -180,7 +180,7 @@ export default function InventoryManagement() {
       color: "#ef4444"
     },
   ];
-  
+
   // Management options data
   const managementOptions = [
     {
@@ -188,75 +188,66 @@ export default function InventoryManagement() {
       description: "Create and publish new product listings",
       icon: <AntDesign name="plus" size={22} color="#fff" />,
       iconBgColor: "#3b82f6",
-      action: () => console.log("Add new product")
+      action: () => router.push("/suplier/addProduct")
     },
     {
       title: "View Products",
       description: "Browse and search your product catalog",
       icon: <MaterialCommunityIcons name="eye-outline" size={22} color="#fff" />,
       iconBgColor: "#8b5cf6",
-      action: () => console.log("View products")
-    },
-    {
-      title: "Update Products",
-      description: "Edit existing product details and information",
-      icon: <Feather name="edit-2" size={22} color="#fff" />,
-      iconBgColor: "#10b981",
-      action: () => console.log("Update products")
+      action: () => router.push("/suplier/viewProducts")
     },
     {
       title: "Add Category",
       description: "Create new product categories",
       icon: <AntDesign name="addfolder" size={22} color="#fff" />,
       iconBgColor: "#f97316",
-      action: () => console.log("Add category")
+      action: () => {
+        router.push({
+          pathname: "/(app)/suplier/addCategory",
+          params: { openAddModal: "true" }
+        });
+      }
     },
     {
       title: "View Categories",
       description: "Browse and search product categories",
       icon: <MaterialIcons name="category" size={22} color="#fff" />,
       iconBgColor: "#f43f5e",
-      action: () => console.log("View categories")
-    },
-    {
-      title: "Update Categories",
-      description: "Edit existing category details",
-      icon: <Feather name="edit-3" size={22} color="#fff" />,
-      iconBgColor: "#0ea5e9",
-      action: () => console.log("Update categories")
+      action: () => router.push("/(app)/suplier/(tabs)/categories")
     },
     {
       title: "Inventory Alerts",
       description: "Configure stock level notifications",
       icon: <Octicons name="bell" size={22} color="#fff" />,
       iconBgColor: "#6366f1",
-      action: () => console.log("Inventory alerts")
+      action: () => router.push("/suplier/manageOrder")
     },
     {
       title: "Inventory Reports",
       description: "Generate stock and sales reports",
       icon: <Feather name="bar-chart-2" size={22} color="#fff" />,
       iconBgColor: "#14b8a6",
-      action: () => console.log("Inventory reports")
+      action: () => router.push("/suplier/SPerformanceAnalytics")
     },
   ];
 
   return (
     <View style={styles.container}>
       <StatusBar barStyle="dark-content" />
-      
+
       {/* Header */}
       <Animated.View style={headerStyle}>
-        <HomeHeader 
-          title="Inventory Management" 
-          showBackButton={true} 
+        <HomeHeader
+          title="Inventory Management"
+          showBackButton={true}
           onBackPress={() => {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
             router.back();
           }}
         />
       </Animated.View>
-      
+
       {/* Main Content */}
       <Animated.ScrollView
         style={styles.content}
@@ -274,7 +265,7 @@ export default function InventoryManagement() {
         }
       >
         {/* Inventory Summary */}
-        <Animated.View 
+        <Animated.View
           entering={FadeInDown.duration(500)}
           style={styles.summaryContainer}
         >
@@ -295,11 +286,11 @@ export default function InventoryManagement() {
             </View>
           </LinearGradient>
         </Animated.View>
-        
+
         {/* Stats Grid */}
         <View style={styles.statsGrid}>
           {stats.map((stat, index) => (
-            <StatCard 
+            <StatCard
               key={stat.title}
               title={stat.title}
               value={stat.value}
@@ -308,8 +299,8 @@ export default function InventoryManagement() {
               index={index}
             />
           ))}
-          </View>
-        
+        </View>
+
         <View style={styles.managementOptionsContainer}>
           {managementOptions.map((option, index) => (
             <ManagementCard
