@@ -51,7 +51,7 @@ import {
   startAfter
 } from 'firebase/firestore';
 import { db, storage } from '../../firebase/firebaseConfig';
-import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
+import { getDownloadURL, ref, uploadBytes, uploadBytesResumable } from 'firebase/storage';
 
 const REACTION_EMOJIS = ['👍', '❤️', '😂', '😮', '😢', '🙏'];
 const EMOJI_LIST = [
@@ -80,9 +80,6 @@ export default function ChatRoom() {
   const router = useRouter();
   const routeParams = useLocalSearchParams();
 
-  // Add better parameter handling to debug and normalize different parameter formats
-  console.log('[ChatRoom Debug] Received route params:', routeParams);
-
   const item = {
     ...routeParams,
     // Ensure we have a normalized structure regardless of how params were passed
@@ -90,8 +87,6 @@ export default function ChatRoom() {
     name: routeParams.name || routeParams.recipientName,
     chatId: routeParams.chatId
   };
-
-  console.log('[ChatRoom Debug] Normalized params:', item);
 
   const { userData } = useAuth(); // Current logged-in user
   const [messages, setMessages] = useState([]);
@@ -118,28 +113,22 @@ export default function ChatRoom() {
 
   // Get room ID from user IDs
   const roomId = getRoomId(userData?.uid, item?.uid);
-  console.log('[ChatRoom Debug] Calculated roomId:', roomId, 'from users:', userData?.uid, item?.uid);
 
   // Fetch user profile once
   useEffect(() => {
     const fetchUserProfile = async () => {
       if (!item?.uid) {
-        console.log('[ChatRoom Debug] No recipient UID found, cannot fetch profile');
         return;
       }
 
       try {
-        console.log('[ChatRoom Debug] Fetching profile for user:', item.uid);
         const userDoc = await getDoc(doc(db, 'users', item.uid));
         if (userDoc.exists()) {
           const profile = userDoc.data();
-          console.log('[ChatRoom Debug] User profile found:', profile.name || profile.email);
           setUserProfile(profile);
-        } else {
-          console.log('[ChatRoom Debug] No user document found for:', item.uid);
         }
       } catch (error) {
-        console.error('[ChatRoom Debug] Error fetching user profile:', error);
+        // Error silently handled
       }
     };
 
@@ -167,11 +156,8 @@ export default function ChatRoom() {
   // Improved message fetching logic with pagination
   useEffect(() => {
     if (!userData?.uid || !item?.uid) {
-      console.log('[Chat Debug] Missing user IDs');
       return;
     }
-
-    console.log('[Chat Debug] Setting up initial message fetch');
 
     // Initial query with limit
     const messagesQuery = query(
@@ -183,10 +169,7 @@ export default function ChatRoom() {
     const unsubscribe = onSnapshot(
       messagesQuery,
       (snapshot) => {
-        console.log(`[Chat Debug] Received ${snapshot.docs.length} messages`);
-
         if (snapshot.empty) {
-          console.log('[Chat Debug] No messages found in this chat');
           setMessages([]);
           setLoading(false);
           setAllMessagesLoaded(true);
@@ -219,7 +202,6 @@ export default function ChatRoom() {
         markMessagesAsRead(snapshot.docs);
       },
       (error) => {
-        console.error('[Chat Debug] Error in messages snapshot:', error);
         setLoading(false);
         setMessages([]);
       }
@@ -233,7 +215,6 @@ export default function ChatRoom() {
     if (isLoadingMore || allMessagesLoaded || !lastVisible) return;
 
     setIsLoadingMore(true);
-    console.log('[Chat Debug] Loading more messages');
 
     try {
       const moreMessagesQuery = query(
@@ -271,7 +252,7 @@ export default function ChatRoom() {
       // Mark new messages as read
       markMessagesAsRead(snapshot.docs);
     } catch (error) {
-      console.error('[Chat Debug] Error loading more messages:', error);
+      // Error silently handled
     } finally {
       setIsLoadingMore(false);
     }
@@ -280,12 +261,10 @@ export default function ChatRoom() {
   // Mark messages as read
   const markMessagesAsRead = async (messageDocs) => {
     if (!userData?.uid || !item?.uid) {
-      console.log('[Chat Debug] Missing user IDs for marking messages as read');
       return;
     }
 
     try {
-      console.log('[Chat Debug] Checking for unread messages to mark as read');
       const batch = writeBatch(db);
       let hasUnread = false;
 
@@ -294,7 +273,6 @@ export default function ChatRoom() {
         const message = doc.data();
         // Only mark messages from the other user as read
         if (message.senderId === item.uid && !message.read) {
-          console.log('[Chat Debug] Marking message as read:', doc.id);
           hasUnread = true;
           batch.update(doc.ref, { read: true });
         }
@@ -302,8 +280,6 @@ export default function ChatRoom() {
 
       // If there were unread messages, update the chat metadata
       if (hasUnread) {
-        console.log('[Chat Debug] Updating last read timestamp for chat');
-
         // Update chat metadata in the user's collection
         const chatRef = doc(db, 'users', userData.uid, 'chats', item.uid);
         batch.update(chatRef, {
@@ -312,10 +288,9 @@ export default function ChatRoom() {
         });
 
         await batch.commit();
-        console.log('[Chat Debug] Successfully marked messages as read');
       }
     } catch (error) {
-      console.error('[Chat Debug] Error marking messages as read:', error);
+      // Error silently handled
     }
   };
 
@@ -337,7 +312,7 @@ export default function ChatRoom() {
         timestamp: serverTimestamp()
       });
     } catch (error) {
-      console.error('Error updating typing status:', error);
+      // Error silently handled
     }
   };
 
@@ -385,7 +360,6 @@ export default function ChatRoom() {
         await sendImage(result.assets[0].uri);
       }
     } catch (error) {
-      console.error('Error picking image:', error);
       Alert.alert('Error', 'Failed to select image. Please try again.');
     }
   };
@@ -393,7 +367,6 @@ export default function ChatRoom() {
   // Upload and send image message
   const sendImage = async (uri) => {
     if (!uri || !userData?.uid || !item?.uid) {
-      console.log('[Chat Debug] Missing required data for image upload');
       return;
     }
 
@@ -402,7 +375,6 @@ export default function ChatRoom() {
     try {
       // Create roomId for storage path
       const roomId = getRoomId(userData.uid, item.uid);
-      console.log('[Chat Debug] Room ID for image upload:', roomId);
 
       // Convert image to blob
       const response = await fetch(uri);
@@ -410,21 +382,16 @@ export default function ChatRoom() {
         throw new Error('Failed to fetch image');
       }
       const blob = await response.blob();
-      console.log('[Chat Debug] Image blob created successfully');
 
       // Create storage reference with proper path
       const timestamp = Date.now();
       const imageRef = ref(storage, `chat_images/${roomId}/${timestamp}.jpg`);
-      console.log('[Chat Debug] Storage reference created:', imageRef.fullPath);
 
       // Upload image
-      console.log('[Chat Debug] Starting image upload...');
       const uploadResult = await uploadBytes(imageRef, blob);
-      console.log('[Chat Debug] Image uploaded successfully');
 
       // Get download URL
       const downloadURL = await getDownloadURL(uploadResult.ref);
-      console.log('[Chat Debug] Got download URL:', downloadURL);
 
       // Create message data
       const messageData = {
@@ -472,14 +439,12 @@ export default function ChatRoom() {
 
       // Commit all changes
       await batch.commit();
-      console.log('[Chat Debug] Image message sent successfully');
 
       // Reset state and scroll to bottom
       setImageUploading(false);
       scrollToBottom();
 
     } catch (error) {
-      console.error('[Chat Debug] Error sending image:', error);
       Alert.alert('Error', 'Failed to send image. Please try again.');
       setImageUploading(false);
     }
@@ -501,7 +466,6 @@ export default function ChatRoom() {
         await sendFile(result.assets[0]);
       }
     } catch (error) {
-      console.error('[Chat Debug] Error picking document:', error);
       Alert.alert('Error', 'Failed to select file. Please try again.');
     } finally {
       setShowAttachmentOptions(false);
@@ -536,17 +500,14 @@ export default function ChatRoom() {
         (snapshot) => {
           // Progress tracking
           const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-          console.log(`[Chat Debug] File upload is ${progress}% done`);
         },
         (error) => {
-          console.error('[Chat Debug] File upload error:', error);
           Alert.alert('Error', 'Failed to upload file. Please try again.');
           setFileUploading(false);
         },
         async () => {
           // Upload completed successfully
           const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-          console.log('[Chat Debug] File uploaded successfully, URL:', downloadURL);
 
           // File type detection
           let fileType = 'document';
@@ -574,7 +535,6 @@ export default function ChatRoom() {
         }
       );
     } catch (error) {
-      console.error('[Chat Debug] Error sending file:', error);
       Alert.alert('Error', 'Failed to send file. Please try again.');
       setFileUploading(false);
     }
@@ -612,10 +572,7 @@ export default function ChatRoom() {
       if (Platform.OS === 'ios') {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       }
-
-      console.log('[Chat Debug] Added reaction to message:', messageId);
     } catch (error) {
-      console.error('[Chat Debug] Error adding reaction:', error);
       Alert.alert('Error', 'Failed to add reaction. Please try again.');
     }
   };
@@ -623,18 +580,15 @@ export default function ChatRoom() {
   // Updated sendMessage function to use user collections
   const sendMessage = async () => {
     if (!text.trim()) {
-      console.log('[Chat Debug] Attempted to send empty message');
       return;
     }
 
-    console.log('[Chat Debug] Preparing to send message:', text);
     const isTextEmpty = text.trim().length === 0;
 
     // Clear input
     setText('');
 
     if (isTextEmpty) {
-      console.log('[Chat Debug] Message was empty after trimming');
       return;
     }
 
@@ -649,8 +603,6 @@ export default function ChatRoom() {
         read: false,
         type: 'text'
       };
-
-      console.log('[Chat Debug] Message data being sent:', messageData);
 
       // Batch write to ensure consistency
       const batch = writeBatch(db);
@@ -686,13 +638,11 @@ export default function ChatRoom() {
 
       // Commit all changes
       await batch.commit();
-      console.log('[Chat Debug] Message sent successfully');
 
       // Reset text and scroll to bottom
       scrollToBottom();
 
     } catch (error) {
-      console.error('[Chat Debug] Error sending message:', error);
       Alert.alert('Error', 'Failed to send message. Please try again.');
     }
   };
@@ -937,7 +887,7 @@ export default function ChatRoom() {
           photoURL={userProfile?.photoURL}
           online={false}
           typing={false}
-          role={userProfile?.role}
+          role={userData?.role}
         />
 
         <View className="flex-1 justify-center items-center">
@@ -959,7 +909,7 @@ export default function ChatRoom() {
         photoURL={userProfile?.photoURL}
         online={false}
         typing={false}
-        role={userProfile?.role}
+        role={userData?.role}
       />
 
       {/* Messages Container */}

@@ -15,6 +15,15 @@ export default function Layout() {
       <Stack.Screen name="(tabs)" options={{
         headerShown: false
       }} />
+      <Stack.Screen name="newChat" options={{
+        headerShown: false
+      }} />
+      <Stack.Screen name="systemChat" options={{
+        headerShown: false
+      }} />
+      <Stack.Screen name="chatRoom" options={{
+        headerShown: false
+      }} />
     </Stack>
   );
 }

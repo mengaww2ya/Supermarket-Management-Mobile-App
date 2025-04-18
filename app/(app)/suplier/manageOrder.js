@@ -237,6 +237,8 @@ export default function ManageOrder() {
   // States
   const [activeFilter, setActiveFilter] = useState('all');
   const [orders, setOrders] = useState(SAMPLE_ORDERS);
+  const [filteredOrders, setFilteredOrders] = useState(SAMPLE_ORDERS);
+  const [isLoading, setIsLoading] = useState(false);
   const [filterModalVisible, setFilterModalVisible] = useState(false);
   const [searchVisible, setSearchVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');

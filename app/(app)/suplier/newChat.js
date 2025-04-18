@@ -7,7 +7,8 @@ import {
     TouchableOpacity,
     TextInput,
     ActivityIndicator,
-    Alert
+    Alert,
+    Image
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons, MaterialIcons, Feather } from '@expo/vector-icons';
@@ -23,6 +24,7 @@ import {
 } from 'firebase/firestore';
 import { db, auth } from '../../../firebase/firebaseConfig';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import HomeHeader from '../../components/HomeHeader';
 
 export default function NewChat() {
     const router = useRouter();
@@ -34,13 +36,13 @@ export default function NewChat() {
     const [filteredUsers, setFilteredUsers] = useState([]);
     const [showFilterDropdown, setShowFilterDropdown] = useState(false);
 
-    // Define user categories with their icons, colors, and database role names
+    // Define user categories with their icons and colors and correct database role names
     const userCategories = {
         customer: {
             title: 'Customer Assistance',
             icon: 'people',
             color: '#f59e0b', // Amber
-            dbRole: 'customerAssistance' // Actual role name in the database
+            dbRole: 'customerAssistance'
         },
         manager: {
             title: 'Managers',
@@ -58,7 +60,7 @@ export default function NewChat() {
             title: 'Delivery Agents',
             icon: 'bicycle',
             color: '#059669', // Green
-            dbRole: 'deliveryAgent' // Actual role name in the database
+            dbRole: 'deliveryAgent'
         }
     };
 
@@ -93,8 +95,9 @@ export default function NewChat() {
                 return;
             }
 
-            // Get the correct database role name from our mapping
+            // Get the correct database role name for the selected tab
             const roleToQuery = userCategories[activeTab].dbRole;
+
             console.log(`Fetching users with role: ${roleToQuery}`);
 
             const usersRef = collection(db, 'users');
@@ -105,15 +108,20 @@ export default function NewChat() {
 
             const snapshot = await getDocs(q);
 
+            console.log(`Found ${snapshot.docs.length} users with role ${roleToQuery}`);
+
             // Filter out current user and format the data
             const usersData = snapshot.docs
-                .map(doc => ({
-                    id: doc.id,
-                    ...doc.data()
-                }))
+                .map(doc => {
+                    const userData = doc.data();
+                    console.log(`User data for ${doc.id}:`, userData);
+                    return {
+                        id: doc.id,
+                        ...userData
+                    };
+                })
                 .filter(user => user.id !== currentUserId);
 
-            console.log(`Found ${usersData.length} users with role ${roleToQuery}`);
             setUsers(usersData);
             setFilteredUsers(usersData);
             setLoading(false);
@@ -163,10 +171,25 @@ export default function NewChat() {
             // If chat exists, navigate to it
             if (existingChatId) {
                 setLoading(false);
-                router.push({
-                    pathname: '/suplier/(tabs)/chat',
-                    params: { chatId: existingChatId }
-                });
+
+                try {
+                    // Try direct string path with query parameters - use our local chatRoom
+                    router.push(`/suplier/chatRoom?uid=${selectedUser.id}&name=${encodeURIComponent(selectedUser.name || selectedUser.email)}&chatId=${existingChatId}`);
+                } catch (navError) {
+                    console.error("Navigation error:", navError);
+
+                    // Fallback to object-based navigation
+                    setTimeout(() => {
+                        router.push({
+                            pathname: "/suplier/chatRoom",
+                            params: {
+                                uid: selectedUser.id,
+                                name: selectedUser.name || selectedUser.email,
+                                chatId: existingChatId
+                            }
+                        });
+                    }, 100);
+                }
                 return;
             }
 
@@ -203,10 +226,24 @@ export default function NewChat() {
 
             // Navigate to chat
             setLoading(false);
-            router.push({
-                pathname: '/suplier/(tabs)/chat',
-                params: { chatId: newChatRef.id }
-            });
+            try {
+                // Try direct string path with query parameters - use our local chatRoom
+                router.push(`/suplier/chatRoom?uid=${selectedUser.id}&name=${encodeURIComponent(selectedUser.name || selectedUser.email)}&chatId=${newChatRef.id}`);
+            } catch (navError) {
+                console.error("Navigation error:", navError);
+
+                // Fallback to object-based navigation
+                setTimeout(() => {
+                    router.push({
+                        pathname: "/suplier/chatRoom",
+                        params: {
+                            uid: selectedUser.id,
+                            name: selectedUser.name || selectedUser.email,
+                            chatId: newChatRef.id
+                        }
+                    });
+                }, 100);
+            }
 
         } catch (error) {
             console.error('Error creating chat:', error);
@@ -216,17 +253,29 @@ export default function NewChat() {
     };
 
     const renderUserItem = ({ item }) => {
-        // Find which category this user belongs to based on their role
-        let categoryKey = null;
-        for (const [key, category] of Object.entries(userCategories)) {
-            if (category.dbRole === item.role) {
-                categoryKey = key;
-                break;
-            }
-        }
+        // Map database role to UI category
+        const roleMap = {
+            customerAssistance: 'customer',
+            deliveryAgent: 'delivery',
+            manager: 'manager',
+            stockManager: 'stockManager'
+        };
 
-        // Default to customer category if we can't find a match
-        const category = categoryKey ? userCategories[categoryKey] : userCategories.customer;
+        const uiRole = roleMap[item.role] || 'customer';
+        const category = userCategories[uiRole];
+
+        // Get user display name - prioritize name, then firstName + lastName, then email, or fallback
+        let displayName = "Unknown User";
+
+        if (item.name) {
+            displayName = item.name;
+        } else if (item.firstName && item.lastName) {
+            displayName = `${item.firstName} ${item.lastName}`;
+        } else if (item.firstName) {
+            displayName = item.firstName;
+        } else if (item.email) {
+            displayName = item.email.split('@')[0]; // Use email without domain
+        }
 
         const bgColor = category.color + '20'; // Add transparency for background
         const iconName = category.icon;
@@ -239,11 +288,20 @@ export default function NewChat() {
                 disabled={loading}
             >
                 <View style={[styles.userAvatar, { backgroundColor: bgColor }]}>
-                    <Ionicons name={iconName} size={24} color={iconColor} />
+                    {item.profilePicture ? (
+                        <Image
+                            source={{ uri: item.profilePicture }}
+                            style={styles.avatarImage}
+                        />
+                    ) : (
+                        <Text style={styles.avatarText}>
+                            {displayName.charAt(0).toUpperCase()}
+                        </Text>
+                    )}
                 </View>
 
                 <View style={styles.userInfo}>
-                    <Text style={styles.userName}>{item.name || 'User'}</Text>
+                    <Text style={styles.userName}>{displayName}</Text>
                     <Text style={styles.userEmail}>{item.email || ''}</Text>
                     {item.phone && <Text style={styles.userPhone}>{item.phone}</Text>}
                 </View>
@@ -279,17 +337,12 @@ export default function NewChat() {
     };
 
     return (
-        <View style={[styles.container, { paddingTop: insets.top }]}>
-            <View style={styles.header}>
-                <TouchableOpacity
-                    style={styles.backButton}
-                    onPress={() => router.back()}
-                >
-                    <MaterialIcons name="arrow-back" size={24} color="#000" />
-                </TouchableOpacity>
-                <Text style={styles.headerTitle}>New Chat</Text>
-                <View style={{ width: 24 }} />
-            </View>
+        <View style={[styles.container, { paddingTop: 0 }]}>
+            <HomeHeader
+                title="New Chat"
+                showBackButton={true}
+                onBackPress={() => router.back()}
+            />
 
             <View style={styles.searchContainer}>
                 <View style={styles.searchRow}>
@@ -504,6 +557,16 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         marginRight: 16,
+    },
+    avatarImage: {
+        width: 50,
+        height: 50,
+        borderRadius: 25,
+    },
+    avatarText: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        color: '#4b5563',
     },
     userInfo: {
         flex: 1,

@@ -180,7 +180,7 @@ export default function SystemChat() {
 
         try {
             router.push({
-                pathname: "/chatRoom",
+                pathname: "/suplier/chatRoom",
                 params: {
                     uid: user.uid,
                     name: user.name || user.email || 'User'
@@ -191,7 +191,7 @@ export default function SystemChat() {
 
             // Fallback navigation method if the first fails
             setTimeout(() => {
-                router.push(`/chatRoom?uid=${user.uid}&name=${encodeURIComponent(user.name || user.email || 'User')}`);
+                router.push(`/suplier/chatRoom?uid=${user.uid}&name=${encodeURIComponent(user.name || user.email || 'User')}`);
             }, 100);
         }
     };

@@ -11,7 +11,7 @@ export default function ChatRoomHeader({ title, photoURL, online, typing, role }
     const insets = useSafeAreaInsets();
     const [showOptions, setShowOptions] = useState(false);
     const [showProfileModal, setShowProfileModal] = useState(false);
-    
+
     // Animation values
     const fadeAnim = useRef(new Animated.Value(0)).current;
     const slideAnim = useRef(new Animated.Value(-20)).current;
@@ -19,16 +19,16 @@ export default function ChatRoomHeader({ title, photoURL, online, typing, role }
     const typingDots = useRef(new Animated.Value(0)).current;
     const optionsScaleAnim = useRef(new Animated.Value(0.5)).current;
     const optionsOpacityAnim = useRef(new Animated.Value(0)).current;
-    
+
     // Helper function to format dates safely
     const formatDate = (dateValue, formatType = 'date') => {
         if (!dateValue) return 'Unknown';
-        
+
         try {
             // Handle Firestore timestamps
             if (dateValue && typeof dateValue.toDate === 'function') {
                 dateValue = dateValue.toDate();
-            } 
+            }
             // Handle Firestore timestamp as object with seconds and nanoseconds
             else if (dateValue && dateValue.seconds && dateValue.nanoseconds) {
                 dateValue = new Date(dateValue.seconds * 1000);
@@ -37,7 +37,7 @@ export default function ChatRoomHeader({ title, photoURL, online, typing, role }
             else if (typeof dateValue === 'string') {
                 dateValue = new Date(dateValue);
             }
-            
+
             // Check if we have a valid date
             if (dateValue instanceof Date && !isNaN(dateValue)) {
                 if (formatType === 'datetime') {
@@ -46,7 +46,7 @@ export default function ChatRoomHeader({ title, photoURL, online, typing, role }
                     return dateValue.toLocaleDateString();
                 }
             }
-            
+
             // If it's still an object with seconds, try directly
             if (typeof dateValue === 'object' && dateValue.seconds) {
                 const date = new Date(dateValue.seconds * 1000);
@@ -56,36 +56,36 @@ export default function ChatRoomHeader({ title, photoURL, online, typing, role }
                     return date.toLocaleDateString();
                 }
             }
-            
+
             // Last resort - stringify the value
             if (typeof dateValue === 'object') {
                 return JSON.stringify(dateValue);
             }
-            
+
             return 'Unknown';
         } catch (error) {
             console.log('Error formatting date:', error);
             return 'Unknown';
         }
     };
-    
+
     // Extract user data
     const userData = React.useMemo(() => {
         if (!title) return { name: 'Chat' };
-        
+
         // If title is a string, use it as name
         if (typeof title === 'string') {
             return { name: title };
         }
-        
+
         // If it's an object, it's the user data
         if (typeof title === 'object') {
             return title;
         }
-        
+
         return { name: 'Chat' };
     }, [title]);
-    
+
     // Get a display name from userData
     const safeTitle = React.useMemo(() => {
         if (userData.fullName) return userData.fullName;
@@ -94,7 +94,7 @@ export default function ChatRoomHeader({ title, photoURL, online, typing, role }
         if (userData.email) return userData.email;
         return 'Chat';
     }, [userData]);
-    
+
     useEffect(() => {
         // Entrance animation
         Animated.parallel([
@@ -109,7 +109,7 @@ export default function ChatRoomHeader({ title, photoURL, online, typing, role }
                 useNativeDriver: true,
             }),
         ]).start();
-        
+
         // Typing animation
         if (typing) {
             Animated.timing(typingOpacity, {
@@ -117,7 +117,7 @@ export default function ChatRoomHeader({ title, photoURL, online, typing, role }
                 duration: 200,
                 useNativeDriver: true,
             }).start();
-            
+
             // Animate the typing dots in a loop
             Animated.loop(
                 Animated.sequence([
@@ -141,7 +141,7 @@ export default function ChatRoomHeader({ title, photoURL, online, typing, role }
             }).start();
         }
     }, [typing]);
-    
+
     const toggleOptions = () => {
         if (showOptions) {
             Animated.parallel([
@@ -174,22 +174,22 @@ export default function ChatRoomHeader({ title, photoURL, online, typing, role }
         }
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     };
-    
+
     const viewProfile = () => {
         toggleOptions();
         setShowProfileModal(true);
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     };
-    
+
     const renderTypingDots = () => {
         // Get animated dots based on the animation value
         const dotsValue = typingDots.interpolate({
             inputRange: [0, 0.33, 0.66, 1],
             outputRange: ['', '.', '..', '...'],
         });
-        
+
         return (
-            <Animated.View 
+            <Animated.View
                 style={[
                     styles.typingContainer,
                     { opacity: typingOpacity }
@@ -204,18 +204,43 @@ export default function ChatRoomHeader({ title, photoURL, online, typing, role }
             </Animated.View>
         );
     };
-    
+
     const goBack = () => {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-        router.back();
+
+        // Add debug logging
+        console.log("[ChatRoomHeader] Going back with role:", role);
+
+        // Instead of using router.back() which may navigate incorrectly,
+        // navigate to specific routes based on user role
+        try {
+            if (role === 'supplier') {
+                console.log("[ChatRoomHeader] Navigating to supplier chat");
+                router.replace('/(app)/suplier/(tabs)/chat');
+            } else if (role === 'deliveryAgent') {
+                console.log("[ChatRoomHeader] Navigating to delivery agent chat");
+                router.replace('/(app)/deliveryAgent/(tabs)/chat');
+            } else if (role === 'customer') {
+                console.log("[ChatRoomHeader] Navigating to customer tabs");
+                router.replace('/(app)/customer/(tabs)');
+            } else {
+                // Fallback to a safe route if role is not recognized
+                console.log("[ChatRoomHeader] No specific back route for role:", role);
+                router.replace('/(app)');
+            }
+        } catch (error) {
+            console.error('[ChatRoomHeader] Navigation error:', error);
+            // Emergency fallback
+            router.replace('/(app)');
+        }
     };
-    
+
     // Safely get the first character for avatar
     const getAvatarInitial = () => {
         if (!safeTitle) return '?';
         return safeTitle.charAt(0).toUpperCase();
     };
-    
+
     const getRoleColor = (userRole) => {
         switch (userRole) {
             case 'admin':
@@ -236,7 +261,7 @@ export default function ChatRoomHeader({ title, photoURL, online, typing, role }
                 return '#6c757d';
         }
     };
-    
+
     const getRoleLabel = (userRole) => {
         switch (userRole) {
             case 'admin':
@@ -257,8 +282,8 @@ export default function ChatRoomHeader({ title, photoURL, online, typing, role }
                 return userRole ? userRole.charAt(0).toUpperCase() + userRole.slice(1) : 'User';
         }
     };
-    
-  return (
+
+    return (
         <>
             <LinearGradient
                 colors={['#ffffff', '#f8fafc']}
@@ -267,17 +292,17 @@ export default function ChatRoomHeader({ title, photoURL, online, typing, role }
                     { paddingTop: insets.top > 0 ? insets.top : 12 }
                 ]}
             >
-                <TouchableOpacity 
-                    style={styles.backButton} 
+                <TouchableOpacity
+                    style={styles.backButton}
                     onPress={goBack}
                     activeOpacity={0.7}
                 >
                     <View style={styles.iconWrapper}>
                         <Feather name="arrow-left" size={22} color="#374151" />
                     </View>
-                      </TouchableOpacity>
-                
-                <TouchableOpacity 
+                </TouchableOpacity>
+
+                <TouchableOpacity
                     style={styles.profileContainer}
                     onPress={viewProfile}
                     activeOpacity={0.8}
@@ -297,15 +322,15 @@ export default function ChatRoomHeader({ title, photoURL, online, typing, role }
                                 </Text>
                             </LinearGradient>
                         )}
-                        
+
                         {online && <View style={styles.onlineIndicator} />}
                     </View>
-                    
+
                     <View style={styles.titleContainer}>
-                        <Animated.Text 
+                        <Animated.Text
                             style={[
                                 styles.title,
-                                { 
+                                {
                                     opacity: fadeAnim,
                                     transform: [{ translateY: slideAnim }]
                                 }
@@ -314,25 +339,25 @@ export default function ChatRoomHeader({ title, photoURL, online, typing, role }
                         >
                             {safeTitle}
                         </Animated.Text>
-                        
+
                         {typing ? renderTypingDots() : online && (
                             <Text style={styles.onlineText}>online</Text>
                         )}
-                      </View>
+                    </View>
                 </TouchableOpacity>
-                
-                <TouchableOpacity 
+
+                <TouchableOpacity
                     style={styles.optionsButton}
                     onPress={toggleOptions}
                     activeOpacity={0.7}
                 >
                     <View style={styles.iconWrapper}>
                         <Feather name="more-vertical" size={22} color="#374151" />
-                  </View>
+                    </View>
                 </TouchableOpacity>
-                
+
                 {showOptions && (
-                    <Animated.View 
+                    <Animated.View
                         style={[
                             styles.optionsMenu,
                             {
@@ -341,19 +366,19 @@ export default function ChatRoomHeader({ title, photoURL, online, typing, role }
                             }
                         ]}
                     >
-                        <TouchableOpacity 
+                        <TouchableOpacity
                             style={styles.optionItem}
                             onPress={viewProfile}
                         >
                             <Feather name="user" size={18} color="#374151" />
                             <Text style={styles.optionText}>View Profile</Text>
                         </TouchableOpacity>
-                        
+
                         <TouchableOpacity style={styles.optionItem}>
                             <Feather name="bell-off" size={18} color="#374151" />
                             <Text style={styles.optionText}>Mute Notifications</Text>
                         </TouchableOpacity>
-                        
+
                         <TouchableOpacity style={styles.optionItem}>
                             <Feather name="trash-2" size={18} color="#dc3545" />
                             <Text style={[styles.optionText, { color: '#dc3545' }]}>Delete Chat</Text>
@@ -361,7 +386,7 @@ export default function ChatRoomHeader({ title, photoURL, online, typing, role }
                     </Animated.View>
                 )}
             </LinearGradient>
-            
+
             {/* Enhanced Profile Modal */}
             <Modal
                 visible={showProfileModal}
@@ -369,21 +394,21 @@ export default function ChatRoomHeader({ title, photoURL, online, typing, role }
                 animationType="fade"
                 onRequestClose={() => setShowProfileModal(false)}
             >
-                <Pressable 
+                <Pressable
                     style={styles.modalOverlay}
                     onPress={() => setShowProfileModal(false)}
                 >
                     <Pressable style={styles.modalContent} onPress={e => e.stopPropagation()}>
                         <View style={styles.modalHeader}>
                             <Text style={styles.modalTitle}>User Profile</Text>
-                            <TouchableOpacity 
+                            <TouchableOpacity
                                 onPress={() => setShowProfileModal(false)}
                                 style={styles.closeButton}
                             >
                                 <Feather name="x" size={24} color="#374151" />
                             </TouchableOpacity>
                         </View>
-                        
+
                         <ScrollView style={styles.modalScrollView} contentContainerStyle={styles.scrollContent}>
                             <View style={styles.profileInfo}>
                                 <View style={styles.modalAvatarContainer}>
@@ -401,14 +426,14 @@ export default function ChatRoomHeader({ title, photoURL, online, typing, role }
                                             </Text>
                                         </LinearGradient>
                                     )}
-                                    
+
                                     {online && (
                                         <View style={styles.modalOnlineIndicator} />
                                     )}
                                 </View>
-                                
+
                                 <Text style={styles.profileName}>{safeTitle}</Text>
-                                
+
                                 {(userData?.role || role) && (
                                     <View style={[
                                         styles.roleBadge,
@@ -422,7 +447,7 @@ export default function ChatRoomHeader({ title, photoURL, online, typing, role }
                                         </Text>
                                     </View>
                                 )}
-                                
+
                                 <View style={styles.profileStatus}>
                                     {online ? (
                                         <Text style={styles.statusText}>
@@ -430,16 +455,16 @@ export default function ChatRoomHeader({ title, photoURL, online, typing, role }
                                             Online now
                                         </Text>
                                     ) : (
-                                        <Text style={[styles.statusText, {color: '#6b7280'}]}>
+                                        <Text style={[styles.statusText, { color: '#6b7280' }]}>
                                             Offline
                                         </Text>
                                     )}
                                 </View>
                             </View>
-                            
+
                             <View style={styles.infoSection}>
                                 <Text style={styles.sectionTitle}>Contact Information</Text>
-                                
+
                                 <View style={styles.infoItem}>
                                     <View style={styles.infoIconContainer}>
                                         <Feather name="mail" size={18} color="#4F46E5" />
@@ -451,7 +476,7 @@ export default function ChatRoomHeader({ title, photoURL, online, typing, role }
                                         </Text>
                                     </View>
                                 </View>
-                                
+
                                 <View style={styles.infoItem}>
                                     <View style={styles.infoIconContainer}>
                                         <Feather name="phone" size={18} color="#4F46E5" />
@@ -471,30 +496,30 @@ export default function ChatRoomHeader({ title, photoURL, online, typing, role }
                                     <View style={styles.infoContent}>
                                         <Text style={styles.infoLabel}>Full Name</Text>
                                         <Text style={styles.infoValue}>
-                                            {userData?.fullName || 
-                                             (userData?.firstName && userData?.lastName ? 
-                                               `${userData.firstName} ${userData.lastName}` : 
-                                               userData?.name || 'Not available')}
+                                            {userData?.fullName ||
+                                                (userData?.firstName && userData?.lastName ?
+                                                    `${userData.firstName} ${userData.lastName}` :
+                                                    userData?.name || 'Not available')}
                                         </Text>
                                     </View>
                                 </View>
                             </View>
-                            
+
                             <View style={styles.infoSection}>
                                 <Text style={styles.sectionTitle}>Account Information</Text>
-                                
+
                                 <View style={styles.infoItem}>
                                     <View style={styles.infoIconContainer}>
                                         <Feather name="award" size={18} color="#4F46E5" />
                                     </View>
                                     <View style={styles.infoContent}>
                                         <Text style={styles.infoLabel}>Role</Text>
-                                        <Text style={[styles.infoValue, {color: getRoleColor(userData?.role || role)}]}>
+                                        <Text style={[styles.infoValue, { color: getRoleColor(userData?.role || role) }]}>
                                             {getRoleLabel(userData?.role || role) || 'User'}
                                         </Text>
                                     </View>
                                 </View>
-                                
+
                                 <View style={styles.infoItem}>
                                     <View style={styles.infoIconContainer}>
                                         <Feather name="hash" size={18} color="#4F46E5" />
@@ -506,7 +531,7 @@ export default function ChatRoomHeader({ title, photoURL, online, typing, role }
                                         </Text>
                                     </View>
                                 </View>
-                                
+
                                 {userData?.department && (
                                     <View style={styles.infoItem}>
                                         <View style={styles.infoIconContainer}>
@@ -518,7 +543,7 @@ export default function ChatRoomHeader({ title, photoURL, online, typing, role }
                                         </View>
                                     </View>
                                 )}
-                                
+
                                 {userData?.location && (
                                     <View style={styles.infoItem}>
                                         <View style={styles.infoIconContainer}>
@@ -530,7 +555,7 @@ export default function ChatRoomHeader({ title, photoURL, online, typing, role }
                                         </View>
                                     </View>
                                 )}
-                                
+
                                 {userData?.address && (
                                     <View style={styles.infoItem}>
                                         <View style={styles.infoIconContainer}>
@@ -543,10 +568,10 @@ export default function ChatRoomHeader({ title, photoURL, online, typing, role }
                                     </View>
                                 )}
                             </View>
-                            
+
                             <View style={styles.infoSection}>
                                 <Text style={styles.sectionTitle}>App Activity</Text>
-                                
+
                                 <View style={styles.infoItem}>
                                     <View style={styles.infoIconContainer}>
                                         <Feather name="calendar" size={18} color="#4F46E5" />
@@ -554,13 +579,13 @@ export default function ChatRoomHeader({ title, photoURL, online, typing, role }
                                     <View style={styles.infoContent}>
                                         <Text style={styles.infoLabel}>Last Active</Text>
                                         <Text style={styles.infoValue}>
-                                            {online ? 'Now' : userData?.lastActive ? 
-                                                formatDate(userData.lastActive) 
+                                            {online ? 'Now' : userData?.lastActive ?
+                                                formatDate(userData.lastActive)
                                                 : 'Unknown'}
                                         </Text>
                                     </View>
                                 </View>
-                                
+
                                 <View style={styles.infoItem}>
                                     <View style={styles.infoIconContainer}>
                                         <Feather name="clock" size={18} color="#4F46E5" />
@@ -568,17 +593,17 @@ export default function ChatRoomHeader({ title, photoURL, online, typing, role }
                                     <View style={styles.infoContent}>
                                         <Text style={styles.infoLabel}>Created Account</Text>
                                         <Text style={styles.infoValue}>
-                                            {userData?.createdAt ? 
-                                                formatDate(userData.createdAt) 
+                                            {userData?.createdAt ?
+                                                formatDate(userData.createdAt)
                                                 : 'Unknown'}
                                         </Text>
                                     </View>
-                  </View>
-      </View>  
+                                </View>
+                            </View>
                         </ScrollView>
-                        
+
                         <View style={styles.actionButtons}>
-                            <TouchableOpacity 
+                            <TouchableOpacity
                                 style={styles.actionButton}
                                 onPress={() => setShowProfileModal(false)}
                             >

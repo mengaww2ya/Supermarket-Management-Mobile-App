@@ -450,6 +450,17 @@ export default function AddProduct() {
         return true;
     };
 
+    // Animation optimization helper
+    const performAnimationWithOptimization = (animValue, endValue = 1, duration = 200, initialValue = 0.7) => {
+        // Use withTiming instead of withSequence for better performance
+        animValue.value = withTiming(initialValue, { duration: duration / 2 });
+
+        // Use setTimeout to prevent UI thread blocking
+        setTimeout(() => {
+            animValue.value = withTiming(endValue, { duration: duration / 2 });
+        }, 10);
+    };
+
     // Reset form
     const resetForm = () => {
         setProductName("");
@@ -463,11 +474,8 @@ export default function AddProduct() {
         setFormError("");
         setCurrentStep(1);
 
-        // Animate the form reset
-        fadeAnim.value = withSequence(
-            withTiming(0.5, { duration: 300 }),
-            withTiming(1, { duration: 300 })
-        );
+        // Optimize form reset animation
+        performAnimationWithOptimization(fadeAnim, 1, 300);
     };
 
     // Handle step navigation
@@ -475,11 +483,8 @@ export default function AddProduct() {
         if (!validateForm()) return;
 
         if (currentStep < 3) {
-            // Animate transition to next step
-            fadeAnim.value = withSequence(
-                withTiming(0.5, { duration: 200 }),
-                withTiming(1, { duration: 200 })
-            );
+            // Optimize step transition animation
+            performAnimationWithOptimization(fadeAnim, 1, 200);
 
             setCurrentStep(currentStep + 1);
 
@@ -492,11 +497,8 @@ export default function AddProduct() {
 
     const handlePreviousStep = () => {
         if (currentStep > 1) {
-            // Animate transition to previous step
-            fadeAnim.value = withSequence(
-                withTiming(0.5, { duration: 200 }),
-                withTiming(1, { duration: 200 })
-            );
+            // Optimize step transition animation
+            performAnimationWithOptimization(fadeAnim, 1, 200);
 
             setCurrentStep(currentStep - 1);
 
@@ -525,11 +527,8 @@ export default function AddProduct() {
                 Vibration.vibrate(50);
             }
 
-            // Animate button
-            buttonScaleAnim.value = withSequence(
-                withTiming(0.95, { duration: 100 }),
-                withTiming(1, { duration: 100 })
-            );
+            // Optimize button animation
+            performAnimationWithOptimization(buttonScaleAnim, 1, 150, 0.95);
 
             // Upload image first
             const imageUrl = await uploadImage(productImage);

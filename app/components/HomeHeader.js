@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, Modal, Animated, Dimensions, Platform, Vibration, StyleSheet, StatusBar as RNStatusBar } from 'react-native';
+import { View, Text, TouchableOpacity, Modal, Animated, Dimensions, Platform, Vibration, StyleSheet, StatusBar as RNStatusBar, Alert } from 'react-native';
 import React, { useState, useRef, useEffect } from 'react';
 import { Image } from 'expo-image';
 import { blurhash } from '../utills/common';
@@ -47,16 +47,16 @@ export default function HomeHeader({ title, showBackButton = false, onBackPress,
 
   // Start animations on component mount
   useEffect(() => {
-    // Entrance animations
+    // Simplified entrance animations
     Animated.parallel([
       Animated.timing(fadeAnim, {
         toValue: 1,
-        duration: 600,
+        duration: 400,
         useNativeDriver: true,
       }),
       Animated.timing(translateY, {
         toValue: 0,
-        duration: 600,
+        duration: 400,
         useNativeDriver: true,
       }),
       Animated.spring(scaleAnim, {
@@ -67,109 +67,64 @@ export default function HomeHeader({ title, showBackButton = false, onBackPress,
       }),
       Animated.timing(titleAnim, {
         toValue: 1,
-        duration: 800,
+        duration: 400,
         useNativeDriver: true,
       }),
       Animated.timing(underlineWidth, {
         toValue: 1,
-        duration: 800,
-        delay: 300,
+        duration: 400,
         useNativeDriver: false,
       })
     ]).start();
 
-    // Start bubble animations
-    animateBubbles();
-    // Start particle animations
-    animateParticles();
-    // Start glow animation
-    animateGlow();
-
     // Fetch user profile image
     fetchUserProfileImage();
+
+    // Use a lighter version of animations for decorative elements
+    const animationTimer = setTimeout(() => {
+      // Only run these animations if the component is still mounted
+      animateBubbles();
+      animateGlow();
+    }, 300);
+
+    return () => {
+      clearTimeout(animationTimer);
+    };
   }, []);
 
-  // Animate decorative bubbles
+  // Simplified bubble animation with fewer resources
   const animateBubbles = () => {
-    // Create a looping animation for the bubbles
+    // Create a simpler looping animation for the bubbles
     Animated.loop(
       Animated.sequence([
-        Animated.parallel([
-          Animated.timing(bubbleAnim1, {
-            toValue: 1.15,
-            duration: 2000,
-            useNativeDriver: true,
-          }),
-          Animated.timing(bubbleAnim2, {
-            toValue: 0.85,
-            duration: 1500,
-            useNativeDriver: true,
-          }),
-          Animated.timing(bubbleAnim3, {
-            toValue: 1.1,
-            duration: 2500,
-            useNativeDriver: true,
-          }),
-          Animated.timing(rotateAnim, {
-            toValue: 1,
-            duration: 10000,
-            useNativeDriver: true,
-          }),
-        ]),
-        Animated.parallel([
-          Animated.timing(bubbleAnim1, {
-            toValue: 0.9,
-            duration: 2000,
-            useNativeDriver: true,
-          }),
-          Animated.timing(bubbleAnim2, {
-            toValue: 1.1,
-            duration: 1500,
-            useNativeDriver: true,
-          }),
-          Animated.timing(bubbleAnim3, {
-            toValue: 0.95,
-            duration: 2500,
-            useNativeDriver: true,
-          }),
-          Animated.timing(rotateAnim, {
-            toValue: 0,
-            duration: 10000,
-            useNativeDriver: true,
-          }),
-        ]),
+        Animated.timing(bubbleAnim1, {
+          toValue: 1.1,
+          duration: 3000,
+          useNativeDriver: true,
+        }),
+        Animated.timing(bubbleAnim1, {
+          toValue: 0.95,
+          duration: 3000,
+          useNativeDriver: true,
+        }),
       ])
     ).start();
-  };
 
-  // Animate floating particles
-  const animateParticles = () => {
-    // Reset positions
-    particleAnim1.setValue(0);
-    particleAnim2.setValue(0);
-    particleAnim3.setValue(0);
-
-    // Create staggered animations for particles
-    Animated.stagger(300, [
-      Animated.timing(particleAnim1, {
-        toValue: 1,
-        duration: 3000,
-        useNativeDriver: true,
-      }),
-      Animated.timing(particleAnim2, {
-        toValue: 1,
-        duration: 4000,
-        useNativeDriver: true,
-      }),
-      Animated.timing(particleAnim3, {
-        toValue: 1,
-        duration: 5000,
-        useNativeDriver: true,
-      }),
-    ]).start(() => {
-      // Repeat animation
-      animateParticles();
-    });
+    // Separate loop for better performance
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(bubbleAnim2, {
+          toValue: 1.1,
+          duration: 2500,
+          useNativeDriver: true,
+        }),
+        Animated.timing(bubbleAnim2, {
+          toValue: 0.9,
+          duration: 2500,
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
   };
 
   // Animate glow effect
@@ -223,73 +178,102 @@ export default function HomeHeader({ title, showBackButton = false, onBackPress,
 
   // Handle profile button press
   const handleProfilePress = () => {
-    // Provide haptic feedback
-    if (Platform.OS === 'ios') {
-      try {
-        const Haptics = require('expo-haptics');
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      } catch (e) {
+    try {
+      // Provide haptic feedback
+      if (Platform.OS === 'ios') {
+        try {
+          const Haptics = require('expo-haptics');
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        } catch (e) {
+          // Fallback to simple vibration if Haptics is unavailable
+          Vibration.vibrate(20);
+        }
+      } else {
         Vibration.vibrate(20);
       }
-    } else {
-      Vibration.vibrate(20);
+
+      // Animate profile image with reduced animation complexity
+      Animated.timing(profileImageAnim, {
+        toValue: 0.95,
+        duration: 100,
+        useNativeDriver: true,
+      }).start(() => {
+        Animated.timing(profileImageAnim, {
+          toValue: 1,
+          duration: 100,
+          useNativeDriver: true,
+        }).start();
+      });
+
+      // Show menu first before starting animations
+      setShowMenu(true);
+
+      // Use a slight delay to ensure the modal is ready before animation starts
+      setTimeout(() => {
+        // Use simpler animation for better performance
+        Animated.parallel([
+          Animated.spring(menuScaleAnim, {
+            toValue: 1,
+            friction: 8,
+            tension: 65,
+            useNativeDriver: true,
+          }),
+          Animated.timing(menuFadeAnim, {
+            toValue: 1,
+            duration: 200,
+            useNativeDriver: true,
+          })
+        ]).start();
+      }, 50);
+    } catch (error) {
+      // Ensure we handle any errors that might occur
+      console.error("Error in handleProfilePress:", error);
+      // If there's an error, make sure the menu is still shown
+      setShowMenu(true);
     }
-
-    // Animate profile image
-    Animated.sequence([
-      Animated.timing(profileImageAnim, {
-        toValue: 0.9,
-        duration: 100,
-        useNativeDriver: true,
-      }),
-      Animated.timing(profileImageAnim, {
-        toValue: 1,
-        duration: 100,
-        useNativeDriver: true,
-      })
-    ]).start();
-
-    // Show menu
-    setShowMenu(true);
-
-    // Animate menu entrance
-    Animated.parallel([
-      Animated.timing(menuScaleAnim, {
-        toValue: 1,
-        duration: 300,
-        useNativeDriver: true,
-      }),
-      Animated.timing(menuFadeAnim, {
-        toValue: 1,
-        duration: 300,
-        useNativeDriver: true,
-      })
-    ]).start();
   };
 
   // Handle closing the menu
   const handleCloseMenu = () => {
-    // Animate menu exit
-    Animated.parallel([
-      Animated.timing(menuScaleAnim, {
-        toValue: 0,
-        duration: 200,
-        useNativeDriver: true,
-      }),
-      Animated.timing(menuFadeAnim, {
-        toValue: 0,
-        duration: 200,
-        useNativeDriver: true,
-      })
-    ]).start(() => {
+    try {
+      // Use simpler animation with proper error handling
+      Animated.parallel([
+        Animated.timing(menuScaleAnim, {
+          toValue: 0,
+          duration: 150,
+          useNativeDriver: true,
+        }),
+        Animated.timing(menuFadeAnim, {
+          toValue: 0,
+          duration: 150,
+          useNativeDriver: true,
+        })
+      ]).start(() => {
+        setShowMenu(false);
+      });
+    } catch (error) {
+      // If animation fails, at least close the menu
+      console.error("Error in handleCloseMenu:", error);
       setShowMenu(false);
-    });
+    }
   };
 
   // Handle profile navigation
   const handleProfile = () => {
-    handleCloseMenu();
-    router.push('/common/EditProfile');
+    try {
+      // Close menu first
+      handleCloseMenu();
+
+      // Add a small delay before navigation to ensure animations complete
+      setTimeout(() => {
+        router.push('/common/EditProfile');
+      }, 300);
+    } catch (error) {
+      console.error("Error navigating to profile:", error);
+      // Fallback handling
+      handleCloseMenu();
+      Alert.alert("Navigation Error", "Could not navigate to profile page. Please try again.");
+    }
   };
 
   // Handle logout
@@ -630,38 +614,39 @@ export default function HomeHeader({ title, showBackButton = false, onBackPress,
       <Modal
         visible={showMenu}
         transparent={true}
-        animationType="none"
+        animationType="fade"
         onRequestClose={handleCloseMenu}
+        statusBarTranslucent={true}
       >
         <TouchableOpacity
-          style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)' }}
+          style={{
+            flex: 1,
+            backgroundColor: 'rgba(0,0,0,0.5)',
+            justifyContent: 'flex-start',
+            alignItems: 'flex-end',
+            paddingTop: hp(8),
+            paddingRight: 15
+          }}
           activeOpacity={1}
           onPress={handleCloseMenu}
         >
           <Animated.View
             style={{
-              position: 'absolute',
-              top: hp(8),
-              right: 15,
               opacity: menuFadeAnim,
               transform: [
-                { scale: menuScaleAnim },
-                {
-                  translateY: menuFadeAnim.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [-20, 0]
-                  })
-                }
+                { scale: menuScaleAnim }
               ],
               backgroundColor: 'white',
               borderRadius: 24,
               padding: 0,
               minWidth: 240,
-              shadowColor: '#4F46E5',
-              shadowOffset: { width: 0, height: 10 },
-              shadowOpacity: 0.25,
-              shadowRadius: 15,
-              elevation: 10,
+              width: wp(75),
+              maxWidth: 300,
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.15,
+              shadowRadius: 12,
+              elevation: 8,
               overflow: 'hidden'
             }}
           >
@@ -672,10 +657,9 @@ export default function HomeHeader({ title, showBackButton = false, onBackPress,
               end={{ x: 1, y: 1 }}
               className="px-4 pt-4 pb-5"
             >
-              {/* Decorative elements in header */}
+              {/* Decorative elements in header - simplified */}
               <View className="absolute top-2 right-2 w-12 h-12 rounded-full bg-white/5" />
               <View className="absolute bottom-3 left-12 w-8 h-8 rounded-full bg-white/5" />
-              <View className="absolute -bottom-4 right-16 w-16 h-16 rounded-full bg-white/5" />
 
               <View className="flex-row items-center">
                 <View className="relative">
@@ -689,8 +673,9 @@ export default function HomeHeader({ title, showBackButton = false, onBackPress,
                     }}
                     source={profileImage ? { uri: profileImage } : ProfileImgPlaceholder}
                     placeholder={blurhash}
-                    transition={500}
+                    transition={300}
                     contentFit="cover"
+                    cachePolicy="memory-disk"
                   />
                   <View className="absolute -right-1 -bottom-1 w-4 h-4 rounded-full bg-emerald-400 border-2 border-white" />
                 </View>
@@ -702,6 +687,7 @@ export default function HomeHeader({ title, showBackButton = false, onBackPress,
             </LinearGradient>
 
             <View className="px-1 py-2">
+              {/* Menu Items - Simplified with fewer animations */}
               {/* Menu Item: View Profile */}
               <TouchableOpacity
                 className="flex-row items-center py-3.5 px-4 mx-1 rounded-xl active:bg-gray-100"
@@ -722,7 +708,6 @@ export default function HomeHeader({ title, showBackButton = false, onBackPress,
                 className="flex-row items-center py-3.5 px-4 mx-1 rounded-xl active:bg-gray-100"
                 onPress={() => {
                   handleCloseMenu();
-                  // Navigate to settings if available
                 }}
               >
                 <View className="w-10 h-10 rounded-full bg-blue-100 items-center justify-center mr-3">
@@ -735,47 +720,8 @@ export default function HomeHeader({ title, showBackButton = false, onBackPress,
                 <Feather name="chevron-right" size={18} color="#9CA3AF" />
               </TouchableOpacity>
 
-              {/* Menu Item: Notifications */}
-              <TouchableOpacity
-                className="flex-row items-center py-3.5 px-4 mx-1 rounded-xl active:bg-gray-100"
-                onPress={() => {
-                  handleCloseMenu();
-                  // Navigate to notifications if available
-                }}
-              >
-                <View className="w-10 h-10 rounded-full bg-amber-100 items-center justify-center mr-3 relative">
-                  <Ionicons name="notifications-outline" size={hp(2.2)} color="#D97706" />
-                  <View className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-red-500 border border-white items-center justify-center">
-                    <Text className="text-[8px] text-white font-bold">3</Text>
-                  </View>
-                </View>
-                <View className="flex-1">
-                  <Text className="font-semibold text-gray-800">Notifications</Text>
-                  <Text className="text-xs text-gray-500">3 unread messages</Text>
-                </View>
-                <Feather name="chevron-right" size={18} color="#9CA3AF" />
-              </TouchableOpacity>
-
               {/* Menu Divider */}
               <View className="h-[1px] bg-gray-200 mx-4 my-1" />
-
-              {/* Menu Item: Help Center */}
-              <TouchableOpacity
-                className="flex-row items-center py-3.5 px-4 mx-1 rounded-xl active:bg-gray-100"
-                onPress={() => {
-                  handleCloseMenu();
-                  // Navigate to help center if available
-                }}
-              >
-                <View className="w-10 h-10 rounded-full bg-purple-100 items-center justify-center mr-3">
-                  <MaterialIcons name="help-outline" size={hp(2.2)} color="#7C3AED" />
-                </View>
-                <View className="flex-1">
-                  <Text className="font-semibold text-gray-800">Help Center</Text>
-                  <Text className="text-xs text-gray-500">Support and FAQ</Text>
-                </View>
-                <Feather name="chevron-right" size={18} color="#9CA3AF" />
-              </TouchableOpacity>
 
               {/* Menu Item: Logout */}
               <TouchableOpacity

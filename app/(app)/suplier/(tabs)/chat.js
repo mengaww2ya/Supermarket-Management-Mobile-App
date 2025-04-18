@@ -2,13 +2,54 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { View, StyleSheet, Text, ActivityIndicator, TouchableOpacity, KeyboardAvoidingView, Platform, TextInput, FlatList } from 'react-native';
 import { GiftedChat, Bubble, Send, SystemMessage } from 'react-native-gifted-chat';
 import { FontAwesome, MaterialIcons, Ionicons, Feather } from '@expo/vector-icons';
-import { collection, query, orderBy, onSnapshot, addDoc, serverTimestamp, where, getDocs, doc, updateDoc } from 'firebase/firestore';
+import { collection, query, orderBy, onSnapshot, addDoc, serverTimestamp, where, getDocs, doc, updateDoc, getDoc } from 'firebase/firestore';
 import { db, auth } from '../../../../firebase/firebaseConfig';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { useFocusEffect } from '@react-navigation/native';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import ImageBubble from '../../../components/ImageBubble';
+import HomeHeader from '../../../components/HomeHeader';
+
+// Role definitions with colors and icons
+const roleConfig = {
+    customer: {
+        color: '#3b82f6', // Blue
+        bgColor: '#dbeafe',
+        icon: 'person',
+        label: 'Customer'
+    },
+    customerAssistance: {
+        color: '#f59e0b', // Amber
+        bgColor: '#fef3c7',
+        icon: 'people',
+        label: 'Customer Assistance'
+    },
+    deliveryAgent: {
+        color: '#10b981', // Green
+        bgColor: '#d1fae5',
+        icon: 'bicycle',
+        label: 'Delivery'
+    },
+    manager: {
+        color: '#8b5cf6', // Purple
+        bgColor: '#ede9fe',
+        icon: 'business',
+        label: 'Manager'
+    },
+    stockManager: {
+        color: '#0891b2', // Cyan
+        bgColor: '#cffafe',
+        icon: 'cube',
+        label: 'Stock Manager'
+    },
+    supplier: {
+        color: '#f43f5e', // Rose
+        bgColor: '#ffe4e6',
+        icon: 'cart',
+        label: 'Supplier'
+    }
+};
 
 export default function Chat() {
     const router = useRouter();
@@ -22,6 +63,7 @@ export default function Chat() {
     const [searchQuery, setSearchQuery] = useState('');
     const [showFilters, setShowFilters] = useState(false);
     const [activeFilter, setActiveFilter] = useState('all'); // 'all', 'delivery', 'manager'
+    const [participantDetails, setParticipantDetails] = useState({});
 
     // Auth state listener
     useEffect(() => {
@@ -76,7 +118,17 @@ export default function Chat() {
             result = result.filter(chat => {
                 const otherParticipantId = chat.participants.find(id => id !== user?._id);
                 const participantRole = chat.participantRoles?.[otherParticipantId] || 'customer';
-                return participantRole.toLowerCase() === activeFilter;
+
+                // Map the DB roles to the filter categories
+                const roleMapping = {
+                    'deliveryAgent': 'delivery',
+                    'manager': 'manager',
+                    'stockManager': 'manager',
+                    'customerAssistance': 'customer'
+                };
+
+                const mappedRole = roleMapping[participantRole] || 'customer';
+                return mappedRole === activeFilter;
             });
         }
 
@@ -92,7 +144,9 @@ export default function Chat() {
                 where('participants', 'array-contains', userId)
             );
 
-            const unsubscribe = onSnapshot(q, (snapshot) => {
+            const unsubscribe = onSnapshot(q, async (snapshot) => {
+                console.log(`Got ${snapshot.docs.length} chats`);
+
                 const chatData = snapshot.docs.map(doc => ({
                     id: doc.id,
                     ...doc.data(),
@@ -106,6 +160,46 @@ export default function Chat() {
                     return bTime - aTime;
                 });
 
+                // Fetch additional details for each participant
+                const participants = {};
+
+                // Extract all unique participant IDs
+                const participantIds = new Set();
+                chatData.forEach(chat => {
+                    chat.participants.forEach(id => {
+                        if (id !== userId) {
+                            participantIds.add(id);
+                        }
+                    });
+                });
+
+                console.log(`Found ${participantIds.size} unique participants to fetch details for`);
+
+                // Fetch user details for each participant
+                for (const participantId of participantIds) {
+                    try {
+                        console.log(`Fetching details for user ${participantId}`);
+                        const userDoc = await getDoc(doc(db, 'users', participantId));
+
+                        if (userDoc.exists()) {
+                            const userData = userDoc.data();
+                            console.log(`Got user data for ${participantId}:`,
+                                userData.name || 'No name field',
+                                userData.firstName || 'No firstName',
+                                userData.lastName || 'No lastName',
+                                userData.email || 'No email'
+                            );
+                            participants[participantId] = userData;
+                        } else {
+                            console.log(`No user document exists for ID ${participantId}`);
+                        }
+                    } catch (error) {
+                        console.error(`Error fetching details for user ${participantId}:`, error);
+                    }
+                }
+
+                console.log('Setting participant details:', participants);
+                setParticipantDetails(participants);
                 setChats(chatData);
                 setFilteredChats(chatData);
                 setLoading(false);
@@ -118,35 +212,6 @@ export default function Chat() {
             setLoading(false);
         }
     };
-
-    // Load messages when a chat is selected
-    useEffect(() => {
-        if (!selectedChat) return;
-
-        const q = query(
-            collection(db, 'chats', selectedChat.id, 'messages'),
-            orderBy('createdAt', 'desc')
-        );
-
-        const unsubscribe = onSnapshot(q, (snapshot) => {
-            const messageData = snapshot.docs.map(doc => {
-                const data = doc.data();
-                const createdAt = data.createdAt?.toDate() || new Date();
-
-                return {
-                    _id: doc.id,
-                    text: data.text,
-                    createdAt,
-                    image: data.image || null,
-                    user: data.user,
-                };
-            });
-
-            setMessages(messageData);
-        });
-
-        return unsubscribe;
-    }, [selectedChat]);
 
     // Clear search query
     const handleClearSearch = () => {
@@ -164,104 +229,91 @@ export default function Chat() {
         router.push('/suplier/newChat');
     };
 
-    // Send a message
-    const onSend = useCallback(async (newMessages = []) => {
-        if (!selectedChat || !user) return;
-
-        const message = newMessages[0];
-
-        try {
-            const messageRef = collection(db, 'chats', selectedChat.id, 'messages');
-            await addDoc(messageRef, {
-                text: message.text,
-                createdAt: serverTimestamp(),
-                user: {
-                    _id: user._id,
-                    name: user.name,
-                    avatar: user.avatar
-                },
-                image: message.image || null
-            });
-
-            // Update the last message in the chat document
-            const chatRef = doc(db, 'chats', selectedChat.id);
-            await updateDoc(chatRef, {
-                lastMessage: {
-                    text: message.text,
-                    createdAt: serverTimestamp()
-                }
-            });
-        } catch (error) {
-            console.error('Error sending message:', error);
-            setError('Failed to send message');
-        }
-    }, [selectedChat, user]);
-
     // Select a chat to view
     const handleChatSelect = (chat) => {
-        setSelectedChat(chat);
+        // Get the other participant's ID
+        const otherParticipantId = chat.participants.find(id => id !== user?._id);
+
+        // Get participant info
+        const participantName = getDisplayName(otherParticipantId, chat);
+
+        // Navigate to our local chatRoom redirector which will then go to the common chatRoom
+        console.log(`Navigating to chat with ${participantName} (${otherParticipantId})`);
+        router.push(`/suplier/chatRoom?uid=${otherParticipantId}&name=${encodeURIComponent(participantName)}&chatId=${chat.id}`);
     };
 
-    // Back to chat list
-    const handleBackToList = () => {
-        setSelectedChat(null);
-    };
+    // Get display name from user data
+    const getDisplayName = (userId, chat) => {
+        console.log(`Getting display name for user ID: ${userId}`);
 
-    // Customize the bubbles
-    const renderBubble = (props) => {
-        return (
-            <Bubble
-                {...props}
-                wrapperStyle={{
-                    right: {
-                        backgroundColor: '#3b82f6',
-                    },
-                    left: {
-                        backgroundColor: '#e5e7eb',
-                    },
-                }}
-                textStyle={{
-                    right: {
-                        color: '#ffffff',
-                    },
-                    left: {
-                        color: '#000000',
-                    },
-                }}
-            />
-        );
-    };
+        // First try from the chat's participantNames
+        const nameFromChat = chat.participantNames?.[userId];
+        console.log(`Name from chat: ${nameFromChat}`);
 
-    // Customize the send button
-    const renderSend = (props) => {
-        return (
-            <Send {...props}>
-                <View style={styles.sendButton}>
-                    <FontAwesome name="send" size={24} color="#3b82f6" />
-                </View>
-            </Send>
-        );
-    };
+        // If we have fetched user details, try to get the name
+        const userData = participantDetails[userId];
+        console.log(`User data from participantDetails:`, userData);
 
-    // Render message image bubble
-    const renderMessageImage = (props) => {
-        return <ImageBubble {...props} />;
+        if (userData) {
+            // First priority: check for the explicit 'name' field
+            if (userData.name) {
+                console.log(`Using name field: ${userData.name}`);
+                return userData.name;
+            }
+
+            // Second priority: check for firstName + lastName
+            if (userData.firstName && userData.lastName) {
+                const fullName = `${userData.firstName} ${userData.lastName}`;
+                console.log(`Using firstName + lastName: ${fullName}`);
+                return fullName;
+            }
+
+            // Third priority: just firstName
+            if (userData.firstName) {
+                console.log(`Using firstName: ${userData.firstName}`);
+                return userData.firstName;
+            }
+
+            // Fourth priority: email username
+            if (userData.email) {
+                const emailName = userData.email.split('@')[0];
+                console.log(`Using email username: ${emailName}`);
+                return emailName;
+            }
+        }
+
+        // If we still have nameFromChat, use it instead of a generic fallback
+        if (nameFromChat) {
+            console.log(`Falling back to chat name: ${nameFromChat}`);
+            return nameFromChat;
+        }
+
+        // Final fallback to generic name based on role
+        const role = chat.participantRoles?.[userId] || 'customer';
+        const config = roleConfig[role] || roleConfig.customer;
+        console.log(`Using generic role label: ${config.label}`);
+        return config.label;
     };
 
     // Chat list item
     const renderChatItem = ({ item: chat }) => {
-        // Get the other participant's name
+        // Get the other participant's ID
         const otherParticipantId = chat.participants.find(id => id !== user?._id);
-        const participantName = chat.participantNames?.[otherParticipantId] || 'Customer';
-        const participantRole = chat.participantRoles?.[otherParticipantId] || 'customer';
 
-        // Change avatar background color based on role
-        let avatarBgColor = '#3b82f6'; // Default blue for customers
-        if (participantRole === 'delivery') {
-            avatarBgColor = '#10b981'; // Green for delivery agents
-        } else if (participantRole === 'manager') {
-            avatarBgColor = '#8b5cf6'; // Purple for managers
-        }
+        // Get participant info
+        const participantName = getDisplayName(otherParticipantId, chat);
+        console.log(`Displaying name for ${otherParticipantId}: ${participantName}`);
+
+        const participantRole = chat.participantRoles?.[otherParticipantId] || 'customer';
+        const userData = participantDetails[otherParticipantId];
+
+        // Get role configuration
+        const config = roleConfig[participantRole] || roleConfig.customer;
+
+        // Format timestamp
+        const timestamp = chat.lastMessage.createdAt?.toDate?.()
+            ? formatMessageTime(chat.lastMessage.createdAt.toDate())
+            : '';
 
         return (
             <TouchableOpacity
@@ -269,45 +321,65 @@ export default function Chat() {
                 style={styles.chatItem}
                 onPress={() => handleChatSelect(chat)}
             >
-                <View style={[styles.chatAvatar, { backgroundColor: avatarBgColor }]}>
-                    <Text style={styles.avatarText}>{participantName.charAt(0).toUpperCase()}</Text>
+                <View style={[styles.chatAvatar, { backgroundColor: config.bgColor }]}>
+                    {userData?.profilePicture ? (
+                        <Image
+                            source={{ uri: userData.profilePicture }}
+                            style={styles.avatarImage}
+                            contentFit="cover"
+                        />
+                    ) : (
+                        <Text style={[styles.avatarText, { color: config.color }]}>
+                            {participantName.charAt(0).toUpperCase()}
+                        </Text>
+                    )}
                 </View>
                 <View style={styles.chatInfo}>
                     <View style={styles.chatNameRow}>
                         <Text style={styles.chatName}>{participantName}</Text>
-                        {participantRole !== 'customer' && (
-                            <View style={[styles.roleBadge,
-                            participantRole === 'delivery' ? styles.deliveryBadge : styles.managerBadge]}>
-                                <Text style={styles.roleBadgeText}>
-                                    {participantRole === 'delivery' ? 'Delivery' : 'Manager'}
-                                </Text>
-                            </View>
-                        )}
+                        <View style={[styles.roleBadge, { backgroundColor: config.bgColor }]}>
+                            <Text style={[styles.roleBadgeText, { color: config.color }]}>
+                                {config.label}
+                            </Text>
+                        </View>
                     </View>
                     <Text style={styles.lastMessage} numberOfLines={1}>
                         {chat.lastMessage.text}
                     </Text>
                 </View>
-                <Text style={styles.timestamp}>
-                    {chat.lastMessage.createdAt?.toDate?.()
-                        ? new Date(chat.lastMessage.createdAt.toDate()).toLocaleDateString()
-                        : ''}
-                </Text>
+                <Text style={styles.timestamp}>{timestamp}</Text>
             </TouchableOpacity>
         );
+    };
+
+    // Format message time
+    const formatMessageTime = (date) => {
+        const now = new Date();
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const yesterday = new Date(today);
+        yesterday.setDate(yesterday.getDate() - 1);
+
+        // Same day - show time
+        if (date >= today) {
+            return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+        // Yesterday
+        else if (date >= yesterday) {
+            return 'Yesterday';
+        }
+        // Within last 7 days - show day name
+        else if (date >= new Date(today.setDate(today.getDate() - 6))) {
+            return date.toLocaleDateString([], { weekday: 'short' });
+        }
+        // Older - show date
+        else {
+            return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
+        }
     };
 
     // Render search and filter section
     const renderSearchBar = () => (
         <View style={styles.searchContainer}>
-            <TouchableOpacity
-                style={styles.newChatButton}
-                onPress={handleNewChat}
-            >
-                <Feather name="message-square" size={18} color="#ffffff" />
-                <Text style={styles.newChatButtonText}>New Chat</Text>
-            </TouchableOpacity>
-
             <View style={styles.searchRow}>
                 <View style={styles.searchInputWrapper}>
                     <Ionicons name="search-outline" size={20} color="#9ca3af" style={styles.searchIcon} />
@@ -345,6 +417,14 @@ export default function Chat() {
                     >
                         <Text style={[styles.filterOptionText, activeFilter === 'all' && styles.activeFilterText]}>
                             All Contacts
+                        </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={[styles.filterOption, activeFilter === 'customer' && styles.activeFilterOption]}
+                        onPress={() => handleFilterSelect('customer')}
+                    >
+                        <Text style={[styles.filterOptionText, activeFilter === 'customer' && styles.activeFilterText]}>
+                            Customer Assistance
                         </Text>
                     </TouchableOpacity>
                     <TouchableOpacity
@@ -422,16 +502,14 @@ export default function Chat() {
         );
     }
 
-    // Show chat list if no chat is selected
-    if (!selectedChat) {
-        return (
-            <View style={styles.container}>
-                <View style={styles.header}>
-                    <Text style={styles.headerTitle}>Chats</Text>
-                </View>
+    // Simplified render - we always show the chat list now
+    return (
+        <View style={styles.container}>
+            <HomeHeader title="Chats" />
 
-                {renderSearchBar()}
+            {renderSearchBar()}
 
+            <View style={{ flex: 1, position: 'relative' }}>
                 {filteredChats.length === 0 ? (
                     renderEmptyState()
                 ) : (
@@ -442,45 +520,17 @@ export default function Chat() {
                         style={styles.chatList}
                     />
                 )}
-            </View>
-        );
-    }
 
-    // Show selected chat
-    return (
-        <KeyboardAvoidingView
-            style={{ flex: 1 }}
-            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-            keyboardVerticalOffset={Platform.OS === 'ios' ? 60 : 0}
-        >
-            <View style={styles.container}>
-                <View style={styles.chatHeader}>
-                    <TouchableOpacity onPress={handleBackToList} style={styles.backButton}>
-                        <MaterialIcons name="arrow-back" size={24} color="#000" />
-                    </TouchableOpacity>
-                    <Text style={styles.headerTitle}>
-                        {selectedChat.participantNames?.[
-                            selectedChat.participants.find(id => id !== user?._id)
-                        ] || 'Chat'}
-                    </Text>
-                </View>
-
-                <GiftedChat
-                    messages={messages}
-                    onSend={onSend}
-                    user={user}
-                    renderBubble={renderBubble}
-                    renderSend={renderSend}
-                    renderMessageImage={renderMessageImage}
-                    alwaysShowSend
-                    scrollToBottom
-                    renderAvatarOnTop
-                    showUserAvatar
-                    renderUsernameOnMessage
-                    infiniteScroll
-                />
+                {/* Floating Action Button for New Chat */}
+                <TouchableOpacity
+                    style={styles.fabButton}
+                    onPress={handleNewChat}
+                    activeOpacity={0.7}
+                >
+                    <Feather name="edit" size={24} color="#FFFFFF" />
+                </TouchableOpacity>
             </View>
-        </KeyboardAvoidingView>
+        </View>
     );
 }
 
@@ -558,22 +608,6 @@ const styles = StyleSheet.create({
         width: 40,
         justifyContent: 'center',
         alignItems: 'center',
-    },
-    newChatButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: '#3b82f6',
-        paddingVertical: 12,
-        paddingHorizontal: 16,
-        borderRadius: 8,
-        marginBottom: 12,
-    },
-    newChatButtonText: {
-        color: '#ffffff',
-        fontWeight: '600',
-        marginLeft: 8,
-        fontSize: 16,
     },
     filterDropdown: {
         position: 'absolute',
@@ -659,13 +693,16 @@ const styles = StyleSheet.create({
         width: 50,
         height: 50,
         borderRadius: 25,
-        backgroundColor: '#3b82f6',
         justifyContent: 'center',
         alignItems: 'center',
         marginRight: 16,
+        overflow: 'hidden',
+    },
+    avatarImage: {
+        width: 50,
+        height: 50,
     },
     avatarText: {
-        color: '#ffffff',
         fontSize: 20,
         fontWeight: 'bold',
     },
@@ -686,18 +723,10 @@ const styles = StyleSheet.create({
         paddingHorizontal: 8,
         paddingVertical: 2,
         borderRadius: 12,
-        backgroundColor: '#e5e7eb',
-    },
-    deliveryBadge: {
-        backgroundColor: '#d1fae5',
-    },
-    managerBadge: {
-        backgroundColor: '#ede9fe',
     },
     roleBadgeText: {
         fontSize: 10,
         fontWeight: '600',
-        color: '#065f46',
     },
     lastMessage: {
         fontSize: 14,
@@ -712,5 +741,22 @@ const styles = StyleSheet.create({
         fontSize: 16,
         textAlign: 'center',
         margin: 20,
+    },
+    fabButton: {
+        position: 'absolute',
+        bottom: 20,
+        right: 20,
+        width: 56,
+        height: 56,
+        borderRadius: 28,
+        backgroundColor: '#3b82f6',
+        justifyContent: 'center',
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 4,
+        elevation: 6,
+        zIndex: 100,
     },
 }); 
