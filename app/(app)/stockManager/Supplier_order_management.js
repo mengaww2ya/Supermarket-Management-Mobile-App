@@ -21,20 +21,20 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { db } from '../../../firebase/firebaseConfig';
-import { 
-  collection, 
-  getDocs, 
-  doc, 
-  addDoc, 
-  updateDoc, 
+import {
+  collection,
+  getDocs,
+  doc,
+  addDoc,
+  updateDoc,
   deleteDoc,
-  query, 
-  where, 
-  orderBy, 
+  query,
+  where,
+  orderBy,
   serverTimestamp,
-  Timestamp 
+  Timestamp
 } from 'firebase/firestore';
-import { Ionicons, MaterialCommunityIcons, FontAwesome5, AntDesign, MaterialIcons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons, FontAwesome5, AntDesign, MaterialIcons, Feather } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import { format } from 'date-fns';
@@ -44,46 +44,60 @@ import Animated, {
   withTiming,
   withSequence,
   withSpring,
+  withDelay,
   FadeIn,
   FadeInDown,
   FadeInUp,
   FadeInRight,
-  SlideInDown
+  SlideInDown,
+  Easing,
+  Layout
 } from 'react-native-reanimated';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { BlurView } from 'expo-blur';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import HomeHeader from '../../components/HomeHeader';
+import SupplierProductDisplay from './SupplierProductDisplay';
+import SupplierDisplay from './SupplierDisplay';
+import SupplierAnalytics from './SupplierAnalytics';
 
 export default function SupplierOrderManagement() {
   const router = useRouter();
-  
+  const insets = useSafeAreaInsets();
+  const { width, height } = Dimensions.get('window');
+
   // State for orders
   const [orders, setOrders] = useState([]);
   const [filteredOrders, setFilteredOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
-  
+
   // State for suppliers
   const [suppliers, setSuppliers] = useState([]);
-  
+
   // State for products
   const [products, setProducts] = useState([]);
-  
+
   // State for search and filters
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [sortCriteria, setSortCriteria] = useState('dateDesc');
-  
+
   // State for modals
   const [newOrderVisible, setNewOrderVisible] = useState(false);
   const [orderDetailsVisible, setOrderDetailsVisible] = useState(false);
   const [deleteConfirmVisible, setDeleteConfirmVisible] = useState(false);
   const [selectProductVisible, setSelectProductVisible] = useState(false);
   const [selectSupplierVisible, setSelectSupplierVisible] = useState(false);
-  
+
+  // Active tab state
+  const [activeTab, setActiveTab] = useState('orders'); // 'orders', 'suppliers', 'analytics'
+
   // State for selected items
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [orderToDelete, setOrderToDelete] = useState(null);
-  
+
   // State for new order form
   const [newOrder, setNewOrder] = useState({
     supplierName: '',
@@ -95,21 +109,23 @@ export default function SupplierOrderManagement() {
     notes: '',
     totalAmount: 0,
   });
-  
-  // Animation values with Reanimated
+
+  // Animation values
   const fadeAnim = useSharedValue(0);
   const scaleAnim = useSharedValue(0.95);
   const slideAnim = useSharedValue(50);
   const searchBarWidth = useSharedValue(Dimensions.get('window').width - 40);
   const searchInputRef = useRef(null);
   const [searchFocused, setSearchFocused] = useState(false);
-  
-  // Card animations
-  const pressAnimations = {};
+
+  // Card animations - create a single shared value for animation
+  const animationValue = useSharedValue(1);
+  // Store the currently animated order ID
+  const [animatedOrderId, setAnimatedOrderId] = useState(null);
+
   const [filterVisible, setFilterVisible] = useState(false);
   const [sortVisible, setSortVisible] = useState(false);
-  const [productSearchQuery, setProductSearchQuery] = useState('');
-  
+
   // Stats
   const [stats, setStats] = useState({
     pendingCount: 0,
@@ -117,36 +133,48 @@ export default function SupplierOrderManagement() {
     deliveredCount: 0,
     totalAmount: 0
   });
-  
+
   // Additional state for date picker
   const [datePickerVisible, setDatePickerVisible] = useState(false);
-  
+  const [dateType, setDateType] = useState('');
+
+  // TabBar animation
+  const tabIndicatorPosition = useSharedValue(0);
+
+  // State for cart badge
+  const [cartItemCount, setCartItemCount] = useState(0);
+
   useEffect(() => {
     // Start entrance animations
     fadeAnim.value = withTiming(1, { duration: 500 });
     scaleAnim.value = withSpring(1, { damping: 8 });
     slideAnim.value = withTiming(0, { duration: 500 });
-    
+
     // Fetch initial data
     fetchOrders();
     fetchSuppliers();
     fetchProducts();
-  }, []);
-  
+    checkCartItems();
+
+    // Animate tab indicator on tab change
+    switch (activeTab) {
+      case 'orders':
+        tabIndicatorPosition.value = withTiming(0, { duration: 300, easing: Easing.bezier(0.25, 0.1, 0.25, 1) });
+        break;
+      case 'suppliers':
+        tabIndicatorPosition.value = withTiming(width / 3, { duration: 300, easing: Easing.bezier(0.25, 0.1, 0.25, 1) });
+        break;
+      case 'analytics':
+        tabIndicatorPosition.value = withTiming((width / 3) * 2, { duration: 300, easing: Easing.bezier(0.25, 0.1, 0.25, 1) });
+        break;
+    }
+  }, [activeTab]);
+
   // Apply filters when search, status, or sort criteria changes
   useEffect(() => {
     filterOrders();
   }, [searchQuery, statusFilter, sortCriteria, orders]);
-  
-  // Initialize animations for new orders
-  useEffect(() => {
-    orders.forEach(order => {
-      if (!pressAnimations[order.id]) {
-        pressAnimations[order.id] = useSharedValue(1);
-      }
-    });
-  }, [orders]);
-  
+
   // Function to fetch orders
   const fetchOrders = async () => {
     setLoading(true);
@@ -154,7 +182,7 @@ export default function SupplierOrderManagement() {
     try {
       const ordersRef = collection(db, "SupplierOrders");
       const querySnapshot = await getDocs(ordersRef);
-      
+
       const fetchedOrders = querySnapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data(),
@@ -162,28 +190,28 @@ export default function SupplierOrderManagement() {
         expectedDeliveryDate: doc.data().expectedDeliveryDate?.toDate() || null,
         deliveryDate: doc.data().deliveryDate?.toDate() || null,
       }));
-      
+
       // Calculate statistics
       let pendingCount = 0;
       let shippedCount = 0;
       let deliveredCount = 0;
       let totalAmount = 0;
-      
+
       fetchedOrders.forEach(order => {
         if (order.status === 'Pending') pendingCount++;
         else if (order.status === 'Shipped') shippedCount++;
         else if (order.status === 'Delivered') deliveredCount++;
-        
+
         totalAmount += order.totalAmount || 0;
       });
-      
+
       setStats({
         pendingCount,
         shippedCount,
         deliveredCount,
         totalAmount
       });
-      
+
       setOrders(fetchedOrders);
       provideFeedback('success');
     } catch (err) {
@@ -195,123 +223,127 @@ export default function SupplierOrderManagement() {
       setRefreshing(false);
     }
   };
-  
+
   // Function to fetch suppliers
   const fetchSuppliers = async () => {
     try {
       const suppliersRef = collection(db, "Suppliers");
       const querySnapshot = await getDocs(suppliersRef);
-      
+
       const fetchedSuppliers = querySnapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data(),
       }));
-      
+
       setSuppliers(fetchedSuppliers);
     } catch (err) {
       console.error("Error fetching suppliers:", err);
       Alert.alert("Error", "Failed to load suppliers data.");
     }
   };
-  
+
   // Function to fetch products
   const fetchProducts = async () => {
     try {
       const productsRef = collection(db, "Products");
       const querySnapshot = await getDocs(productsRef);
-      
+
       const fetchedProducts = querySnapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data(),
       }));
-      
+
       setProducts(fetchedProducts);
     } catch (err) {
       console.error("Error fetching products:", err);
       Alert.alert("Error", "Failed to load products data.");
     }
   };
-  
+
   // Filter orders based on search query, status filter, and sort criteria
   const filterOrders = () => {
     let filtered = [...orders];
-    
+
     // Apply search filter
     if (searchQuery) {
-      filtered = filtered.filter(order => 
+      filtered = filtered.filter(order =>
         order.supplierName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        order.products?.some(product => 
+        order.products?.some(product =>
           product.name?.toLowerCase().includes(searchQuery.toLowerCase())
         )
       );
     }
-    
+
     // Apply status filter
     if (statusFilter !== 'All') {
       filtered = filtered.filter(order => order.status === statusFilter);
     }
-    
-    // Apply sorting
-    switch (sortCriteria) {
-      case 'dateDesc':
-        filtered.sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate));
-        break;
-      case 'dateAsc':
-        filtered.sort((a, b) => new Date(a.orderDate) - new Date(b.orderDate));
-        break;
-      case 'amountDesc':
-        filtered.sort((a, b) => (b.totalAmount || 0) - (a.totalAmount || 0));
-        break;
-      case 'amountAsc':
-        filtered.sort((a, b) => (a.totalAmount || 0) - (b.totalAmount || 0));
-        break;
-      case 'statusPriority':
-        filtered.sort((a, b) => {
-          const priority = { 'Pending': 0, 'Shipped': 1, 'Delivered': 2 };
-          return priority[a.status] - priority[b.status];
-        });
-        break;
+
+    // Apply sort
+    if (sortCriteria === 'dateDesc') {
+      filtered.sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate));
+    } else if (sortCriteria === 'dateAsc') {
+      filtered.sort((a, b) => new Date(a.orderDate) - new Date(b.orderDate));
+    } else if (sortCriteria === 'amountDesc') {
+      filtered.sort((a, b) => (b.totalAmount || 0) - (a.totalAmount || 0));
+    } else if (sortCriteria === 'amountAsc') {
+      filtered.sort((a, b) => (a.totalAmount || 0) - (b.totalAmount || 0));
     }
-    
+
     setFilteredOrders(filtered);
   };
-  
-  // Refresh orders data
+
   const onRefresh = () => {
     setRefreshing(true);
     fetchOrders();
+    fetchSuppliers();
+    fetchProducts();
   };
-  
-  // Provide haptic feedback based on action type
+
+  // Provide haptic feedback
   const provideFeedback = (type) => {
-    if (Platform.OS === 'ios') {
-      try {
-        if (type === 'success') {
-          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        } else if (type === 'error') {
-          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-        } else {
-          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-        }
-      } catch (e) {
-        // Fallback to basic vibration
-        Vibration.vibrate(type === 'error' ? 500 : 20);
-      }
-    } else {
-      // Android vibration
-      Vibration.vibrate(type === 'error' ? 500 : 20);
+    switch (type) {
+      case 'success':
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        break;
+      case 'error':
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+        break;
+      case 'warning':
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+        break;
+      case 'light':
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        break;
+      case 'medium':
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+        break;
+      case 'heavy':
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+        break;
+      default:
+        break;
     }
   };
-  
-  // Card press animation using Reanimated
+
+  // Modified animatePress function using a single animation value
   const animatePress = (id) => {
-    provideFeedback('light');
-    pressAnimations[id].value = withSequence(
+    // Set the currently animated order ID
+    setAnimatedOrderId(id);
+
+    // First reset to 1
+    animationValue.value = 1;
+
+    // Then animate
+    animationValue.value = withSequence(
       withTiming(0.95, { duration: 100 }),
       withTiming(1, { duration: 100 })
     );
+
+    // Provide haptic feedback
+    provideFeedback('light');
   };
-  
+
   // Toggle search focus with Reanimated
   const toggleSearch = () => {
     if (searchFocused) {
@@ -327,52 +359,52 @@ export default function SupplierOrderManagement() {
       searchBarWidth.value = withSpring(Dimensions.get('window').width - 100, { damping: 8 });
     }
   };
-  
+
   // Format currency
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-US', { 
+    return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
-      minimumFractionDigits: 2 
+      minimumFractionDigits: 2
     }).format(amount || 0);
   };
-  
+
   // Format date
   const formatDate = (date) => {
     if (!date) return 'Not specified';
     return format(new Date(date), 'MMM dd, yyyy');
   };
-  
+
   // Create a new order
   const createOrder = async () => {
     if (!newOrder.supplierId || newOrder.products.length === 0) {
       Alert.alert('Validation Error', 'Please select a supplier and at least one product.');
       return;
     }
-    
+
     try {
       setLoading(true);
-      
+
       // Calculate total amount
       let totalAmount = 0;
       newOrder.products.forEach(product => {
         totalAmount += (product.price * product.quantity);
       });
-      
+
       const orderData = {
         ...newOrder,
         totalAmount,
         status: 'Pending',
         orderDate: Timestamp.fromDate(new Date()),
-        expectedDeliveryDate: newOrder.expectedDeliveryDate 
-          ? Timestamp.fromDate(newOrder.expectedDeliveryDate) 
+        expectedDeliveryDate: newOrder.expectedDeliveryDate
+          ? Timestamp.fromDate(newOrder.expectedDeliveryDate)
           : null,
         createdAt: serverTimestamp(),
       };
-      
+
       // Add the order to Firestore
       await addDoc(collection(db, "SupplierOrders"), orderData);
-      
+
       // Reset form and close modal
       setNewOrder({
         supplierName: '',
@@ -384,10 +416,10 @@ export default function SupplierOrderManagement() {
         notes: '',
         totalAmount: 0,
       });
-      
+
       setNewOrderVisible(false);
       fetchOrders();
-      
+
       // Success feedback
       Alert.alert('Success', 'Order created successfully!');
       provideFeedback('success');
@@ -399,39 +431,39 @@ export default function SupplierOrderManagement() {
       setLoading(false);
     }
   };
-  
+
   // Update order status
   const updateOrderStatus = async (order, newStatus) => {
     try {
       setLoading(true);
-      
+
       const orderRef = doc(db, "SupplierOrders", order.id);
-      
+
       // If status is Delivered, add delivery date
-      const updateData = { 
-        status: newStatus 
+      const updateData = {
+        status: newStatus
       };
-      
+
       if (newStatus === 'Delivered') {
         updateData.deliveryDate = Timestamp.fromDate(new Date());
       }
-      
+
       await updateDoc(orderRef, updateData);
-      
+
       // Update local state
       const updatedOrders = orders.map(o => {
         if (o.id === order.id) {
-          return { 
-            ...o, 
+          return {
+            ...o,
             status: newStatus,
             deliveryDate: newStatus === 'Delivered' ? new Date() : o.deliveryDate
           };
         }
         return o;
       });
-      
+
       setOrders(updatedOrders);
-      
+
       // If details modal is open, update selected order
       if (selectedOrder && selectedOrder.id === order.id) {
         setSelectedOrder({
@@ -440,7 +472,7 @@ export default function SupplierOrderManagement() {
           deliveryDate: newStatus === 'Delivered' ? new Date() : selectedOrder.deliveryDate
         });
       }
-      
+
       // Success feedback
       Alert.alert('Success', `Order status updated to ${newStatus}`);
       provideFeedback('success');
@@ -452,41 +484,47 @@ export default function SupplierOrderManagement() {
       setLoading(false);
     }
   };
-  
+
   // Delete an order
   const deleteOrder = async () => {
     if (!orderToDelete) return;
-    
+
     try {
-      setLoading(true);
-      
-      const orderRef = doc(db, "SupplierOrders", orderToDelete.id);
-      await deleteDoc(orderRef);
-      
+      provideFeedback('medium');
+
+      await deleteDoc(doc(db, "SupplierOrders", orderToDelete.id));
+
       // Update local state
-      setOrders(orders.filter(o => o.id !== orderToDelete.id));
-      
-      // Reset state and close modal
-      setOrderToDelete(null);
+      const updatedOrders = orders.filter(order => order.id !== orderToDelete.id);
+      setOrders(updatedOrders);
+
+      // Close modal
       setDeleteConfirmVisible(false);
-      
+      setOrderToDelete(null);
+
       // Success feedback
-      Alert.alert('Success', 'Order deleted successfully');
       provideFeedback('success');
-    } catch (error) {
-      console.error("Error deleting order:", error);
-      Alert.alert('Error', 'Failed to delete order: ' + error.message);
+      Alert.alert(
+        "Order Deleted",
+        "The order has been successfully deleted.",
+        [{ text: "OK" }]
+      );
+    } catch (err) {
+      console.error("Error deleting order:", err);
+      Alert.alert(
+        "Error",
+        "Failed to delete the order. Please try again.",
+        [{ text: "OK" }]
+      );
       provideFeedback('error');
-    } finally {
-      setLoading(false);
     }
   };
-  
+
   // Add product to new order
   const addProductToOrder = (product) => {
     // Check if product already exists in order
     const productIndex = newOrder.products.findIndex(p => p.id === product.id);
-    
+
     if (productIndex >= 0) {
       // Update quantity if product already exists
       const updatedProducts = [...newOrder.products];
@@ -494,7 +532,7 @@ export default function SupplierOrderManagement() {
         ...updatedProducts[productIndex],
         quantity: updatedProducts[productIndex].quantity + 1
       };
-      
+
       setNewOrder({
         ...newOrder,
         products: updatedProducts
@@ -515,11 +553,11 @@ export default function SupplierOrderManagement() {
         ]
       });
     }
-    
+
     setSelectProductVisible(false);
     provideFeedback('light');
   };
-  
+
   // Select supplier for new order
   const selectSupplier = (supplier) => {
     setNewOrder({
@@ -527,16 +565,16 @@ export default function SupplierOrderManagement() {
       supplierId: supplier.id,
       supplierName: supplier.name
     });
-    
+
     setSelectSupplierVisible(false);
     provideFeedback('light');
   };
-  
+
   // Render order status badge
   const renderStatusBadge = (status) => {
     let bgColor = '';
     let textColor = '';
-    
+
     switch (status) {
       case 'Pending':
         bgColor = 'bg-amber-100';
@@ -554,25 +592,25 @@ export default function SupplierOrderManagement() {
         bgColor = 'bg-gray-100';
         textColor = 'text-gray-800';
     }
-    
+
     return (
       <View className={`px-2 py-1 rounded-full ${bgColor} w-24 items-center`}>
         <Text className={`font-medium ${textColor} text-xs`}>{status}</Text>
       </View>
     );
   };
-  
+
   // Render order card
   const renderOrderCard = (order) => {
     // Use animated style for scale animation
     const animatedStyle = useAnimatedStyle(() => {
       return {
-        transform: [{ scale: pressAnimations[order.id]?.value || 1 }]
+        transform: [{ scale: animationValue.value }]
       };
     });
 
     return (
-      <Animated.View 
+      <Animated.View
         key={order.id}
         entering={FadeInRight.delay(200 * (orders.indexOf(order) % 8)).duration(300)}
         style={animatedStyle}
@@ -597,9 +635,9 @@ export default function SupplierOrderManagement() {
             </View>
             {renderStatusBadge(order.status)}
           </View>
-          
+
           <View className="border-t border-gray-100 my-3" />
-          
+
           <View className="flex-row items-center justify-between">
             <View className="flex-row items-center">
               <LinearGradient
@@ -616,7 +654,7 @@ export default function SupplierOrderManagement() {
               {formatCurrency(order.totalAmount)}
             </Text>
           </View>
-          
+
           <View className="mt-3 flex-row justify-between">
             <View className="flex-row items-center">
               <MaterialIcons name="event" size={16} color="#6B7280" className="mr-1" />
@@ -624,7 +662,7 @@ export default function SupplierOrderManagement() {
                 {formatDate(order.orderDate)}
               </Text>
             </View>
-            
+
             {order.expectedDeliveryDate && (
               <View className="flex-row items-center">
                 <MaterialIcons name="local-shipping" size={16} color="#6B7280" className="mr-1" />
@@ -634,7 +672,7 @@ export default function SupplierOrderManagement() {
               </View>
             )}
           </View>
-          
+
           {order.status !== 'Delivered' && (
             <View className="mt-3 flex-row space-x-2">
               {order.status === 'Pending' && (
@@ -646,7 +684,7 @@ export default function SupplierOrderManagement() {
                   <Text className="text-xs font-medium text-blue-800">Mark Shipped</Text>
                 </TouchableOpacity>
               )}
-              
+
               {order.status === 'Shipped' && (
                 <TouchableOpacity
                   onPress={() => updateOrderStatus(order, 'Delivered')}
@@ -656,7 +694,7 @@ export default function SupplierOrderManagement() {
                   <Text className="text-xs font-medium text-green-800">Mark Delivered</Text>
                 </TouchableOpacity>
               )}
-              
+
               <TouchableOpacity
                 onPress={() => {
                   setOrderToDelete(order);
@@ -672,9 +710,9 @@ export default function SupplierOrderManagement() {
       </Animated.View>
     );
   };
-  
-  // Render new order form
-  const renderNewOrderForm = () => {
+
+  // Render New Order Modal
+  const renderNewOrderModal = () => {
     return (
       <Modal
         visible={newOrderVisible}
@@ -682,184 +720,449 @@ export default function SupplierOrderManagement() {
         transparent={true}
         onRequestClose={() => setNewOrderVisible(false)}
       >
+        <BlurView
+          intensity={20}
+          style={{
+            position: 'absolute',
+            width: '100%',
+            height: '100%',
+          }}
+        />
+
         <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          className="flex-1 justify-end"
+          style={{ flex: 1 }}
         >
-          <View className="bg-white rounded-t-3xl shadow-lg p-5 h-[95%]">
-            <View className="flex-row justify-between items-center mb-5">
-              <Text className="text-xl font-bold text-gray-900">New Order</Text>
+          <Animated.View
+            style={{
+              backgroundColor: 'white',
+              borderTopLeftRadius: 24,
+              borderTopRightRadius: 24,
+              paddingTop: 16,
+              paddingBottom: Math.max(20, insets.bottom),
+              marginTop: 'auto',
+              maxHeight: height * 0.9,
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: -5 },
+              shadowOpacity: 0.1,
+              shadowRadius: 6,
+              elevation: 5,
+            }}
+            entering={SlideInDown.springify().damping(15)}
+          >
+            {/* Header */}
+            <View style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              borderBottomWidth: 1,
+              borderBottomColor: '#E5E7EB',
+              paddingHorizontal: 20,
+              paddingBottom: 16,
+            }}>
               <TouchableOpacity
-                onPress={() => setNewOrderVisible(false)}
-                className="h-8 w-8 items-center justify-center rounded-full bg-gray-100"
+                style={{
+                  width: 40,
+                  height: 40,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}
+                onPress={() => {
+                  provideFeedback('light');
+                  setNewOrderVisible(false);
+                }}
               >
-                <MaterialIcons name="close" size={20} color="#4B5563" />
+                <Ionicons name="close" size={24} color="#6B7280" />
+              </TouchableOpacity>
+
+              <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#111827' }}>
+                Create New Order
+              </Text>
+
+              <TouchableOpacity
+                style={{
+                  width: 40,
+                  height: 40,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}
+                onPress={() => {
+                  provideFeedback('medium');
+                  createOrder();
+                }}
+                disabled={!newOrder.supplierId || newOrder.products.length === 0}
+              >
+                <Ionicons
+                  name="checkmark-circle"
+                  size={28}
+                  color={!newOrder.supplierId || newOrder.products.length === 0 ? '#D1D5DB' : '#4F46E5'}
+                />
               </TouchableOpacity>
             </View>
-            
-            <ScrollView showsVerticalScrollIndicator={false} className="mb-5">
-              {/* Supplier Selection */}
-              <View className="mb-4">
-                <Text className="text-sm font-medium text-gray-700 mb-1">Supplier</Text>
+
+            <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
+              <View style={{ padding: 20 }}>
+                {/* Select Supplier Section */}
+                <Text style={{ fontSize: 16, fontWeight: '600', color: '#374151', marginBottom: 12 }}>
+                  Supplier Information
+                </Text>
+
                 <TouchableOpacity
-                  onPress={() => setSelectSupplierVisible(true)}
-                  className="border border-gray-300 rounded-lg p-3 flex-row justify-between items-center"
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    backgroundColor: '#F9FAFB',
+                    borderWidth: 1,
+                    borderColor: '#E5E7EB',
+                    borderRadius: 12,
+                    padding: 12,
+                    marginBottom: 20,
+                  }}
+                  onPress={() => {
+                    provideFeedback('light');
+                    setSelectSupplierVisible(true);
+                  }}
                 >
-                  <Text className={newOrder.supplierName ? "text-gray-900" : "text-gray-400"}>
-                    {newOrder.supplierName || "Select a supplier"}
-                  </Text>
-                  <MaterialIcons name="keyboard-arrow-right" size={20} color="#9CA3AF" />
+                  <View style={{
+                    width: 40,
+                    height: 40,
+                    borderRadius: 20,
+                    backgroundColor: '#EEF2FF',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    marginRight: 12,
+                  }}>
+                    <MaterialCommunityIcons name="store" size={20} color="#4F46E5" />
+                  </View>
+
+                  <View style={{ flex: 1 }}>
+                    {newOrder.supplierName ? (
+                      <>
+                        <Text style={{ fontSize: 16, fontWeight: '600', color: '#111827' }}>
+                          {newOrder.supplierName}
+                        </Text>
+                        <Text style={{ fontSize: 13, color: '#6B7280' }}>
+                          Supplier ID: {newOrder.supplierId.substring(0, 8)}
+                        </Text>
+                      </>
+                    ) : (
+                      <Text style={{ fontSize: 15, color: '#9CA3AF' }}>
+                        Select a supplier
+                      </Text>
+                    )}
+                  </View>
+
+                  <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
                 </TouchableOpacity>
-              </View>
-              
-              {/* Products */}
-              <View className="mb-4">
-                <View className="flex-row justify-between items-center mb-1">
-                  <Text className="text-sm font-medium text-gray-700">Products</Text>
-                  <TouchableOpacity
-                    onPress={() => setSelectProductVisible(true)}
-                    className="bg-indigo-100 py-1 px-3 rounded-full"
-                  >
-                    <Text className="text-xs font-medium text-indigo-800">Add Product</Text>
-                  </TouchableOpacity>
-                </View>
-                
-                {/* Selected Products List */}
+
+                {/* Products Section */}
+                <Text style={{ fontSize: 16, fontWeight: '600', color: '#374151', marginBottom: 12 }}>
+                  Order Products
+                </Text>
+
                 {newOrder.products.length > 0 ? (
-                  <View className="border border-gray-200 rounded-lg overflow-hidden">
+                  <View style={{ marginBottom: 20 }}>
                     {newOrder.products.map((product, index) => (
-                      <View key={index} className={`p-3 flex-row justify-between items-center ${
-                        index !== newOrder.products.length - 1 ? "border-b border-gray-100" : ""
-                      }`}>
-                        <View className="flex-row items-center flex-1">
-                          {product.image ? (
-                            <Image 
-                              source={{ uri: product.image }} 
-                              className="h-10 w-10 rounded-md mr-3" 
-                            />
-                          ) : (
-                            <View className="h-10 w-10 rounded-md bg-gray-200 items-center justify-center mr-3">
-                              <MaterialIcons name="image" size={20} color="#9CA3AF" />
-                            </View>
-                          )}
-                          <View className="flex-1">
-                            <Text className="text-sm font-medium text-gray-800" numberOfLines={1}>
-                              {product.name}
-                            </Text>
-                            <Text className="text-xs text-gray-500">
-                              {formatCurrency(product.price)} × {product.quantity}
+                      <Animated.View
+                        key={index}
+                        style={{
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          backgroundColor: '#F9FAFB',
+                          borderWidth: 1,
+                          borderColor: '#E5E7EB',
+                          borderRadius: 12,
+                          padding: 12,
+                          marginBottom: 8,
+                        }}
+                        entering={FadeInRight.delay(index * 100).springify()}
+                      >
+                        <View style={{
+                          width: 40,
+                          height: 40,
+                          borderRadius: 8,
+                          backgroundColor: '#F3F4F6',
+                          justifyContent: 'center',
+                          alignItems: 'center',
+                          marginRight: 12,
+                        }}>
+                          <MaterialCommunityIcons name="package-variant-closed" size={20} color="#4B5563" />
+                        </View>
+
+                        <View style={{ flex: 1 }}>
+                          <Text style={{ fontSize: 15, fontWeight: '600', color: '#111827' }}>
+                            {product.name}
+                          </Text>
+                          <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 4 }}>
+                            <Text style={{ fontSize: 13, color: '#6B7280' }}>
+                              {product.quantity} {product.unit} at ${product.price?.toFixed(2) || '0.00'}/unit
                             </Text>
                           </View>
                         </View>
-                        
-                        <View className="flex-row items-center">
-                          <TouchableOpacity
-                            onPress={() => {
-                              const updatedProducts = [...newOrder.products];
-                              if (product.quantity > 1) {
-                                updatedProducts[index] = {
-                                  ...product,
-                                  quantity: product.quantity - 1
-                                };
-                              } else {
-                                updatedProducts.splice(index, 1);
-                              }
-                              setNewOrder({...newOrder, products: updatedProducts});
-                            }}
-                            className="h-8 w-8 items-center justify-center rounded-full bg-gray-100"
-                          >
-                            <MaterialIcons name="remove" size={18} color="#4B5563" />
-                          </TouchableOpacity>
-                          
-                          <Text className="mx-3 min-w-[20px] text-center">
-                            {product.quantity}
-                          </Text>
-                          
-                          <TouchableOpacity
-                            onPress={() => {
-                              const updatedProducts = [...newOrder.products];
-                              updatedProducts[index] = {
-                                ...product,
-                                quantity: product.quantity + 1
-                              };
-                              setNewOrder({...newOrder, products: updatedProducts});
-                            }}
-                            className="h-8 w-8 items-center justify-center rounded-full bg-gray-100"
-                          >
-                            <MaterialIcons name="add" size={18} color="#4B5563" />
-                          </TouchableOpacity>
-                        </View>
-                      </View>
+
+                        <Text style={{ fontSize: 15, fontWeight: 'bold', color: '#111827', marginRight: 12 }}>
+                          ${(product.quantity * product.price).toFixed(2)}
+                        </Text>
+
+                        <TouchableOpacity
+                          style={{
+                            width: 32,
+                            height: 32,
+                            borderRadius: 16,
+                            backgroundColor: '#FEE2E2',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                          }}
+                          onPress={() => {
+                            provideFeedback('light');
+                            // Remove product from order
+                            const updatedProducts = [...newOrder.products];
+                            updatedProducts.splice(index, 1);
+
+                            // Recalculate total
+                            const totalAmount = updatedProducts.reduce(
+                              (sum, p) => sum + (p.quantity * p.price), 0
+                            );
+
+                            setNewOrder({
+                              ...newOrder,
+                              products: updatedProducts,
+                              totalAmount,
+                            });
+                          }}
+                        >
+                          <Ionicons name="trash-outline" size={16} color="#DC2626" />
+                        </TouchableOpacity>
+                      </Animated.View>
                     ))}
-                    
-                    <View className="p-3 bg-gray-50">
-                      <Text className="text-right font-semibold text-gray-900">
-                        Total: {formatCurrency(
-                          newOrder.products.reduce(
-                            (sum, product) => sum + (product.price * product.quantity), 0
-                          )
-                        )}
+
+                    <View style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      paddingVertical: 12,
+                      paddingHorizontal: 16,
+                      backgroundColor: '#F3F4F6',
+                      borderRadius: 8,
+                      marginTop: 8,
+                    }}>
+                      <Text style={{ fontSize: 15, fontWeight: '600', color: '#374151' }}>
+                        Total Amount:
+                      </Text>
+                      <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#111827' }}>
+                        ${newOrder.totalAmount?.toFixed(2) || '0.00'}
                       </Text>
                     </View>
                   </View>
                 ) : (
-                  <View className="border border-gray-200 rounded-lg p-4 items-center justify-center">
-                    <Text className="text-gray-400">No products added yet</Text>
+                  <View style={{
+                    backgroundColor: '#F9FAFB',
+                    borderWidth: 1,
+                    borderColor: '#E5E7EB',
+                    borderRadius: 12,
+                    padding: 20,
+                    alignItems: 'center',
+                    marginBottom: 20,
+                  }}>
+                    <MaterialCommunityIcons name="cart-outline" size={40} color="#9CA3AF" />
+                    <Text style={{ fontSize: 16, color: '#4B5563', marginTop: 12, marginBottom: 8, textAlign: 'center' }}>
+                      No products added yet
+                    </Text>
+                    <Text style={{ fontSize: 14, color: '#6B7280', textAlign: 'center', marginBottom: 16 }}>
+                      Add products to your order
+                    </Text>
                   </View>
                 )}
-              </View>
-              
-              {/* Expected Delivery Date */}
-              <View className="mb-4">
-                <Text className="text-sm font-medium text-gray-700 mb-1">Expected Delivery Date</Text>
+
                 <TouchableOpacity
-                  onPress={() => setDatePickerVisible(true)}
-                  className="border border-gray-300 rounded-lg p-3 flex-row justify-between items-center"
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    backgroundColor: '#EEF2FF',
+                    borderWidth: 1,
+                    borderColor: '#C7D2FE',
+                    borderRadius: 10,
+                    paddingVertical: 12,
+                    marginBottom: 20,
+                  }}
+                  onPress={() => {
+                    provideFeedback('light');
+                    setSelectProductVisible(true);
+                  }}
                 >
-                  <Text className={newOrder.expectedDeliveryDate ? "text-gray-900" : "text-gray-400"}>
-                    {newOrder.expectedDeliveryDate ? formatDate(newOrder.expectedDeliveryDate) : "Select a date"}
+                  <Ionicons name="add-circle" size={18} color="#4F46E5" style={{ marginRight: 8 }} />
+                  <Text style={{ fontSize: 14, fontWeight: '600', color: '#4F46E5' }}>
+                    Add Product
                   </Text>
-                  <MaterialIcons name="event" size={20} color="#9CA3AF" />
                 </TouchableOpacity>
-              </View>
-              
-              {/* Notes */}
-              <View className="mb-4">
-                <Text className="text-sm font-medium text-gray-700 mb-1">Notes</Text>
-                <TextInput
-                  placeholder="Add any special instructions or notes"
-                  value={newOrder.notes}
-                  onChangeText={(text) => setNewOrder({...newOrder, notes: text})}
-                  className="border border-gray-300 rounded-lg p-3 text-gray-900 min-h-[100px]"
-                  multiline
-                  textAlignVertical="top"
-                />
+
+                {/* Order Details Section */}
+                <Text style={{ fontSize: 16, fontWeight: '600', color: '#374151', marginBottom: 12 }}>
+                  Order Details
+                </Text>
+
+                <View style={{ marginBottom: 20 }}>
+                  {/* Order Date (Current date by default) */}
+                  <TouchableOpacity
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      backgroundColor: '#F9FAFB',
+                      borderWidth: 1,
+                      borderColor: '#E5E7EB',
+                      borderRadius: 10,
+                      padding: 12,
+                      marginBottom: 12,
+                    }}
+                    onPress={() => {
+                      provideFeedback('light');
+                      setDateType('orderDate');
+                      setDatePickerVisible(true);
+                    }}
+                  >
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                      <Ionicons name="calendar-outline" size={20} color="#6B7280" style={{ marginRight: 10 }} />
+                      <Text style={{ fontSize: 15, color: '#4B5563' }}>
+                        Order Date:
+                      </Text>
+                    </View>
+                    <Text style={{ fontSize: 15, fontWeight: '500', color: '#111827' }}>
+                      {formatDate(newOrder.orderDate)}
+                    </Text>
+                  </TouchableOpacity>
+
+                  {/* Expected Delivery Date */}
+                  <TouchableOpacity
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      backgroundColor: '#F9FAFB',
+                      borderWidth: 1,
+                      borderColor: '#E5E7EB',
+                      borderRadius: 10,
+                      padding: 12,
+                      marginBottom: 12,
+                    }}
+                    onPress={() => {
+                      provideFeedback('light');
+                      setDateType('expectedDeliveryDate');
+                      setDatePickerVisible(true);
+                    }}
+                  >
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                      <Ionicons name="time-outline" size={20} color="#6B7280" style={{ marginRight: 10 }} />
+                      <Text style={{ fontSize: 15, color: '#4B5563' }}>
+                        Expected Delivery:
+                      </Text>
+                    </View>
+                    <Text style={{ fontSize: 15, fontWeight: '500', color: '#111827' }}>
+                      {newOrder.expectedDeliveryDate ? formatDate(newOrder.expectedDeliveryDate) : 'Select date'}
+                    </Text>
+                  </TouchableOpacity>
+
+                  {/* Notes */}
+                  <View style={{
+                    backgroundColor: '#F9FAFB',
+                    borderWidth: 1,
+                    borderColor: '#E5E7EB',
+                    borderRadius: 10,
+                    padding: 12,
+                  }}>
+                    <Text style={{ fontSize: 15, color: '#4B5563', marginBottom: 8 }}>
+                      Order Notes:
+                    </Text>
+                    <TextInput
+                      style={{
+                        minHeight: 80,
+                        fontSize: 15,
+                        color: '#111827',
+                        textAlignVertical: 'top',
+                      }}
+                      placeholder="Add notes about this order (optional)"
+                      placeholderTextColor="#9CA3AF"
+                      multiline
+                      value={newOrder.notes}
+                      onChangeText={(text) => setNewOrder({ ...newOrder, notes: text })}
+                    />
+                  </View>
+                </View>
               </View>
             </ScrollView>
-            
-            <TouchableOpacity
-              onPress={createOrder}
-              disabled={loading}
-              className={`py-3 rounded-lg items-center justify-center ${
-                loading ? "bg-indigo-300" : "bg-indigo-600"
-              }`}
-            >
-              {loading ? (
-                <ActivityIndicator color="white" size="small" />
-              ) : (
-                <Text className="text-white font-semibold">Create Order</Text>
-              )}
-            </TouchableOpacity>
-          </View>
+
+            {/* Bottom Action Buttons */}
+            <View style={{
+              flexDirection: 'row',
+              paddingHorizontal: 20,
+              paddingTop: 12,
+              borderTopWidth: 1,
+              borderTopColor: '#E5E7EB',
+            }}>
+              <TouchableOpacity
+                style={{
+                  flex: 1,
+                  paddingVertical: 14,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  backgroundColor: '#F9FAFB',
+                  borderWidth: 1,
+                  borderColor: '#E5E7EB',
+                  borderRadius: 10,
+                  marginRight: 8,
+                }}
+                onPress={() => {
+                  provideFeedback('light');
+                  setNewOrderVisible(false);
+                }}
+              >
+                <Text style={{ fontSize: 15, fontWeight: '600', color: '#4B5563' }}>
+                  Cancel
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={{
+                  flex: 2,
+                  flexDirection: 'row',
+                  paddingVertical: 14,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  backgroundColor: !newOrder.supplierId || newOrder.products.length === 0 ? '#E5E7EB' : '#4F46E5',
+                  borderRadius: 10,
+                }}
+                onPress={() => {
+                  provideFeedback('medium');
+                  createOrder();
+                }}
+                disabled={!newOrder.supplierId || newOrder.products.length === 0}
+              >
+                <MaterialCommunityIcons
+                  name="send"
+                  size={18}
+                  color={!newOrder.supplierId || newOrder.products.length === 0 ? '#9CA3AF' : 'white'}
+                  style={{ marginRight: 8 }}
+                />
+                <Text style={{
+                  fontSize: 15,
+                  fontWeight: '600',
+                  color: !newOrder.supplierId || newOrder.products.length === 0 ? '#9CA3AF' : 'white'
+                }}>
+                  Submit Order
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </Animated.View>
         </KeyboardAvoidingView>
       </Modal>
     );
   };
-  
-  // Render order details modal
+
+  // Render Order Details Modal
   const renderOrderDetailsModal = () => {
     if (!selectedOrder) return null;
-    
+
     return (
       <Modal
         visible={orderDetailsVisible}
@@ -867,644 +1170,1202 @@ export default function SupplierOrderManagement() {
         transparent={true}
         onRequestClose={() => setOrderDetailsVisible(false)}
       >
-        <View className="flex-1 justify-end">
-          <View className="bg-white rounded-t-3xl shadow-lg p-5 h-[85%]">
-            <View className="flex-row justify-between items-center mb-5">
-              <Text className="text-xl font-bold text-gray-900">Order Details</Text>
+        <BlurView
+          intensity={20}
+          style={{
+            position: 'absolute',
+            width: '100%',
+            height: '100%',
+          }}
+        />
+
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={{ flex: 1 }}
+        >
+          <Animated.View
+            style={{
+              backgroundColor: 'white',
+              borderTopLeftRadius: 24,
+              borderTopRightRadius: 24,
+              paddingTop: 16,
+              paddingBottom: Math.max(20, insets.bottom),
+              marginTop: 'auto',
+              maxHeight: height * 0.9,
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: -5 },
+              shadowOpacity: 0.1,
+              shadowRadius: 6,
+              elevation: 5,
+            }}
+            entering={SlideInDown.springify().damping(15)}
+          >
+            {/* Header */}
+            <View style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              borderBottomWidth: 1,
+              borderBottomColor: '#E5E7EB',
+              paddingHorizontal: 20,
+              paddingBottom: 16,
+            }}>
               <TouchableOpacity
-                onPress={() => setOrderDetailsVisible(false)}
-                className="h-8 w-8 items-center justify-center rounded-full bg-gray-100"
+                style={{
+                  width: 40,
+                  height: 40,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}
+                onPress={() => {
+                  provideFeedback('light');
+                  setOrderDetailsVisible(false);
+                  setSelectedOrder(null);
+                }}
               >
-                <MaterialIcons name="close" size={20} color="#4B5563" />
+                <Ionicons name="close" size={24} color="#6B7280" />
+              </TouchableOpacity>
+
+              <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#111827' }}>
+                Order Details
+              </Text>
+
+              <TouchableOpacity
+                style={{
+                  width: 40,
+                  height: 40,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}
+                onPress={() => {
+                  provideFeedback('light');
+                  // Print or export order
+                  Alert.alert(
+                    "Export Order",
+                    "Generate an invoice for this order?",
+                    [
+                      { text: "Cancel", style: "cancel" },
+                      { text: "Export" }
+                    ]
+                  );
+                }}
+              >
+                <Ionicons name="print-outline" size={22} color="#4F46E5" />
               </TouchableOpacity>
             </View>
-            
-            <ScrollView showsVerticalScrollIndicator={false} className="mb-5">
-              {/* Order Header */}
-              <View className="bg-indigo-50 p-4 rounded-xl mb-4">
-                <View className="flex-row justify-between items-center mb-2">
-                  <View className="flex-row items-center">
-                    <LinearGradient
-                      colors={['#4F46E5', '#7C3AED']}
-                      className="h-10 w-10 rounded-full items-center justify-center mr-3"
-                    >
-                      <MaterialIcons name="receipt" size={20} color="white" />
-                    </LinearGradient>
-                    <View>
-                      <Text className="text-base font-bold text-gray-900">
-                        Order #{selectedOrder.id.substring(0, 8)}
-                      </Text>
-                      <Text className="text-xs text-gray-500">
-                        {formatDate(selectedOrder.orderDate)}
+
+            <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
+              <View style={{ padding: 20 }}>
+                {/* Order Status Banner */}
+                <View style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  backgroundColor: getStatusColor(selectedOrder.status).bgColor,
+                  borderWidth: 1,
+                  borderColor: getStatusColor(selectedOrder.status).borderColor,
+                  borderRadius: 12,
+                  padding: 16,
+                  marginBottom: 20,
+                }}>
+                  <View style={{
+                    width: 40,
+                    height: 40,
+                    borderRadius: 20,
+                    backgroundColor: 'white',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    marginRight: 12,
+                  }}>
+                    {getStatusIcon(selectedOrder.status)}
+                  </View>
+
+                  <View style={{ flex: 1 }}>
+                    <Text style={{
+                      fontSize: 16,
+                      fontWeight: 'bold',
+                      color: getStatusColor(selectedOrder.status).textColor,
+                      marginBottom: 2,
+                    }}>
+                      {selectedOrder.status} Order
+                    </Text>
+                    <Text style={{
+                      fontSize: 13,
+                      color: getStatusColor(selectedOrder.status).textColor,
+                      opacity: 0.8,
+                    }}>
+                      {getStatusMessage(selectedOrder.status)}
+                    </Text>
+                  </View>
+                </View>
+
+                {/* Order ID and Dates */}
+                <View style={{
+                  backgroundColor: '#F9FAFB',
+                  borderRadius: 12,
+                  padding: 16,
+                  marginBottom: 20,
+                }}>
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12 }}>
+                    <Text style={{ fontSize: 14, color: '#6B7280' }}>Order ID:</Text>
+                    <Text style={{ fontSize: 14, fontWeight: '600', color: '#111827' }}>
+                      #{selectedOrder.id.substring(0, 8)}
+                    </Text>
+                  </View>
+
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12 }}>
+                    <Text style={{ fontSize: 14, color: '#6B7280' }}>Order Date:</Text>
+                    <Text style={{ fontSize: 14, fontWeight: '600', color: '#111827' }}>
+                      {formatDate(selectedOrder.orderDate)}
+                    </Text>
+                  </View>
+
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                    <Text style={{ fontSize: 14, color: '#6B7280' }}>Expected Delivery:</Text>
+                    <Text style={{ fontSize: 14, fontWeight: '600', color: '#111827' }}>
+                      {selectedOrder.expectedDeliveryDate
+                        ? formatDate(selectedOrder.expectedDeliveryDate)
+                        : 'Not specified'}
+                    </Text>
+                  </View>
+
+                  {selectedOrder.status === 'Delivered' && selectedOrder.deliveryDate && (
+                    <View style={{
+                      flexDirection: 'row',
+                      justifyContent: 'space-between',
+                      marginTop: 12,
+                      paddingTop: 12,
+                      borderTopWidth: 1,
+                      borderTopColor: '#E5E7EB',
+                    }}>
+                      <Text style={{ fontSize: 14, color: '#6B7280' }}>Delivery Date:</Text>
+                      <Text style={{ fontSize: 14, fontWeight: '600', color: '#059669' }}>
+                        {formatDate(selectedOrder.deliveryDate)}
                       </Text>
                     </View>
+                  )}
+                </View>
+
+                {/* Supplier Info */}
+                <Text style={{ fontSize: 16, fontWeight: '600', color: '#374151', marginBottom: 12 }}>
+                  Supplier Information
+                </Text>
+
+                <View style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  backgroundColor: '#F9FAFB',
+                  borderWidth: 1,
+                  borderColor: '#E5E7EB',
+                  borderRadius: 12,
+                  padding: 16,
+                  marginBottom: 20,
+                }}>
+                  <View style={{
+                    width: 44,
+                    height: 44,
+                    borderRadius: 22,
+                    backgroundColor: '#EEF2FF',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    marginRight: 12,
+                  }}>
+                    <MaterialCommunityIcons name="store" size={22} color="#4F46E5" />
                   </View>
-                  {renderStatusBadge(selectedOrder.status)}
-                </View>
-                
-                <View className="border-t border-indigo-100 my-2" />
-                
-                <View className="flex-row items-center">
-                  <MaterialIcons name="business" size={16} color="#4F46E5" className="mr-1" />
-                  <Text className="text-sm font-medium text-gray-800 ml-1">
-                    {selectedOrder.supplierName || 'Unknown Supplier'}
-                  </Text>
-                </View>
-                
-                {selectedOrder.expectedDeliveryDate && (
-                  <View className="flex-row items-center mt-1">
-                    <MaterialIcons name="event" size={16} color="#4F46E5" className="mr-1" />
-                    <Text className="text-sm text-gray-700 ml-1">
-                      Expected: {formatDate(selectedOrder.expectedDeliveryDate)}
+
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ fontSize: 16, fontWeight: '600', color: '#111827' }}>
+                      {selectedOrder.supplierName}
+                    </Text>
+                    <Text style={{ fontSize: 13, color: '#6B7280', marginTop: 2 }}>
+                      Supplier ID: {selectedOrder.supplierId.substring(0, 8)}
                     </Text>
                   </View>
-                )}
-                
-                {selectedOrder.deliveryDate && (
-                  <View className="flex-row items-center mt-1">
-                    <MaterialIcons name="check-circle" size={16} color="#16A34A" className="mr-1" />
-                    <Text className="text-sm text-gray-700 ml-1">
-                      Delivered: {formatDate(selectedOrder.deliveryDate)}
-                    </Text>
-                  </View>
-                )}
-              </View>
-              
-              {/* Products */}
-              <View className="mb-4">
-                <Text className="text-sm font-semibold text-gray-700 mb-2">Products</Text>
-                <View className="border border-gray-200 rounded-lg overflow-hidden">
-                  {selectedOrder.products?.map((product, index) => (
-                    <View key={index} className={`p-3 flex-row items-center ${
-                      index !== selectedOrder.products.length - 1 ? "border-b border-gray-100" : ""
-                    }`}>
-                      {product.image ? (
-                        <Image 
-                          source={{ uri: product.image }} 
-                          className="h-12 w-12 rounded-md mr-3" 
-                        />
-                      ) : (
-                        <View className="h-12 w-12 rounded-md bg-gray-200 items-center justify-center mr-3">
-                          <MaterialIcons name="image" size={20} color="#9CA3AF" />
-                        </View>
-                      )}
-                      <View className="flex-1">
-                        <Text className="text-sm font-medium text-gray-800">
+
+                  <TouchableOpacity
+                    style={{
+                      width: 38,
+                      height: 38,
+                      borderRadius: 19,
+                      backgroundColor: '#F3F4F6',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                    }}
+                    onPress={() => {
+                      provideFeedback('light');
+                      // View supplier details
+                      router.push('/stockManager/AllSuppliers');
+                    }}
+                  >
+                    <Ionicons name="open-outline" size={18} color="#4B5563" />
+                  </TouchableOpacity>
+                </View>
+
+                {/* Order Products */}
+                <Text style={{ fontSize: 16, fontWeight: '600', color: '#374151', marginBottom: 12 }}>
+                  Order Products
+                </Text>
+
+                <View style={{
+                  backgroundColor: '#F9FAFB',
+                  borderWidth: 1,
+                  borderColor: '#E5E7EB',
+                  borderRadius: 12,
+                  overflow: 'hidden',
+                  marginBottom: 20,
+                }}>
+                  {selectedOrder.products.map((product, index) => (
+                    <View
+                      key={index}
+                      style={{
+                        flexDirection: 'row',
+                        padding: 16,
+                        borderBottomWidth: index < selectedOrder.products.length - 1 ? 1 : 0,
+                        borderBottomColor: '#E5E7EB',
+                      }}
+                    >
+                      <View style={{
+                        width: 40,
+                        height: 40,
+                        borderRadius: 8,
+                        backgroundColor: '#F3F4F6',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        marginRight: 12,
+                      }}>
+                        <MaterialCommunityIcons name="package-variant-closed" size={20} color="#4B5563" />
+                      </View>
+
+                      <View style={{ flex: 1 }}>
+                        <Text style={{ fontSize: 15, fontWeight: '600', color: '#111827' }}>
                           {product.name}
                         </Text>
-                        <View className="flex-row justify-between mt-1">
-                          <Text className="text-xs text-gray-500">
-                            Qty: {product.quantity}
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 4 }}>
+                          <Text style={{ fontSize: 13, color: '#6B7280' }}>
+                            {product.quantity} {product.unit} x ${product.price?.toFixed(2) || '0.00'}
                           </Text>
-                          <Text className="text-xs text-gray-500">
-                            Unit: {formatCurrency(product.price)}
-                          </Text>
-                          <Text className="text-xs font-medium text-gray-800">
-                            Total: {formatCurrency(product.price * product.quantity)}
+                          <Text style={{ fontSize: 14, fontWeight: '600', color: '#111827' }}>
+                            ${(product.quantity * product.price).toFixed(2)}
                           </Text>
                         </View>
                       </View>
                     </View>
                   ))}
-                  
-                  <View className="p-3 bg-gray-50">
-                    <Text className="text-right font-semibold text-gray-900">
-                      Order Total: {formatCurrency(selectedOrder.totalAmount)}
+
+                  <View style={{
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    backgroundColor: '#EEF2FF',
+                    paddingVertical: 12,
+                    paddingHorizontal: 16,
+                  }}>
+                    <Text style={{ fontSize: 15, fontWeight: '600', color: '#4F46E5' }}>
+                      Total Amount:
+                    </Text>
+                    <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#4F46E5' }}>
+                      ${selectedOrder.totalAmount?.toFixed(2) || '0.00'}
                     </Text>
                   </View>
                 </View>
+
+                {/* Notes */}
+                {selectedOrder.notes && (
+                  <>
+                    <Text style={{ fontSize: 16, fontWeight: '600', color: '#374151', marginBottom: 12 }}>
+                      Order Notes
+                    </Text>
+
+                    <View style={{
+                      backgroundColor: '#F9FAFB',
+                      borderWidth: 1,
+                      borderColor: '#E5E7EB',
+                      borderRadius: 12,
+                      padding: 16,
+                      marginBottom: 20,
+                    }}>
+                      <Text style={{ fontSize: 14, color: '#4B5563', lineHeight: 20 }}>
+                        {selectedOrder.notes}
+                      </Text>
+                    </View>
+                  </>
+                )}
               </View>
-              
-              {/* Notes */}
-              {selectedOrder.notes && (
-                <View className="mb-4">
-                  <Text className="text-sm font-semibold text-gray-700 mb-2">Notes</Text>
-                  <View className="border border-gray-200 rounded-lg p-3 bg-gray-50">
-                    <Text className="text-sm text-gray-700">
-                      {selectedOrder.notes}
-                    </Text>
-                  </View>
-                </View>
-              )}
-              
-              {/* Actions */}
-              {selectedOrder.status !== 'Delivered' && (
-                <View className="flex-row space-x-3 mb-4">
-                  {selectedOrder.status === 'Pending' && (
-                    <TouchableOpacity
-                      onPress={() => updateOrderStatus(selectedOrder, 'Shipped')}
-                      className="flex-1 bg-blue-600 py-3 rounded-lg items-center justify-center"
-                    >
-                      <Text className="text-white font-medium">Mark as Shipped</Text>
-                    </TouchableOpacity>
-                  )}
-                  
-                  {selectedOrder.status === 'Shipped' && (
-                    <TouchableOpacity
-                      onPress={() => updateOrderStatus(selectedOrder, 'Delivered')}
-                      className="flex-1 bg-green-600 py-3 rounded-lg items-center justify-center"
-                    >
-                      <Text className="text-white font-medium">Mark as Delivered</Text>
-                    </TouchableOpacity>
-                  )}
-                  
-                  <TouchableOpacity
-                    onPress={() => {
-                      setOrderDetailsVisible(false);
-                      setTimeout(() => {
-                        setOrderToDelete(selectedOrder);
-                        setDeleteConfirmVisible(true);
-                      }, 300);
-                    }}
-                    className="bg-red-600 py-3 px-4 rounded-lg items-center justify-center"
-                  >
-                    <MaterialIcons name="delete" size={20} color="white" />
-                  </TouchableOpacity>
-                </View>
-              )}
             </ScrollView>
-          </View>
-        </View>
+
+            {/* Bottom Action Buttons */}
+            <View style={{
+              flexDirection: 'row',
+              paddingHorizontal: 20,
+              paddingTop: 12,
+              borderTopWidth: 1,
+              borderTopColor: '#E5E7EB',
+            }}>
+              <TouchableOpacity
+                style={{
+                  flex: 1,
+                  paddingVertical: 14,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  backgroundColor: '#FEE2E2',
+                  borderRadius: 10,
+                  marginRight: 8,
+                }}
+                onPress={() => {
+                  provideFeedback('medium');
+                  setOrderDetailsVisible(false);
+                  setOrderToDelete(selectedOrder);
+                  setDeleteConfirmVisible(true);
+                }}
+              >
+                <Text style={{ fontSize: 15, fontWeight: '600', color: '#DC2626' }}>
+                  Delete
+                </Text>
+              </TouchableOpacity>
+
+              {/* Status-based action button */}
+              {selectedOrder.status !== 'Delivered' && (
+                <TouchableOpacity
+                  style={{
+                    flex: 2,
+                    flexDirection: 'row',
+                    paddingVertical: 14,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    backgroundColor: '#4F46E5',
+                    borderRadius: 10,
+                  }}
+                  onPress={() => {
+                    provideFeedback('medium');
+                    // Determine next status
+                    let newStatus;
+                    switch (selectedOrder.status) {
+                      case 'Pending':
+                        newStatus = 'Shipped';
+                        break;
+                      case 'Shipped':
+                        newStatus = 'Delivered';
+                        break;
+                      default:
+                        newStatus = 'Pending';
+                    }
+
+                    // Update status
+                    updateOrderStatus(selectedOrder, newStatus);
+
+                    // Close modal
+                    setOrderDetailsVisible(false);
+                  }}
+                >
+                  <MaterialCommunityIcons
+                    name={selectedOrder.status === 'Pending' ? 'truck-delivery' : 'check-circle'}
+                    size={18}
+                    color="white"
+                    style={{ marginRight: 8 }}
+                  />
+                  <Text style={{ fontSize: 15, fontWeight: '600', color: 'white' }}>
+                    {selectedOrder.status === 'Pending' ? 'Mark as Shipped' : 'Mark as Delivered'}
+                  </Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          </Animated.View>
+        </KeyboardAvoidingView>
       </Modal>
     );
   };
-  
-  // Render delete confirmation modal
+
+  // Render date picker modal
+  const renderDatePickerModal = () => {
+    const handleDateChange = (event, selectedDate) => {
+      const currentDate = selectedDate || (dateType === 'orderDate' ? newOrder.orderDate : newOrder.expectedDeliveryDate);
+
+      // On Android, we close the picker on select
+      if (Platform.OS === 'android') {
+        setDatePickerVisible(false);
+
+        if (dateType === 'orderDate') {
+          setNewOrder({ ...newOrder, orderDate: currentDate });
+        } else if (dateType === 'expectedDeliveryDate') {
+          setNewOrder({ ...newOrder, expectedDeliveryDate: currentDate });
+        }
+      } else {
+        // On iOS, we update the date but keep the picker open
+        if (dateType === 'orderDate') {
+          setNewOrder({ ...newOrder, orderDate: currentDate });
+        } else if (dateType === 'expectedDeliveryDate') {
+          setNewOrder({ ...newOrder, expectedDeliveryDate: currentDate });
+        }
+      }
+    };
+
+    const confirmIOSDate = () => {
+      setDatePickerVisible(false);
+    };
+
+    return (
+      <Modal
+        visible={datePickerVisible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setDatePickerVisible(false)}
+      >
+        <BlurView
+          intensity={20}
+          style={{
+            position: 'absolute',
+            width: '100%',
+            height: '100%',
+          }}
+        />
+
+        <TouchableOpacity
+          style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
+          activeOpacity={1}
+          onPress={() => setDatePickerVisible(false)}
+        >
+          <Animated.View
+            style={{
+              backgroundColor: 'white',
+              borderRadius: 16,
+              padding: 20,
+              width: '90%',
+              maxWidth: 400,
+              alignItems: 'center',
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.1,
+              shadowRadius: 10,
+              elevation: 5,
+            }}
+            entering={FadeIn.springify()}
+          >
+            <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#111827', marginBottom: 20 }}>
+              {dateType === 'orderDate' ? 'Select Order Date' : 'Select Expected Delivery Date'}
+            </Text>
+
+            <DateTimePicker
+              value={dateType === 'orderDate' ? newOrder.orderDate || new Date() : newOrder.expectedDeliveryDate || new Date()}
+              mode="date"
+              display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+              onChange={handleDateChange}
+              style={{ width: Platform.OS === 'ios' ? 300 : 'auto' }}
+              minimumDate={dateType === 'expectedDeliveryDate' ? new Date() : undefined}
+              themeVariant="light"
+            />
+
+            {Platform.OS === 'ios' && (
+              <View style={{
+                flexDirection: 'row',
+                marginTop: 20,
+                width: '100%',
+              }}>
+                <TouchableOpacity
+                  style={{
+                    flex: 1,
+                    paddingVertical: 12,
+                    alignItems: 'center',
+                    backgroundColor: '#F3F4F6',
+                    borderRadius: 8,
+                    marginRight: 8,
+                  }}
+                  onPress={() => setDatePickerVisible(false)}
+                >
+                  <Text style={{ fontSize: 15, fontWeight: '600', color: '#4B5563' }}>
+                    Cancel
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={{
+                    flex: 1,
+                    paddingVertical: 12,
+                    alignItems: 'center',
+                    backgroundColor: '#4F46E5',
+                    borderRadius: 8,
+                  }}
+                  onPress={confirmIOSDate}
+                >
+                  <Text style={{ fontSize: 15, fontWeight: '600', color: 'white' }}>
+                    Confirm
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            )}
+          </Animated.View>
+        </TouchableOpacity>
+      </Modal>
+    );
+  };
+
+  // Render Delete Confirmation Modal
   const renderDeleteConfirmationModal = () => {
     return (
       <Modal
         visible={deleteConfirmVisible}
-        animationType="fade"
         transparent={true}
+        animationType="fade"
         onRequestClose={() => setDeleteConfirmVisible(false)}
       >
-        <View className="flex-1 bg-black/50 justify-center items-center p-5">
-          <View className="bg-white rounded-2xl p-5 w-full max-w-sm">
-            <Text className="text-xl font-bold text-gray-900 mb-3">Delete Order</Text>
-            <Text className="text-gray-600 mb-4">
+        <BlurView
+          intensity={20}
+          style={{
+            position: 'absolute',
+            width: '100%',
+            height: '100%',
+          }}
+        />
+
+        <TouchableOpacity
+          style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
+          activeOpacity={1}
+          onPress={() => setDeleteConfirmVisible(false)}
+        >
+          <Animated.View
+            style={{
+              backgroundColor: 'white',
+              borderRadius: 16,
+              padding: 24,
+              width: '90%',
+              maxWidth: 400,
+              alignItems: 'center',
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.1,
+              shadowRadius: 10,
+              elevation: 5,
+            }}
+            entering={FadeIn.springify()}
+          >
+            <View style={{
+              width: 56,
+              height: 56,
+              borderRadius: 28,
+              backgroundColor: '#FEE2E2',
+              justifyContent: 'center',
+              alignItems: 'center',
+              marginBottom: 16,
+            }}>
+              <MaterialCommunityIcons name="alert" size={28} color="#DC2626" />
+            </View>
+
+            <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#111827', marginBottom: 8 }}>
+              Delete Order
+            </Text>
+
+            <Text style={{ fontSize: 15, color: '#4B5563', textAlign: 'center', marginBottom: 24, lineHeight: 22 }}>
               Are you sure you want to delete this order? This action cannot be undone.
             </Text>
-            
-            <View className="flex-row space-x-3">
+
+            <View style={{ flexDirection: 'row', width: '100%' }}>
               <TouchableOpacity
-                onPress={() => setDeleteConfirmVisible(false)}
-                className="flex-1 py-3 rounded-lg bg-gray-200 items-center justify-center"
+                style={{
+                  flex: 1,
+                  paddingVertical: 12,
+                  alignItems: 'center',
+                  backgroundColor: '#F3F4F6',
+                  borderRadius: 8,
+                  marginRight: 8,
+                }}
+                onPress={() => {
+                  provideFeedback('light');
+                  setDeleteConfirmVisible(false);
+                }}
               >
-                <Text className="font-medium text-gray-800">Cancel</Text>
-              </TouchableOpacity>
-              
-              <TouchableOpacity
-                onPress={deleteOrder}
-                className="flex-1 py-3 rounded-lg bg-red-600 items-center justify-center"
-              >
-                {loading ? (
-                  <ActivityIndicator color="white" size="small" />
-                ) : (
-                  <Text className="font-medium text-white">Delete</Text>
-                )}
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
-    );
-  };
-  
-  // Render select supplier modal
-  const renderSelectSupplierModal = () => {
-    return (
-      <Modal
-        visible={selectSupplierVisible}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={() => setSelectSupplierVisible(false)}
-      >
-        <View className="flex-1 justify-end">
-          <View className="bg-white rounded-t-3xl shadow-lg p-5 h-[70%]">
-            <View className="flex-row justify-between items-center mb-5">
-              <Text className="text-xl font-bold text-gray-900">Select Supplier</Text>
-              <TouchableOpacity
-                onPress={() => setSelectSupplierVisible(false)}
-                className="h-8 w-8 items-center justify-center rounded-full bg-gray-100"
-              >
-                <MaterialIcons name="close" size={20} color="#4B5563" />
-              </TouchableOpacity>
-            </View>
-            
-            <FlatList
-              data={suppliers}
-              keyExtractor={(item) => item.id}
-              renderItem={({ item }) => (
-                <TouchableOpacity
-                  onPress={() => selectSupplier(item)}
-                  className="p-3 border-b border-gray-100 flex-row justify-between items-center"
-                >
-                  <View className="flex-row items-center">
-                    <View className="bg-indigo-100 h-10 w-10 rounded-full items-center justify-center mr-3">
-                      <Text className="text-indigo-800 font-semibold">
-                        {item.name?.charAt(0).toUpperCase() || 'S'}
-                      </Text>
-                    </View>
-                    <View>
-                      <Text className="text-base font-medium text-gray-800">
-                        {item.name}
-                      </Text>
-                      {item.phone && (
-                        <Text className="text-xs text-gray-500">
-                          {item.phone}
-                        </Text>
-                      )}
-                    </View>
-                  </View>
-                  <MaterialIcons name="chevron-right" size={20} color="#9CA3AF" />
-                </TouchableOpacity>
-              )}
-              ListEmptyComponent={
-                <View className="items-center justify-center py-8">
-                  <Text className="text-gray-400">No suppliers found</Text>
-                </View>
-              }
-            />
-          </View>
-        </View>
-      </Modal>
-    );
-  };
-  
-  // Render select product modal
-  const renderSelectProductModal = () => {
-    return (
-      <Modal
-        visible={selectProductVisible}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={() => setSelectProductVisible(false)}
-      >
-        <View className="flex-1 justify-end">
-          <View className="bg-white rounded-t-3xl shadow-lg p-5 h-[80%]">
-            <View className="flex-row justify-between items-center mb-5">
-              <Text className="text-xl font-bold text-gray-900">Select Product</Text>
-              <TouchableOpacity
-                onPress={() => setSelectProductVisible(false)}
-                className="h-8 w-8 items-center justify-center rounded-full bg-gray-100"
-              >
-                <MaterialIcons name="close" size={20} color="#4B5563" />
-              </TouchableOpacity>
-            </View>
-            
-            <TextInput
-              placeholder="Search products..."
-              className="bg-gray-100 px-4 py-2 rounded-lg mb-3"
-              onChangeText={(text) => setProductSearchQuery(text)}
-              value={productSearchQuery}
-            />
-            
-            <FlatList
-              data={products.filter(product => 
-                product.name?.toLowerCase().includes(productSearchQuery.toLowerCase())
-              )}
-              keyExtractor={(item) => item.id}
-              renderItem={({ item }) => (
-                <TouchableOpacity
-                  onPress={() => addProductToOrder(item)}
-                  className="p-3 border-b border-gray-100 flex-row justify-between items-center"
-                >
-                  <View className="flex-row items-center flex-1">
-                    {item.image ? (
-                      <Image 
-                        source={{ uri: item.image }} 
-                        className="h-12 w-12 rounded-md mr-3" 
-                      />
-                    ) : (
-                      <View className="h-12 w-12 rounded-md bg-gray-200 items-center justify-center mr-3">
-                        <MaterialIcons name="image" size={20} color="#9CA3AF" />
-                      </View>
-                    )}
-                    <View className="flex-1">
-                      <Text className="text-base font-medium text-gray-800" numberOfLines={1}>
-                        {item.name}
-                      </Text>
-                      <View className="flex-row justify-between mt-1">
-                        <Text className="text-xs text-gray-500">
-                          Stock: {item.stockQuantity || '0'}
-                        </Text>
-                        <Text className="text-xs font-medium text-gray-800">
-                          {formatCurrency(item.price)}
-                        </Text>
-                      </View>
-                    </View>
-                  </View>
-                  <MaterialIcons name="add-circle" size={24} color="#4F46E5" />
-                </TouchableOpacity>
-              )}
-              ListEmptyComponent={
-                <View className="items-center justify-center py-8">
-                  <Text className="text-gray-400">No products found</Text>
-                </View>
-              }
-            />
-          </View>
-        </View>
-      </Modal>
-    );
-  };
-  
-  // Render date picker modal
-  const renderDatePickerModal = () => {
-    return (
-      <Modal
-        visible={datePickerVisible}
-        animationType="fade"
-        transparent={true}
-        onRequestClose={() => setDatePickerVisible(false)}
-      >
-        <View className="flex-1 bg-black/50 justify-center items-center p-5">
-          <View className="bg-white rounded-2xl p-5 w-full">
-            <Text className="text-lg font-bold text-gray-900 mb-3 text-center">
-              Select Expected Delivery Date
-            </Text>
-            
-            <DateTimePicker
-              value={newOrder.expectedDeliveryDate || new Date()}
-              mode="date"
-              display="inline"
-              onChange={(event, selectedDate) => {
-                if (selectedDate) {
-                  setNewOrder({...newOrder, expectedDeliveryDate: selectedDate});
-                }
-              }}
-              minimumDate={new Date()}
-            />
-            
-            <View className="flex-row space-x-3 mt-3">
-              <TouchableOpacity
-                onPress={() => setDatePickerVisible(false)}
-                className="flex-1 py-3 rounded-lg bg-gray-200 items-center justify-center"
-              >
-                <Text className="font-medium text-gray-800">Cancel</Text>
-              </TouchableOpacity>
-              
-              <TouchableOpacity
-                onPress={() => setDatePickerVisible(false)}
-                className="flex-1 py-3 rounded-lg bg-indigo-600 items-center justify-center"
-              >
-                <Text className="font-medium text-white">Confirm</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
-    );
-  };
-  
-  // Main render
-  return (
-    <SafeAreaView className="flex-1 bg-gray-50">
-      {/* Header */}
-      <View className="bg-white pt-2 pb-3 px-4 border-b border-gray-200">
-        <View className="flex-row items-center justify-between mb-3">
-          <Text className="text-2xl font-bold text-gray-900">
-            Supplier Orders
-          </Text>
-          
-          <TouchableOpacity 
-            onPress={() => setNewOrderVisible(true)}
-            className="h-10 w-10 items-center justify-center rounded-full bg-indigo-100"
-          >
-            <MaterialIcons name="add" size={24} color="#4F46E5" />
-          </TouchableOpacity>
-        </View>
-        
-        {/* Stats cards */}
-        <Animated.ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 12 }}
-          entering={FadeIn.delay(300).duration(500)}
-        >
-          <View className="bg-indigo-50 p-3 mr-3 rounded-xl w-36">
-            <View className="flex-row items-center mb-1">
-              <MaterialIcons name="pending-actions" size={16} color="#4F46E5" />
-              <Text className="text-xs font-medium text-indigo-800 ml-1">Pending</Text>
-            </View>
-            <Text className="text-xl font-bold text-gray-900">{stats.pendingCount}</Text>
-          </View>
-          
-          <View className="bg-blue-50 p-3 mr-3 rounded-xl w-36">
-            <View className="flex-row items-center mb-1">
-              <MaterialIcons name="local-shipping" size={16} color="#2563EB" />
-              <Text className="text-xs font-medium text-blue-800 ml-1">Shipped</Text>
-            </View>
-            <Text className="text-xl font-bold text-gray-900">{stats.shippedCount}</Text>
-          </View>
-          
-          <View className="bg-green-50 p-3 mr-3 rounded-xl w-36">
-            <View className="flex-row items-center mb-1">
-              <MaterialIcons name="check-circle" size={16} color="#16A34A" />
-              <Text className="text-xs font-medium text-green-800 ml-1">Delivered</Text>
-            </View>
-            <Text className="text-xl font-bold text-gray-900">{stats.deliveredCount}</Text>
-          </View>
-          
-          <View className="bg-purple-50 p-3 rounded-xl w-40">
-            <View className="flex-row items-center mb-1">
-              <MaterialIcons name="attach-money" size={16} color="#7E22CE" />
-              <Text className="text-xs font-medium text-purple-800 ml-1">Total Value</Text>
-            </View>
-            <Text className="text-xl font-bold text-gray-900" numberOfLines={1}>
-              {formatCurrency(stats.totalAmount)}
-            </Text>
-          </View>
-        </Animated.ScrollView>
-      </View>
-      
-      {/* Search and Filter Bar */}
-      <Animated.View 
-        entering={FadeInDown.delay(200).duration(400)}
-        className="flex-row items-center mx-4 mt-3 mb-2"
-      >
-        <Animated.View
-          style={useAnimatedStyle(() => ({
-            width: searchBarWidth.value
-          }))}
-          className="flex-row items-center bg-white rounded-xl border border-gray-200 flex-1 h-12 px-3 mr-2"
-        >
-          <MaterialIcons name="search" size={20} color="#9CA3AF" />
-          <TextInput
-            ref={searchInputRef}
-            placeholder="Search orders..."
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-            onFocus={() => setSearchFocused(true)}
-            className="flex-1 ml-2 text-gray-900"
-          />
-          {searchQuery !== "" && (
-            <TouchableOpacity onPress={() => setSearchQuery("")}>
-              <MaterialIcons name="clear" size={20} color="#9CA3AF" />
-            </TouchableOpacity>
-          )}
-        </Animated.View>
-        
-        {searchFocused && (
-          <TouchableOpacity 
-            onPress={toggleSearch}
-            className="ml-1"
-          >
-            <Text className="text-indigo-600 font-medium">Cancel</Text>
-          </TouchableOpacity>
-        )}
-        
-        {!searchFocused && (
-          <TouchableOpacity 
-            onPress={() => setFilterVisible(!filterVisible)}
-            className="h-12 w-12 items-center justify-center rounded-xl bg-white border border-gray-200"
-          >
-            <MaterialIcons name="filter-list" size={24} color="#4F46E5" />
-          </TouchableOpacity>
-        )}
-      </Animated.View>
-      
-      {/* Filters */}
-      {filterVisible && (
-        <Animated.View 
-          entering={SlideInDown.duration(300)}
-          className="mx-4 mb-3"
-        >
-          <View className="flex-row justify-between items-center mb-2">
-            <Text className="text-sm font-medium text-gray-700">Status</Text>
-            <TouchableOpacity onPress={() => setSortVisible(!sortVisible)}>
-              <Text className="text-indigo-600 text-sm">Sort by: {sortCriteria.replace(/([A-Z])/g, ' $1').replace(/([a-z])([A-Z])/g, '$1 $2').toLowerCase()}</Text>
-            </TouchableOpacity>
-          </View>
-          
-          <View className="flex-row flex-wrap">
-            {['All', 'Pending', 'Shipped', 'Delivered'].map((status) => (
-              <TouchableOpacity
-                key={status}
-                onPress={() => setStatusFilter(status)}
-                className={`mr-2 mb-2 py-1 px-3 rounded-full ${
-                  statusFilter === status 
-                    ? 'bg-indigo-100 border border-indigo-300' 
-                    : 'bg-white border border-gray-300'
-                }`}
-              >
-                <Text className={`text-xs ${
-                  statusFilter === status 
-                    ? 'text-indigo-800 font-medium' 
-                    : 'text-gray-600'
-                }`}>
-                  {status}
+                <Text style={{ fontSize: 15, fontWeight: '600', color: '#4B5563' }}>
+                  Cancel
                 </Text>
               </TouchableOpacity>
-            ))}
-          </View>
-          
-          {sortVisible && (
-            <Animated.View 
-              entering={SlideInDown.duration(200)}
-              className="mt-2 bg-white rounded-xl border border-gray-200 overflow-hidden"
-            >
-              {[
-                { id: 'dateDesc', label: 'Newest first' },
-                { id: 'dateAsc', label: 'Oldest first' },
-                { id: 'amountDesc', label: 'Highest amount' },
-                { id: 'amountAsc', label: 'Lowest amount' },
-                { id: 'statusPriority', label: 'Status priority' },
-              ].map((sort) => (
-                <TouchableOpacity
-                  key={sort.id}
-                  onPress={() => {
-                    setSortCriteria(sort.id);
-                    setSortVisible(false);
-                  }}
-                  className={`py-3 px-4 ${
-                    sortCriteria === sort.id 
-                      ? 'bg-indigo-50' 
-                      : 'bg-white'
-                  } ${sort.id !== 'statusPriority' ? 'border-b border-gray-100' : ''}`}
-                >
-                  <Text className={`${
-                    sortCriteria === sort.id 
-                      ? 'text-indigo-700 font-medium' 
-                      : 'text-gray-700'
-                  }`}>
-                    {sort.label}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </Animated.View>
-          )}
-        </Animated.View>
-      )}
-      
-      {/* Orders List */}
-      {loading && !refreshing ? (
-        <View className="flex-1 items-center justify-center">
-          <ActivityIndicator size="large" color="#4F46E5" />
-          <Text className="mt-3 text-gray-500">Loading orders...</Text>
-        </View>
-      ) : (
-        <FlatList
-          data={filteredOrders}
-          renderItem={({ item }) => renderOrderCard(item)}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={{ padding: 16 }}
-          showsVerticalScrollIndicator={false}
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={onRefresh}
-              colors={['#4F46E5', '#7C3AED']}
-              tintColor="#4F46E5"
-            />
-          }
-          ListEmptyComponent={
-            <View className="items-center justify-center py-8">
-              {error ? (
-                <View className="items-center">
-                  <MaterialIcons name="error-outline" size={48} color="#EF4444" />
-                  <Text className="text-red-500 mt-2 mb-4">{error}</Text>
-                  <TouchableOpacity
-                    onPress={fetchOrders}
-                    className="py-2 px-4 bg-indigo-600 rounded-lg"
-                  >
-                    <Text className="text-white font-medium">Try Again</Text>
-                  </TouchableOpacity>
-                </View>
-              ) : (
-                <View className="items-center max-w-[70%]">
-                  <MaterialIcons name="inbox" size={48} color="#9CA3AF" />
-                  <Text className="text-gray-400 text-center mt-2">
-                    {searchQuery || statusFilter !== 'All'
-                      ? 'No orders match your filters'
-                      : 'No orders found. Create a new order to get started!'}
-                  </Text>
-                  
-                  {(searchQuery || statusFilter !== 'All') && (
-                    <TouchableOpacity
-                      onPress={() => {
-                        setSearchQuery('');
-                        setStatusFilter('All');
-                      }}
-                      className="mt-3 py-2 px-4 bg-gray-200 rounded-lg"
-                    >
-                      <Text className="text-gray-800">Clear Filters</Text>
-                    </TouchableOpacity>
-                  )}
-                </View>
-              )}
+
+              <TouchableOpacity
+                style={{
+                  flex: 1,
+                  paddingVertical: 12,
+                  alignItems: 'center',
+                  backgroundColor: '#EF4444',
+                  borderRadius: 8,
+                }}
+                onPress={() => {
+                  provideFeedback('medium');
+                  deleteOrder();
+                }}
+              >
+                <Text style={{ fontSize: 15, fontWeight: '600', color: 'white' }}>
+                  Delete
+                </Text>
+              </TouchableOpacity>
             </View>
-          }
+          </Animated.View>
+        </TouchableOpacity>
+      </Modal>
+    );
+  };
+
+  // Render all modals
+  const renderModals = () => {
+    return (
+      <>
+        {renderNewOrderModal()}
+        <SupplierProductDisplay
+          visible={selectProductVisible}
+          onClose={() => setSelectProductVisible(false)}
+          products={products}
+          onSelectProduct={addProductToOrder}
+          provideFeedback={provideFeedback}
         />
-      )}
-      
-      {/* Modals */}
-      {renderNewOrderForm()}
-      {renderOrderDetailsModal()}
-      {renderDeleteConfirmationModal()}
-      {renderSelectSupplierModal()}
-      {renderSelectProductModal()}
-      {renderDatePickerModal()}
+        <SupplierDisplay
+          visible={selectSupplierVisible}
+          onClose={() => setSelectSupplierVisible(false)}
+          suppliers={suppliers}
+          onSelectSupplier={selectSupplier}
+          provideFeedback={provideFeedback}
+          navigation={router}
+        />
+        {renderDatePickerModal()}
+        {renderDeleteConfirmationModal()}
+        {renderOrderDetailsModal()}
+      </>
+    );
+  };
+
+  // Update navigation function to redirect to SupplierCatalog instead of empty page
+  const navigateToSupplierProducts = () => {
+    router.push("/stockManager/SupplierCatalog");
+  };
+
+  // Check for items in the cart
+  const checkCartItems = async () => {
+    try {
+      const auth = await import('firebase/auth').then(module => module.getAuth());
+      const currentUser = auth.currentUser;
+
+      if (!currentUser) return;
+
+      const cartRef = collection(db, `stockManager/${currentUser.uid}/supplierCart`);
+      const cartSnapshot = await getDocs(cartRef);
+      setCartItemCount(cartSnapshot.size);
+    } catch (error) {
+      console.error('Error checking cart items:', error);
+    }
+  };
+
+  // Navigate to the supplier cart
+  const navigateToCart = () => {
+    router.push('/stockManager/SupplierCart');
+  };
+
+  // Render content based on active tab
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case 'orders':
+        return (
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ paddingBottom: 100 }}
+            refreshControl={
+              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+            }
+          >
+            {/* Orders Dashboard Cards */}
+            <View style={{ marginBottom: 20 }}>
+              {/* Create New Order Card */}
+              <TouchableOpacity
+                style={{
+                  backgroundColor: 'white',
+                  borderRadius: 16,
+                  padding: 20,
+                  marginBottom: 16,
+                  borderWidth: 1,
+                  borderColor: '#E5E7EB',
+                  shadowColor: '#000',
+                  shadowOffset: { width: 0, height: 1 },
+                  shadowOpacity: 0.05,
+                  shadowRadius: 3,
+                  elevation: 2,
+                }}
+                onPress={() => {
+                  provideFeedback('medium');
+                  setNewOrderVisible(true);
+                }}
+              >
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <View
+                    style={{
+                      width: 56,
+                      height: 56,
+                      borderRadius: 28,
+                      backgroundColor: '#EEF2FF',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      marginRight: 16,
+                    }}
+                  >
+                    <MaterialCommunityIcons name="plus-circle" size={28} color="#4F46E5" />
+                  </View>
+
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#111827', marginBottom: 4 }}>
+                      Add New Order
+                    </Text>
+                    <Text style={{ fontSize: 14, color: '#6B7280' }}>
+                      Create a new supplier order
+                    </Text>
+                  </View>
+
+                  <MaterialCommunityIcons name="chevron-right" size={24} color="#9CA3AF" />
+                </View>
+              </TouchableOpacity>
+
+              {/* View All Suppliers Card */}
+              <TouchableOpacity
+                style={{
+                  backgroundColor: 'white',
+                  borderRadius: 16,
+                  padding: 20,
+                  marginBottom: 16,
+                  borderWidth: 1,
+                  borderColor: '#E5E7EB',
+                  shadowColor: '#000',
+                  shadowOffset: { width: 0, height: 1 },
+                  shadowOpacity: 0.05,
+                  shadowRadius: 3,
+                  elevation: 2,
+                }}
+                onPress={() => {
+                  provideFeedback('light');
+                  router.push('/stockManager/AllSuppliers');
+                }}
+              >
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <View
+                    style={{
+                      width: 56,
+                      height: 56,
+                      borderRadius: 28,
+                      backgroundColor: '#F0FDF4',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      marginRight: 16,
+                    }}
+                  >
+                    <MaterialCommunityIcons name="account-group" size={28} color="#059669" />
+                  </View>
+
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#111827', marginBottom: 4 }}>
+                      View All Suppliers
+                    </Text>
+                    <Text style={{ fontSize: 14, color: '#6B7280' }}>
+                      Manage your supplier relationships
+                    </Text>
+                  </View>
+
+                  <MaterialCommunityIcons name="chevron-right" size={24} color="#9CA3AF" />
+                </View>
+              </TouchableOpacity>
+
+              {/* Supplier Products Card */}
+              <TouchableOpacity
+                style={{
+                  backgroundColor: 'white',
+                  borderRadius: 16,
+                  padding: 20,
+                  marginBottom: 16,
+                  borderWidth: 1,
+                  borderColor: '#E5E7EB',
+                  shadowColor: '#000',
+                  shadowOffset: { width: 0, height: 1 },
+                  shadowOpacity: 0.05,
+                  shadowRadius: 3,
+                  elevation: 2,
+                }}
+                onPress={() => {
+                  provideFeedback('light');
+                  navigateToSupplierProducts();
+                }}
+              >
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <View
+                    style={{
+                      width: 56,
+                      height: 56,
+                      borderRadius: 28,
+                      backgroundColor: '#E0F2FE',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      marginRight: 16,
+                    }}
+                  >
+                    <MaterialCommunityIcons name="package-variant-closed" size={28} color="#0284C7" />
+                  </View>
+
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#111827', marginBottom: 4 }}>
+                      Supplier Products
+                    </Text>
+                    <Text style={{ fontSize: 14, color: '#6B7280' }}>
+                      View and manage products from suppliers
+                    </Text>
+                  </View>
+
+                  <MaterialCommunityIcons name="chevron-right" size={24} color="#9CA3AF" />
+                </View>
+              </TouchableOpacity>
+
+              {/* Supplier Chat Card */}
+              <TouchableOpacity
+                style={{
+                  backgroundColor: 'white',
+                  borderRadius: 16,
+                  padding: 20,
+                  marginBottom: 16,
+                  borderWidth: 1,
+                  borderColor: '#E5E7EB',
+                  shadowColor: '#000',
+                  shadowOffset: { width: 0, height: 1 },
+                  shadowOpacity: 0.05,
+                  shadowRadius: 3,
+                  elevation: 2,
+                }}
+                onPress={() => {
+                  provideFeedback('light');
+                  router.push('/suplier/systemChat');
+                }}
+              >
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <View
+                    style={{
+                      width: 56,
+                      height: 56,
+                      borderRadius: 28,
+                      backgroundColor: '#FCE7F3',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      marginRight: 16,
+                    }}
+                  >
+                    <MaterialCommunityIcons name="chat-processing" size={28} color="#DB2777" />
+                  </View>
+
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#111827', marginBottom: 4 }}>
+                      Supplier Communication
+                    </Text>
+                    <Text style={{ fontSize: 14, color: '#6B7280' }}>
+                      Chat and message with your suppliers
+                    </Text>
+                  </View>
+
+                  <MaterialCommunityIcons name="chevron-right" size={24} color="#9CA3AF" />
+                </View>
+              </TouchableOpacity>
+
+              {/* Supplier Delivery Management Card */}
+              <TouchableOpacity
+                style={{
+                  backgroundColor: 'white',
+                  borderRadius: 16,
+                  padding: 20,
+                  marginBottom: 16,
+                  borderWidth: 1,
+                  borderColor: '#E5E7EB',
+                  shadowColor: '#000',
+                  shadowOffset: { width: 0, height: 1 },
+                  shadowOpacity: 0.05,
+                  shadowRadius: 3,
+                  elevation: 2,
+                }}
+                onPress={() => {
+                  provideFeedback('light');
+                  router.push('/suplier/manageDelivery');
+                }}
+              >
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <View
+                    style={{
+                      width: 56,
+                      height: 56,
+                      borderRadius: 28,
+                      backgroundColor: '#FEF3C7',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      marginRight: 16,
+                    }}
+                  >
+                    <MaterialCommunityIcons name="truck-delivery" size={28} color="#D97706" />
+                  </View>
+
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#111827', marginBottom: 4 }}>
+                      Delivery Management
+                    </Text>
+                    <Text style={{ fontSize: 14, color: '#6B7280' }}>
+                      Track and manage supplier deliveries
+                    </Text>
+                  </View>
+
+                  <MaterialCommunityIcons name="chevron-right" size={24} color="#9CA3AF" />
+                </View>
+              </TouchableOpacity>
+
+              {/* Supplier Performance Analytics Card */}
+              <TouchableOpacity
+                style={{
+                  backgroundColor: 'white',
+                  borderRadius: 16,
+                  padding: 20,
+                  marginBottom: 16,
+                  borderWidth: 1,
+                  borderColor: '#E5E7EB',
+                  shadowColor: '#000',
+                  shadowOffset: { width: 0, height: 1 },
+                  shadowOpacity: 0.05,
+                  shadowRadius: 3,
+                  elevation: 2,
+                }}
+                onPress={() => {
+                  provideFeedback('light');
+                  router.push('/suplier/SPerformanceAnalytics');
+                }}
+              >
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <View
+                    style={{
+                      width: 56,
+                      height: 56,
+                      borderRadius: 28,
+                      backgroundColor: '#EDE9FE',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      marginRight: 16,
+                    }}
+                  >
+                    <MaterialCommunityIcons name="chart-bar" size={28} color="#7C3AED" />
+                  </View>
+
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#111827', marginBottom: 4 }}>
+                      Performance Analytics
+                    </Text>
+                    <Text style={{ fontSize: 14, color: '#6B7280' }}>
+                      View detailed supplier performance metrics
+                    </Text>
+                  </View>
+
+                  <MaterialCommunityIcons name="chevron-right" size={24} color="#9CA3AF" />
+                </View>
+              </TouchableOpacity>
+
+              {/* Manage Orders Card */}
+              <TouchableOpacity
+                style={{
+                  backgroundColor: 'white',
+                  borderRadius: 16,
+                  padding: 20,
+                  marginBottom: 16,
+                  borderWidth: 1,
+                  borderColor: '#E5E7EB',
+                  shadowColor: '#000',
+                  shadowOffset: { width: 0, height: 1 },
+                  shadowOpacity: 0.05,
+                  shadowRadius: 3,
+                  elevation: 2,
+                }}
+                onPress={() => {
+                  provideFeedback('light');
+                  router.push('/suplier/manageOrder');
+                }}
+              >
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <View
+                    style={{
+                      width: 56,
+                      height: 56,
+                      borderRadius: 28,
+                      backgroundColor: '#DBEAFE',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      marginRight: 16,
+                    }}
+                  >
+                    <MaterialCommunityIcons name="clipboard-list" size={28} color="#2563EB" />
+                  </View>
+
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#111827', marginBottom: 4 }}>
+                      Manage Orders
+                    </Text>
+                    <Text style={{ fontSize: 14, color: '#6B7280' }}>
+                      Review and manage all supplier orders
+                    </Text>
+                  </View>
+
+                  <MaterialCommunityIcons name="chevron-right" size={24} color="#9CA3AF" />
+                </View>
+              </TouchableOpacity>
+            </View>
+
+            {/* List of orders */}
+            <View>
+              {/* ... existing code for orders list ... */}
+            </View>
+          </ScrollView>
+        );
+      case 'analytics':
+        return (
+          <SupplierAnalytics
+            orders={orders}
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            getStatusColor={getStatusColor}
+            getStatusIcon={getStatusIcon}
+          />
+        );
+      default:
+        return null;
+    }
+  };
+
+  // Header with Cart Button
+  const renderHeader = () => (
+    <View style={{
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingHorizontal: 16,
+      paddingTop: insets.top || 20,
+      paddingBottom: 10,
+      backgroundColor: 'white',
+      borderBottomWidth: 1,
+      borderBottomColor: '#E5E7EB',
+      zIndex: 10,
+    }}>
+      <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#111827' }}>
+        Supplier Management
+      </Text>
+      <TouchableOpacity
+        onPress={navigateToCart}
+        style={{
+          position: 'relative',
+          padding: 6,
+        }}
+      >
+        <Ionicons name="cart-outline" size={28} color="#4F46E5" />
+        {cartItemCount > 0 && (
+          <View style={{
+            position: 'absolute',
+            top: 0,
+            right: 0,
+            backgroundColor: '#EF4444',
+            width: 20,
+            height: 20,
+            borderRadius: 10,
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}>
+            <Text style={{
+              color: 'white',
+              fontSize: 12,
+              fontWeight: 'bold',
+            }}>
+              {cartItemCount > 9 ? '9+' : cartItemCount}
+            </Text>
+          </View>
+        )}
+      </TouchableOpacity>
+    </View>
+  );
+
+  // Main render function
+  return (
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#F3F4F6' }}>
+      <StatusBar barStyle="dark-content" />
+
+      {renderHeader()}
+
+      {/* Tab bar */}
+      <View style={{
+        flexDirection: 'row',
+        backgroundColor: 'white',
+        borderBottomWidth: 1,
+        borderBottomColor: '#E5E7EB',
+        height: 50,
+        position: 'relative',
+      }}>
+        <TouchableOpacity
+          style={{
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: 50,
+          }}
+          onPress={() => setActiveTab('orders')}
+        >
+          <Text style={{
+            fontSize: 16,
+            fontWeight: activeTab === 'orders' ? 'bold' : 'normal',
+            color: activeTab === 'orders' ? '#4F46E5' : '#6B7280',
+          }}>
+            Orders
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={{
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: 50,
+          }}
+          onPress={() => setActiveTab('suppliers')}
+        >
+          <Text style={{
+            fontSize: 16,
+            fontWeight: activeTab === 'suppliers' ? 'bold' : 'normal',
+            color: activeTab === 'suppliers' ? '#4F46E5' : '#6B7280',
+          }}>
+            Suppliers
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={{
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: 50,
+          }}
+          onPress={() => setActiveTab('analytics')}
+        >
+          <Text style={{
+            fontSize: 16,
+            fontWeight: activeTab === 'analytics' ? 'bold' : 'normal',
+            color: activeTab === 'analytics' ? '#4F46E5' : '#6B7280',
+          }}>
+            Analytics
+          </Text>
+        </TouchableOpacity>
+
+        <Animated.View style={[
+          {
+            position: 'absolute',
+            bottom: 0,
+            width: width / 3,
+            height: 3,
+            backgroundColor: '#4F46E5',
+            borderTopLeftRadius: 3,
+            borderTopRightRadius: 3,
+          },
+          {
+            transform: [{ translateX: tabIndicatorPosition }],
+          }
+        ]} />
+      </View>
+
+      <View style={{ flex: 1, padding: 16 }}>
+        {renderTabContent()}
+      </View>
+
+      {renderModals()}
     </SafeAreaView>
   );
 }
