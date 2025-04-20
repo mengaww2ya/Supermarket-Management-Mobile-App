@@ -70,7 +70,7 @@ const getStatusColor = (status) => {
   }
 };
 
-const OrderCard = ({ order, onPress, onStatusChange }) => {
+const OrderCard = ({ order, onPress }) => {
   // Animation values
   const animation = useSharedValue(0);
 
@@ -104,7 +104,7 @@ const OrderCard = ({ order, onPress, onStatusChange }) => {
   return (
     <AnimatedTouchable
       style={[styles.orderCard, animStyle]}
-      onPress={onPress}
+      onPress={() => onPress(order)}
       activeOpacity={0.97}
     >
       <View style={styles.orderHeader}>
@@ -119,11 +119,6 @@ const OrderCard = ({ order, onPress, onStatusChange }) => {
         </View>
       </View>
 
-      <View style={styles.orderStoreRow}>
-        <Ionicons name="person-outline" size={16} color="#666" />
-        <Text style={styles.orderStore}>Created by Stock Manager</Text>
-      </View>
-
       <View style={styles.orderDetailRow}>
         <View style={styles.orderDetailItem}>
           <Text style={styles.orderDetailLabel}>Items</Text>
@@ -136,41 +131,13 @@ const OrderCard = ({ order, onPress, onStatusChange }) => {
         </View>
       </View>
 
-      <View style={styles.orderItemsPreview}>
-        {order.items && order.items.slice(0, 2).map((item, index) => (
-          <View key={index} style={styles.orderItemRow}>
-            <Text style={styles.orderItemName} numberOfLines={1}>
-              {item.name}
-            </Text>
-            <Text style={styles.orderItemQuantity}>x{item.quantity}</Text>
-            <Text style={styles.orderItemPrice}>{item.price?.toFixed(2) || "0.00"} Birr</Text>
-          </View>
-        ))}
-        {order.items && order.items.length > 2 && (
-          <TouchableOpacity style={styles.viewMoreButton} onPress={onPress}>
-            <Text style={styles.viewMoreText}>+{order.items.length - 2} more items</Text>
-          </TouchableOpacity>
-        )}
-      </View>
-
-      <View style={styles.orderActions}>
-        <TouchableOpacity
-          style={[styles.actionButton, { backgroundColor: '#EFF6FF' }]}
-          onPress={() => onStatusChange(order.id, 'next')}
-          disabled={order.status === 'Delivered' || order.status === 'Cancelled'}
-        >
-          <Feather name="arrow-right-circle" size={16} color={order.status === 'Delivered' || order.status === 'Cancelled' ? '#BFDBFE' : '#3B82F6'} />
-          <Text style={[styles.actionButtonText, { color: order.status === 'Delivered' || order.status === 'Cancelled' ? '#BFDBFE' : '#3B82F6' }]}>Next Stage</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.actionButton, { backgroundColor: '#FEF2F2' }]}
-          onPress={() => onStatusChange(order.id, 'cancel')}
-          disabled={order.status === 'Cancelled' || order.status === 'Delivered'}
-        >
-          <Feather name="x-circle" size={16} color={order.status === 'Cancelled' || order.status === 'Delivered' ? '#FCA5A5' : '#EF4444'} />
-          <Text style={[styles.actionButtonText, { color: order.status === 'Cancelled' || order.status === 'Delivered' ? '#FCA5A5' : '#EF4444' }]}>Cancel</Text>
-        </TouchableOpacity>
-      </View>
+      <TouchableOpacity
+        style={styles.viewDetailsButton}
+        onPress={() => onPress(order)}
+      >
+        <Text style={styles.viewDetailsText}>View Details</Text>
+        <Ionicons name="chevron-forward" size={18} color="#5E7CE2" />
+      </TouchableOpacity>
     </AnimatedTouchable>
   );
 };
@@ -408,7 +375,7 @@ export default function ManageOrder() {
       return;
     }
 
-    // Set the selected order and show the modal directly
+    // Set the selected order and show the modal
     setSelectedOrder(order);
     setDetailsVisible(true);
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -548,8 +515,7 @@ export default function ManageOrder() {
             renderItem={({ item }) => (
               <OrderCard
                 order={item}
-                onPress={() => handleOrderPress(item)}
-                onStatusChange={handleStatusChange}
+                onPress={handleOrderPress}
               />
             )}
             showsVerticalScrollIndicator={false}
@@ -607,7 +573,7 @@ export default function ManageOrder() {
             }}
             entering={SlideInDown.springify().damping(15)}
           >
-            {/* Header */}
+            {/* Modal Header with Title */}
             <View style={{
               flexDirection: 'row',
               justifyContent: 'space-between',
@@ -642,15 +608,43 @@ export default function ManageOrder() {
                 style={{ padding: 16 }}
                 showsVerticalScrollIndicator={false}
               >
+                {/* Order Status Banner */}
+                <View style={{
+                  backgroundColor: getStatusColor(selectedOrder.status).bg,
+                  padding: 12,
+                  borderRadius: 12,
+                  marginBottom: 16,
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'space-between'
+                }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    {selectedOrder.status === 'Pending' && <Ionicons name="time-outline" size={24} color={getStatusColor(selectedOrder.status).text} />}
+                    {selectedOrder.status === 'Processing' && <Ionicons name="construct-outline" size={24} color={getStatusColor(selectedOrder.status).text} />}
+                    {selectedOrder.status === 'Shipped' && <Ionicons name="car-outline" size={24} color={getStatusColor(selectedOrder.status).text} />}
+                    {selectedOrder.status === 'Delivered' && <Ionicons name="checkmark-circle-outline" size={24} color={getStatusColor(selectedOrder.status).text} />}
+                    {selectedOrder.status === 'Cancelled' && <Ionicons name="close-circle-outline" size={24} color={getStatusColor(selectedOrder.status).text} />}
+                    <Text style={{
+                      fontSize: 16,
+                      fontWeight: 'bold',
+                      color: getStatusColor(selectedOrder.status).text,
+                      marginLeft: 8
+                    }}>
+                      {selectedOrder.status}
+                    </Text>
+                  </View>
+
+                  <Text style={{
+                    color: getStatusColor(selectedOrder.status).text,
+                    fontSize: 14
+                  }}>
+                    Order #{selectedOrder.orderNumber || selectedOrder.id.substring(0, 8)}
+                  </Text>
+                </View>
+
                 {/* Order ID and Status */}
                 <View style={styles.detailsSection}>
                   <Text style={styles.detailsSectionTitle}>Order Information</Text>
-                  <View style={styles.detailsRow}>
-                    <Text style={styles.detailsLabel}>Order Number:</Text>
-                    <Text style={styles.detailsValue}>
-                      {selectedOrder.orderNumber || `#${selectedOrder.id.substring(0, 8)}`}
-                    </Text>
-                  </View>
                   <View style={styles.detailsRow}>
                     <Text style={styles.detailsLabel}>Order Date:</Text>
                     <Text style={styles.detailsValue}>
@@ -661,17 +655,7 @@ export default function ManageOrder() {
                       })}
                     </Text>
                   </View>
-                  <View style={styles.detailsRow}>
-                    <Text style={styles.detailsLabel}>Status:</Text>
-                    <View style={[
-                      styles.detailsStatusBadge,
-                      { backgroundColor: getStatusColor(selectedOrder.status).bg }
-                    ]}>
-                      <Text style={{ color: getStatusColor(selectedOrder.status).text }}>
-                        {selectedOrder.status}
-                      </Text>
-                    </View>
-                  </View>
+
                   {selectedOrder.supplierName && (
                     <View style={styles.detailsRow}>
                       <Text style={styles.detailsLabel}>Supplier:</Text>
@@ -776,26 +760,6 @@ export default function ManageOrder() {
                         <Text style={styles.detailsValue}>{selectedOrder.payment.tx_ref}</Text>
                       </View>
                     )}
-                  </View>
-                )}
-
-                {/* Order History */}
-                {selectedOrder.orderHistory && selectedOrder.orderHistory.length > 0 && (
-                  <View style={styles.detailsSection}>
-                    <Text style={styles.detailsSectionTitle}>Order History</Text>
-                    {selectedOrder.orderHistory.map((historyItem, index) => (
-                      <View key={index} style={styles.historyItem}>
-                        <View style={styles.historyItemHeader}>
-                          <Text style={styles.historyItemStatus}>{historyItem.status}</Text>
-                          <Text style={styles.historyItemDate}>
-                            {new Date(historyItem.timestamp).toLocaleString()}
-                          </Text>
-                        </View>
-                        {historyItem.note && (
-                          <Text style={styles.historyItemNote}>{historyItem.note}</Text>
-                        )}
-                      </View>
-                    ))}
                   </View>
                 )}
 
@@ -1013,323 +977,291 @@ export default function ManageOrder() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#F9FAFB',
   },
   header: {
+    backgroundColor: 'white',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E7EB',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingVertical: 15,
-    backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
-  },
-  backButton: {
-    padding: 5,
   },
   headerTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#333',
+    color: '#1F2937',
+  },
+  headerButton: {
+    padding: 8,
   },
   statsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingVertical: 16,
-    backgroundColor: '#fff',
+    backgroundColor: 'white',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+    zIndex: 10,
   },
   statCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 10,
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
   },
   statIconBg: {
     width: 40,
     height: 40,
-    borderRadius: 8,
+    borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 12,
+    marginRight: 8,
   },
   statValue: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: 'bold',
-    color: '#333',
+    color: '#1F2937',
   },
   statLabel: {
     fontSize: 12,
-    color: '#666',
+    color: '#6B7280',
   },
-  // Search and Filter
   searchContainer: {
     flexDirection: 'row',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
     alignItems: 'center',
+    padding: 16,
+    backgroundColor: 'white',
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E7EB',
   },
   searchInputContainer: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f5f5f5',
-    borderRadius: 10,
+    backgroundColor: '#F3F4F6',
+    borderRadius: 8,
     paddingHorizontal: 12,
-    marginRight: 10,
-    height: 42,
+    height: 40,
   },
   searchIcon: {
     marginRight: 8,
   },
   searchInput: {
     flex: 1,
-    height: 40,
     fontSize: 15,
-    color: '#333',
+    color: '#4B5563',
   },
   filterButton: {
-    width: 42,
-    height: 42,
-    borderRadius: 10,
-    backgroundColor: '#f0f4fd',
+    width: 40,
+    height: 40,
+    borderRadius: 8,
+    backgroundColor: '#EEF2FF',
     justifyContent: 'center',
     alignItems: 'center',
-    position: 'relative',
+    marginLeft: 8,
+    borderWidth: 1,
+    borderColor: '#E0E7FF',
   },
   filterActiveIndicator: {
     position: 'absolute',
-    top: 8,
-    right: 8,
+    top: 10,
+    right: 10,
     width: 8,
     height: 8,
     borderRadius: 4,
     backgroundColor: '#5E7CE2',
   },
-  // Active filter indicator
   activeFilterContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 8,
-    backgroundColor: '#fff',
+    backgroundColor: '#F9FAFB',
   },
   activeFilterLabel: {
     fontSize: 14,
-    color: '#666',
+    color: '#6B7280',
     marginRight: 8,
   },
   activeFilterChip: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#EBF2FF',
+    backgroundColor: '#EEF2FF',
     paddingHorizontal: 12,
-    paddingVertical: 6,
+    paddingVertical: 4,
     borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#E0E7FF',
   },
   activeFilterChipText: {
     fontSize: 13,
     color: '#5E7CE2',
-    marginRight: 8,
+    marginRight: 6,
   },
-  // Order List
   orderListContainer: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#F3F4F6',
   },
   orderList: {
     padding: 16,
+    paddingBottom: 80,
   },
   orderCard: {
-    backgroundColor: '#fff',
+    backgroundColor: 'white',
     borderRadius: 12,
-    marginBottom: 16,
-    padding: 16,
+    marginBottom: 12,
+    overflow: 'hidden',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
     elevation: 2,
-    borderWidth: 1,
-    borderColor: '#f0f0f0',
   },
   orderHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 12,
+    alignItems: 'center',
+    padding: 16,
+    paddingBottom: 12,
   },
   orderId: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#333',
+    color: '#1F2937',
+    marginBottom: 4,
   },
   orderDate: {
     fontSize: 13,
-    color: '#666',
-    marginTop: 2,
+    color: '#6B7280',
   },
   statusBadge: {
     paddingHorizontal: 10,
-    paddingVertical: 5,
+    paddingVertical: 4,
     borderRadius: 12,
   },
   statusText: {
     fontSize: 12,
     fontWeight: '500',
   },
-  orderStoreRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  orderStore: {
-    fontSize: 14,
-    color: '#666',
-    marginLeft: 8,
-  },
   orderDetailRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 12,
-    borderTopWidth: 1,
-    borderTopColor: '#f0f0f0',
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
-    marginBottom: 12,
+    paddingHorizontal: 16,
+    paddingBottom: 12,
   },
   orderDetailItem: {
     flex: 1,
-    alignItems: 'center',
-  },
-  orderDetailDivider: {
-    width: 1,
-    height: 30,
-    backgroundColor: '#f0f0f0',
   },
   orderDetailLabel: {
     fontSize: 12,
-    color: '#999',
-    marginBottom: 4,
+    color: '#6B7280',
+    marginBottom: 2,
   },
   orderDetailValue: {
-    fontSize: 15,
-    fontWeight: 'bold',
-    color: '#333',
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#1F2937',
   },
-  orderItemsPreview: {
-    marginBottom: 12,
+  orderDetailDivider: {
+    width: 1,
+    height: 24,
+    backgroundColor: '#E5E7EB',
+    marginHorizontal: 12,
   },
-  orderItemRow: {
+  viewDetailsButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 8,
-  },
-  orderItemName: {
-    fontSize: 14,
-    color: '#333',
-    flex: 1,
-  },
-  orderItemQuantity: {
-    fontSize: 14,
-    color: '#666',
-    width: 40,
-    textAlign: 'center',
-  },
-  orderItemPrice: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#333',
-    width: 70,
-    textAlign: 'right',
-  },
-  viewMoreButton: {
-    alignSelf: 'flex-start',
-    paddingVertical: 4,
-  },
-  viewMoreText: {
-    fontSize: 13,
-    color: '#5E7CE2',
-  },
-  orderActions: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
     borderTopWidth: 1,
     borderTopColor: '#f0f0f0',
-    paddingTop: 12,
+    backgroundColor: '#f9fafb',
   },
-  actionButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 8,
-    marginLeft: 8,
-  },
-  actionButtonText: {
-    fontSize: 13,
+  viewDetailsText: {
+    fontSize: 14,
     fontWeight: '500',
-    marginLeft: 4,
+    color: '#5E7CE2',
   },
   loaderContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingVertical: 40,
+    padding: 16,
   },
   loaderText: {
+    fontSize: 16,
+    color: '#6B7280',
     marginTop: 12,
-    fontSize: 14,
-    color: '#666',
   },
   emptyContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingVertical: 60,
+    padding: 16,
   },
   emptyTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#333',
-    marginTop: 16,
-    marginBottom: 8,
+    color: '#4B5563',
+    marginTop: 12,
   },
   emptyMessage: {
     fontSize: 14,
-    color: '#666',
+    color: '#6B7280',
+    marginTop: 8,
     textAlign: 'center',
-    paddingHorizontal: 32,
   },
-  // We need to keep these section styles for the modal content
-  detailsSection: {
-    marginBottom: 20,
-    backgroundColor: '#f9fafb',
-    padding: 16,
+  filterCategory: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F3F4F6',
+  },
+  activeFilterCategory: {
+    backgroundColor: '#F9FAFB',
+  },
+  filterCategoryText: {
+    fontSize: 16,
+    color: '#4B5563',
+  },
+  activeFilterCategoryText: {
+    color: '#5E7CE2',
+    fontWeight: '500',
+  },
+  filterBadge: {
+    backgroundColor: '#F3F4F6',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
     borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#f0f0f0',
+  },
+  filterBadgeText: {
+    fontSize: 12,
+    color: '#6B7280',
+  },
+  detailsSection: {
+    backgroundColor: 'white',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
   },
   detailsSectionTitle: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#1e293b',
-    marginBottom: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e5e7eb',
-    paddingBottom: 8,
+    color: '#1F2937',
+    marginBottom: 12,
   },
   detailsRow: {
     flexDirection: 'row',
@@ -1339,56 +1271,45 @@ const styles = StyleSheet.create({
   },
   detailsLabel: {
     fontSize: 14,
-    color: '#64748b',
-    fontWeight: '500',
+    color: '#6B7280',
   },
   detailsValue: {
     fontSize: 14,
-    fontWeight: '600',
-    color: '#334155',
-    maxWidth: '60%',
+    color: '#1F2937',
+    fontWeight: '500',
   },
   detailsTotalValue: {
     fontSize: 16,
+    color: '#1F2937',
     fontWeight: 'bold',
-    color: '#0f172a',
   },
   detailsStatusBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 12,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 6,
   },
   detailsItemCard: {
-    backgroundColor: 'white',
+    backgroundColor: '#F9FAFB',
     borderRadius: 8,
-    padding: 14,
-    marginBottom: 10,
-    borderWidth: 1,
-    borderColor: '#e5e7eb',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 1,
+    padding: 12,
+    marginBottom: 8,
   },
   detailsItemHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f3f4f6',
-    paddingBottom: 8,
+    alignItems: 'center',
+    marginBottom: 8,
   },
   detailsItemName: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#334155',
+    fontSize: 15,
+    fontWeight: '500',
+    color: '#1F2937',
     flex: 1,
   },
   detailsItemPrice: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#334155',
+    fontSize: 15,
+    color: '#1F2937',
+    fontWeight: '500',
   },
   detailsItemDetails: {
     flexDirection: 'row',
@@ -1396,93 +1317,30 @@ const styles = StyleSheet.create({
   },
   detailsItemInfo: {
     fontSize: 13,
-    color: '#64748b',
+    color: '#6B7280',
   },
   detailsActions: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 20,
-    marginBottom: 24,
+    justifyContent: 'center',
+    marginBottom: 16,
   },
   detailsActionButton: {
     flex: 1,
-    paddingVertical: 14,
+    paddingVertical: 12,
     borderRadius: 8,
     alignItems: 'center',
-    marginHorizontal: 5,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  historyItem: {
-    backgroundColor: 'white',
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 10,
-    borderWidth: 1,
-    borderColor: '#e5e7eb',
-  },
-  historyItemHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 6,
-  },
-  historyItemStatus: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#334155',
-    textTransform: 'capitalize',
-  },
-  historyItemDate: {
-    fontSize: 12,
-    color: '#64748b',
-  },
-  historyItemNote: {
-    fontSize: 13,
-    color: '#64748b',
-    marginTop: 6,
-    fontStyle: 'italic',
+    justifyContent: 'center',
+    maxWidth: 180,
   },
   actionButtonContent: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
   },
-  // Filter styles
-  filterCategory: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 14,
-    paddingHorizontal: 16,
-    borderRadius: 10,
-    marginBottom: 10,
-    backgroundColor: '#f9f9fc',
-  },
-  activeFilterCategory: {
-    backgroundColor: '#EBF2FF',
-  },
-  filterCategoryText: {
-    fontSize: 16,
-    color: '#555',
-    fontWeight: '500',
+  detailsModalBody: {
     flex: 1,
-  },
-  activeFilterCategoryText: {
-    color: '#5E7CE2',
-    fontWeight: '600',
-  },
-  filterBadge: {
-    backgroundColor: '#5E7CE2',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
-    marginLeft: 8,
-  },
-  filterBadgeText: {
-    fontSize: 12,
-    fontWeight: 'bold',
-    color: 'white',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 16,
   },
 });

@@ -13,10 +13,11 @@ import {
     Dimensions,
     Alert,
     Modal,
-    ScrollView
+    ScrollView,
+    Platform
 } from 'react-native';
 import { db } from '../../../firebase/firebaseConfig';
-import { collection, getDocs, query, where } from 'firebase/firestore';
+import { collection, getDocs, query, where, doc, getDoc } from 'firebase/firestore';
 import { useRouter } from 'expo-router';
 import { useNavigation } from '@react-navigation/native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -29,6 +30,7 @@ import Animated, {
     useSharedValue,
     withTiming
 } from 'react-native-reanimated';
+import { LinearGradient } from 'expo-linear-gradient';
 
 const { width } = Dimensions.get('window');
 
@@ -43,6 +45,7 @@ export default function AllSuppliers() {
     const [filterModalVisible, setFilterModalVisible] = useState(false);
     const [selectedSupplier, setSelectedSupplier] = useState(null);
     const [detailsModalVisible, setDetailsModalVisible] = useState(false);
+    const [loadingSupplierDetails, setLoadingSupplierDetails] = useState(false);
 
     const router = useRouter();
     const navigation = useNavigation();
@@ -58,6 +61,13 @@ export default function AllSuppliers() {
     useEffect(() => {
         applyFilters();
     }, [suppliers, searchQuery, filterBy, sortBy]);
+
+    // Add an effect to fetch complete supplier details when one is selected
+    useEffect(() => {
+        if (selectedSupplier && selectedSupplier.id) {
+            fetchCompleteSupplierDetails(selectedSupplier.id);
+        }
+    }, [selectedSupplier?.id]);
 
     const fetchSuppliers = async () => {
         try {
@@ -95,6 +105,33 @@ export default function AllSuppliers() {
             Alert.alert("Error", "Failed to load suppliers");
         } finally {
             setLoading(false);
+        }
+    };
+
+    // Function to fetch complete supplier details
+    const fetchCompleteSupplierDetails = async (supplierId) => {
+        if (!supplierId) return;
+
+        try {
+            setLoadingSupplierDetails(true);
+            const supplierDocRef = doc(db, 'users', supplierId);
+            const supplierDocSnap = await getDoc(supplierDocRef);
+
+            if (supplierDocSnap.exists()) {
+                // Update the selected supplier with full details
+                setSelectedSupplier({
+                    id: supplierId,
+                    ...supplierDocSnap.data(),
+                });
+                console.log("Supplier details loaded successfully");
+            } else {
+                console.log("No supplier found with ID:", supplierId);
+            }
+        } catch (error) {
+            console.error("Error fetching supplier details:", error);
+            Alert.alert("Error", "Failed to load supplier details");
+        } finally {
+            setLoadingSupplierDetails(false);
         }
     };
 
@@ -157,40 +194,31 @@ export default function AllSuppliers() {
 
     const navigateToSupplierDetails = (supplier) => {
         provideFeedback('light');
-        Alert.alert(
-            supplier.companyName || 'Supplier Details',
-            `Name: ${supplier.companyName || 'Unnamed Supplier'}\n` +
-            `${supplier.contactPerson ? 'Contact: ' + supplier.contactPerson + '\n' : ''}` +
-            `${supplier.email ? 'Email: ' + supplier.email + '\n' : ''}` +
-            `${supplier.phone ? 'Phone: ' + supplier.phone + '\n' : ''}` +
-            `${supplier.address ? 'Address: ' + supplier.address + '\n' : ''}` +
-            `Orders: ${supplier.ordersCount || 0}\n` +
-            `Product Types: ${Array.isArray(supplier.productType) ?
-                supplier.productType.join(', ') : supplier.productType || 'N/A'}\n` +
-            `Status: ${supplier.active ? 'Active' : 'Inactive'}`,
-            [
-                {
-                    text: "Close",
-                    style: "cancel"
-                },
-                {
-                    text: "View Products",
-                    onPress: () => {
-                        provideFeedback('medium');
-                        router.push({
-                            pathname: "/stockManager/SupplierCatalog",
-                            params: { supplierId: supplier.id }
-                        });
-                    }
-                }
-            ]
-        );
+        // Use the supplier data directly for the modal instead of relying on fetching again
+        setSelectedSupplier({
+            ...supplier,
+            // Add any default values for potentially missing fields
+            active: supplier.active !== undefined ? supplier.active : true,
+            ordersCount: supplier.ordersCount || 0,
+            contactPerson: supplier.contactPerson || '',
+            email: supplier.email || '',
+            phone: supplier.phone || '',
+            address: supplier.address || '',
+            website: supplier.website || '',
+            productType: supplier.productType || [],
+            yearEstablished: supplier.yearEstablished || '',
+            taxId: supplier.taxId || '',
+            paymentTerms: supplier.paymentTerms || '',
+            minOrderQuantity: supplier.minOrderQuantity || '',
+            discountRate: supplier.discountRate || '',
+        });
+        setDetailsModalVisible(true);
     };
 
     const handleAddNewSupplier = () => {
         provideFeedback('medium');
         // Navigate to add supplier page
-        router.push('/admine/manageSuppliers');
+        router.push('/stockManager/manageSuppliers');
     };
 
     const toggleFilterModal = () => {
@@ -336,405 +364,181 @@ export default function AllSuppliers() {
         </Modal>
     );
 
-    const renderSupplierDetailsModal = () => (
-        <Modal
-            visible={detailsModalVisible}
-            transparent={true}
-            animationType="fade"
-            statusBarTranslucent={true}
-            onRequestClose={() => setDetailsModalVisible(false)}
-        >
-            <View style={{
-                flex: 1,
-                backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                justifyContent: 'center',
-                paddingHorizontal: 16,
-            }}>
-                <View style={{
-                    backgroundColor: 'white',
-                    borderRadius: 16,
-                    overflow: 'hidden',
-                    maxHeight: '80%',
-                    width: '100%',
-                }}>
-                    {selectedSupplier && (
-                        <>
+    const renderSupplierDetailsModal = () => {
+        if (!selectedSupplier) return null;
+
+        return (
+            <Modal
+                visible={detailsModalVisible}
+                animationType="slide"
+                transparent={false}
+                onRequestClose={() => setDetailsModalVisible(false)}
+            >
+                <View style={{ flex: 1, backgroundColor: '#f5f5f5' }}>
+                    {/* Basic header */}
+                    <View style={{
+                        backgroundColor: '#4F46E5',
+                        padding: 16,
+                        paddingTop: Platform.OS === 'ios' ? 50 : 20
+                    }}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                            <TouchableOpacity
+                                onPress={() => setDetailsModalVisible(false)}
+                                style={{ padding: 8 }}
+                            >
+                                <Ionicons name="arrow-back" size={24} color="white" />
+                            </TouchableOpacity>
+
+                            <Text style={{ color: 'white', fontSize: 18, fontWeight: 'bold' }}>
+                                Supplier Details
+                            </Text>
+
+                            <TouchableOpacity
+                                onPress={() => {
+                                    if (selectedSupplier) {
+                                        setDetailsModalVisible(false);
+                                        router.push({
+                                            pathname: "/stockManager/SupplierCatalog",
+                                            params: { supplierId: selectedSupplier.id }
+                                        });
+                                    }
+                                }}
+                                style={{ padding: 8 }}
+                            >
+                                <Ionicons name="grid-outline" size={24} color="white" />
+                            </TouchableOpacity>
+                        </View>
+
+                        <View style={{ marginTop: 16, flexDirection: 'row', alignItems: 'center' }}>
                             <View style={{
-                                flexDirection: 'row',
-                                justifyContent: 'space-between',
+                                width: 60,
+                                height: 60,
+                                borderRadius: 30,
+                                backgroundColor: 'white',
                                 alignItems: 'center',
-                                padding: 16,
-                                borderBottomWidth: 1,
-                                borderBottomColor: '#E5E7EB',
+                                justifyContent: 'center',
+                                marginRight: 12
                             }}>
-                                <Text style={{
-                                    fontSize: 18,
-                                    fontWeight: 'bold',
-                                    color: '#111827',
-                                }}>Supplier Details</Text>
-                                <TouchableOpacity
-                                    onPress={() => setDetailsModalVisible(false)}
-                                    style={{ padding: 4 }}
-                                >
-                                    <Ionicons name="close" size={24} color="#6B7280" />
-                                </TouchableOpacity>
+                                <MaterialCommunityIcons name="domain" size={30} color="#9CA3AF" />
                             </View>
 
-                            <ScrollView style={{ maxHeight: '100%' }}>
-                                {/* Supplier Profile */}
-                                <View style={{
-                                    alignItems: 'center',
-                                    padding: 16,
-                                    borderBottomWidth: 1,
-                                    borderBottomColor: '#E5E7EB',
-                                }}>
-                                    <View style={{
-                                        width: 80,
-                                        height: 80,
-                                        borderRadius: 40,
-                                        marginBottom: 12,
-                                        overflow: 'hidden',
-                                        borderWidth: 2,
-                                        borderColor: '#E5E7EB',
-                                    }}>
-                                        {selectedSupplier.photoURL ? (
-                                            <Image
-                                                source={{ uri: selectedSupplier.photoURL }}
-                                                style={{ width: '100%', height: '100%' }}
-                                                resizeMode="cover"
-                                            />
-                                        ) : (
-                                            <View style={{
-                                                width: '100%',
-                                                height: '100%',
-                                                backgroundColor: '#F3F4F6',
-                                                justifyContent: 'center',
-                                                alignItems: 'center',
-                                            }}>
-                                                <MaterialCommunityIcons name="domain" size={36} color="#9CA3AF" />
-                                            </View>
-                                        )}
-                                    </View>
-                                    <Text style={{
-                                        fontSize: 20,
-                                        fontWeight: 'bold',
-                                        color: '#111827',
-                                    }}>{selectedSupplier.companyName || 'Unnamed Supplier'}</Text>
+                            <View>
+                                <Text style={{ color: 'white', fontSize: 20, fontWeight: 'bold' }}>
+                                    {selectedSupplier.companyName || 'Unnamed Supplier'}
+                                </Text>
+                                <Text style={{ color: 'rgba(255,255,255,0.8)', fontSize: 14 }}>
+                                    {selectedSupplier.active ? 'Active Supplier' : 'Inactive Supplier'} • {selectedSupplier.ordersCount || 0} Orders
+                                </Text>
+                            </View>
+                        </View>
+                    </View>
+
+                    {/* Simple content with basic styling */}
+                    <ScrollView style={{ flex: 1 }}>
+                        {/* Contact Information */}
+                        <View style={{ margin: 16, padding: 16, backgroundColor: 'white', borderRadius: 8 }}>
+                            <Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 16 }}>
+                                Contact Information
+                            </Text>
+
+                            <Text style={{ fontSize: 14, color: '#6B7280', marginBottom: 4 }}>Contact Person</Text>
+                            <Text style={{ fontSize: 16, marginBottom: 12 }}>{selectedSupplier.contactPerson || 'Not provided'}</Text>
+
+                            <Text style={{ fontSize: 14, color: '#6B7280', marginBottom: 4 }}>Email</Text>
+                            <Text style={{ fontSize: 16, marginBottom: 12 }}>{selectedSupplier.email || 'Not provided'}</Text>
+
+                            <Text style={{ fontSize: 14, color: '#6B7280', marginBottom: 4 }}>Phone</Text>
+                            <Text style={{ fontSize: 16, marginBottom: 12 }}>{selectedSupplier.phone || 'Not provided'}</Text>
+
+                            <Text style={{ fontSize: 14, color: '#6B7280', marginBottom: 4 }}>Address</Text>
+                            <Text style={{ fontSize: 16, marginBottom: 12 }}>{selectedSupplier.address || 'Not provided'}</Text>
+
+                            <Text style={{ fontSize: 14, color: '#6B7280', marginBottom: 4 }}>Website</Text>
+                            <Text style={{ fontSize: 16 }}>{selectedSupplier.website || 'Not provided'}</Text>
+                        </View>
+
+                        {/* Product Types */}
+                        <View style={{ marginHorizontal: 16, marginBottom: 16, padding: 16, backgroundColor: 'white', borderRadius: 8 }}>
+                            <Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 16 }}>
+                                Product Types
+                            </Text>
+
+                            {Array.isArray(selectedSupplier.productType) && selectedSupplier.productType.length > 0 ? (
+                                <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+                                    {selectedSupplier.productType.map((type, index) => (
+                                        <View key={index} style={{
+                                            backgroundColor: '#F3F4F6',
+                                            borderRadius: 16,
+                                            paddingHorizontal: 12,
+                                            paddingVertical: 6,
+                                            margin: 4
+                                        }}>
+                                            <Text>{type}</Text>
+                                        </View>
+                                    ))}
                                 </View>
-
-                                {/* Contact Information */}
+                            ) : typeof selectedSupplier.productType === 'string' && selectedSupplier.productType ? (
                                 <View style={{
-                                    padding: 16,
-                                    borderBottomWidth: 1,
-                                    borderBottomColor: '#E5E7EB',
+                                    backgroundColor: '#F3F4F6',
+                                    borderRadius: 16,
+                                    paddingHorizontal: 12,
+                                    paddingVertical: 6,
+                                    alignSelf: 'flex-start'
                                 }}>
-                                    <Text style={{
-                                        fontSize: 16,
-                                        fontWeight: 'bold',
-                                        color: '#4B5563',
-                                        marginBottom: 12,
-                                    }}>Contact Information</Text>
-
-                                    {selectedSupplier.contactPerson && (
-                                        <View style={{
-                                            flexDirection: 'row',
-                                            marginBottom: 16,
-                                        }}>
-                                            <View style={{
-                                                width: 36,
-                                                height: 36,
-                                                borderRadius: 18,
-                                                backgroundColor: '#EEF2FF',
-                                                justifyContent: 'center',
-                                                alignItems: 'center',
-                                                marginRight: 12,
-                                            }}>
-                                                <Ionicons name="person" size={20} color="#4F46E5" />
-                                            </View>
-                                            <View style={{
-                                                flex: 1,
-                                                justifyContent: 'center',
-                                            }}>
-                                                <Text style={{
-                                                    fontSize: 14,
-                                                    color: '#6B7280',
-                                                    marginBottom: 2,
-                                                }}>Contact Person</Text>
-                                                <Text style={{
-                                                    fontSize: 16,
-                                                    color: '#111827',
-                                                    fontWeight: '500',
-                                                }}>{selectedSupplier.contactPerson}</Text>
-                                            </View>
-                                        </View>
-                                    )}
-
-                                    {selectedSupplier.email && (
-                                        <View style={{
-                                            flexDirection: 'row',
-                                            marginBottom: 16,
-                                        }}>
-                                            <View style={{
-                                                width: 36,
-                                                height: 36,
-                                                borderRadius: 18,
-                                                backgroundColor: '#EEF2FF',
-                                                justifyContent: 'center',
-                                                alignItems: 'center',
-                                                marginRight: 12,
-                                            }}>
-                                                <Ionicons name="mail" size={20} color="#4F46E5" />
-                                            </View>
-                                            <View style={{
-                                                flex: 1,
-                                                justifyContent: 'center',
-                                            }}>
-                                                <Text style={{
-                                                    fontSize: 14,
-                                                    color: '#6B7280',
-                                                    marginBottom: 2,
-                                                }}>Email</Text>
-                                                <Text style={{
-                                                    fontSize: 16,
-                                                    color: '#111827',
-                                                    fontWeight: '500',
-                                                }}>{selectedSupplier.email}</Text>
-                                            </View>
-                                        </View>
-                                    )}
-
-                                    {selectedSupplier.phone && (
-                                        <View style={{
-                                            flexDirection: 'row',
-                                            marginBottom: 16,
-                                        }}>
-                                            <View style={{
-                                                width: 36,
-                                                height: 36,
-                                                borderRadius: 18,
-                                                backgroundColor: '#EEF2FF',
-                                                justifyContent: 'center',
-                                                alignItems: 'center',
-                                                marginRight: 12,
-                                            }}>
-                                                <Ionicons name="call" size={20} color="#4F46E5" />
-                                            </View>
-                                            <View style={{
-                                                flex: 1,
-                                                justifyContent: 'center',
-                                            }}>
-                                                <Text style={{
-                                                    fontSize: 14,
-                                                    color: '#6B7280',
-                                                    marginBottom: 2,
-                                                }}>Phone</Text>
-                                                <Text style={{
-                                                    fontSize: 16,
-                                                    color: '#111827',
-                                                    fontWeight: '500',
-                                                }}>{selectedSupplier.phone}</Text>
-                                            </View>
-                                        </View>
-                                    )}
-
-                                    {selectedSupplier.address && (
-                                        <View style={{
-                                            flexDirection: 'row',
-                                            marginBottom: 16,
-                                        }}>
-                                            <View style={{
-                                                width: 36,
-                                                height: 36,
-                                                borderRadius: 18,
-                                                backgroundColor: '#EEF2FF',
-                                                justifyContent: 'center',
-                                                alignItems: 'center',
-                                                marginRight: 12,
-                                            }}>
-                                                <Ionicons name="location" size={20} color="#4F46E5" />
-                                            </View>
-                                            <View style={{
-                                                flex: 1,
-                                                justifyContent: 'center',
-                                            }}>
-                                                <Text style={{
-                                                    fontSize: 14,
-                                                    color: '#6B7280',
-                                                    marginBottom: 2,
-                                                }}>Address</Text>
-                                                <Text style={{
-                                                    fontSize: 16,
-                                                    color: '#111827',
-                                                    fontWeight: '500',
-                                                }}>{selectedSupplier.address}</Text>
-                                            </View>
-                                        </View>
-                                    )}
+                                    <Text>{selectedSupplier.productType}</Text>
                                 </View>
+                            ) : (
+                                <Text>No product types specified</Text>
+                            )}
+                        </View>
 
-                                {/* Business Information */}
-                                <View style={{
+                        {/* Business Information */}
+                        <View style={{ marginHorizontal: 16, marginBottom: 16, padding: 16, backgroundColor: 'white', borderRadius: 8 }}>
+                            <Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 16 }}>
+                                Business Information
+                            </Text>
+
+                            <Text style={{ fontSize: 14, color: '#6B7280', marginBottom: 4 }}>Year Established</Text>
+                            <Text style={{ fontSize: 16, marginBottom: 12 }}>{selectedSupplier.yearEstablished || 'Not provided'}</Text>
+
+                            <Text style={{ fontSize: 14, color: '#6B7280', marginBottom: 4 }}>Tax ID</Text>
+                            <Text style={{ fontSize: 16, marginBottom: 12 }}>{selectedSupplier.taxId || 'Not provided'}</Text>
+
+                            <Text style={{ fontSize: 14, color: '#6B7280', marginBottom: 4 }}>Payment Terms</Text>
+                            <Text style={{ fontSize: 16, marginBottom: 12 }}>{selectedSupplier.paymentTerms || 'Not provided'}</Text>
+
+                            <Text style={{ fontSize: 14, color: '#6B7280', marginBottom: 4 }}>Minimum Order Quantity</Text>
+                            <Text style={{ fontSize: 16, marginBottom: 12 }}>{selectedSupplier.minOrderQuantity || 'Not provided'}</Text>
+
+                            <Text style={{ fontSize: 14, color: '#6B7280', marginBottom: 4 }}>Discount Rate</Text>
+                            <Text style={{ fontSize: 16 }}>{selectedSupplier.discountRate ? `${selectedSupplier.discountRate}%` : 'Not provided'}</Text>
+                        </View>
+
+                        {/* Action Button */}
+                        <View style={{ margin: 16, marginBottom: 32 }}>
+                            <TouchableOpacity
+                                style={{
+                                    backgroundColor: '#4F46E5',
                                     padding: 16,
-                                    borderBottomWidth: 1,
-                                    borderBottomColor: '#E5E7EB',
-                                }}>
-                                    <Text style={{
-                                        fontSize: 16,
-                                        fontWeight: 'bold',
-                                        color: '#4B5563',
-                                        marginBottom: 12,
-                                    }}>Business Information</Text>
-
-                                    {selectedSupplier.productType && (
-                                        <View style={{
-                                            flexDirection: 'row',
-                                            marginBottom: 16,
-                                        }}>
-                                            <View style={{
-                                                width: 36,
-                                                height: 36,
-                                                borderRadius: 18,
-                                                backgroundColor: '#EEF2FF',
-                                                justifyContent: 'center',
-                                                alignItems: 'center',
-                                                marginRight: 12,
-                                            }}>
-                                                <MaterialIcons name="category" size={20} color="#4F46E5" />
-                                            </View>
-                                            <View style={{
-                                                flex: 1,
-                                                justifyContent: 'center',
-                                            }}>
-                                                <Text style={{
-                                                    fontSize: 14,
-                                                    color: '#6B7280',
-                                                    marginBottom: 2,
-                                                }}>Product Types</Text>
-                                                <Text style={{
-                                                    fontSize: 16,
-                                                    color: '#111827',
-                                                    fontWeight: '500',
-                                                }}>
-                                                    {Array.isArray(selectedSupplier.productType)
-                                                        ? selectedSupplier.productType.join(', ')
-                                                        : selectedSupplier.productType}
-                                                </Text>
-                                            </View>
-                                        </View>
-                                    )}
-
-                                    <View style={{
-                                        flexDirection: 'row',
-                                        marginBottom: 16,
-                                    }}>
-                                        <View style={{
-                                            width: 36,
-                                            height: 36,
-                                            borderRadius: 18,
-                                            backgroundColor: '#EEF2FF',
-                                            justifyContent: 'center',
-                                            alignItems: 'center',
-                                            marginRight: 12,
-                                        }}>
-                                            <MaterialIcons name="shopping-bag" size={20} color="#4F46E5" />
-                                        </View>
-                                        <View style={{
-                                            flex: 1,
-                                            justifyContent: 'center',
-                                        }}>
-                                            <Text style={{
-                                                fontSize: 14,
-                                                color: '#6B7280',
-                                                marginBottom: 2,
-                                            }}>Orders</Text>
-                                            <Text style={{
-                                                fontSize: 16,
-                                                color: '#111827',
-                                                fontWeight: '500',
-                                            }}>{selectedSupplier.ordersCount || 0}</Text>
-                                        </View>
-                                    </View>
-
-                                    {selectedSupplier.active !== undefined && (
-                                        <View style={{
-                                            flexDirection: 'row',
-                                            marginBottom: 16,
-                                        }}>
-                                            <View style={{
-                                                width: 36,
-                                                height: 36,
-                                                borderRadius: 18,
-                                                backgroundColor: '#EEF2FF',
-                                                justifyContent: 'center',
-                                                alignItems: 'center',
-                                                marginRight: 12,
-                                            }}>
-                                                <MaterialIcons
-                                                    name="verified"
-                                                    size={20}
-                                                    color={selectedSupplier.active ? "#10B981" : "#6B7280"}
-                                                />
-                                            </View>
-                                            <View style={{
-                                                flex: 1,
-                                                justifyContent: 'center',
-                                            }}>
-                                                <Text style={{
-                                                    fontSize: 14,
-                                                    color: '#6B7280',
-                                                    marginBottom: 2,
-                                                }}>Status</Text>
-                                                <Text style={{
-                                                    fontSize: 16,
-                                                    color: selectedSupplier.active ? "#10B981" : "#6B7280",
-                                                    fontWeight: '500',
-                                                }}>
-                                                    {selectedSupplier.active ? "Active" : "Inactive"}
-                                                </Text>
-                                            </View>
-                                        </View>
-                                    )}
-                                </View>
-
-                                {/* Action Buttons */}
-                                <View style={{
-                                    padding: 16,
-                                    flexDirection: 'row',
-                                    justifyContent: 'center',
-                                }}>
-                                    <TouchableOpacity
-                                        style={{
-                                            backgroundColor: '#4F46E5',
-                                            paddingVertical: 12,
-                                            paddingHorizontal: 24,
-                                            borderRadius: 8,
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            width: '100%',
-                                        }}
-                                        onPress={() => {
-                                            setDetailsModalVisible(false);
-                                            provideFeedback('medium');
-                                            router.push({
-                                                pathname: "/stockManager/SupplierCatalog",
-                                                params: { supplierId: selectedSupplier.id }
-                                            });
-                                        }}
-                                    >
-                                        <Text style={{
-                                            color: 'white',
-                                            fontWeight: 'bold',
-                                            fontSize: 16,
-                                        }}>View Products</Text>
-                                    </TouchableOpacity>
-                                </View>
-                            </ScrollView>
-                        </>
-                    )}
+                                    borderRadius: 8,
+                                    alignItems: 'center'
+                                }}
+                                onPress={() => {
+                                    setDetailsModalVisible(false);
+                                    router.push({
+                                        pathname: "/stockManager/SupplierCatalog",
+                                        params: { supplierId: selectedSupplier.id }
+                                    });
+                                }}
+                            >
+                                <Text style={{ color: 'white', fontWeight: 'bold' }}>View Supplier Products</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </ScrollView>
                 </View>
-            </View>
-        </Modal>
-    );
+            </Modal>
+        );
+    };
 
     const headerAnimatedStyle = useAnimatedStyle(() => {
         return {
@@ -1117,13 +921,24 @@ const styles = StyleSheet.create({
     },
     infoRow: {
         flexDirection: 'row',
-        alignItems: 'center',
-        marginTop: 4,
+        alignItems: 'flex-start',
+        marginBottom: 16,
     },
-    infoText: {
+    infoIcon: {
+        backgroundColor: '#EEF2FF',
+        padding: 8,
+        borderRadius: 20,
+        marginRight: 12,
+    },
+    infoLabel: {
         fontSize: 13,
         color: '#6B7280',
-        marginLeft: 4,
+        marginBottom: 4,
+    },
+    infoValue: {
+        fontSize: 15,
+        color: '#111827',
+        fontWeight: '500',
     },
     statusRow: {
         flexDirection: 'row',
@@ -1290,28 +1105,9 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         marginBottom: 16,
     },
-    detailsIconContainer: {
-        width: 36,
-        height: 36,
-        borderRadius: 18,
-        backgroundColor: '#EEF2FF',
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginRight: 12,
-    },
     detailsTextContainer: {
         flex: 1,
         justifyContent: 'center',
-    },
-    detailsLabel: {
-        fontSize: 14,
-        color: '#6B7280',
-        marginBottom: 2,
-    },
-    detailsValue: {
-        fontSize: 16,
-        color: '#111827',
-        fontWeight: '500',
     },
     detailsActions: {
         padding: 16,

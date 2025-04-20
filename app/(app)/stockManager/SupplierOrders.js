@@ -24,7 +24,10 @@ import {
     doc,
     updateDoc,
     deleteDoc,
-    Timestamp
+    Timestamp,
+    getDoc,
+    query,
+    where
 } from 'firebase/firestore';
 import { Ionicons, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -36,6 +39,7 @@ import Animated, {
     withTiming,
     withSequence,
     FadeInRight,
+    FadeInDown,
 } from 'react-native-reanimated';
 import { BlurView } from 'expo-blur';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -69,6 +73,13 @@ export default function SupplierOrders() {
     const animationValue = useSharedValue(1);
     const [animatedOrderId, setAnimatedOrderId] = useState(null);
 
+    // Define the animated style at component level
+    const animatedStyle = useAnimatedStyle(() => {
+        return {
+            transform: [{ scale: animationValue.value }]
+        };
+    });
+
     // Stats
     const [stats, setStats] = useState({
         pendingCount: 0,
@@ -87,7 +98,7 @@ export default function SupplierOrders() {
         filterOrders();
     }, [searchQuery, statusFilter, orders]);
 
-    // Function to fetch orders
+    // Function to fetch orders with improved supplier information from users collection
     const fetchOrders = async () => {
         setLoading(true);
         setError(null);
@@ -124,7 +135,45 @@ export default function SupplierOrders() {
                 totalAmount
             });
 
-            setOrders(fetchedOrders);
+            // Fetch supplier details for each order with a supplierId from users collection
+            const ordersWithSupplierDetails = await Promise.all(
+                fetchedOrders.map(async (order) => {
+                    if (order.supplierId) {
+                        try {
+                            // Get supplier details from the users collection where role is 'supplier'
+                            const usersRef = collection(db, 'users');
+                            const q = query(usersRef, where('uid', '==', order.supplierId), where('role', '==', 'supplier'));
+                            const supplierSnapshot = await getDocs(q);
+
+                            if (!supplierSnapshot.empty) {
+                                const supplierData = supplierSnapshot.docs[0].data();
+                                // Create enriched order with supplier details
+                                return {
+                                    ...order,
+                                    supplierName: supplierData.companyName || supplierData.fullName || 'Unknown Supplier',
+                                    supplierDetails: {
+                                        address: supplierData.address || '',
+                                        email: supplierData.email || '',
+                                        phone: supplierData.phone || '',
+                                        website: supplierData.website || '',
+                                        firstName: supplierData.firstName || '',
+                                        lastName: supplierData.lastName || '',
+                                        fullName: supplierData.fullName || '',
+                                        yearEstablished: supplierData.yearEstablished || '',
+                                        productType: supplierData.productType || '',
+                                        status: supplierData.status || ''
+                                    }
+                                };
+                            }
+                        } catch (err) {
+                            console.error(`Error fetching supplier details for order ${order.id}:`, err);
+                        }
+                    }
+                    return order;
+                })
+            );
+
+            setOrders(ordersWithSupplierDetails);
             provideFeedback('success');
         } catch (err) {
             console.error("Error fetching orders:", err);
@@ -198,28 +247,19 @@ export default function SupplierOrders() {
         provideFeedback('light');
 
         // Use a more lightweight animation that won't cause UI freezes
-        animationValue.value = withSequence(
-            withTiming(0.97, { duration: 50 }),
-            withTiming(1, { duration: 100 })
-        );
     };
 
-    // Format currency
+    // Format currency with appropriate formatting - Changed from $ to Birr
     const formatCurrency = (amount) => {
-        return new Intl.NumberFormat('en-US', {
-            style: 'currency',
-            currency: 'USD',
-            minimumFractionDigits: 2
-        }).format(amount || 0);
+        return amount ? `${parseFloat(amount).toFixed(2)} Birr` : '0.00 Birr';
     };
 
-    // Format date
+    // Format date with appropriate formatting
     const formatDate = (date) => {
-        if (!date) return 'Not specified';
-        return format(new Date(date), 'MMM dd, yyyy');
+        return date ? format(date, 'MMM dd, yyyy') : 'N/A';
     };
 
-    // Update order status
+    // Function to update order status
     const updateOrderStatus = async (order, newStatus) => {
         try {
             setLoading(true);
@@ -272,7 +312,7 @@ export default function SupplierOrders() {
         }
     };
 
-    // Delete an order
+    // Function to delete order
     const deleteOrder = async () => {
         if (!orderToDelete) return;
 
@@ -307,7 +347,7 @@ export default function SupplierOrders() {
         }
     };
 
-    // Render order status badge
+    // Render status badge
     const renderStatusBadge = (status) => {
         let bgColor = '';
         let textColor = '';
@@ -337,15 +377,8 @@ export default function SupplierOrders() {
         );
     };
 
-    // Render order card
+    // Render order card - Removed delete and status change buttons
     const renderOrderCard = (order) => {
-        // Use animated style for scale animation
-        const animatedStyle = useAnimatedStyle(() => {
-            return {
-                transform: [{ scale: animationValue.value }]
-            };
-        });
-
         return (
             <Animated.View
                 key={order.id}
@@ -373,7 +406,7 @@ export default function SupplierOrders() {
                                 {order.supplierName || 'Unknown Supplier'}
                             </Text>
                             <Text className="text-xs text-gray-500">
-                                Order #{order.id.substring(0, 8)}
+                                Order #{order.orderNumber || order.supplierOrderRef || order.id.substring(0, 8)}
                             </Text>
                         </View>
                         {renderStatusBadge(order.status)}
@@ -390,7 +423,7 @@ export default function SupplierOrders() {
                                 <MaterialIcons name="shopping-bag" size={18} color="white" />
                             </LinearGradient>
                             <Text className="text-sm text-gray-700">
-                                {order.products?.length || 0} {order.products?.length === 1 ? 'item' : 'items'}
+                                {order.items?.length || order.products?.length || 0} {(order.items?.length || order.products?.length || 0) === 1 ? 'item' : 'items'}
                             </Text>
                         </View>
                         <Text className="text-base font-semibold text-indigo-700">
@@ -415,97 +448,197 @@ export default function SupplierOrders() {
                             </View>
                         )}
                     </View>
-
-                    {order.status !== 'Delivered' && (
-                        <View className="mt-3 flex-row space-x-2">
-                            {order.status === 'Pending' && (
-                                <TouchableOpacity
-                                    onPress={() => updateOrderStatus(order, 'Shipped')}
-                                    className="flex-1 bg-blue-100 py-2 rounded-lg items-center justify-center flex-row space-x-1"
-                                >
-                                    <MaterialIcons name="local-shipping" size={16} color="#1E40AF" />
-                                    <Text className="text-xs font-medium text-blue-800">Mark Shipped</Text>
-                                </TouchableOpacity>
-                            )}
-
-                            {order.status === 'Shipped' && (
-                                <TouchableOpacity
-                                    onPress={() => updateOrderStatus(order, 'Delivered')}
-                                    className="flex-1 bg-green-100 py-2 rounded-lg items-center justify-center flex-row space-x-1"
-                                >
-                                    <MaterialIcons name="check-circle" size={16} color="#166534" />
-                                    <Text className="text-xs font-medium text-green-800">Mark Delivered</Text>
-                                </TouchableOpacity>
-                            )}
-
-                            <TouchableOpacity
-                                onPress={() => {
-                                    setOrderToDelete(order);
-                                    setDeleteConfirmVisible(true);
-                                }}
-                                className="bg-red-100 py-2 px-3 rounded-lg items-center justify-center"
-                            >
-                                <MaterialIcons name="delete" size={16} color="#B91C1C" />
-                            </TouchableOpacity>
-                        </View>
-                    )}
                 </Pressable>
             </Animated.View>
         );
     };
 
-    // Render orders statistics
-    const renderOrderStats = () => {
-        return (
-            <View style={{
+    // Search bar component with enhanced styling
+    const renderSearchBar = () => (
+        <Animated.View
+            entering={FadeInDown.duration(300)}
+            style={{
                 flexDirection: 'row',
                 paddingHorizontal: 16,
                 paddingVertical: 12,
                 backgroundColor: 'white',
-                marginBottom: 12,
+                borderBottomWidth: 1,
+                borderBottomColor: '#E5E7EB',
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 1 },
+                shadowOpacity: 0.05,
+                shadowRadius: 2,
+                elevation: 1,
+                zIndex: 1,
+            }}
+        >
+            <View style={{
+                flex: 1,
+                flexDirection: 'row',
+                alignItems: 'center',
+                backgroundColor: '#F3F4F6',
+                borderRadius: 12,
+                paddingHorizontal: 12,
+                height: 48,
+                borderWidth: 1,
+                borderColor: '#E5E7EB',
             }}>
-                <View style={{
-                    flex: 1,
-                    backgroundColor: '#EFF6FF',
-                    borderRadius: 12,
-                    padding: 12,
-                    marginRight: 8,
-                    alignItems: 'center',
-                }}>
-                    <Text style={{ color: '#2563EB', fontSize: 12, fontWeight: '600' }}>Pending</Text>
-                    <Text style={{ color: '#1E40AF', fontSize: 20, fontWeight: 'bold', marginTop: 4 }}>
-                        {stats.pendingCount}
-                    </Text>
-                </View>
-
-                <View style={{
-                    flex: 1,
-                    backgroundColor: '#FEF3C7',
-                    borderRadius: 12,
-                    padding: 12,
-                    marginHorizontal: 4,
-                    alignItems: 'center',
-                }}>
-                    <Text style={{ color: '#D97706', fontSize: 12, fontWeight: '600' }}>Shipped</Text>
-                    <Text style={{ color: '#92400E', fontSize: 20, fontWeight: 'bold', marginTop: 4 }}>
-                        {stats.shippedCount}
-                    </Text>
-                </View>
-
-                <View style={{
-                    flex: 1,
-                    backgroundColor: '#ECFDF5',
-                    borderRadius: 12,
-                    padding: 12,
-                    marginLeft: 8,
-                    alignItems: 'center',
-                }}>
-                    <Text style={{ color: '#059669', fontSize: 12, fontWeight: '600' }}>Delivered</Text>
-                    <Text style={{ color: '#065F46', fontSize: 20, fontWeight: 'bold', marginTop: 4 }}>
-                        {stats.deliveredCount}
-                    </Text>
-                </View>
+                <Ionicons name="search" size={20} color="#6B7280" />
+                <TextInput
+                    placeholder="Search orders..."
+                    placeholderTextColor="#6B7280"
+                    value={searchQuery}
+                    onChangeText={setSearchQuery}
+                    style={{
+                        flex: 1,
+                        height: '100%',
+                        fontSize: 16,
+                        color: '#1F2937',
+                        marginLeft: 8,
+                        fontWeight: '400',
+                    }}
+                />
+                {searchQuery ? (
+                    <TouchableOpacity onPress={() => setSearchQuery('')}>
+                        <Ionicons name="close-circle" size={20} color="#6B7280" />
+                    </TouchableOpacity>
+                ) : null}
             </View>
+
+            {/* Filter icon next to search input */}
+            <TouchableOpacity
+                onPress={() => setFilterVisible(true)}
+                style={{
+                    width: 48,
+                    height: 48,
+                    borderRadius: 12,
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    backgroundColor: '#4F46E5',
+                    marginLeft: 10,
+                    shadowColor: '#4338CA',
+                    shadowOffset: { width: 0, height: 1 },
+                    shadowOpacity: 0.1,
+                    shadowRadius: 2,
+                    elevation: 1,
+                }}
+            >
+                <Ionicons name="filter" size={20} color="white" />
+            </TouchableOpacity>
+        </Animated.View>
+    );
+
+    // Render orders statistics with enhanced styling
+    const renderOrderStats = () => {
+        return (
+            <Animated.View
+                entering={FadeInDown.delay(100).duration(300)}
+                style={{
+                    paddingHorizontal: 16,
+                    paddingVertical: 16,
+                    marginBottom: 12,
+                }}
+            >
+                <View style={{
+                    flexDirection: 'row',
+                    marginBottom: 4
+                }}>
+                    <Text style={{
+                        fontSize: 16,
+                        fontWeight: '600',
+                        color: '#1F2937',
+                        marginLeft: 4
+                    }}>
+                        Order Statistics
+                    </Text>
+                </View>
+
+                <View style={{ flexDirection: 'row' }}>
+                    <View style={{
+                        flex: 1,
+                        backgroundColor: '#EFF6FF',
+                        borderRadius: 16,
+                        padding: 14,
+                        marginRight: 8,
+                        alignItems: 'center',
+                        shadowColor: '#3B82F6',
+                        shadowOffset: { width: 0, height: 1 },
+                        shadowOpacity: 0.05,
+                        shadowRadius: 2,
+                        elevation: 1,
+                        borderWidth: 1,
+                        borderColor: 'rgba(59, 130, 246, 0.1)',
+                    }}>
+                        <Text style={{ color: '#2563EB', fontSize: 13, fontWeight: '600', marginBottom: 4 }}>Pending</Text>
+                        <Text style={{
+                            color: '#1E40AF',
+                            fontSize: 22,
+                            fontWeight: 'bold',
+                            textShadowColor: 'rgba(30, 64, 175, 0.1)',
+                            textShadowOffset: { width: 0, height: 1 },
+                            textShadowRadius: 2,
+                        }}>
+                            {stats.pendingCount}
+                        </Text>
+                    </View>
+
+                    <View style={{
+                        flex: 1,
+                        backgroundColor: '#FEF3C7',
+                        borderRadius: 16,
+                        padding: 14,
+                        marginHorizontal: 4,
+                        alignItems: 'center',
+                        shadowColor: '#D97706',
+                        shadowOffset: { width: 0, height: 1 },
+                        shadowOpacity: 0.05,
+                        shadowRadius: 2,
+                        elevation: 1,
+                        borderWidth: 1,
+                        borderColor: 'rgba(217, 119, 6, 0.1)',
+                    }}>
+                        <Text style={{ color: '#D97706', fontSize: 13, fontWeight: '600', marginBottom: 4 }}>Shipped</Text>
+                        <Text style={{
+                            color: '#92400E',
+                            fontSize: 22,
+                            fontWeight: 'bold',
+                            textShadowColor: 'rgba(146, 64, 14, 0.1)',
+                            textShadowOffset: { width: 0, height: 1 },
+                            textShadowRadius: 2,
+                        }}>
+                            {stats.shippedCount}
+                        </Text>
+                    </View>
+
+                    <View style={{
+                        flex: 1,
+                        backgroundColor: '#ECFDF5',
+                        borderRadius: 16,
+                        padding: 14,
+                        marginLeft: 8,
+                        alignItems: 'center',
+                        shadowColor: '#059669',
+                        shadowOffset: { width: 0, height: 1 },
+                        shadowOpacity: 0.05,
+                        shadowRadius: 2,
+                        elevation: 1,
+                        borderWidth: 1,
+                        borderColor: 'rgba(5, 150, 105, 0.1)',
+                    }}>
+                        <Text style={{ color: '#059669', fontSize: 13, fontWeight: '600', marginBottom: 4 }}>Delivered</Text>
+                        <Text style={{
+                            color: '#065F46',
+                            fontSize: 22,
+                            fontWeight: 'bold',
+                            textShadowColor: 'rgba(6, 95, 70, 0.1)',
+                            textShadowOffset: { width: 0, height: 1 },
+                            textShadowRadius: 2,
+                        }}>
+                            {stats.deliveredCount}
+                        </Text>
+                    </View>
+                </View>
+            </Animated.View>
         );
     };
 
@@ -615,7 +748,7 @@ export default function SupplierOrders() {
         );
     };
 
-    // Order details modal
+    // Render order details modal with enhanced styling and interactivity
     const renderOrderDetailsModal = () => {
         if (!selectedOrder) return null;
 
@@ -675,195 +808,431 @@ export default function SupplierOrders() {
             }
         };
 
+        // Get the items from either order.products or order.items, depending on what is available
+        const orderItems = selectedOrder.items || selectedOrder.products || [];
+
         return (
             <Modal
                 visible={orderDetailsVisible}
                 animationType="slide"
-                transparent={true}
+                transparent={false}
                 onRequestClose={() => {
+                    provideFeedback('light');
                     setOrderDetailsVisible(false);
                     setSelectedOrder(null);
                 }}
             >
-                <BlurView
-                    intensity={20}
-                    style={{
-                        position: 'absolute',
-                        width: '100%',
-                        height: '100%',
-                    }}
-                />
-
-                <View style={{ flex: 1 }}>
-                    <View
+                <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
+                    {/* Header */}
+                    <LinearGradient
+                        colors={['#4F46E5', '#7C3AED']}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 0 }}
                         style={{
-                            backgroundColor: 'white',
-                            borderTopLeftRadius: 24,
-                            borderTopRightRadius: 24,
-                            paddingTop: 16,
-                            paddingBottom: Math.max(20, insets.bottom),
-                            marginTop: 80,
-                            flex: 1,
-                            shadowColor: '#000',
-                            shadowOffset: { width: 0, height: -5 },
-                            shadowOpacity: 0.1,
-                            shadowRadius: 6,
-                            elevation: 5,
-                        }}
-                    >
-                        {/* Header */}
-                        <View style={{
                             flexDirection: 'row',
                             justifyContent: 'space-between',
                             alignItems: 'center',
-                            borderBottomWidth: 1,
-                            borderBottomColor: '#E5E7EB',
                             paddingHorizontal: 20,
-                            paddingBottom: 16,
+                            paddingVertical: 16,
+                            borderBottomWidth: 1,
+                            borderBottomColor: 'rgba(255,255,255,0.1)',
+                        }}
+                    >
+                        <TouchableOpacity
+                            style={{
+                                width: 40,
+                                height: 40,
+                                borderRadius: 20,
+                                backgroundColor: 'rgba(255,255,255,0.2)',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                            }}
+                            onPress={() => {
+                                provideFeedback('light');
+                                setOrderDetailsVisible(false);
+                                setSelectedOrder(null);
+                            }}
+                        >
+                            <Ionicons name="close" size={22} color="white" />
+                        </TouchableOpacity>
+
+                        <Text style={{
+                            fontSize: 18,
+                            fontWeight: 'bold',
+                            color: 'white',
+                            textShadowColor: 'rgba(0,0,0,0.1)',
+                            textShadowOffset: { width: 1, height: 1 },
+                            textShadowRadius: 3,
                         }}>
-                            <TouchableOpacity
-                                style={{
-                                    width: 40,
-                                    height: 40,
-                                    justifyContent: 'center',
-                                    alignItems: 'center',
-                                }}
-                                onPress={() => {
-                                    provideFeedback('light');
-                                    setOrderDetailsVisible(false);
-                                    setSelectedOrder(null);
-                                }}
-                            >
-                                <Ionicons name="close" size={24} color="#6B7280" />
-                            </TouchableOpacity>
+                            Order Details
+                        </Text>
 
-                            <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#111827' }}>
-                                Order Details
-                            </Text>
+                        <TouchableOpacity
+                            style={{
+                                width: 40,
+                                height: 40,
+                                borderRadius: 20,
+                                backgroundColor: 'rgba(255,255,255,0.2)',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                            }}
+                            onPress={() => {
+                                provideFeedback('light');
+                                // Print or export order
+                                Alert.alert(
+                                    "Export Order",
+                                    "Generate an invoice for this order?",
+                                    [
+                                        { text: "Cancel", style: "cancel" },
+                                        { text: "Export" }
+                                    ]
+                                );
+                            }}
+                        >
+                            <Ionicons name="print-outline" size={20} color="white" />
+                        </TouchableOpacity>
+                    </LinearGradient>
 
-                            <TouchableOpacity
-                                style={{
-                                    width: 40,
-                                    height: 40,
-                                    justifyContent: 'center',
-                                    alignItems: 'center',
-                                }}
-                                onPress={() => {
-                                    provideFeedback('light');
-                                    // Print or export order
-                                    Alert.alert(
-                                        "Export Order",
-                                        "Generate an invoice for this order?",
-                                        [
-                                            { text: "Cancel", style: "cancel" },
-                                            { text: "Export" }
-                                        ]
-                                    );
-                                }}
-                            >
-                                <Ionicons name="print-outline" size={22} color="#4F46E5" />
-                            </TouchableOpacity>
+                    {/* Content */}
+                    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 20 }}>
+                        {/* Order Status Banner */}
+                        <View style={{
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            backgroundColor: getStatusColor(selectedOrder.status).bgColor,
+                            borderWidth: 1,
+                            borderColor: getStatusColor(selectedOrder.status).borderColor,
+                            borderRadius: 12,
+                            padding: 16,
+                            marginBottom: 20,
+                        }}>
+                            <View style={{
+                                width: 40,
+                                height: 40,
+                                borderRadius: 20,
+                                backgroundColor: 'white',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                marginRight: 12,
+                            }}>
+                                {getStatusIcon(selectedOrder.status)}
+                            </View>
+
+                            <View style={{ flex: 1 }}>
+                                <Text style={{
+                                    fontSize: 16,
+                                    fontWeight: 'bold',
+                                    color: getStatusColor(selectedOrder.status).textColor,
+                                    marginBottom: 2,
+                                }}>
+                                    {selectedOrder.status} Order
+                                </Text>
+                                <Text style={{
+                                    fontSize: 13,
+                                    color: getStatusColor(selectedOrder.status).textColor,
+                                    opacity: 0.8,
+                                }}>
+                                    {getStatusMessage(selectedOrder.status)}
+                                </Text>
+                            </View>
                         </View>
 
-                        <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
-                            <View style={{ padding: 20 }}>
-                                {/* Order Status Banner */}
+                        {/* Order ID and Dates */}
+                        <View style={{
+                            backgroundColor: '#F9FAFB',
+                            borderRadius: 12,
+                            padding: 16,
+                            marginBottom: 20,
+                            borderWidth: 1,
+                            borderColor: '#E5E7EB',
+                        }}>
+                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12 }}>
+                                <Text style={{ fontSize: 14, color: '#6B7280' }}>Order ID:</Text>
+                                <Text style={{ fontSize: 14, fontWeight: '600', color: '#111827' }}>
+                                    #{selectedOrder.orderNumber || selectedOrder.supplierOrderRef || selectedOrder.id.substring(0, 8)}
+                                </Text>
+                            </View>
+
+                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12 }}>
+                                <Text style={{ fontSize: 14, color: '#6B7280' }}>Order Date:</Text>
+                                <Text style={{ fontSize: 14, fontWeight: '600', color: '#111827' }}>
+                                    {formatDate(selectedOrder.orderDate)}
+                                </Text>
+                            </View>
+
+                            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                                <Text style={{ fontSize: 14, color: '#6B7280' }}>Expected Delivery:</Text>
+                                <Text style={{ fontSize: 14, fontWeight: '600', color: '#111827' }}>
+                                    {selectedOrder.expectedDeliveryDate
+                                        ? formatDate(selectedOrder.expectedDeliveryDate)
+                                        : 'Not specified'}
+                                </Text>
+                            </View>
+
+                            {selectedOrder.status === 'Delivered' && selectedOrder.deliveryDate && (
                                 <View style={{
                                     flexDirection: 'row',
-                                    alignItems: 'center',
-                                    backgroundColor: getStatusColor(selectedOrder.status).bgColor,
-                                    borderWidth: 1,
-                                    borderColor: getStatusColor(selectedOrder.status).borderColor,
-                                    borderRadius: 12,
-                                    padding: 16,
-                                    marginBottom: 20,
+                                    justifyContent: 'space-between',
+                                    marginTop: 12,
+                                    paddingTop: 12,
+                                    borderTopWidth: 1,
+                                    borderTopColor: '#E5E7EB',
                                 }}>
-                                    <View style={{
-                                        width: 40,
-                                        height: 40,
-                                        borderRadius: 20,
-                                        backgroundColor: 'white',
-                                        justifyContent: 'center',
-                                        alignItems: 'center',
-                                        marginRight: 12,
-                                    }}>
-                                        {getStatusIcon(selectedOrder.status)}
-                                    </View>
+                                    <Text style={{ fontSize: 14, color: '#6B7280' }}>Delivery Date:</Text>
+                                    <Text style={{ fontSize: 14, fontWeight: '600', color: '#059669' }}>
+                                        {formatDate(selectedOrder.deliveryDate)}
+                                    </Text>
+                                </View>
+                            )}
+                        </View>
 
-                                    <View style={{ flex: 1 }}>
-                                        <Text style={{
-                                            fontSize: 16,
-                                            fontWeight: 'bold',
-                                            color: getStatusColor(selectedOrder.status).textColor,
-                                            marginBottom: 2,
-                                        }}>
-                                            {selectedOrder.status} Order
-                                        </Text>
-                                        <Text style={{
-                                            fontSize: 13,
-                                            color: getStatusColor(selectedOrder.status).textColor,
-                                            opacity: 0.8,
-                                        }}>
-                                            {getStatusMessage(selectedOrder.status)}
-                                        </Text>
-                                    </View>
+                        {/* Supplier Info */}
+                        <Text style={{
+                            fontSize: 16,
+                            fontWeight: '600',
+                            color: '#374151',
+                            marginBottom: 12,
+                        }}>
+                            Supplier Information
+                        </Text>
+
+                        <View style={{
+                            backgroundColor: '#F9FAFB',
+                            borderWidth: 1,
+                            borderColor: '#E5E7EB',
+                            borderRadius: 16,
+                            padding: 18,
+                            marginBottom: 20,
+                        }}>
+                            <View style={{
+                                flexDirection: 'row',
+                                alignItems: 'center',
+                                marginBottom: 12
+                            }}>
+                                <View style={{
+                                    width: 44,
+                                    height: 44,
+                                    borderRadius: 22,
+                                    backgroundColor: '#EEF2FF',
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    marginRight: 12,
+                                }}>
+                                    <MaterialCommunityIcons name="store" size={22} color="#4F46E5" />
                                 </View>
 
-                                {/* Order ID and Dates */}
+                                <View style={{ flex: 1 }}>
+                                    <Text style={{ fontSize: 16, fontWeight: '600', color: '#111827' }}>
+                                        {selectedOrder.supplierName || 'Unknown Supplier'}
+                                    </Text>
+                                    {selectedOrder.supplierDetails?.address && (
+                                        <Text style={{ fontSize: 13, color: '#6B7280', marginTop: 2 }}>
+                                            {selectedOrder.supplierDetails.address}
+                                        </Text>
+                                    )}
+                                </View>
+                            </View>
+
+                            {/* Additional supplier details */}
+                            <View style={{
+                                flexDirection: 'row',
+                                flexWrap: 'wrap',
+                                borderTopWidth: 1,
+                                borderTopColor: '#E5E7EB',
+                                paddingTop: 12
+                            }}>
+                                {selectedOrder.supplierDetails?.phone && (
+                                    <View style={{ width: '50%', marginBottom: 8 }}>
+                                        <Text style={{ fontSize: 12, color: '#6B7280' }}>Phone</Text>
+                                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                            <Ionicons name="call-outline" size={14} color="#6B7280" style={{ marginRight: 4 }} />
+                                            <Text style={{ fontSize: 13, color: '#4B5563' }}>{selectedOrder.supplierDetails.phone}</Text>
+                                        </View>
+                                    </View>
+                                )}
+
+                                {selectedOrder.supplierDetails?.email && (
+                                    <View style={{ width: '50%', marginBottom: 8 }}>
+                                        <Text style={{ fontSize: 12, color: '#6B7280' }}>Email</Text>
+                                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                            <Ionicons name="mail-outline" size={14} color="#6B7280" style={{ marginRight: 4 }} />
+                                            <Text style={{ fontSize: 13, color: '#4B5563' }} numberOfLines={1}>{selectedOrder.supplierDetails.email}</Text>
+                                        </View>
+                                    </View>
+                                )}
+
+                                {selectedOrder.supplierDetails?.yearEstablished && (
+                                    <View style={{ width: '50%', marginBottom: 8 }}>
+                                        <Text style={{ fontSize: 12, color: '#6B7280' }}>Established</Text>
+                                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                            <Ionicons name="calendar-outline" size={14} color="#6B7280" style={{ marginRight: 4 }} />
+                                            <Text style={{ fontSize: 13, color: '#4B5563' }}>{selectedOrder.supplierDetails.yearEstablished}</Text>
+                                        </View>
+                                    </View>
+                                )}
+
+                                {selectedOrder.supplierDetails?.productType && (
+                                    <View style={{ width: '50%', marginBottom: 8 }}>
+                                        <Text style={{ fontSize: 12, color: '#6B7280' }}>Specialization</Text>
+                                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                            <Ionicons name="pricetag-outline" size={14} color="#6B7280" style={{ marginRight: 4 }} />
+                                            <Text style={{ fontSize: 13, color: '#4B5563', textTransform: 'capitalize' }}>
+                                                {selectedOrder.supplierDetails.productType}
+                                            </Text>
+                                        </View>
+                                    </View>
+                                )}
+
+                                {selectedOrder.supplierDetails?.website && (
+                                    <View style={{ width: '100%', marginBottom: 8 }}>
+                                        <Text style={{ fontSize: 12, color: '#6B7280' }}>Website</Text>
+                                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                            <Ionicons name="globe-outline" size={14} color="#6B7280" style={{ marginRight: 4 }} />
+                                            <Text style={{ fontSize: 13, color: '#4F46E5', textDecorationLine: 'underline' }}>
+                                                {selectedOrder.supplierDetails.website}
+                                            </Text>
+                                        </View>
+                                    </View>
+                                )}
+                            </View>
+                        </View>
+
+                        {/* Order Products */}
+                        <Text style={{ fontSize: 16, fontWeight: '600', color: '#374151', marginBottom: 12 }}>
+                            Order Products
+                        </Text>
+
+                        <View style={{
+                            backgroundColor: '#F9FAFB',
+                            borderWidth: 1,
+                            borderColor: '#E5E7EB',
+                            borderRadius: 12,
+                            overflow: 'hidden',
+                            marginBottom: 20,
+                        }}>
+                            {orderItems.length > 0 ? (
+                                orderItems.map((item, index) => (
+                                    <View
+                                        key={index}
+                                        style={{
+                                            flexDirection: 'row',
+                                            padding: 16,
+                                            borderBottomWidth: index < orderItems.length - 1 ? 1 : 0,
+                                            borderBottomColor: '#E5E7EB',
+                                        }}
+                                    >
+                                        <View style={{
+                                            width: 40,
+                                            height: 40,
+                                            borderRadius: 8,
+                                            backgroundColor: '#F3F4F6',
+                                            justifyContent: 'center',
+                                            alignItems: 'center',
+                                            marginRight: 12,
+                                        }}>
+                                            <MaterialCommunityIcons name="package-variant-closed" size={20} color="#4B5563" />
+                                        </View>
+
+                                        <View style={{ flex: 1 }}>
+                                            <Text style={{ fontSize: 15, fontWeight: '600', color: '#111827' }}>
+                                                {item.name || 'Unnamed Product'}
+                                            </Text>
+                                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 4 }}>
+                                                <Text style={{ fontSize: 13, color: '#6B7280' }}>
+                                                    {item.quantity || 0} {item.unit || 'unit'} x {(item.price || 0).toFixed(2)} Birr
+                                                </Text>
+                                                <Text style={{ fontSize: 14, fontWeight: '600', color: '#111827' }}>
+                                                    {((item.quantity || 0) * (item.price || 0) || item.totalPrice || 0).toFixed(2)} Birr
+                                                </Text>
+                                            </View>
+                                        </View>
+                                    </View>
+                                ))
+                            ) : (
+                                <View style={{ padding: 16, alignItems: 'center' }}>
+                                    <Text style={{ color: '#6B7280', fontSize: 14 }}>No items in this order</Text>
+                                </View>
+                            )}
+
+                            <View style={{
+                                flexDirection: 'row',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                                backgroundColor: '#EEF2FF',
+                                paddingVertical: 14,
+                                paddingHorizontal: 16,
+                                borderTopWidth: 1,
+                                borderTopColor: 'rgba(79, 70, 229, 0.2)',
+                            }}>
+                                <Text style={{ fontSize: 15, fontWeight: '600', color: '#4F46E5' }}>
+                                    Total Amount:
+                                </Text>
+                                <Text style={{ fontSize: 17, fontWeight: 'bold', color: '#4F46E5' }}>
+                                    {(selectedOrder.totalAmount || 0).toFixed(2)} Birr
+                                </Text>
+                            </View>
+                        </View>
+
+                        {/* Payment Information if available */}
+                        {selectedOrder.payment && (
+                            <>
+                                <Text style={{ fontSize: 16, fontWeight: '600', color: '#374151', marginBottom: 12 }}>
+                                    Payment Information
+                                </Text>
                                 <View style={{
                                     backgroundColor: '#F9FAFB',
+                                    borderWidth: 1,
+                                    borderColor: '#E5E7EB',
                                     borderRadius: 12,
                                     padding: 16,
                                     marginBottom: 20,
                                 }}>
-                                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12 }}>
-                                        <Text style={{ fontSize: 14, color: '#6B7280' }}>Order ID:</Text>
+                                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 }}>
+                                        <Text style={{ fontSize: 14, color: '#6B7280' }}>Payment Method:</Text>
                                         <Text style={{ fontSize: 14, fontWeight: '600', color: '#111827' }}>
-                                            #{selectedOrder.id.substring(0, 8)}
+                                            {selectedOrder.payment.method || 'Not specified'}
+                                            {selectedOrder.payment.provider ? ` (${selectedOrder.payment.provider})` : ''}
                                         </Text>
                                     </View>
 
-                                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12 }}>
-                                        <Text style={{ fontSize: 14, color: '#6B7280' }}>Order Date:</Text>
+                                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 }}>
+                                        <Text style={{ fontSize: 14, color: '#6B7280' }}>Amount:</Text>
                                         <Text style={{ fontSize: 14, fontWeight: '600', color: '#111827' }}>
-                                            {formatDate(selectedOrder.orderDate)}
+                                            {selectedOrder.payment.amount?.toFixed(2) || '0.00'} Birr
                                         </Text>
                                     </View>
 
-                                    <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                                        <Text style={{ fontSize: 14, color: '#6B7280' }}>Expected Delivery:</Text>
-                                        <Text style={{ fontSize: 14, fontWeight: '600', color: '#111827' }}>
-                                            {selectedOrder.expectedDeliveryDate
-                                                ? formatDate(selectedOrder.expectedDeliveryDate)
-                                                : 'Not specified'}
-                                        </Text>
-                                    </View>
-
-                                    {selectedOrder.status === 'Delivered' && selectedOrder.deliveryDate && (
-                                        <View style={{
-                                            flexDirection: 'row',
-                                            justifyContent: 'space-between',
-                                            marginTop: 12,
-                                            paddingTop: 12,
-                                            borderTopWidth: 1,
-                                            borderTopColor: '#E5E7EB',
+                                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 }}>
+                                        <Text style={{ fontSize: 14, color: '#6B7280' }}>Status:</Text>
+                                        <Text style={{
+                                            fontSize: 14,
+                                            fontWeight: '600',
+                                            color: selectedOrder.payment.status === 'completed' ? '#059669' : '#DC2626'
                                         }}>
-                                            <Text style={{ fontSize: 14, color: '#6B7280' }}>Delivery Date:</Text>
-                                            <Text style={{ fontSize: 14, fontWeight: '600', color: '#059669' }}>
-                                                {formatDate(selectedOrder.deliveryDate)}
+                                            {selectedOrder.payment.status || 'Unknown'}
+                                        </Text>
+                                    </View>
+
+                                    {selectedOrder.payment.tx_ref && (
+                                        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                                            <Text style={{ fontSize: 14, color: '#6B7280' }}>Transaction Reference:</Text>
+                                            <Text style={{ fontSize: 14, fontWeight: '600', color: '#111827' }}>
+                                                {selectedOrder.payment.tx_ref}
                                             </Text>
                                         </View>
                                     )}
                                 </View>
+                            </>
+                        )}
 
-                                {/* Supplier Info */}
+                        {/* Notes */}
+                        {selectedOrder.notes && selectedOrder.notes.trim() !== '' && (
+                            <>
                                 <Text style={{ fontSize: 16, fontWeight: '600', color: '#374151', marginBottom: 12 }}>
-                                    Supplier Information
+                                    Order Notes
                                 </Text>
 
                                 <View style={{
-                                    flexDirection: 'row',
-                                    alignItems: 'center',
                                     backgroundColor: '#F9FAFB',
                                     borderWidth: 1,
                                     borderColor: '#E5E7EB',
@@ -871,221 +1240,107 @@ export default function SupplierOrders() {
                                     padding: 16,
                                     marginBottom: 20,
                                 }}>
-                                    <View style={{
-                                        width: 44,
-                                        height: 44,
-                                        borderRadius: 22,
-                                        backgroundColor: '#EEF2FF',
-                                        justifyContent: 'center',
-                                        alignItems: 'center',
-                                        marginRight: 12,
-                                    }}>
-                                        <MaterialCommunityIcons name="store" size={22} color="#4F46E5" />
-                                    </View>
-
-                                    <View style={{ flex: 1 }}>
-                                        <Text style={{ fontSize: 16, fontWeight: '600', color: '#111827' }}>
-                                            {selectedOrder.supplierName}
-                                        </Text>
-                                        <Text style={{ fontSize: 13, color: '#6B7280', marginTop: 2 }}>
-                                            Supplier ID: {selectedOrder.supplierId.substring(0, 8)}
-                                        </Text>
-                                    </View>
-
-                                    <TouchableOpacity
-                                        style={{
-                                            width: 38,
-                                            height: 38,
-                                            borderRadius: 19,
-                                            backgroundColor: '#F3F4F6',
-                                            justifyContent: 'center',
-                                            alignItems: 'center',
-                                        }}
-                                        onPress={() => {
-                                            provideFeedback('light');
-                                            // View supplier details
-                                            router.push('/stockManager/AllSuppliers');
-                                        }}
-                                    >
-                                        <Ionicons name="open-outline" size={18} color="#4B5563" />
-                                    </TouchableOpacity>
+                                    <Text style={{ fontSize: 14, color: '#4B5563', lineHeight: 20 }}>
+                                        {selectedOrder.notes}
+                                    </Text>
                                 </View>
+                            </>
+                        )}
+                    </ScrollView>
 
-                                {/* Order Products */}
-                                <Text style={{ fontSize: 16, fontWeight: '600', color: '#374151', marginBottom: 12 }}>
-                                    Order Products
-                                </Text>
+                    {/* Bottom Action Buttons */}
+                    <View style={{
+                        flexDirection: 'row',
+                        paddingHorizontal: 20,
+                        paddingVertical: 16,
+                        borderTopWidth: 1,
+                        borderTopColor: '#E5E7EB',
+                        backgroundColor: '#FFFFFF',
+                    }}>
+                        <TouchableOpacity
+                            style={{
+                                flex: 1,
+                                paddingVertical: 14,
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                backgroundColor: '#FEE2E2',
+                                borderRadius: 12,
+                                marginRight: 8,
+                                shadowColor: '#EF4444',
+                                shadowOffset: { width: 0, height: 2 },
+                                shadowOpacity: 0.1,
+                                shadowRadius: 3,
+                                elevation: 2,
+                            }}
+                            onPress={() => {
+                                provideFeedback('medium');
+                                setOrderDetailsVisible(false);
+                                setOrderToDelete(selectedOrder);
+                                setDeleteConfirmVisible(true);
+                            }}
+                        >
+                            <Text style={{ fontSize: 15, fontWeight: '600', color: '#DC2626' }}>
+                                Delete
+                            </Text>
+                        </TouchableOpacity>
 
-                                <View style={{
-                                    backgroundColor: '#F9FAFB',
-                                    borderWidth: 1,
-                                    borderColor: '#E5E7EB',
-                                    borderRadius: 12,
-                                    overflow: 'hidden',
-                                    marginBottom: 20,
-                                }}>
-                                    {selectedOrder.products.map((product, index) => (
-                                        <View
-                                            key={index}
-                                            style={{
-                                                flexDirection: 'row',
-                                                padding: 16,
-                                                borderBottomWidth: index < selectedOrder.products.length - 1 ? 1 : 0,
-                                                borderBottomColor: '#E5E7EB',
-                                            }}
-                                        >
-                                            <View style={{
-                                                width: 40,
-                                                height: 40,
-                                                borderRadius: 8,
-                                                backgroundColor: '#F3F4F6',
-                                                justifyContent: 'center',
-                                                alignItems: 'center',
-                                                marginRight: 12,
-                                            }}>
-                                                <MaterialCommunityIcons name="package-variant-closed" size={20} color="#4B5563" />
-                                            </View>
-
-                                            <View style={{ flex: 1 }}>
-                                                <Text style={{ fontSize: 15, fontWeight: '600', color: '#111827' }}>
-                                                    {product.name}
-                                                </Text>
-                                                <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 4 }}>
-                                                    <Text style={{ fontSize: 13, color: '#6B7280' }}>
-                                                        {product.quantity} {product.unit || 'unit'} x ${product.price?.toFixed(2) || '0.00'}
-                                                    </Text>
-                                                    <Text style={{ fontSize: 14, fontWeight: '600', color: '#111827' }}>
-                                                        ${(product.quantity * product.price).toFixed(2)}
-                                                    </Text>
-                                                </View>
-                                            </View>
-                                        </View>
-                                    ))}
-
-                                    <View style={{
-                                        flexDirection: 'row',
-                                        justifyContent: 'space-between',
-                                        alignItems: 'center',
-                                        backgroundColor: '#EEF2FF',
-                                        paddingVertical: 12,
-                                        paddingHorizontal: 16,
-                                    }}>
-                                        <Text style={{ fontSize: 15, fontWeight: '600', color: '#4F46E5' }}>
-                                            Total Amount:
-                                        </Text>
-                                        <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#4F46E5' }}>
-                                            ${selectedOrder.totalAmount?.toFixed(2) || '0.00'}
-                                        </Text>
-                                    </View>
-                                </View>
-
-                                {/* Notes */}
-                                {selectedOrder.notes && (
-                                    <>
-                                        <Text style={{ fontSize: 16, fontWeight: '600', color: '#374151', marginBottom: 12 }}>
-                                            Order Notes
-                                        </Text>
-
-                                        <View style={{
-                                            backgroundColor: '#F9FAFB',
-                                            borderWidth: 1,
-                                            borderColor: '#E5E7EB',
-                                            borderRadius: 12,
-                                            padding: 16,
-                                            marginBottom: 20,
-                                        }}>
-                                            <Text style={{ fontSize: 14, color: '#4B5563', lineHeight: 20 }}>
-                                                {selectedOrder.notes}
-                                            </Text>
-                                        </View>
-                                    </>
-                                )}
-                            </View>
-                        </ScrollView>
-
-                        {/* Bottom Action Buttons */}
-                        <View style={{
-                            flexDirection: 'row',
-                            paddingHorizontal: 20,
-                            paddingTop: 12,
-                            borderTopWidth: 1,
-                            borderTopColor: '#E5E7EB',
-                        }}>
+                        {/* Status-based action button */}
+                        {selectedOrder.status !== 'Delivered' && (
                             <TouchableOpacity
                                 style={{
-                                    flex: 1,
+                                    flex: 2,
+                                    flexDirection: 'row',
                                     paddingVertical: 14,
                                     alignItems: 'center',
                                     justifyContent: 'center',
-                                    backgroundColor: '#FEE2E2',
-                                    borderRadius: 10,
-                                    marginRight: 8,
+                                    backgroundColor: '#4F46E5',
+                                    borderRadius: 12,
+                                    shadowColor: '#4338CA',
+                                    shadowOffset: { width: 0, height: 2 },
+                                    shadowOpacity: 0.15,
+                                    shadowRadius: 3,
+                                    elevation: 2,
                                 }}
                                 onPress={() => {
                                     provideFeedback('medium');
+                                    // Determine next status
+                                    let newStatus;
+                                    switch (selectedOrder.status) {
+                                        case 'Pending':
+                                            newStatus = 'Shipped';
+                                            break;
+                                        case 'Shipped':
+                                            newStatus = 'Delivered';
+                                            break;
+                                        default:
+                                            newStatus = 'Pending';
+                                    }
+
+                                    // Update status
+                                    updateOrderStatus(selectedOrder, newStatus);
+
+                                    // Close modal
                                     setOrderDetailsVisible(false);
-                                    setOrderToDelete(selectedOrder);
-                                    setDeleteConfirmVisible(true);
                                 }}
                             >
-                                <Text style={{ fontSize: 15, fontWeight: '600', color: '#DC2626' }}>
-                                    Delete
+                                <MaterialCommunityIcons
+                                    name={selectedOrder.status === 'Pending' ? 'truck-delivery' : 'check-circle'}
+                                    size={18}
+                                    color="white"
+                                    style={{ marginRight: 8 }}
+                                />
+                                <Text style={{ fontSize: 15, fontWeight: '600', color: 'white' }}>
+                                    {selectedOrder.status === 'Pending' ? 'Mark as Shipped' : 'Mark as Delivered'}
                                 </Text>
                             </TouchableOpacity>
-
-                            {/* Status-based action button */}
-                            {selectedOrder.status !== 'Delivered' && (
-                                <TouchableOpacity
-                                    style={{
-                                        flex: 2,
-                                        flexDirection: 'row',
-                                        paddingVertical: 14,
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        backgroundColor: '#4F46E5',
-                                        borderRadius: 10,
-                                    }}
-                                    onPress={() => {
-                                        provideFeedback('medium');
-                                        // Determine next status
-                                        let newStatus;
-                                        switch (selectedOrder.status) {
-                                            case 'Pending':
-                                                newStatus = 'Shipped';
-                                                break;
-                                            case 'Shipped':
-                                                newStatus = 'Delivered';
-                                                break;
-                                            default:
-                                                newStatus = 'Pending';
-                                        }
-
-                                        // Update status
-                                        updateOrderStatus(selectedOrder, newStatus);
-
-                                        // Close modal
-                                        setOrderDetailsVisible(false);
-                                    }}
-                                >
-                                    <MaterialCommunityIcons
-                                        name={selectedOrder.status === 'Pending' ? 'truck-delivery' : 'check-circle'}
-                                        size={18}
-                                        color="white"
-                                        style={{ marginRight: 8 }}
-                                    />
-                                    <Text style={{ fontSize: 15, fontWeight: '600', color: 'white' }}>
-                                        {selectedOrder.status === 'Pending' ? 'Mark as Shipped' : 'Mark as Delivered'}
-                                    </Text>
-                                </TouchableOpacity>
-                            )}
-                        </View>
+                        )}
                     </View>
-                </View>
+                </SafeAreaView>
             </Modal>
         );
     };
 
-    // Delete confirmation modal
+    // Delete confirmation modal with enhanced styling
     const renderDeleteConfirmationModal = () => {
         return (
             <Modal
@@ -1095,7 +1350,8 @@ export default function SupplierOrders() {
                 onRequestClose={() => setDeleteConfirmVisible(false)}
             >
                 <BlurView
-                    intensity={20}
+                    intensity={30}
+                    tint="dark"
                     style={{
                         position: 'absolute',
                         width: '100%',
@@ -1108,38 +1364,57 @@ export default function SupplierOrders() {
                     activeOpacity={1}
                     onPress={() => setDeleteConfirmVisible(false)}
                 >
-                    <View
+                    <Animated.View
+                        entering={FadeInDown.duration(300).springify()}
                         style={{
                             backgroundColor: 'white',
-                            borderRadius: 16,
+                            borderRadius: 20,
                             padding: 24,
                             width: '90%',
                             maxWidth: 400,
                             alignItems: 'center',
                             shadowColor: '#000',
-                            shadowOffset: { width: 0, height: 2 },
-                            shadowOpacity: 0.1,
-                            shadowRadius: 10,
-                            elevation: 5,
+                            shadowOffset: { width: 0, height: 4 },
+                            shadowOpacity: 0.15,
+                            shadowRadius: 12,
+                            elevation: 8,
                         }}
                     >
                         <View style={{
-                            width: 56,
-                            height: 56,
-                            borderRadius: 28,
+                            width: 70,
+                            height: 70,
+                            borderRadius: 35,
                             backgroundColor: '#FEE2E2',
                             justifyContent: 'center',
                             alignItems: 'center',
-                            marginBottom: 16,
+                            marginBottom: 20,
+                            shadowColor: '#DC2626',
+                            shadowOffset: { width: 0, height: 2 },
+                            shadowOpacity: 0.1,
+                            shadowRadius: 4,
+                            elevation: 2,
                         }}>
-                            <MaterialCommunityIcons name="alert" size={28} color="#DC2626" />
+                            <MaterialCommunityIcons name="alert" size={36} color="#DC2626" />
                         </View>
 
-                        <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#111827', marginBottom: 8 }}>
+                        <Text style={{
+                            fontSize: 20,
+                            fontWeight: 'bold',
+                            color: '#111827',
+                            marginBottom: 10,
+                            textAlign: 'center'
+                        }}>
                             Delete Order
                         </Text>
 
-                        <Text style={{ fontSize: 15, color: '#4B5563', textAlign: 'center', marginBottom: 24, lineHeight: 22 }}>
+                        <Text style={{
+                            fontSize: 15,
+                            color: '#4B5563',
+                            textAlign: 'center',
+                            marginBottom: 24,
+                            lineHeight: 22,
+                            paddingHorizontal: 12
+                        }}>
                             Are you sure you want to delete this order? This action cannot be undone.
                         </Text>
 
@@ -1147,11 +1422,16 @@ export default function SupplierOrders() {
                             <TouchableOpacity
                                 style={{
                                     flex: 1,
-                                    paddingVertical: 12,
+                                    paddingVertical: 14,
                                     alignItems: 'center',
                                     backgroundColor: '#F3F4F6',
-                                    borderRadius: 8,
+                                    borderRadius: 12,
                                     marginRight: 8,
+                                    shadowColor: '#000',
+                                    shadowOffset: { width: 0, height: 1 },
+                                    shadowOpacity: 0.05,
+                                    shadowRadius: 2,
+                                    elevation: 1,
                                 }}
                                 onPress={() => {
                                     provideFeedback('light');
@@ -1166,10 +1446,15 @@ export default function SupplierOrders() {
                             <TouchableOpacity
                                 style={{
                                     flex: 1,
-                                    paddingVertical: 12,
+                                    paddingVertical: 14,
                                     alignItems: 'center',
                                     backgroundColor: '#EF4444',
-                                    borderRadius: 8,
+                                    borderRadius: 12,
+                                    shadowColor: '#DC2626',
+                                    shadowOffset: { width: 0, height: 2 },
+                                    shadowOpacity: 0.15,
+                                    shadowRadius: 3,
+                                    elevation: 2,
                                 }}
                                 onPress={() => {
                                     provideFeedback('medium');
@@ -1181,55 +1466,13 @@ export default function SupplierOrders() {
                                 </Text>
                             </TouchableOpacity>
                         </View>
-                    </View>
+                    </Animated.View>
                 </TouchableOpacity>
             </Modal>
         );
     };
 
-    // Search bar component
-    const renderSearchBar = () => (
-        <View style={{
-            flexDirection: 'row',
-            paddingHorizontal: 16,
-            paddingVertical: 12,
-            backgroundColor: 'white',
-            borderBottomWidth: 1,
-            borderBottomColor: '#E5E7EB',
-        }}>
-            <View style={{
-                flex: 1,
-                flexDirection: 'row',
-                alignItems: 'center',
-                backgroundColor: '#F3F4F6',
-                borderRadius: 8,
-                paddingHorizontal: 12,
-                height: 44,
-            }}>
-                <Ionicons name="search" size={20} color="#6B7280" />
-                <TextInput
-                    placeholder="Search orders..."
-                    placeholderTextColor="#6B7280"
-                    value={searchQuery}
-                    onChangeText={setSearchQuery}
-                    style={{
-                        flex: 1,
-                        height: '100%',
-                        fontSize: 16,
-                        color: '#1F2937',
-                        marginLeft: 8,
-                    }}
-                />
-                {searchQuery ? (
-                    <TouchableOpacity onPress={() => setSearchQuery('')}>
-                        <Ionicons name="close-circle" size={20} color="#6B7280" />
-                    </TouchableOpacity>
-                ) : null}
-            </View>
-        </View>
-    );
-
-    // Render header
+    // Render header with enhanced styling
     const renderHeader = () => (
         <View style={{
             flexDirection: 'row',
@@ -1241,6 +1484,11 @@ export default function SupplierOrders() {
             backgroundColor: 'white',
             borderBottomWidth: 1,
             borderBottomColor: '#E5E7EB',
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 1 },
+            shadowOpacity: 0.05,
+            shadowRadius: 2,
+            elevation: 2,
         }}>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <TouchableOpacity
@@ -1249,48 +1497,40 @@ export default function SupplierOrders() {
                         router.back();
                     }}
                     style={{
-                        width: 40,
-                        height: 40,
-                        borderRadius: 20,
+                        width: 42,
+                        height: 42,
+                        borderRadius: 12,
                         justifyContent: 'center',
                         alignItems: 'center',
                         backgroundColor: '#F3F4F6',
                         marginRight: 12,
+                        borderWidth: 1,
+                        borderColor: '#E5E7EB',
                     }}
                 >
                     <Ionicons name="arrow-back" size={22} color="#1F2937" />
                 </TouchableOpacity>
-                <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#1F2937' }}>Supplier Orders</Text>
-            </View>
-
-            <View style={{ flexDirection: 'row' }}>
-                <TouchableOpacity
-                    onPress={() => setFilterVisible(true)}
-                    style={{
-                        width: 40,
-                        height: 40,
-                        borderRadius: 20,
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        backgroundColor: '#F3F4F6',
-                        marginLeft: 8,
-                    }}
-                >
-                    <Ionicons name="filter" size={22} color="#1F2937" />
-                </TouchableOpacity>
+                <Text style={{
+                    fontSize: 22,
+                    fontWeight: 'bold',
+                    color: '#1F2937',
+                    letterSpacing: 0.3,
+                }}>
+                    Supplier Orders
+                </Text>
             </View>
         </View>
     );
 
     return (
         <View style={{ flex: 1, backgroundColor: '#F9FAFB' }}>
-            <Stack.Screen options={{ headerShown: false }} />
+            <Stack.Screen name="SupplierOrders" options={{ headerShown: false }} />
             <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent={true} />
             {renderHeader()}
 
             {loading && !refreshing ? (
                 <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                    <ActivityIndicator size="large" color="#3B82F6" />
+                    <ActivityIndicator size="large" color="#4F46E5" />
                     <Text style={{ marginTop: 10, color: '#6B7280', fontSize: 16 }}>Loading orders...</Text>
                 </View>
             ) : error ? (
@@ -1304,8 +1544,13 @@ export default function SupplierOrders() {
                             marginTop: 20,
                             paddingHorizontal: 16,
                             paddingVertical: 10,
-                            backgroundColor: '#3B82F6',
-                            borderRadius: 8,
+                            backgroundColor: '#4F46E5',
+                            borderRadius: 10,
+                            shadowColor: '#4338CA',
+                            shadowOffset: { width: 0, height: 2 },
+                            shadowOpacity: 0.1,
+                            shadowRadius: 2,
+                            elevation: 2,
                         }}
                         onPress={fetchOrders}
                     >
@@ -1326,20 +1571,34 @@ export default function SupplierOrders() {
                             <RefreshControl
                                 refreshing={refreshing}
                                 onRefresh={onRefresh}
-                                colors={['#3B82F6']}
-                                tintColor="#3B82F6"
+                                colors={['#4F46E5']}
+                                tintColor="#4F46E5"
                             />
                         }
                         ListEmptyComponent={
-                            <View style={{ padding: 20, alignItems: 'center', justifyContent: 'center' }}>
+                            <View style={{
+                                backgroundColor: 'white',
+                                padding: 24,
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                borderRadius: 16,
+                                marginTop: 8,
+                                shadowColor: '#000',
+                                shadowOffset: { width: 0, height: 1 },
+                                shadowOpacity: 0.05,
+                                shadowRadius: 2,
+                                elevation: 1,
+                                borderWidth: 1,
+                                borderColor: '#E5E7EB',
+                            }}>
                                 <Image
                                     source={{ uri: 'https://cdn-icons-png.flaticon.com/512/5400/5400905.png' }}
-                                    style={{ width: 100, height: 100, opacity: 0.7, marginBottom: 16 }}
+                                    style={{ width: 80, height: 80, opacity: 0.7, marginBottom: 16 }}
                                 />
-                                <Text style={{ fontSize: 18, color: '#6B7280', textAlign: 'center' }}>
+                                <Text style={{ fontSize: 18, fontWeight: '600', color: '#4B5563', textAlign: 'center' }}>
                                     No orders found
                                 </Text>
-                                <Text style={{ fontSize: 14, color: '#9CA3AF', textAlign: 'center', marginTop: 8 }}>
+                                <Text style={{ fontSize: 14, color: '#9CA3AF', textAlign: 'center', marginTop: 8, lineHeight: 20 }}>
                                     {statusFilter !== 'All'
                                         ? `No ${statusFilter.toLowerCase()} orders found`
                                         : searchQuery

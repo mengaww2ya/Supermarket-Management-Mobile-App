@@ -2137,7 +2137,7 @@ export default function SupplierOrderManagement() {
               }}
               onPress={() => {
                 provideFeedback('light');
-                router.push('/suplier/systemChat');
+                router.push('/stockManager/systemChat');
               }}
             >
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -2185,7 +2185,7 @@ export default function SupplierOrderManagement() {
               }}
               onPress={() => {
                 provideFeedback('light');
-                router.push('/suplier/manageDelivery');
+                router.push('/stockManager/manageDelivery');
               }}
             >
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -2233,7 +2233,7 @@ export default function SupplierOrderManagement() {
               }}
               onPress={() => {
                 provideFeedback('light');
-                router.push('/suplier/SPerformanceAnalytics');
+                router.push('/stockManager/SPerformanceAnalytics');
               }}
             >
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
