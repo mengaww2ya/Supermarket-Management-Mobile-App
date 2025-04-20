@@ -502,13 +502,24 @@ export default function SupplierCatalog() {
                                 marginTop: 16,
                             }}
                             onPress={() => {
-                                // Action when "Add to order" is pressed
                                 setProductModalVisible(false);
-                                // Add logic here to add product to order or other action
+                                router.push({
+                                    pathname: "/stockManager/AddToSupplierCart",
+                                    params: {
+                                        productId: selectedProduct.id,
+                                        productName: selectedProduct.name,
+                                        price: selectedProduct.price,
+                                        unitType: selectedProduct.unit || "unit",
+                                        image: selectedProduct.imageUrl,
+                                        categoryId: selectedProduct.categoryId,
+                                        supplierId: selectedProduct.supplierId || "unknown",
+                                        supplierName: selectedProduct.categoryName || "Unknown Supplier"
+                                    }
+                                });
                             }}
                         >
                             <Text style={{ color: 'white', fontSize: 16, fontWeight: 'bold' }}>
-                                Add To Order
+                                Add To Cart
                             </Text>
                         </TouchableOpacity>
                     </View>
@@ -635,6 +646,59 @@ export default function SupplierCatalog() {
             </TouchableOpacity>
         </Modal>
     );
+
+    const renderNoProductsFound = () => {
+        return (
+            <View style={{
+                flex: 1,
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: 20,
+                marginTop: 40
+            }}>
+                <MaterialIcons name="inventory" size={70} color="#D1D5DB" />
+                <Text style={{
+                    fontSize: 18,
+                    fontWeight: 'bold',
+                    color: '#4B5563',
+                    marginTop: 16,
+                    textAlign: 'center'
+                }}>
+                    {searchQuery.trim().length > 0
+                        ? "No products match your search"
+                        : selectedCategory
+                            ? "No products in this category"
+                            : "No products available"}
+                </Text>
+                <Text style={{
+                    color: '#6B7280',
+                    textAlign: 'center',
+                    marginTop: 8,
+                    lineHeight: 20
+                }}>
+                    {searchQuery.trim().length > 0
+                        ? `We couldn't find any products matching "${searchQuery}". Try a different search term or browse categories.`
+                        : selectedCategory
+                            ? "This category doesn't have any products yet. Try selecting a different category."
+                            : "There are no products available at the moment. Check back later or contact your suppliers."}
+                </Text>
+                {searchQuery.trim().length > 0 && (
+                    <TouchableOpacity
+                        style={{
+                            backgroundColor: '#4F46E5',
+                            paddingHorizontal: 20,
+                            paddingVertical: 12,
+                            borderRadius: 8,
+                            marginTop: 20
+                        }}
+                        onPress={handleClearSearch}
+                    >
+                        <Text style={{ color: 'white', fontWeight: 'bold' }}>Clear Search</Text>
+                    </TouchableOpacity>
+                )}
+            </View>
+        );
+    };
 
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
@@ -769,133 +833,30 @@ export default function SupplierCatalog() {
                 </View>
             )}
 
-            {loading ? (
-                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                    <ActivityIndicator size="large" color="#4F46E5" />
-                </View>
-            ) : (
-                <ScrollView
-                    style={{ flex: 1 }}
-                    showsVerticalScrollIndicator={false}
-                    refreshControl={
-                        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#4F46E5" />
-                    }
-                >
-                    {/* Categories Section */}
-                    <View style={{ marginTop: 24, marginHorizontal: 16 }}>
-                        <View style={{
-                            flexDirection: 'row',
-                            alignItems: 'center',
-                            marginBottom: 12
-                        }}>
-                            <View style={{
-                                backgroundColor: '#EEF2FF',
-                                width: 30,
-                                height: 30,
-                                borderRadius: 15,
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                marginRight: 10
-                            }}>
-                                <MaterialIcons name="category" size={18} color="#4F46E5" />
-                            </View>
-                            <Text style={{
-                                fontSize: 20,
-                                fontWeight: 'bold',
-                                color: '#1F2937'
-                            }}>
-                                Supplier Categories
-                            </Text>
-                        </View>
+            {/* Products Section - modified to use the new renderNoProductsFound function */}
+            <View style={{ flex: 1 }}>
+                <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#111827', marginVertical: 16, paddingHorizontal: 16 }}>
+                    Products {selectedCategory ? `in ${selectedCategory.name}` : ''}
+                </Text>
 
-                        {categories.length === 0 ? (
-                            <View style={{
-                                padding: 16,
-                                backgroundColor: '#F9FAFB',
-                                borderRadius: 12,
-                                alignItems: 'center',
-                                marginBottom: 20
-                            }}>
-                                <Text style={{ color: '#6B7280', fontSize: 16 }}>No categories found</Text>
-                            </View>
-                        ) : (
-                            <FlatList
-                                horizontal
-                                showsHorizontalScrollIndicator={false}
-                                data={categories}
-                                keyExtractor={(item) => item.id}
-                                renderItem={renderCategoryItem}
-                                contentContainerStyle={{ paddingVertical: 10 }}
-                            />
-                        )}
+                {loading ? (
+                    <View style={{ padding: 20, alignItems: 'center' }}>
+                        <ActivityIndicator size="large" color="#4F46E5" />
+                        <Text style={{ marginTop: 10, color: '#6B7280' }}>Loading products...</Text>
                     </View>
-
-                    {/* Products Section */}
-                    <View style={{ marginHorizontal: 16, marginTop: 24, marginBottom: 24 }}>
-                        <View style={{
-                            flexDirection: 'row',
-                            alignItems: 'center',
-                            marginBottom: 12
-                        }}>
-                            <View style={{
-                                backgroundColor: '#EEF2FF',
-                                width: 30,
-                                height: 30,
-                                borderRadius: 15,
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                marginRight: 10
-                            }}>
-                                <Ionicons name="cube" size={18} color="#4F46E5" />
-                            </View>
-                            <Text style={{
-                                fontSize: 20,
-                                fontWeight: 'bold',
-                                color: '#1F2937'
-                            }}>
-                                {selectedCategory ? `${selectedCategory.name} Products` : "All Products"}
-                            </Text>
-                            {selectedCategory && (
-                                <TouchableOpacity
-                                    style={{ marginLeft: 'auto' }}
-                                    onPress={() => setSelectedCategory(null)}
-                                >
-                                    <Text style={{ fontSize: 14, fontWeight: '500', color: '#4F46E5' }}>
-                                        Show All
-                                    </Text>
-                                </TouchableOpacity>
-                            )}
-                        </View>
-
-                        {filteredProducts.length === 0 ? (
-                            <View style={{
-                                padding: 40,
-                                backgroundColor: '#F9FAFB',
-                                borderRadius: 12,
-                                alignItems: 'center'
-                            }}>
-                                <MaterialCommunityIcons name="package-variant" size={48} color="#D1D5DB" />
-                                <Text style={{ marginTop: 16, color: '#6B7280', fontSize: 16, textAlign: 'center' }}>
-                                    {searchQuery.length > 0
-                                        ? `No products found matching "${searchQuery}"`
-                                        : selectedCategory
-                                            ? `No products found in ${selectedCategory.name}`
-                                            : "No products available"}
-                                </Text>
-                            </View>
-                        ) : (
-                            <FlatList
-                                data={filteredProducts}
-                                renderItem={renderProductItem}
-                                keyExtractor={(item) => item.id}
-                                numColumns={2}
-                                scrollEnabled={false}
-                                contentContainerStyle={{ paddingTop: 10, paddingBottom: 20 }}
-                            />
-                        )}
-                    </View>
-                </ScrollView>
-            )}
+                ) : filteredProducts.length === 0 ? (
+                    renderNoProductsFound()
+                ) : (
+                    <FlatList
+                        data={filteredProducts}
+                        renderItem={renderProductItem}
+                        keyExtractor={(item) => item.id}
+                        numColumns={2}
+                        showsVerticalScrollIndicator={false}
+                        contentContainerStyle={{ paddingHorizontal: 8, paddingBottom: 20 }}
+                    />
+                )}
+            </View>
 
             {/* Filter Modal */}
             {renderFilterModal()}

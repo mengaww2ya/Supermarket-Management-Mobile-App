@@ -5,7 +5,7 @@ export default {
       "expo-router"
     ],
     "newArchEnabled": true,
-     userInterfaceStyle: "automatic",
+    userInterfaceStyle: "automatic",
     name: "QUEEN",
     slug: "QUEEN",
     extra: {
@@ -16,13 +16,18 @@ export default {
       firebaseMessagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
       firebaseAppId: process.env.FIREBASE_APP_ID,
       // firebaseMeasurementId: process.env.FIREBASE_MEASUREMENT_ID,
-      
-      // Chapa Payment configuration
+
+      // Chapa Payment configuration (Customer)
       chapaPublicKey: process.env.CHAPA_PUBLIC_KEY,
       chapaSecretKey: process.env.CHAPA_SECRET_KEY,
       chapaEncryptionKey: process.env.CHAPA_ENCRYPTION_KEY,
+
+      // Chapa Payment configuration (Supplier)
+      supplierChapaPublicKey: process.env.SUPPLIER_CHAPA_PUBLIC_KEY,
+      supplierChapaSecretKey: process.env.SUPPLIER_CHAPA_SECRET_KEY,
+      supplierChapaEncryptionKey: process.env.SUPPLIER_CHAPA_ENCRYPTION_KEY,
     },
-    
+
     android: {
       package: "com.anonymous.QUEEN"
     }

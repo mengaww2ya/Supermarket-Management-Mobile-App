@@ -149,13 +149,55 @@ export default function AddToSupplierCart() {
     const confirmQuantityInput = () => {
         const parsedInput = parseInt(inputValue);
 
-        if (isNaN(parsedInput) || parsedInput < 1) {
-            Alert.alert("Invalid Quantity", "Please enter a valid number greater than 0.");
+        if (isNaN(parsedInput)) {
+            Alert.alert(
+                "Invalid Quantity",
+                "Please enter a valid number.",
+                [{ text: "OK", onPress: () => setInputValue(quantity.toString()) }]
+            );
+            return;
+        }
+
+        if (parsedInput <= 0) {
+            Alert.alert(
+                "Invalid Quantity",
+                "Quantity must be greater than zero.",
+                [{ text: "OK", onPress: () => setInputValue(quantity.toString()) }]
+            );
+            return;
+        }
+
+        // Optional: Add a reasonable maximum limit to prevent accidental large orders
+        if (parsedInput > 9999) {
+            Alert.alert(
+                "Quantity Too Large",
+                "The maximum quantity allowed is 9,999. Please enter a smaller value.",
+                [{ text: "OK", onPress: () => setInputValue(quantity.toString()) }]
+            );
             return;
         }
 
         setQuantity(parsedInput);
         setInputVisible(false);
+
+        // Provide feedback for large quantities
+        if (parsedInput > 100) {
+            Alert.alert(
+                "Large Quantity Added",
+                `You've added ${parsedInput} units of this product. Please confirm this is correct.`,
+                [
+                    {
+                        text: "Change Quantity",
+                        style: "cancel",
+                        onPress: () => {
+                            setInputValue(quantity.toString());
+                            setInputVisible(true);
+                        }
+                    },
+                    { text: "Confirm", style: "default" }
+                ]
+            );
+        }
     };
 
     const totalPrice = parsedPrice * quantity;

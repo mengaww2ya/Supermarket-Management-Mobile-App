@@ -133,11 +133,16 @@ export default function SupplierCategoryProducts() {
 
     const handleProductPress = (product) => {
         router.push({
-            pathname: "/stockManager/ProductDetails",
+            pathname: "/stockManager/AddToSupplierCart",
             params: {
                 productId: product.id,
                 categoryId: product.categoryId,
-                supplier: 'true'
+                productName: product.name || 'Unknown Product',
+                price: product.price || '0',
+                unitType: product.unit || 'unit',
+                image: product.imageUrl || '',
+                supplierId: product.supplierId || '',
+                supplierName: product.supplierName || 'Unknown Supplier'
             }
         });
     };

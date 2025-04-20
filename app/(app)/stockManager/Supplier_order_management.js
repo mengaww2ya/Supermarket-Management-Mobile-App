@@ -91,8 +91,8 @@ export default function SupplierOrderManagement() {
   const [selectProductVisible, setSelectProductVisible] = useState(false);
   const [selectSupplierVisible, setSelectSupplierVisible] = useState(false);
 
-  // Active tab state
-  const [activeTab, setActiveTab] = useState('orders'); // 'orders', 'suppliers', 'analytics'
+  // Active tab state - updated to focus on suppliers and analytics
+  const [activeTab, setActiveTab] = useState('suppliers'); // 'suppliers', 'analytics'
 
   // State for selected items
   const [selectedOrder, setSelectedOrder] = useState(null);
@@ -158,14 +158,11 @@ export default function SupplierOrderManagement() {
 
     // Animate tab indicator on tab change
     switch (activeTab) {
-      case 'orders':
+      case 'suppliers':
         tabIndicatorPosition.value = withTiming(0, { duration: 300, easing: Easing.bezier(0.25, 0.1, 0.25, 1) });
         break;
-      case 'suppliers':
-        tabIndicatorPosition.value = withTiming(width / 3, { duration: 300, easing: Easing.bezier(0.25, 0.1, 0.25, 1) });
-        break;
       case 'analytics':
-        tabIndicatorPosition.value = withTiming((width / 3) * 2, { duration: 300, easing: Easing.bezier(0.25, 0.1, 0.25, 1) });
+        tabIndicatorPosition.value = withTiming(width / 2, { duration: 300, easing: Easing.bezier(0.25, 0.1, 0.25, 1) });
         break;
     }
   }, [activeTab]);
@@ -331,17 +328,14 @@ export default function SupplierOrderManagement() {
     // Set the currently animated order ID
     setAnimatedOrderId(id);
 
-    // First reset to 1
-    animationValue.value = 1;
+    // Provide haptic feedback immediately
+    provideFeedback('light');
 
-    // Then animate
+    // Use a more lightweight animation that won't cause UI freezes
     animationValue.value = withSequence(
-      withTiming(0.95, { duration: 100 }),
+      withTiming(0.97, { duration: 50 }),
       withTiming(1, { duration: 100 })
     );
-
-    // Provide haptic feedback
-    provideFeedback('light');
   };
 
   // Toggle search focus with Reanimated
@@ -618,9 +612,15 @@ export default function SupplierOrderManagement() {
       >
         <Pressable
           onPress={() => {
+            // Changed the press handling to be more efficient
+            provideFeedback('light');
             animatePress(order.id);
-            setSelectedOrder(order);
-            setOrderDetailsVisible(true);
+
+            // Add a small delay to prevent UI freeze when showing the modal
+            setTimeout(() => {
+              setSelectedOrder(order);
+              setOrderDetailsVisible(true);
+            }, 50);
           }}
           className="p-4"
         >
@@ -1805,25 +1805,136 @@ export default function SupplierOrderManagement() {
     return (
       <>
         {renderNewOrderModal()}
-        <SupplierProductDisplay
-          visible={selectProductVisible}
-          onClose={() => setSelectProductVisible(false)}
-          products={products}
-          onSelectProduct={addProductToOrder}
-          provideFeedback={provideFeedback}
-        />
-        <SupplierDisplay
-          visible={selectSupplierVisible}
-          onClose={() => setSelectSupplierVisible(false)}
-          suppliers={suppliers}
-          onSelectSupplier={selectSupplier}
-          provideFeedback={provideFeedback}
-          navigation={router}
-        />
-        {renderDatePickerModal()}
-        {renderDeleteConfirmationModal()}
-        {renderOrderDetailsModal()}
+        {orderDetailsVisible && renderOrderDetailsModal()}
+        {selectProductVisible && (
+          <SupplierProductDisplay
+            visible={selectProductVisible}
+            onClose={() => setSelectProductVisible(false)}
+            products={products}
+            onSelectProduct={addProductToOrder}
+            provideFeedback={provideFeedback}
+          />
+        )}
+        {selectSupplierVisible && (
+          <SupplierDisplay
+            visible={selectSupplierVisible}
+            onClose={() => setSelectSupplierVisible(false)}
+            suppliers={suppliers}
+            onSelectSupplier={selectSupplier}
+            provideFeedback={provideFeedback}
+            navigation={router}
+          />
+        )}
+        {datePickerVisible && renderDatePickerModal()}
+        {deleteConfirmVisible && renderDeleteConfirmationModal()}
+        {renderFilterModal()}
       </>
+    );
+  };
+
+  // Add a render function for the filter modal
+  const renderFilterModal = () => {
+    if (!filterVisible) return null;
+
+    const handleStatusSelect = (status) => {
+      provideFeedback('light');
+      setStatusFilter(status);
+      // Automatically hide the filter panel after selection
+      setFilterVisible(false);
+    };
+
+    return (
+      <Modal
+        visible={filterVisible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setFilterVisible(false)}
+      >
+        <TouchableOpacity
+          style={{
+            flex: 1,
+            backgroundColor: 'rgba(0,0,0,0.5)',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+          activeOpacity={1}
+          onPress={() => setFilterVisible(false)}
+        >
+          <TouchableOpacity
+            activeOpacity={1}
+            onPress={(e) => e.stopPropagation()}
+            style={{
+              width: '90%',
+              backgroundColor: 'white',
+              borderRadius: 15,
+              padding: 20,
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.25,
+              shadowRadius: 3.84,
+              elevation: 5,
+            }}
+          >
+            <View style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: 15,
+            }}>
+              <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#111827' }}>
+                Filter By Status
+              </Text>
+              <TouchableOpacity onPress={() => setFilterVisible(false)}>
+                <Ionicons name="close" size={24} color="#6B7280" />
+              </TouchableOpacity>
+            </View>
+
+            <View>
+              {['All', 'Pending', 'Shipped', 'Delivered'].map(status => (
+                <TouchableOpacity
+                  key={status}
+                  onPress={() => handleStatusSelect(status)}
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    paddingVertical: 12,
+                    paddingHorizontal: 15,
+                    backgroundColor: statusFilter === status ? '#EEF2FF' : 'white',
+                    borderRadius: 8,
+                    marginBottom: 8,
+                  }}
+                >
+                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <View style={{
+                      width: 12,
+                      height: 12,
+                      borderRadius: 6,
+                      backgroundColor:
+                        status === 'All' ? '#9CA3AF' :
+                          status === 'Pending' ? '#F59E0B' :
+                            status === 'Shipped' ? '#3B82F6' :
+                              '#10B981',
+                      marginRight: 10,
+                    }} />
+                    <Text style={{
+                      fontSize: 16,
+                      fontWeight: statusFilter === status ? '600' : 'normal',
+                      color: statusFilter === status ? '#4F46E5' : '#374151',
+                    }}>
+                      {status}
+                    </Text>
+                  </View>
+
+                  {statusFilter === status && (
+                    <Ionicons name="checkmark-circle" size={22} color="#4F46E5" />
+                  )}
+                </TouchableOpacity>
+              ))}
+            </View>
+          </TouchableOpacity>
+        </TouchableOpacity>
+      </Modal>
     );
   };
 
@@ -1856,7 +1967,7 @@ export default function SupplierOrderManagement() {
   // Render content based on active tab
   const renderTabContent = () => {
     switch (activeTab) {
-      case 'orders':
+      case 'suppliers':
         return (
           <ScrollView
             showsVerticalScrollIndicator={false}
@@ -1865,349 +1976,293 @@ export default function SupplierOrderManagement() {
               <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
             }
           >
-            {/* Orders Dashboard Cards */}
-            <View style={{ marginBottom: 20 }}>
-              {/* Create New Order Card */}
-              <TouchableOpacity
-                style={{
-                  backgroundColor: 'white',
-                  borderRadius: 16,
-                  padding: 20,
-                  marginBottom: 16,
-                  borderWidth: 1,
-                  borderColor: '#E5E7EB',
-                  shadowColor: '#000',
-                  shadowOffset: { width: 0, height: 1 },
-                  shadowOpacity: 0.05,
-                  shadowRadius: 3,
-                  elevation: 2,
-                }}
-                onPress={() => {
-                  provideFeedback('medium');
-                  setNewOrderVisible(true);
-                }}
-              >
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <View
-                    style={{
-                      width: 56,
-                      height: 56,
-                      borderRadius: 28,
-                      backgroundColor: '#EEF2FF',
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                      marginRight: 16,
-                    }}
-                  >
-                    <MaterialCommunityIcons name="plus-circle" size={28} color="#4F46E5" />
-                  </View>
-
-                  <View style={{ flex: 1 }}>
-                    <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#111827', marginBottom: 4 }}>
-                      Add New Order
-                    </Text>
-                    <Text style={{ fontSize: 14, color: '#6B7280' }}>
-                      Create a new supplier order
-                    </Text>
-                  </View>
-
-                  <MaterialCommunityIcons name="chevron-right" size={24} color="#9CA3AF" />
+            {/* Order Management Card - Link to SupplierOrders page */}
+            <TouchableOpacity
+              style={{
+                backgroundColor: 'white',
+                borderRadius: 16,
+                padding: 20,
+                marginBottom: 16,
+                borderWidth: 1,
+                borderColor: '#E5E7EB',
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 1 },
+                shadowOpacity: 0.05,
+                shadowRadius: 3,
+                elevation: 2,
+              }}
+              onPress={() => {
+                provideFeedback('medium');
+                router.push('/stockManager/SupplierOrders');
+              }}
+            >
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <View
+                  style={{
+                    width: 56,
+                    height: 56,
+                    borderRadius: 28,
+                    backgroundColor: '#DBEAFE',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    marginRight: 16,
+                  }}
+                >
+                  <MaterialCommunityIcons name="clipboard-list" size={28} color="#2563EB" />
                 </View>
-              </TouchableOpacity>
 
-              {/* View All Suppliers Card */}
-              <TouchableOpacity
-                style={{
-                  backgroundColor: 'white',
-                  borderRadius: 16,
-                  padding: 20,
-                  marginBottom: 16,
-                  borderWidth: 1,
-                  borderColor: '#E5E7EB',
-                  shadowColor: '#000',
-                  shadowOffset: { width: 0, height: 1 },
-                  shadowOpacity: 0.05,
-                  shadowRadius: 3,
-                  elevation: 2,
-                }}
-                onPress={() => {
-                  provideFeedback('light');
-                  router.push('/stockManager/AllSuppliers');
-                }}
-              >
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <View
-                    style={{
-                      width: 56,
-                      height: 56,
-                      borderRadius: 28,
-                      backgroundColor: '#F0FDF4',
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                      marginRight: 16,
-                    }}
-                  >
-                    <MaterialCommunityIcons name="account-group" size={28} color="#059669" />
-                  </View>
-
-                  <View style={{ flex: 1 }}>
-                    <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#111827', marginBottom: 4 }}>
-                      View All Suppliers
-                    </Text>
-                    <Text style={{ fontSize: 14, color: '#6B7280' }}>
-                      Manage your supplier relationships
-                    </Text>
-                  </View>
-
-                  <MaterialCommunityIcons name="chevron-right" size={24} color="#9CA3AF" />
+                <View style={{ flex: 1 }}>
+                  <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#111827', marginBottom: 4 }}>
+                    Manage Orders
+                  </Text>
+                  <Text style={{ fontSize: 14, color: '#6B7280' }}>
+                    View, track, and manage all supplier orders
+                  </Text>
                 </View>
-              </TouchableOpacity>
 
-              {/* Supplier Products Card */}
-              <TouchableOpacity
-                style={{
-                  backgroundColor: 'white',
-                  borderRadius: 16,
-                  padding: 20,
-                  marginBottom: 16,
-                  borderWidth: 1,
-                  borderColor: '#E5E7EB',
-                  shadowColor: '#000',
-                  shadowOffset: { width: 0, height: 1 },
-                  shadowOpacity: 0.05,
-                  shadowRadius: 3,
-                  elevation: 2,
-                }}
-                onPress={() => {
-                  provideFeedback('light');
-                  navigateToSupplierProducts();
-                }}
-              >
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <View
-                    style={{
-                      width: 56,
-                      height: 56,
-                      borderRadius: 28,
-                      backgroundColor: '#E0F2FE',
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                      marginRight: 16,
-                    }}
-                  >
-                    <MaterialCommunityIcons name="package-variant-closed" size={28} color="#0284C7" />
-                  </View>
+                <MaterialCommunityIcons name="chevron-right" size={24} color="#9CA3AF" />
+              </View>
+            </TouchableOpacity>
 
-                  <View style={{ flex: 1 }}>
-                    <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#111827', marginBottom: 4 }}>
-                      Supplier Products
-                    </Text>
-                    <Text style={{ fontSize: 14, color: '#6B7280' }}>
-                      View and manage products from suppliers
-                    </Text>
-                  </View>
-
-                  <MaterialCommunityIcons name="chevron-right" size={24} color="#9CA3AF" />
+            {/* View All Suppliers Card */}
+            <TouchableOpacity
+              style={{
+                backgroundColor: 'white',
+                borderRadius: 16,
+                padding: 20,
+                marginBottom: 16,
+                borderWidth: 1,
+                borderColor: '#E5E7EB',
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 1 },
+                shadowOpacity: 0.05,
+                shadowRadius: 3,
+                elevation: 2,
+              }}
+              onPress={() => {
+                provideFeedback('light');
+                router.push('/stockManager/AllSuppliers');
+              }}
+            >
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <View
+                  style={{
+                    width: 56,
+                    height: 56,
+                    borderRadius: 28,
+                    backgroundColor: '#F0FDF4',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    marginRight: 16,
+                  }}
+                >
+                  <MaterialCommunityIcons name="account-group" size={28} color="#059669" />
                 </View>
-              </TouchableOpacity>
 
-              {/* Supplier Chat Card */}
-              <TouchableOpacity
-                style={{
-                  backgroundColor: 'white',
-                  borderRadius: 16,
-                  padding: 20,
-                  marginBottom: 16,
-                  borderWidth: 1,
-                  borderColor: '#E5E7EB',
-                  shadowColor: '#000',
-                  shadowOffset: { width: 0, height: 1 },
-                  shadowOpacity: 0.05,
-                  shadowRadius: 3,
-                  elevation: 2,
-                }}
-                onPress={() => {
-                  provideFeedback('light');
-                  router.push('/suplier/systemChat');
-                }}
-              >
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <View
-                    style={{
-                      width: 56,
-                      height: 56,
-                      borderRadius: 28,
-                      backgroundColor: '#FCE7F3',
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                      marginRight: 16,
-                    }}
-                  >
-                    <MaterialCommunityIcons name="chat-processing" size={28} color="#DB2777" />
-                  </View>
-
-                  <View style={{ flex: 1 }}>
-                    <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#111827', marginBottom: 4 }}>
-                      Supplier Communication
-                    </Text>
-                    <Text style={{ fontSize: 14, color: '#6B7280' }}>
-                      Chat and message with your suppliers
-                    </Text>
-                  </View>
-
-                  <MaterialCommunityIcons name="chevron-right" size={24} color="#9CA3AF" />
+                <View style={{ flex: 1 }}>
+                  <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#111827', marginBottom: 4 }}>
+                    View All Suppliers
+                  </Text>
+                  <Text style={{ fontSize: 14, color: '#6B7280' }}>
+                    Manage your supplier relationships
+                  </Text>
                 </View>
-              </TouchableOpacity>
 
-              {/* Supplier Delivery Management Card */}
-              <TouchableOpacity
-                style={{
-                  backgroundColor: 'white',
-                  borderRadius: 16,
-                  padding: 20,
-                  marginBottom: 16,
-                  borderWidth: 1,
-                  borderColor: '#E5E7EB',
-                  shadowColor: '#000',
-                  shadowOffset: { width: 0, height: 1 },
-                  shadowOpacity: 0.05,
-                  shadowRadius: 3,
-                  elevation: 2,
-                }}
-                onPress={() => {
-                  provideFeedback('light');
-                  router.push('/suplier/manageDelivery');
-                }}
-              >
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <View
-                    style={{
-                      width: 56,
-                      height: 56,
-                      borderRadius: 28,
-                      backgroundColor: '#FEF3C7',
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                      marginRight: 16,
-                    }}
-                  >
-                    <MaterialCommunityIcons name="truck-delivery" size={28} color="#D97706" />
-                  </View>
+                <MaterialCommunityIcons name="chevron-right" size={24} color="#9CA3AF" />
+              </View>
+            </TouchableOpacity>
 
-                  <View style={{ flex: 1 }}>
-                    <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#111827', marginBottom: 4 }}>
-                      Delivery Management
-                    </Text>
-                    <Text style={{ fontSize: 14, color: '#6B7280' }}>
-                      Track and manage supplier deliveries
-                    </Text>
-                  </View>
-
-                  <MaterialCommunityIcons name="chevron-right" size={24} color="#9CA3AF" />
+            {/* Supplier Products Card */}
+            <TouchableOpacity
+              style={{
+                backgroundColor: 'white',
+                borderRadius: 16,
+                padding: 20,
+                marginBottom: 16,
+                borderWidth: 1,
+                borderColor: '#E5E7EB',
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 1 },
+                shadowOpacity: 0.05,
+                shadowRadius: 3,
+                elevation: 2,
+              }}
+              onPress={() => {
+                provideFeedback('light');
+                navigateToSupplierProducts();
+              }}
+            >
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <View
+                  style={{
+                    width: 56,
+                    height: 56,
+                    borderRadius: 28,
+                    backgroundColor: '#E0F2FE',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    marginRight: 16,
+                  }}
+                >
+                  <MaterialCommunityIcons name="package-variant-closed" size={28} color="#0284C7" />
                 </View>
-              </TouchableOpacity>
 
-              {/* Supplier Performance Analytics Card */}
-              <TouchableOpacity
-                style={{
-                  backgroundColor: 'white',
-                  borderRadius: 16,
-                  padding: 20,
-                  marginBottom: 16,
-                  borderWidth: 1,
-                  borderColor: '#E5E7EB',
-                  shadowColor: '#000',
-                  shadowOffset: { width: 0, height: 1 },
-                  shadowOpacity: 0.05,
-                  shadowRadius: 3,
-                  elevation: 2,
-                }}
-                onPress={() => {
-                  provideFeedback('light');
-                  router.push('/suplier/SPerformanceAnalytics');
-                }}
-              >
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <View
-                    style={{
-                      width: 56,
-                      height: 56,
-                      borderRadius: 28,
-                      backgroundColor: '#EDE9FE',
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                      marginRight: 16,
-                    }}
-                  >
-                    <MaterialCommunityIcons name="chart-bar" size={28} color="#7C3AED" />
-                  </View>
-
-                  <View style={{ flex: 1 }}>
-                    <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#111827', marginBottom: 4 }}>
-                      Performance Analytics
-                    </Text>
-                    <Text style={{ fontSize: 14, color: '#6B7280' }}>
-                      View detailed supplier performance metrics
-                    </Text>
-                  </View>
-
-                  <MaterialCommunityIcons name="chevron-right" size={24} color="#9CA3AF" />
+                <View style={{ flex: 1 }}>
+                  <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#111827', marginBottom: 4 }}>
+                    Supplier Products
+                  </Text>
+                  <Text style={{ fontSize: 14, color: '#6B7280' }}>
+                    View and manage products from suppliers
+                  </Text>
                 </View>
-              </TouchableOpacity>
 
-              {/* Manage Orders Card */}
-              <TouchableOpacity
-                style={{
-                  backgroundColor: 'white',
-                  borderRadius: 16,
-                  padding: 20,
-                  marginBottom: 16,
-                  borderWidth: 1,
-                  borderColor: '#E5E7EB',
-                  shadowColor: '#000',
-                  shadowOffset: { width: 0, height: 1 },
-                  shadowOpacity: 0.05,
-                  shadowRadius: 3,
-                  elevation: 2,
-                }}
-                onPress={() => {
-                  provideFeedback('light');
-                  router.push('/suplier/manageOrder');
-                }}
-              >
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <View
-                    style={{
-                      width: 56,
-                      height: 56,
-                      borderRadius: 28,
-                      backgroundColor: '#DBEAFE',
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                      marginRight: 16,
-                    }}
-                  >
-                    <MaterialCommunityIcons name="clipboard-list" size={28} color="#2563EB" />
-                  </View>
+                <MaterialCommunityIcons name="chevron-right" size={24} color="#9CA3AF" />
+              </View>
+            </TouchableOpacity>
 
-                  <View style={{ flex: 1 }}>
-                    <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#111827', marginBottom: 4 }}>
-                      Manage Orders
-                    </Text>
-                    <Text style={{ fontSize: 14, color: '#6B7280' }}>
-                      Review and manage all supplier orders
-                    </Text>
-                  </View>
-
-                  <MaterialCommunityIcons name="chevron-right" size={24} color="#9CA3AF" />
+            {/* Supplier Chat Card */}
+            <TouchableOpacity
+              style={{
+                backgroundColor: 'white',
+                borderRadius: 16,
+                padding: 20,
+                marginBottom: 16,
+                borderWidth: 1,
+                borderColor: '#E5E7EB',
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 1 },
+                shadowOpacity: 0.05,
+                shadowRadius: 3,
+                elevation: 2,
+              }}
+              onPress={() => {
+                provideFeedback('light');
+                router.push('/suplier/systemChat');
+              }}
+            >
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <View
+                  style={{
+                    width: 56,
+                    height: 56,
+                    borderRadius: 28,
+                    backgroundColor: '#FCE7F3',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    marginRight: 16,
+                  }}
+                >
+                  <MaterialCommunityIcons name="chat-processing" size={28} color="#DB2777" />
                 </View>
-              </TouchableOpacity>
-            </View>
 
-            {/* List of orders */}
-            <View>
-              {/* ... existing code for orders list ... */}
-            </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#111827', marginBottom: 4 }}>
+                    Supplier Communication
+                  </Text>
+                  <Text style={{ fontSize: 14, color: '#6B7280' }}>
+                    Chat and message with your suppliers
+                  </Text>
+                </View>
+
+                <MaterialCommunityIcons name="chevron-right" size={24} color="#9CA3AF" />
+              </View>
+            </TouchableOpacity>
+
+            {/* Supplier Delivery Management Card */}
+            <TouchableOpacity
+              style={{
+                backgroundColor: 'white',
+                borderRadius: 16,
+                padding: 20,
+                marginBottom: 16,
+                borderWidth: 1,
+                borderColor: '#E5E7EB',
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 1 },
+                shadowOpacity: 0.05,
+                shadowRadius: 3,
+                elevation: 2,
+              }}
+              onPress={() => {
+                provideFeedback('light');
+                router.push('/suplier/manageDelivery');
+              }}
+            >
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <View
+                  style={{
+                    width: 56,
+                    height: 56,
+                    borderRadius: 28,
+                    backgroundColor: '#FEF3C7',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    marginRight: 16,
+                  }}
+                >
+                  <MaterialCommunityIcons name="truck-delivery" size={28} color="#D97706" />
+                </View>
+
+                <View style={{ flex: 1 }}>
+                  <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#111827', marginBottom: 4 }}>
+                    Delivery Management
+                  </Text>
+                  <Text style={{ fontSize: 14, color: '#6B7280' }}>
+                    Track and manage supplier deliveries
+                  </Text>
+                </View>
+
+                <MaterialCommunityIcons name="chevron-right" size={24} color="#9CA3AF" />
+              </View>
+            </TouchableOpacity>
+
+            {/* Supplier Performance Analytics Card */}
+            <TouchableOpacity
+              style={{
+                backgroundColor: 'white',
+                borderRadius: 16,
+                padding: 20,
+                marginBottom: 16,
+                borderWidth: 1,
+                borderColor: '#E5E7EB',
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 1 },
+                shadowOpacity: 0.05,
+                shadowRadius: 3,
+                elevation: 2,
+              }}
+              onPress={() => {
+                provideFeedback('light');
+                router.push('/suplier/SPerformanceAnalytics');
+              }}
+            >
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <View
+                  style={{
+                    width: 56,
+                    height: 56,
+                    borderRadius: 28,
+                    backgroundColor: '#EDE9FE',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    marginRight: 16,
+                  }}
+                >
+                  <MaterialCommunityIcons name="chart-bar" size={28} color="#7C3AED" />
+                </View>
+
+                <View style={{ flex: 1 }}>
+                  <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#111827', marginBottom: 4 }}>
+                    Performance Analytics
+                  </Text>
+                  <Text style={{ fontSize: 14, color: '#6B7280' }}>
+                    View detailed supplier performance metrics
+                  </Text>
+                </View>
+
+                <MaterialCommunityIcons name="chevron-right" size={24} color="#9CA3AF" />
+              </View>
+            </TouchableOpacity>
           </ScrollView>
         );
       case 'analytics':
@@ -2229,49 +2284,69 @@ export default function SupplierOrderManagement() {
   const renderHeader = () => (
     <View style={{
       flexDirection: 'row',
-      justifyContent: 'space-between',
       alignItems: 'center',
+      justifyContent: 'space-between',
       paddingHorizontal: 16,
-      paddingTop: insets.top || 20,
-      paddingBottom: 10,
+      paddingTop: Math.max(insets.top, 16),
+      paddingBottom: 16,
       backgroundColor: 'white',
       borderBottomWidth: 1,
       borderBottomColor: '#E5E7EB',
-      zIndex: 10,
     }}>
-      <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#111827' }}>
-        Supplier Management
-      </Text>
       <TouchableOpacity
-        onPress={navigateToCart}
+        onPress={() => router.back()}
         style={{
-          position: 'relative',
-          padding: 6,
+          width: 40,
+          height: 40,
+          justifyContent: 'center',
+          alignItems: 'center',
         }}
       >
-        <Ionicons name="cart-outline" size={28} color="#4F46E5" />
-        {cartItemCount > 0 && (
-          <View style={{
-            position: 'absolute',
-            top: 0,
-            right: 0,
-            backgroundColor: '#EF4444',
-            width: 20,
-            height: 20,
-            borderRadius: 10,
+        <Ionicons name="chevron-back" size={24} color="#111827" />
+      </TouchableOpacity>
+
+      <Text style={{
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#111827',
+      }}>
+        Supplier Management
+      </Text>
+
+      <View style={{ flexDirection: 'row' }}>
+        <TouchableOpacity
+          onPress={navigateToCart}
+          style={{
+            width: 40,
+            height: 40,
             justifyContent: 'center',
             alignItems: 'center',
-          }}>
-            <Text style={{
-              color: 'white',
-              fontSize: 12,
-              fontWeight: 'bold',
+          }}
+        >
+          <Ionicons name="cart-outline" size={28} color="#4F46E5" />
+          {cartItemCount > 0 && (
+            <View style={{
+              position: 'absolute',
+              top: 0,
+              right: 0,
+              backgroundColor: '#EF4444',
+              width: 20,
+              height: 20,
+              borderRadius: 10,
+              justifyContent: 'center',
+              alignItems: 'center',
             }}>
-              {cartItemCount > 9 ? '9+' : cartItemCount}
-            </Text>
-          </View>
-        )}
-      </TouchableOpacity>
+              <Text style={{
+                color: 'white',
+                fontSize: 12,
+                fontWeight: 'bold',
+              }}>
+                {cartItemCount > 9 ? '9+' : cartItemCount}
+              </Text>
+            </View>
+          )}
+        </TouchableOpacity>
+      </View>
     </View>
   );
 
@@ -2291,24 +2366,6 @@ export default function SupplierOrderManagement() {
         height: 50,
         position: 'relative',
       }}>
-        <TouchableOpacity
-          style={{
-            flex: 1,
-            justifyContent: 'center',
-            alignItems: 'center',
-            height: 50,
-          }}
-          onPress={() => setActiveTab('orders')}
-        >
-          <Text style={{
-            fontSize: 16,
-            fontWeight: activeTab === 'orders' ? 'bold' : 'normal',
-            color: activeTab === 'orders' ? '#4F46E5' : '#6B7280',
-          }}>
-            Orders
-          </Text>
-        </TouchableOpacity>
-
         <TouchableOpacity
           style={{
             flex: 1,
@@ -2349,7 +2406,7 @@ export default function SupplierOrderManagement() {
           {
             position: 'absolute',
             bottom: 0,
-            width: width / 3,
+            width: width / 2,
             height: 3,
             backgroundColor: '#4F46E5',
             borderTopLeftRadius: 3,

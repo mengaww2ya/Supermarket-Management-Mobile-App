@@ -195,11 +195,89 @@ export default function SupplierCart() {
 
     const handleProceedToCheckout = () => {
         if (selectedItems.size === 0) {
-            Alert.alert("No items selected", "Please select items to proceed.");
+            Alert.alert(
+                "No Items Selected",
+                "Please select at least one item from your cart to proceed with checkout.",
+                [{ text: "OK", style: 'default' }]
+            );
             return;
         }
 
-        setConfirmOrderVisible(true);
+        // Calculate total amount for selected items
+        const totalAmount = Array.from(selectedItems).reduce((sum, itemId) => {
+            const item = cartItems.find(i => i.id === itemId);
+            return sum + (item ? item.totalPrice : 0);
+        }, 0);
+
+        // Extract selected items data
+        const selectedItemsData = cartItems.filter(item => selectedItems.has(item.id));
+
+        // Perform additional validations
+        if (totalAmount <= 0) {
+            Alert.alert(
+                "Invalid Order Total",
+                "The total amount must be greater than zero. Please check your selected items or add more products to your cart.",
+                [{ text: "OK", style: 'default' }]
+            );
+            return;
+        }
+
+        // Group items by supplier
+        const itemsBySupplier = {};
+        selectedItemsData.forEach(item => {
+            if (!itemsBySupplier[item.supplierId]) {
+                itemsBySupplier[item.supplierId] = {
+                    items: [],
+                    name: item.supplierName || "Unknown Supplier",
+                    id: item.supplierId
+                };
+            }
+            itemsBySupplier[item.supplierId].items.push(item);
+        });
+
+        // Check if multiple suppliers are selected
+        if (Object.keys(itemsBySupplier).length > 1) {
+            Alert.alert(
+                "Multiple Suppliers Detected",
+                "Your cart contains items from different suppliers. Orders must be placed separately for each supplier.",
+                [
+                    { text: "Cancel", style: "cancel" },
+                    {
+                        text: "Select Items From One Supplier",
+                        onPress: () => {
+                            // Deselect all items
+                            setSelectedItems(new Set());
+
+                            // Show helpful message to guide the user
+                            setTimeout(() => {
+                                Alert.alert(
+                                    "Select Items From Same Supplier",
+                                    "Please select items from a single supplier at a time for checkout. This ensures proper order processing and delivery from each supplier.",
+                                    [{ text: "OK", style: "default" }]
+                                );
+                            }, 300);
+                        }
+                    }
+                ]
+            );
+            return;
+        }
+
+        // Get the single supplier
+        const supplierId = Object.keys(itemsBySupplier)[0];
+        const supplierData = itemsBySupplier[supplierId];
+
+        // Navigate to payment screen
+        router.push({
+            pathname: "/stockManager/SupplierPaymentScreen",
+            params: {
+                totalAmount: totalAmount.toString(),
+                supplierId: supplierId,
+                supplierName: supplierData.name,
+                notes: notes,
+                cartItems: JSON.stringify(selectedItemsData)
+            }
+        });
     };
 
     const createSupplierOrder = async () => {

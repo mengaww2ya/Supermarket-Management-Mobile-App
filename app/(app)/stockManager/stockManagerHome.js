@@ -1,8 +1,8 @@
 import React from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 
 export default function StockManagerHome() {
@@ -11,16 +11,16 @@ export default function StockManagerHome() {
   return (
     <SafeAreaView className="flex-1 bg-gray-50">
       <StatusBar style="dark" />
-      
+
       {/* Header */}
       <View className="px-4 py-4 bg-white border-b border-gray-200">
         <Text className="text-2xl font-bold text-gray-800">Stock Manager</Text>
       </View>
 
       {/* Management Tools */}
-      <View className="p-4">
+      <ScrollView className="p-4">
         <Text className="text-lg font-semibold text-gray-800 mb-4">Management Tools</Text>
-        
+
         <View className="flex-row flex-wrap justify-between">
           <TouchableOpacity
             onPress={() => router.push("/stockManager/addProduct")}
@@ -54,8 +54,30 @@ export default function StockManagerHome() {
             <Text className="text-gray-800 font-medium mb-1">Expiration Notifications</Text>
             <Text className="text-gray-500 text-xs">View products approaching expiration</Text>
           </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={() => router.push("/stockManager/Supplier_order_management")}
+            className="w-[48%] bg-white p-4 rounded-xl mb-4 shadow-sm"
+          >
+            <View className="bg-blue-100 w-12 h-12 rounded-full items-center justify-center mb-3">
+              <Ionicons name="business-outline" size={24} color="#3b82f6" />
+            </View>
+            <Text className="text-gray-800 font-medium mb-1">Supplier Management</Text>
+            <Text className="text-gray-500 text-xs">Manage suppliers and catalogs</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={() => router.push("/stockManager/SupplierOrders")}
+            className="w-[48%] bg-white p-4 rounded-xl mb-4 shadow-sm"
+          >
+            <View className="bg-purple-100 w-12 h-12 rounded-full items-center justify-center mb-3">
+              <MaterialCommunityIcons name="clipboard-list-outline" size={24} color="#8b5cf6" />
+            </View>
+            <Text className="text-gray-800 font-medium mb-1">Supplier Orders</Text>
+            <Text className="text-gray-500 text-xs">Manage and track supplier orders</Text>
+          </TouchableOpacity>
         </View>
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 } 
