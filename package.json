@@ -17,7 +17,7 @@
     "@emoji-mart/react": "^1.1.1",
     "@expo/vector-icons": "^14.0.4",
     "@react-native-community/datetimepicker": "^8.2.0",
-    "@react-native-picker/picker": "^2.9.0",
+    "@react-native-picker/picker": "^2.11.0",
     "autoprefixer": "^10.4.20",
     "axios": "^1.8.1",
     "date-fns": "^4.1.0",
