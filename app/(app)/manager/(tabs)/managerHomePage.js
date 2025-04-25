@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import {
   Text,
   View,
@@ -7,13 +7,24 @@ import {
   Dimensions,
   ImageBackground,
   Animated,
+  ActivityIndicator,
+  Alert
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Ionicons, MaterialIcons, FontAwesome5, MaterialCommunityIcons } from "@expo/vector-icons";
+import { Ionicons, MaterialIcons, FontAwesome5, MaterialCommunityIcons, Feather } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import HomeHeader from "../../../components/HomeHeader";
 import * as Haptics from 'expo-haptics';
+import { db } from '../../../../firebase/firebaseConfig';
+import {
+  collection,
+  getDocs,
+  query,
+  where,
+  orderBy,
+  Timestamp
+} from 'firebase/firestore';
 
 const { width } = Dimensions.get("window");
 
@@ -102,14 +113,16 @@ const actionItems = [
 ];
 
 // Performance Metrics
-const performanceMetrics = [
+const performanceMetricsData = [
   {
     title: "Revenue",
-    value: "$120K",
+    value: "120K Birr",
     icon: "trending-up",
     iconType: "MaterialIcons",
     change: "+15%",
-    status: "positive"
+    status: "positive",
+    colorClass: "bg-green-100",
+    iconColor: "#10b981"
   },
   {
     title: "Orders",
@@ -117,15 +130,19 @@ const performanceMetrics = [
     icon: "shopping-cart",
     iconType: "MaterialIcons",
     change: "+8%",
-    status: "positive"
+    status: "positive",
+    colorClass: "bg-red-100",
+    iconColor: "#ef4444"
   },
   {
     title: "Profit",
-    value: "$30K",
+    value: "30K Birr",
     icon: "attach-money",
     iconType: "MaterialIcons",
     change: "+12%",
-    status: "positive"
+    status: "positive",
+    colorClass: "bg-blue-100",
+    iconColor: "#3b82f6"
   },
   {
     title: "Feedback",
@@ -133,7 +150,9 @@ const performanceMetrics = [
     icon: "star",
     iconType: "MaterialIcons",
     change: "+0.2",
-    status: "positive"
+    status: "positive",
+    colorClass: "bg-purple-100",
+    iconColor: "#8b5cf6"
   }
 ];
 
@@ -169,7 +188,7 @@ const quickLinks = [
   }
 ];
 
-// Action Card component with animation
+// Action Card component with animation - updated to grid style
 const ActionCard = ({ item, index, onPress }) => {
   const scaleAnim = useRef(new Animated.Value(1)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
@@ -216,9 +235,9 @@ const ActionCard = ({ item, index, onPress }) => {
   };
 
   return (
-    <Animated.View 
+    <Animated.View
       style={{
-        width: "100%",
+        width: "48%",
         marginBottom: 16,
         transform: [
           { scale: scaleAnim },
@@ -229,102 +248,72 @@ const ActionCard = ({ item, index, onPress }) => {
     >
       <TouchableOpacity
         style={{
-          borderRadius: 20,
+          borderRadius: 16,
           overflow: "hidden",
-          elevation: 2,
+          backgroundColor: `${item.color}15`,
+          padding: 16,
           shadowColor: "#000",
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.08,
-          shadowRadius: 6,
-          backgroundColor: 'white',
-          height: 120,
+          shadowOffset: { width: 0, height: 1 },
+          shadowOpacity: 0.05,
+          shadowRadius: 3,
         }}
         onPress={handlePress}
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
         activeOpacity={1}
       >
-        <LinearGradient
-          colors={item.gradient}
-          start={[0, 0]}
-          end={[1, 1]}
-          style={{
-            flex: 1,
-            padding: 18,
-            flexDirection: "row",
-            alignItems: "center",
-  }}
-      >
-          <View style={{
-            width: 70,
-            height: 70,
-            borderRadius: 20,
-            backgroundColor: `${item.color}15`,
-            alignItems: "center",
-            justifyContent: "center",
-            borderWidth: 1,
-            borderColor: `${item.color}20`,
-            marginRight: 18,
-          }}>
-            {item.iconType === "MaterialCommunityIcons" && (
-              <MaterialCommunityIcons name={item.icon} size={36} color={item.color} />
-            )}
-          </View>
-          
-          <View style={{ flex: 1 }}>
-            <Text style={{ 
-              fontSize: 18, 
-              fontWeight: "bold", 
-              color: "#1F2937", 
-              marginBottom: 6,
-            }}>
-              {item.title}
-              </Text>
+        <View style={{
+          width: 48,
+          height: 48,
+          borderRadius: 12,
+          backgroundColor: `${item.color}25`,
+          alignItems: "center",
+          justifyContent: "center",
+          marginBottom: 12,
+        }}>
+          {item.iconType === "MaterialCommunityIcons" && (
+            <MaterialCommunityIcons name={item.icon} size={24} color={item.color} />
+          )}
+        </View>
 
-            <Text style={{ 
-              fontSize: 14, 
-              color: "#6B7280",
-              marginBottom: 8,
-            }} numberOfLines={2}>
-              {item.subtitle}
-              </Text>
-            
-            <View style={{
-              paddingHorizontal: 12,
-              paddingVertical: 5,
-              borderRadius: 100,
-              backgroundColor: `${item.color}10`,
-              alignSelf: "flex-start",
-              borderWidth: 1,
-              borderColor: `${item.color}20`,
-            }}>
-              <Text style={{ 
-                fontSize: 12, 
-                color: item.color,
-                fontWeight: "600" 
-              }}>
-                {item.stats}
-              </Text>
-            </View>
-          </View>
+        <Text style={{
+          fontSize: 16,
+          fontWeight: "bold",
+          color: "#1F2937",
+          marginBottom: 4,
+        }}>
+          {item.title}
+        </Text>
 
-          <View style={{
-            alignItems: "center",
-            paddingLeft: 20,
+        <Text style={{
+          fontSize: 12,
+          color: "#6B7280",
+          marginBottom: 8,
+        }} numberOfLines={2}>
+          {item.subtitle}
+        </Text>
+
+        <View style={{
+          paddingHorizontal: 8,
+          paddingVertical: 4,
+          borderRadius: 100,
+          backgroundColor: `${item.color}15`,
+          alignSelf: "flex-start",
+        }}>
+          <Text style={{
+            fontSize: 10,
+            color: item.color,
+            fontWeight: "600"
           }}>
-            <MaterialIcons 
-              name="arrow-forward-ios" 
-              size={20} 
-              color="#9CA3AF"
-              />
-            </View>
-        </LinearGradient>
+            {item.stats}
+          </Text>
+        </View>
       </TouchableOpacity>
     </Animated.View>
   );
 };
 
-// Metric Card component with animation
+// Metric Card component - updated to match supplier style
 const MetricCard = ({ metric, index }) => {
   const scaleAnim = useRef(new Animated.Value(0.95)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
@@ -347,7 +336,7 @@ const MetricCard = ({ metric, index }) => {
   }, []);
 
   return (
-    <Animated.View 
+    <Animated.View
       style={{
         width: "48%",
         marginBottom: 16,
@@ -359,51 +348,52 @@ const MetricCard = ({ metric, index }) => {
         backgroundColor: "white",
         borderRadius: 16,
         padding: 16,
-        elevation: 3,
         shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        height: 130
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.05,
+        shadowRadius: 3,
       }}>
         <View style={{
-          width: 40,
-          height: 40,
-          borderRadius: 10,
-          backgroundColor: `rgba(79, 70, 229, 0.1)`,
-          justifyContent: "center",
+          flexDirection: "row",
+          justifyContent: "space-between",
           alignItems: "center",
-          marginBottom: 12
+          marginBottom: 8
         }}>
-          {metric.iconType === "MaterialIcons" && (
-            <MaterialIcons name={metric.icon} size={20} color="#4F46E5" />
-          )}
+          <View style={{
+            width: 40,
+            height: 40,
+            borderRadius: 10,
+            backgroundColor: `rgba(79, 70, 229, 0.1)`,
+            justifyContent: "center",
+            alignItems: "center",
+          }}>
+            {metric.iconType === "MaterialIcons" && (
+              <MaterialIcons name={metric.icon} size={20} color={metric.iconColor} />
+            )}
+          </View>
+
+          <View style={{
+            backgroundColor: metric.status === "positive" ? "rgba(16, 185, 129, 0.1)" : "rgba(239, 68, 68, 0.1)",
+            paddingHorizontal: 8,
+            paddingVertical: 4,
+            borderRadius: 100
+          }}>
+            <Text style={{
+              fontSize: 12,
+              color: metric.status === "positive" ? "#10B981" : "#EF4444",
+              fontWeight: "600"
+            }}>
+              {metric.change}
+            </Text>
+          </View>
         </View>
-        
+
         <View>
           <Text style={{ fontSize: 20, fontWeight: "bold", color: "#1F2937", marginBottom: 4 }}>
             {metric.value}
           </Text>
           <Text style={{ fontSize: 14, color: "#6B7280" }}>
             {metric.title}
-          </Text>
-        </View>
-        
-        <View style={{
-          position: "absolute",
-          top: 16,
-          right: 16,
-          backgroundColor: metric.status === "positive" ? "rgba(16, 185, 129, 0.1)" : "rgba(239, 68, 68, 0.1)",
-          paddingHorizontal: 8,
-          paddingVertical: 4,
-          borderRadius: 100
-        }}>
-          <Text style={{
-            fontSize: 12,
-            color: metric.status === "positive" ? "#10B981" : "#EF4444",
-            fontWeight: "600"
-          }}>
-            {metric.change}
           </Text>
         </View>
       </View>
@@ -462,11 +452,10 @@ const QuickAccessButton = ({ link, index, onPress }) => {
           padding: 16,
           alignItems: "center",
           flexDirection: "row",
-          elevation: 3,
           shadowColor: "#000",
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.1,
-          shadowRadius: 4
+          shadowOffset: { width: 0, height: 1 },
+          shadowOpacity: 0.05,
+          shadowRadius: 3
         }}
         onPress={handlePress}
         onPressIn={handlePressIn}
@@ -485,12 +474,12 @@ const QuickAccessButton = ({ link, index, onPress }) => {
           {link.iconType === "MaterialIcons" && (
             <MaterialIcons name={link.icon} size={28} color={link.color} />
           )}
-            </View>
-        <Text style={{ 
+        </View>
+        <Text style={{
           flex: 1,
-          fontSize: 15, 
-          fontWeight: "600", 
-          color: "#374151" 
+          fontSize: 15,
+          fontWeight: "600",
+          color: "#374151"
         }}>
           {link.title}
         </Text>
@@ -525,7 +514,7 @@ const TaskItem = ({ task, index }) => {
 
   const handleToggleComplete = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    
+
     // Animate the task when marked complete
     Animated.sequence([
       Animated.timing(scaleAnim, {
@@ -539,7 +528,7 @@ const TaskItem = ({ task, index }) => {
         useNativeDriver: true
       })
     ]).start();
-    
+
     setCompleted(!completed);
   };
 
@@ -558,15 +547,12 @@ const TaskItem = ({ task, index }) => {
         flexDirection: "row",
         alignItems: "center",
         shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
+        shadowOffset: { width: 0, height: 1 },
         shadowOpacity: 0.05,
         shadowRadius: 3,
-        elevation: 1,
-        borderWidth: 1,
-        borderColor: completed ? "#D1D5DB" : "#E5E7EB",
       }}
     >
-            <TouchableOpacity
+      <TouchableOpacity
         onPress={handleToggleComplete}
         style={{
           width: 24,
@@ -583,23 +569,23 @@ const TaskItem = ({ task, index }) => {
         {completed && (
           <MaterialIcons name="check" size={16} color="white" />
         )}
-            </TouchableOpacity>
-      
-      <Text 
-        style={{ 
-          flex: 1, 
-          fontSize: 16, 
-          fontWeight: "500", 
+      </TouchableOpacity>
+
+      <Text
+        style={{
+          flex: 1,
+          fontSize: 16,
+          fontWeight: "500",
           color: completed ? "#9CA3AF" : "#374151",
           textDecorationLine: completed ? 'line-through' : 'none',
         }}
       >
         {task.text}
-                </Text>
-      
+      </Text>
+
       <View style={{
-        backgroundColor: task.priority === "high" ? "#FEE2E2" : 
-                         task.priority === "medium" ? "#FEF3C7" : "#DBEAFE",
+        backgroundColor: task.priority === "high" ? "#FEE2E2" :
+          task.priority === "medium" ? "#FEF3C7" : "#DBEAFE",
         paddingHorizontal: 10,
         paddingVertical: 4,
         borderRadius: 100,
@@ -607,40 +593,36 @@ const TaskItem = ({ task, index }) => {
         <Text style={{
           fontSize: 12,
           fontWeight: "600",
-          color: task.priority === "high" ? "#EF4444" : 
-                 task.priority === "medium" ? "#F59E0B" : "#3B82F6",
+          color: task.priority === "high" ? "#EF4444" :
+            task.priority === "medium" ? "#F59E0B" : "#3B82F6",
         }}>
           {task.priority}
-              </Text>
+        </Text>
       </View>
     </Animated.View>
   );
 };
 
 // Section Header component
-const SectionHeader = ({ title, color = "#4F46E5" }) => {
+const SectionHeader = ({ title, color = "#4F46E5", icon }) => {
   return (
-    <View style={{ 
-      flexDirection: "row", 
-      alignItems: "center", 
+    <View style={{
+      flexDirection: "row",
+      justifyContent: "center",
+      alignItems: "center",
       marginBottom: 16,
       marginTop: 16
     }}>
-      <View style={{
-        width: 6,
-        height: 24,
-        backgroundColor: color,
-        borderRadius: 3,
-        marginRight: 10
-      }} />
-      <Text style={{ 
-        fontSize: 20, 
-        fontWeight: "bold", 
-        color: "#1F2937",
-        flex: 1
+      {icon && (
+        <Feather name={icon} size={20} color={color} style={{ marginRight: 8 }} />
+      )}
+      <Text style={{
+        fontSize: 18,
+        fontWeight: "semibold",
+        color: "#1F2937"
       }}>
         {title}
-                </Text>
+      </Text>
     </View>
   );
 };
@@ -650,12 +632,151 @@ export default function ManagerHomePage() {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const [focusExpanded, setFocusExpanded] = React.useState(true);
 
+  // Performance metrics state (from Firebase)
+  const [performanceMetrics, setPerformanceMetrics] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+
   useEffect(() => {
     Animated.timing(fadeAnim, {
       toValue: 1,
       duration: 600,
       useNativeDriver: true
     }).start();
+
+    // Fetch data from Firebase
+    const fetchPerformanceData = async () => {
+      setIsLoading(true);
+      try {
+        // Get orders from dedicated orders collection
+        const ordersRef = collection(db, 'orders');
+        const ordersQuery = query(ordersRef, orderBy('createdAt', 'desc'));
+        const ordersSnapshot = await getDocs(ordersQuery);
+
+        let pendingCount = 0;
+        let processingCount = 0;
+        let inTransitCount = 0;
+        let deliveredCount = 0;
+        let cancelledCount = 0;
+        let totalSalesAmount = 0;
+        let todaySalesAmount = 0;
+        let totalOrders = 0;
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const todayTimestamp = Timestamp.fromDate(today);
+
+        // Get order data from main orders collection
+        ordersSnapshot.forEach(doc => {
+          const orderData = { id: doc.id, ...doc.data() };
+          totalOrders++;
+
+          // Count orders by status
+          const status = orderData.status?.charAt(0).toUpperCase() + orderData.status?.slice(1).toLowerCase() || 'Pending';
+
+          switch (status) {
+            case 'Pending':
+              pendingCount++;
+              break;
+            case 'Processing':
+              processingCount++;
+              break;
+            case 'In Transit':
+            case 'In transit':
+              inTransitCount++;
+              break;
+            case 'Delivered':
+              deliveredCount++;
+              break;
+            case 'Cancelled':
+            case 'Canceled':
+              cancelledCount++;
+              break;
+          }
+
+          // Calculate revenue from non-cancelled orders
+          if (status !== 'Cancelled' && status !== 'Canceled') {
+            // Try to get amount from payment object first
+            let orderTotal = 0;
+
+            if (orderData.payment && orderData.payment.amount) {
+              orderTotal = parseFloat(orderData.payment.amount);
+            }
+            // Otherwise calculate from items
+            else if (orderData.cartItems && orderData.cartItems.length > 0) {
+              orderTotal = orderData.cartItems.reduce((sum, item) =>
+                sum + (parseFloat(item.price) * (item.quantity || 1)), 0);
+            }
+            // If amount is directly on the order
+            else if (orderData.totalAmount) {
+              orderTotal = parseFloat(orderData.totalAmount);
+            }
+
+            totalSalesAmount += orderTotal;
+
+            // Calculate today's sales
+            if (orderData.createdAt && orderData.createdAt.toDate() >= todayTimestamp.toDate()) {
+              todaySalesAmount += orderTotal;
+            }
+          }
+        });
+
+        // Format the metrics for display
+        const formattedData = [
+          {
+            title: "Revenue",
+            value: `${Math.round(totalSalesAmount / 1000)}K Birr`,
+            icon: "trending-up",
+            iconType: "MaterialIcons",
+            change: `+${Math.round((todaySalesAmount / totalSalesAmount) * 100)}%`,
+            status: "positive",
+            colorClass: "bg-green-100",
+            iconColor: "#10b981"
+          },
+          {
+            title: "Orders",
+            value: totalOrders.toLocaleString(),
+            icon: "shopping-cart",
+            iconType: "MaterialIcons",
+            change: `+${Math.round((pendingCount / totalOrders) * 100)}%`,
+            status: "positive",
+            colorClass: "bg-red-100",
+            iconColor: "#ef4444"
+          },
+          {
+            title: "Profit",
+            value: `${Math.round((totalSalesAmount * 0.25) / 1000)}K Birr`, // Assuming 25% profit margin
+            icon: "attach-money",
+            iconType: "MaterialIcons",
+            change: `+${Math.round((todaySalesAmount * 0.25) / (totalSalesAmount * 0.25) * 100)}%`,
+            status: "positive",
+            colorClass: "bg-blue-100",
+            iconColor: "#3b82f6"
+          },
+          {
+            title: "Order Completion",
+            value: `${Math.round((deliveredCount / totalOrders) * 100)}%`,
+            icon: "check-circle",
+            iconType: "MaterialIcons",
+            change: `+${deliveredCount}`,
+            status: "positive",
+            colorClass: "bg-purple-100",
+            iconColor: "#8b5cf6"
+          }
+        ];
+
+        setPerformanceMetrics(formattedData);
+      } catch (err) {
+        console.error("Error fetching performance data:", err);
+        setError("Failed to load performance data");
+        // Fallback to default data if fetch fails
+        setPerformanceMetrics(performanceMetricsData);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchPerformanceData();
   }, []);
 
   const handleNavigation = (route) => {
@@ -677,7 +798,7 @@ export default function ManagerHomePage() {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#F3F4F6" }}>
       <HomeHeader title="Manager Dashboard" />
-      
+
       <ScrollView
         showsVerticalScrollIndicator={false}
         style={{
@@ -687,184 +808,189 @@ export default function ManagerHomePage() {
         }}
       >
         <Animated.View style={{ opacity: fadeAnim }}>
-          {/* Welcome Message */}
-          <View style={{ marginBottom: 20 }}>
-            <Text style={{ 
-              color: "#4F46E5", 
-              fontSize: 18, 
-              fontWeight: "600",
-            }}>
-              Welcome back, Manager
-            </Text>
-            <Text style={{ 
-              color: "#6B7280", 
-              fontSize: 14, 
-              marginTop: 4,
-            }}>
-              Tuesday, 2 April 2024
-            </Text>
+          {/* Welcome Message Removed */}
+
+          {/* Performance Metrics - Updated to database-based style */}
+          <SectionHeader title="Performance Overview" color="#4F46E5" icon="bar-chart-2" />
+
+          <View style={{ flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between", marginBottom: 8 }}>
+            {isLoading ? (
+              // Loading skeleton placeholders
+              [...Array(4)].map((_, index) => (
+                <View
+                  key={index}
+                  style={{
+                    width: "48%",
+                    marginBottom: 16,
+                    backgroundColor: "#F9FAFB",
+                    borderRadius: 16,
+                    padding: 16,
+                    height: 140,
+                  }}
+                >
+                  <View style={{
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    marginBottom: 8
+                  }}>
+                    <View style={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: 10,
+                      backgroundColor: "#EAECF0",
+                    }} />
+                    <View style={{
+                      width: 60,
+                      height: 24,
+                      borderRadius: 100,
+                      backgroundColor: "#EAECF0",
+                    }} />
+                  </View>
+
+                  <View style={{ marginTop: 20 }}>
+                    <View style={{
+                      height: 24,
+                      width: "60%",
+                      backgroundColor: "#EAECF0",
+                      borderRadius: 4,
+                      marginBottom: 8
+                    }} />
+                    <View style={{
+                      height: 16,
+                      width: "40%",
+                      backgroundColor: "#EAECF0",
+                      borderRadius: 4
+                    }} />
+                  </View>
+                </View>
+              ))
+            ) : error ? (
+              // Error state
+              <View style={{
+                width: "100%",
+                padding: 16,
+                backgroundColor: "#FEF2F2",
+                borderRadius: 12,
+                flexDirection: "row",
+                alignItems: "center"
+              }}>
+                <MaterialIcons name="error-outline" size={24} color="#DC2626" style={{ marginRight: 12 }} />
+                <Text style={{ color: "#B91C1C", flex: 1 }}>{error}</Text>
+                <TouchableOpacity
+                  style={{
+                    padding: 8,
+                    backgroundColor: "#DC2626",
+                    borderRadius: 8
+                  }}
+                  onPress={() => {
+                    setError(null);
+                    setIsLoading(true);
+                    // Re-fetch data
+                    setTimeout(() => {
+                      setPerformanceMetrics(performanceMetricsData);
+                      setIsLoading(false);
+                    }, 1000);
+                  }}
+                >
+                  <Text style={{ color: "white", fontSize: 12, fontWeight: "500" }}>Retry</Text>
+                </TouchableOpacity>
+              </View>
+            ) : (
+              // Actual data
+              performanceMetrics.map((metric, index) => (
+                <MetricCard key={index} metric={metric} index={index} />
+              ))
+            )}
           </View>
-          
-          {/* Performance Metrics */}
-          <SectionHeader title="Performance Overview" color="#4F46E5" />
-          
-          <View style={{ flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between" }}>
-            {performanceMetrics.map((metric, index) => (
-              <MetricCard key={index} metric={metric} index={index} />
-            ))}
-          </View>
-          
+
           {/* Quick Access */}
-          <SectionHeader title="Quick Access" color="#10B981" />
-          
+          <SectionHeader title="Quick Access" color="#10B981" icon="compass" />
+
           <View style={{ flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between" }}>
             {quickLinks.map((link, index) => (
-              <QuickAccessButton 
-                key={index} 
-                link={link} 
-                index={index} 
+              <QuickAccessButton
+                key={index}
+                link={link}
+                index={index}
                 onPress={handleNavigation}
               />
             ))}
           </View>
-          
-          {/* Management Actions */}
-          <SectionHeader title="Management Actions" color="#F59E0B" />
-          
-          <View style={{ 
-            flexDirection: "row", 
-            flexWrap: "wrap", 
+
+          {/* Management Actions - Updated to grid cards style */}
+          <SectionHeader title="Management Actions" color="#F59E0B" icon="settings" />
+
+          <View style={{
+            flexDirection: "row",
+            flexWrap: "wrap",
             justifyContent: "space-between",
             marginTop: 8,
             marginBottom: 16
           }}>
             {actionItems.map((item, index) => (
-              <ActionCard 
-                key={index} 
-                item={item} 
-                index={index} 
+              <ActionCard
+                key={index}
+                item={item}
+                index={index}
                 onPress={handleNavigation}
               />
             ))}
-            </View>
+          </View>
 
           {/* Today's Focus */}
-          <View style={{
-            flexDirection: "row", 
-            alignItems: "center", 
-            marginBottom: 16,
-            marginTop: 16
-          }}>
+          <View style={{ marginBottom: 32 }}>
             <View style={{
-              width: 6,
-              height: 24,
-              backgroundColor: "#4B5563",
-              borderRadius: 3,
-              marginRight: 10
-            }} />
-            <Text style={{ 
-              fontSize: 20, 
-              fontWeight: "bold", 
-              color: "#1F2937",
-              flex: 1
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "space-between",
+              marginBottom: 16,
+              marginTop: 16
             }}>
-              Today's Focus
-            </Text>
-            <TouchableOpacity
-              onPress={toggleFocusSection}
-              style={{
-                padding: 8,
-                borderRadius: 20,
-                backgroundColor: "#F3F4F6"
-              }}
-            >
-              <MaterialIcons 
-                name={focusExpanded ? "expand-less" : "expand-more"} 
-                size={24} 
-                color="#6B7280" 
-              />
-            </TouchableOpacity>
-          </View>
-          
-          {focusExpanded && (
-            <View style={{
-              backgroundColor: "white",
-              borderRadius: 20,
-              marginBottom: 30,
-              overflow: "hidden",
-              elevation: 2,
-              shadowColor: "#000",
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 0.08,
-              shadowRadius: 8,
-              borderWidth: 1,
-              borderColor: "#F3F4F6"
-            }}>
-              <View style={{ padding: 20 }}>
-                <View style={{ 
-                  flexDirection: "row", 
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  marginBottom: 16
+              <View style={{ flexDirection: "row", alignItems: "center" }}>
+                <View style={{
+                  width: 6,
+                  height: 24,
+                  backgroundColor: "#4F46E5",
+                  borderRadius: 3,
+                  marginRight: 10
+                }} />
+                <Text style={{
+                  fontSize: 20,
+                  fontWeight: "bold",
+                  color: "#1F2937",
                 }}>
-                  <Text style={{ 
-                    fontSize: 16, 
-                    fontWeight: "600",
-                    color: "#4B5563" 
-                  }}>
-                    Your priority tasks for today
-              </Text>
+                  Today's Focus
+                </Text>
+              </View>
 
-            <TouchableOpacity
-                    style={{
-                      flexDirection: "row",
-                      alignItems: "center",
-                      backgroundColor: "#F9FAFB",
-                      paddingHorizontal: 12,
-                      paddingVertical: 6,
-                      borderRadius: 100,
-                      borderWidth: 1,
-                      borderColor: "#E5E7EB"
-                    }}
-                  >
-                    <MaterialIcons name="add" size={18} color="#4B5563" />
-                    <Text style={{ 
-                      marginLeft: 4, 
-                      fontSize: 14, 
-                      fontWeight: "500",
-                      color: "#4B5563"
-                    }}>
-                      Add Task
-                    </Text>
-            </TouchableOpacity>
-          </View>
-                
+              <TouchableOpacity
+                onPress={toggleFocusSection}
+                style={{
+                  width: 36,
+                  height: 36,
+                  borderRadius: 18,
+                  backgroundColor: "#F3F4F6",
+                  justifyContent: "center",
+                  alignItems: "center"
+                }}
+              >
+                <MaterialIcons
+                  name={focusExpanded ? "expand-less" : "expand-more"}
+                  size={24}
+                  color="#6B7280"
+                />
+              </TouchableOpacity>
+            </View>
+
+            {focusExpanded && (
+              <View style={{ marginTop: 8 }}>
                 {todaysTasks.map((task, index) => (
                   <TaskItem key={task.id} task={task} index={index} />
                 ))}
-            </View>
-
-            <TouchableOpacity
-                style={{
-                  padding: 16,
-                  borderTopWidth: 1,
-                  borderTopColor: "#F3F4F6",
-                  alignItems: "center",
-                  flexDirection: "row",
-                  justifyContent: "center"
-                }}
-              >
-                <Text style={{ 
-                  fontSize: 14, 
-                  fontWeight: "600", 
-                  color: "#6B7280",
-                }}>
-                  View All Tasks
-                </Text>
-                <MaterialIcons name="arrow-forward" size={16} color="#6B7280" style={{ marginLeft: 4 }} />
-            </TouchableOpacity>
+              </View>
+            )}
           </View>
-          )}
         </Animated.View>
       </ScrollView>
     </SafeAreaView>

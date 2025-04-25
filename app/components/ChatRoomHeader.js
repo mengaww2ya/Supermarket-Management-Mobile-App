@@ -208,31 +208,8 @@ export default function ChatRoomHeader({ title, photoURL, online, typing, role }
     const goBack = () => {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
-        // Add debug logging
-        console.log("[ChatRoomHeader] Going back with role:", role);
-
-        // Instead of using router.back() which may navigate incorrectly,
-        // navigate to specific routes based on user role
-        try {
-            if (role === 'supplier') {
-                console.log("[ChatRoomHeader] Navigating to supplier chat");
-                router.replace('/(app)/suplier/(tabs)/chat');
-            } else if (role === 'deliveryAgent') {
-                console.log("[ChatRoomHeader] Navigating to delivery agent chat");
-                router.replace('/(app)/deliveryAgent/(tabs)/chat');
-            } else if (role === 'customer') {
-                console.log("[ChatRoomHeader] Navigating to customer tabs");
-                router.replace('/(app)/customer/(tabs)');
-            } else {
-                // Fallback to a safe route if role is not recognized
-                console.log("[ChatRoomHeader] No specific back route for role:", role);
-                router.replace('/(app)');
-            }
-        } catch (error) {
-            console.error('[ChatRoomHeader] Navigation error:', error);
-            // Emergency fallback
-            router.replace('/(app)');
-        }
+        // Use router.back() to navigate back to the previous screen
+        router.back();
     };
 
     // Safely get the first character for avatar
