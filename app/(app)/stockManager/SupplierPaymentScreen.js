@@ -150,6 +150,14 @@ const SupplierPaymentScreen = () => {
 
     const customVerifyPayment = async (txRef) => {
         try {
+            if (!txRef) {
+                console.error('Cannot verify payment: Missing transaction reference');
+                return {
+                    status: 'error',
+                    message: 'Missing transaction reference'
+                };
+            }
+
             console.log(`Custom payment verification for transaction: ${txRef}`);
 
             // Check payment status directly using the Chapa API
@@ -185,6 +193,14 @@ const SupplierPaymentScreen = () => {
                             message: 'Payment is being processed'
                         };
                     }
+                    // If payment failed or was declined
+                    else if (response.data.data.status === 'failed' || response.data.data.status === 'declined') {
+                        return {
+                            status: 'failed',
+                            data: response.data.data,
+                            message: 'Payment was declined or failed'
+                        };
+                    }
                 }
                 // API response was successful but status is unknown
                 return {
@@ -215,10 +231,33 @@ const SupplierPaymentScreen = () => {
     };
 
     const initiatePayment = async () => {
+        // Reset previous payment status whenever a new payment is initiated
+        setPaymentStatus('pending');
+        setVerificationSuccess(false);
+        setVerificationError(false);
+
         if (!paymentMethod) {
             Alert.alert(
                 "Payment Method Required",
                 "Please select a payment method to continue with your purchase.",
+                [{ text: "OK" }]
+            );
+            return;
+        }
+
+        if (!currentUser) {
+            Alert.alert(
+                "Authentication Required",
+                "You must be logged in to make a payment. Please log in and try again.",
+                [{ text: "OK" }]
+            );
+            return;
+        }
+
+        if (!cartItems || cartItems.length === 0) {
+            Alert.alert(
+                "Empty Cart",
+                "Your cart is empty. Please add items before proceeding to payment.",
                 [{ text: "OK" }]
             );
             return;
@@ -391,30 +430,34 @@ const SupplierPaymentScreen = () => {
     };
 
     const handlePaymentSuccess = async (paymentProvider, isVerified = false) => {
-        // Ensure we have actual payment verification before proceeding
-        if (paymentStatus !== 'success' && !verificationSuccess && !isVerified) {
-            console.error('Attempted to complete order without verified payment');
-            Alert.alert(
-                'Verification Required',
-                'We cannot process your order until payment is verified. Please try again or contact support.',
-                [{ text: 'OK' }]
-            );
-            setIsProcessing(false);
-            return;
-        }
-
-        // Set payment status as success
-        setPaymentStatus('success');
-
-        // Show loading indicator
-        setIsProcessing(true);
-
-        const orderRef = `SO-${Date.now()}`;
-
         try {
+            // Double-check verification was successful before proceeding
+            if (paymentStatus !== 'success' && !verificationSuccess && !isVerified) {
+                console.error('Payment verification required before proceeding with order');
+                Alert.alert(
+                    'Payment Verification Failed',
+                    'We cannot process your order until payment is verified. Please try again or contact support.',
+                    [{ text: 'OK' }]
+                );
+                setIsProcessing(false);
+                return;
+            }
+
+            // Additional validation to ensure payment is truly verified
+            if (paymentProvider === undefined || paymentProvider === null || paymentProvider === '') {
+                console.error('Invalid payment provider specified');
+                setIsProcessing(false);
+                Alert.alert('Payment Error', 'Invalid payment method. Please try again with a valid payment method.');
+                return;
+            }
+
+            // Set payment status and start processing
+            setIsProcessing(true);
+            setPaymentStatus('success');
+
             // Validate current user
             if (!currentUser) {
-                throw new Error("Authentication error: User is not logged in");
+                throw new Error('User authentication required');
             }
 
             // Validate cart items
@@ -437,7 +480,7 @@ const SupplierPaymentScreen = () => {
 
             // Create the supplier order data with additional metadata
             const orderData = {
-                supplierOrderRef: orderRef,
+                supplierOrderRef: `SO-${Date.now()}`,
                 supplierId,
                 supplierName,
                 items: cartItems.map(item => ({
@@ -476,7 +519,7 @@ const SupplierPaymentScreen = () => {
                 ]
             };
 
-            console.log('Saving supplier order to database...', orderRef);
+            console.log('Saving supplier order to database...', orderData.supplierOrderRef);
 
             // Store order in the SupplierOrders collection
             const orderDocRef = await addDoc(collection(db, 'SupplierOrders'), orderData);
@@ -539,6 +582,12 @@ const SupplierPaymentScreen = () => {
         setIsProcessing(false);
         setPaymentStatus('failed');
 
+        // Ensure no order processing can happen after payment failure
+        setVerificationSuccess(false);
+
+        // Log the payment failure for troubleshooting
+        console.error('Payment failed:', { txRef, message });
+
         Alert.alert(
             'Payment Verification Failed',
             message || 'We could not verify your payment. If you believe you have paid, please contact support with your transaction reference: ' + txRef,
@@ -562,6 +611,15 @@ const SupplierPaymentScreen = () => {
                     onPress: () => {
                         // This could open an email or support chat in a real app
                         Alert.alert('Support', 'Please email support@yourapp.com with your transaction reference: ' + txRef);
+                    }
+                },
+                {
+                    text: 'Cancel Order',
+                    style: 'cancel',
+                    onPress: () => {
+                        // Cancel the entire order and go back to supplier screen
+                        Alert.alert('Order Cancelled', 'Your order has been cancelled.');
+                        router.push('/stockManager/SupplierCatalog');
                     }
                 }
             ]

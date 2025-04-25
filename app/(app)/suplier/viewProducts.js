@@ -42,6 +42,8 @@ import {
     increment,
     serverTimestamp
 } from "firebase/firestore";
+import HomeHeader from "../../components/HomeHeader";
+import { StatusBar } from "expo-status-bar";
 
 const { width, height } = Dimensions.get("window");
 
@@ -546,35 +548,16 @@ export default function ViewProducts() {
     );
 
     return (
-        <View style={[styles.container, { paddingTop: insets.top }]}>
-            {/* Header */}
-            <Animated.View
-                entering={FadeIn.duration(300)}
-                style={styles.header}
-            >
-                <TouchableOpacity
-                    style={styles.backButton}
-                    onPress={goBack}
-                >
-                    <Ionicons name="arrow-back" size={24} color="#374151" />
-                </TouchableOpacity>
+        <View style={{ flex: 1, backgroundColor: "#ffffff" }}>
+            <StatusBar style="light" />
 
-                <Text style={styles.headerTitle} numberOfLines={1}>
-                    {selectedCategoryName || "Products"}
-                </Text>
-
-                <TouchableOpacity
-                    style={styles.addButton}
-                    onPress={goToAddProduct}
-                >
-                    <AntDesign name="plus" size={22} color="#fff" />
-                </TouchableOpacity>
-            </Animated.View>
+            {/* HomeHeader */}
+            <HomeHeader title={selectedCategoryName || "Products"} />
 
             {/* Search Bar and Filter */}
             <View style={styles.searchContainer}>
-                <View style={styles.searchBar}>
-                    <Ionicons name="search" size={20} color="#9ca3af" style={styles.searchIcon} />
+                <View style={styles.searchInputContainer}>
+                    <Feather name="search" size={20} color="#9ca3af" style={styles.searchIcon} />
                     <TextInput
                         style={styles.searchInput}
                         placeholder="Search products..."
@@ -582,19 +565,33 @@ export default function ViewProducts() {
                         onChangeText={setSearchQuery}
                         placeholderTextColor="#9ca3af"
                     />
+                    {searchQuery ? (
+                        <TouchableOpacity onPress={() => setSearchQuery("")}>
+                            <Feather name="x" size={20} color="#9ca3af" />
+                        </TouchableOpacity>
+                    ) : null}
                 </View>
+
                 <TouchableOpacity
                     style={styles.filterButton}
                     onPress={() => setShowCategoryFilter(true)}
                 >
-                    <MaterialIcons name="filter-list" size={24} color="white" />
+                    <Feather
+                        name="filter"
+                        size={20}
+                        color={selectedCategory ? "#4F46E5" : "#6b7280"}
+                    />
+                    {selectedCategory && (
+                        <View style={styles.filterActiveDot} />
+                    )}
                 </TouchableOpacity>
             </View>
 
             {/* Content */}
             {loading ? (
                 <View style={styles.loadingContainer}>
-                    <ActivityIndicator size="large" color="#3b82f6" />
+                    <ActivityIndicator size="large" color="#4F46E5" />
+                    <Text style={styles.loadingText}>Loading products...</Text>
                 </View>
             ) : (
                 <FlatList
@@ -629,6 +626,17 @@ export default function ViewProducts() {
                 />
             )}
 
+            {/* Floating Action Button */}
+            <TouchableOpacity
+                style={styles.floatingActionButton}
+                onPress={() => {
+                    goToAddProduct();
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                }}
+            >
+                <AntDesign name="plus" size={24} color="#ffffff" />
+            </TouchableOpacity>
+
             {/* Category Filter Modal */}
             <Modal
                 visible={showCategoryFilter}
@@ -649,12 +657,12 @@ export default function ViewProducts() {
                         </View>
 
                         <TouchableOpacity
-                            style={styles.categoryItem}
+                            style={[styles.categoryItem, selectedCategory === null && styles.activeFilterOption]}
                             onPress={() => handleCategorySelect(null)}
                         >
-                            <Text style={styles.categoryItemText}>All Products</Text>
+                            <Text style={[styles.categoryItemText, selectedCategory === null && styles.activeFilterText]}>All Products</Text>
                             {selectedCategory === null && (
-                                <AntDesign name="check" size={18} color="#3b82f6" />
+                                <AntDesign name="check" size={18} color="#4F46E5" />
                             )}
                         </TouchableOpacity>
 
@@ -849,23 +857,22 @@ const styles = StyleSheet.create({
         elevation: 4,
     },
     searchContainer: {
-        flexDirection: "row",
+        flexDirection: 'row',
+        alignItems: 'center',
         paddingHorizontal: 16,
         paddingVertical: 12,
-        backgroundColor: "white",
+        backgroundColor: 'white',
         borderBottomWidth: 1,
-        borderBottomColor: "#e5e7eb",
-        alignItems: "center",
+        borderBottomColor: '#e5e7eb',
     },
-    searchBar: {
+    searchInputContainer: {
         flex: 1,
-        flexDirection: "row",
-        alignItems: "center",
-        backgroundColor: "#f3f4f6",
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#f3f4f6',
         borderRadius: 8,
         paddingHorizontal: 12,
-        paddingVertical: 8,
-        marginRight: 8,
+        height: 44,
     },
     searchIcon: {
         marginRight: 8,
@@ -873,20 +880,34 @@ const styles = StyleSheet.create({
     searchInput: {
         flex: 1,
         fontSize: 16,
-        color: "#374151",
+        color: '#374151',
+        height: '100%',
     },
     filterButton: {
-        backgroundColor: "#3b82f6",
-        width: 40,
-        height: 40,
+        marginLeft: 12,
+        height: 44,
+        width: 44,
         borderRadius: 8,
-        justifyContent: "center",
-        alignItems: "center",
-        shadowColor: "#3b82f6",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.3,
-        shadowRadius: 3,
-        elevation: 4,
+        backgroundColor: '#f3f4f6',
+        justifyContent: 'center',
+        alignItems: 'center',
+        position: 'relative',
+    },
+    filterActiveDot: {
+        position: 'absolute',
+        top: 10,
+        right: 10,
+        width: 8,
+        height: 8,
+        borderRadius: 4,
+        backgroundColor: '#4F46E5',
+    },
+    activeFilterOption: {
+        backgroundColor: '#eff6ff',
+    },
+    activeFilterText: {
+        color: '#4F46E5',
+        fontWeight: '500',
     },
     loadingContainer: {
         flex: 1,
@@ -1288,5 +1309,28 @@ const styles = StyleSheet.create({
         paddingHorizontal: 8,
         paddingVertical: 4,
         borderRadius: 4,
+    },
+    loadingText: {
+        fontSize: 16,
+        fontWeight: "500",
+        color: "#6b7280",
+        marginTop: 16,
+    },
+    floatingActionButton: {
+        position: 'absolute',
+        bottom: 20,
+        right: 20,
+        width: 56,
+        height: 56,
+        borderRadius: 28,
+        backgroundColor: '#4F46E5',
+        justifyContent: 'center',
+        alignItems: 'center',
+        elevation: 5,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        zIndex: 999,
     },
 }); 

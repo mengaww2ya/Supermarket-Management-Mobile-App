@@ -174,14 +174,14 @@ export default function NewChat() {
 
                 try {
                     // Try direct string path with query parameters - use our local chatRoom
-                    router.push(`/suplier/chatRoom?uid=${selectedUser.id}&name=${encodeURIComponent(selectedUser.name || selectedUser.email)}&chatId=${existingChatId}`);
+                    router.push(`/(app)/chatRoom?uid=${selectedUser.id}&name=${encodeURIComponent(selectedUser.name || selectedUser.email)}&chatId=${existingChatId}`);
                 } catch (navError) {
                     console.error("Navigation error:", navError);
 
                     // Fallback to object-based navigation
                     setTimeout(() => {
                         router.push({
-                            pathname: "/suplier/chatRoom",
+                            pathname: "/(app)/chatRoom",
                             params: {
                                 uid: selectedUser.id,
                                 name: selectedUser.name || selectedUser.email,
@@ -228,14 +228,14 @@ export default function NewChat() {
             setLoading(false);
             try {
                 // Try direct string path with query parameters - use our local chatRoom
-                router.push(`/suplier/chatRoom?uid=${selectedUser.id}&name=${encodeURIComponent(selectedUser.name || selectedUser.email)}&chatId=${newChatRef.id}`);
+                router.push(`/(app)/chatRoom?uid=${selectedUser.id}&name=${encodeURIComponent(selectedUser.name || selectedUser.email)}&chatId=${newChatRef.id}`);
             } catch (navError) {
                 console.error("Navigation error:", navError);
 
                 // Fallback to object-based navigation
                 setTimeout(() => {
                     router.push({
-                        pathname: "/suplier/chatRoom",
+                        pathname: "/(app)/chatRoom",
                         params: {
                             uid: selectedUser.id,
                             name: selectedUser.name || selectedUser.email,

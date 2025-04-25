@@ -239,7 +239,7 @@ export default function Chat() {
 
         // Navigate to our local chatRoom redirector which will then go to the common chatRoom
         console.log(`Navigating to chat with ${participantName} (${otherParticipantId})`);
-        router.push(`/suplier/chatRoom?uid=${otherParticipantId}&name=${encodeURIComponent(participantName)}&chatId=${chat.id}`);
+        router.push(`/(app)/chatRoom?uid=${otherParticipantId}&name=${encodeURIComponent(participantName)}&chatId=${chat.id}`);
     };
 
     // Get display name from user data

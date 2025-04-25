@@ -20,7 +20,8 @@ import {
     Ionicons,
     MaterialCommunityIcons,
     AntDesign,
-    FontAwesome
+    FontAwesome,
+    Feather
 } from '@expo/vector-icons';
 import Animated, {
     FadeInDown,
@@ -42,6 +43,8 @@ import {
     orderBy,
     writeBatch
 } from "firebase/firestore";
+import HomeHeader from "../../../components/HomeHeader";
+import { StatusBar } from "expo-status-bar";
 
 const { width, height } = Dimensions.get("window");
 
@@ -57,6 +60,10 @@ export default function Categories() {
     const [editModalVisible, setEditModalVisible] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState(null);
     const [detailModalVisible, setDetailModalVisible] = useState(false);
+    const [searchQuery, setSearchQuery] = useState("");
+    const [filteredCategories, setFilteredCategories] = useState([]);
+    const [filterModalVisible, setFilterModalVisible] = useState(false);
+    const [activeFilter, setActiveFilter] = useState("all");
 
     // Form fields for edit modal
     const [categoryName, setCategoryName] = useState("");
@@ -78,6 +85,17 @@ export default function Categories() {
             goToAddProduct(categories[0]);
         }
     }, [mode, categories, loading]);
+
+    // Update filtered categories when search query changes
+    useEffect(() => {
+        if (categories.length > 0) {
+            const filtered = categories.filter(category =>
+                category.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                (category.description && category.description.toLowerCase().includes(searchQuery.toLowerCase()))
+            );
+            setFilteredCategories(filtered);
+        }
+    }, [searchQuery, categories]);
 
     // Fetch categories created by the current supplier
     const fetchCategories = async () => {
@@ -143,7 +161,7 @@ export default function Categories() {
 
             // Check if we need to automatically open add category page
             if (mode === "addProduct" && categories.length === 0) {
-                router.push("/suplier/(tabs)/addCategory");
+                router.push("/suplier/addCategory");
             }
         } catch (error) {
             console.error("Error fetching categories:", error);
@@ -155,7 +173,7 @@ export default function Categories() {
     // Handle edit category (open modal with selected category data)
     const handleEditPress = (category) => {
         router.push({
-            pathname: "/suplier/(tabs)/addCategory",
+            pathname: "/suplier/addCategory",
             params: {
                 editMode: "true",
                 categoryId: category.id,
@@ -251,6 +269,34 @@ export default function Categories() {
             pathname: `/suplier/addProduct`,
             params: { categoryId: category.id, categoryName: category.name }
         });
+    };
+
+    // Handle filter selection
+    const handleFilterChange = (filter) => {
+        setActiveFilter(filter);
+        setFilterModalVisible(false);
+
+        let filtered = [...categories];
+
+        if (filter === "active") {
+            filtered = filtered.filter(category => category.isActive);
+        } else if (filter === "inactive") {
+            filtered = filtered.filter(category => !category.isActive);
+        } else if (filter === "withProducts") {
+            filtered = filtered.filter(category => category.productCount > 0);
+        } else if (filter === "noProducts") {
+            filtered = filtered.filter(category => !category.productCount || category.productCount === 0);
+        }
+
+        // Apply search query filter too
+        if (searchQuery) {
+            filtered = filtered.filter(category =>
+                category.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                (category.description && category.description.toLowerCase().includes(searchQuery.toLowerCase()))
+            );
+        }
+
+        setFilteredCategories(filtered);
     };
 
     // Render category card
@@ -451,57 +497,163 @@ export default function Categories() {
         );
     };
 
-    return (
-        <View style={[styles.container, { paddingTop: insets.top }]}>
-            {/* Header */}
-            <Animated.View
-                entering={FadeIn.duration(300)}
-                style={styles.header}
+    // Filter Modal Component
+    const FilterModal = () => (
+        <Modal
+            visible={filterModalVisible}
+            transparent
+            animationType="fade"
+            onRequestClose={() => setFilterModalVisible(false)}
+        >
+            <TouchableOpacity
+                style={styles.modalOverlay}
+                activeOpacity={1}
+                onPress={() => setFilterModalVisible(false)}
             >
-                <View style={styles.headerContent}>
-                    <Text style={styles.headerTitle}>Product Categories</Text>
+                <View style={styles.filterModalContainer}>
+                    <Text style={styles.filterModalTitle}>Filter Categories</Text>
 
                     <TouchableOpacity
-                        style={styles.addButton}
+                        style={[styles.filterOption, activeFilter === "all" && styles.activeFilterOption]}
+                        onPress={() => handleFilterChange("all")}
+                    >
+                        <Text style={[styles.filterOptionText, activeFilter === "all" && styles.activeFilterText]}>All Categories</Text>
+                        {activeFilter === "all" && <Ionicons name="checkmark" size={18} color="#4F46E5" />}
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                        style={[styles.filterOption, activeFilter === "active" && styles.activeFilterOption]}
+                        onPress={() => handleFilterChange("active")}
+                    >
+                        <Text style={[styles.filterOptionText, activeFilter === "active" && styles.activeFilterText]}>Active Only</Text>
+                        {activeFilter === "active" && <Ionicons name="checkmark" size={18} color="#4F46E5" />}
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                        style={[styles.filterOption, activeFilter === "inactive" && styles.activeFilterOption]}
+                        onPress={() => handleFilterChange("inactive")}
+                    >
+                        <Text style={[styles.filterOptionText, activeFilter === "inactive" && styles.activeFilterText]}>Inactive Only</Text>
+                        {activeFilter === "inactive" && <Ionicons name="checkmark" size={18} color="#4F46E5" />}
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                        style={[styles.filterOption, activeFilter === "withProducts" && styles.activeFilterOption]}
+                        onPress={() => handleFilterChange("withProducts")}
+                    >
+                        <Text style={[styles.filterOptionText, activeFilter === "withProducts" && styles.activeFilterText]}>With Products</Text>
+                        {activeFilter === "withProducts" && <Ionicons name="checkmark" size={18} color="#4F46E5" />}
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                        style={[styles.filterOption, activeFilter === "noProducts" && styles.activeFilterOption]}
+                        onPress={() => handleFilterChange("noProducts")}
+                    >
+                        <Text style={[styles.filterOptionText, activeFilter === "noProducts" && styles.activeFilterText]}>No Products</Text>
+                        {activeFilter === "noProducts" && <Ionicons name="checkmark" size={18} color="#4F46E5" />}
+                    </TouchableOpacity>
+                </View>
+            </TouchableOpacity>
+        </Modal>
+    );
+
+    return (
+        <View style={{ flex: 1, backgroundColor: "#ffffff" }}>
+            <StatusBar style="light" />
+
+            {/* HomeHeader */}
+            <HomeHeader title="Product Categories" />
+
+            {/* Search Bar */}
+            <View style={styles.searchContainer}>
+                <View style={styles.searchInputContainer}>
+                    <Feather name="search" size={20} color="#9ca3af" style={styles.searchIcon} />
+                    <TextInput
+                        style={styles.searchInput}
+                        placeholder="Search categories..."
+                        placeholderTextColor="#9ca3af"
+                        value={searchQuery}
+                        onChangeText={setSearchQuery}
+                    />
+                    {searchQuery ? (
+                        <TouchableOpacity onPress={() => setSearchQuery("")}>
+                            <Feather name="x" size={20} color="#9ca3af" />
+                        </TouchableOpacity>
+                    ) : null}
+                </View>
+
+                <TouchableOpacity
+                    style={styles.filterButton}
+                    onPress={() => setFilterModalVisible(true)}
+                >
+                    <Feather
+                        name="filter"
+                        size={20}
+                        color={activeFilter !== "all" ? "#4F46E5" : "#6b7280"}
+                    />
+                    {activeFilter !== "all" && (
+                        <View style={styles.filterActiveDot} />
+                    )}
+                </TouchableOpacity>
+            </View>
+
+            {loading && !refreshing ? (
+                <View style={styles.loadingContainer}>
+                    <ActivityIndicator size="large" color="#4F46E5" />
+                    <Text style={styles.loadingText}>Loading categories...</Text>
+                </View>
+            ) : (
+                <>
+                    <FlatList
+                        data={searchQuery.length > 0 || activeFilter !== "all" ? filteredCategories : categories}
+                        renderItem={renderCategoryCard}
+                        keyExtractor={(item) => item.id}
+                        contentContainerStyle={styles.categoriesList}
+                        showsVerticalScrollIndicator={false}
+                        ListEmptyComponent={
+                            <View style={styles.emptyContainer}>
+                                {searchQuery.length > 0 ? (
+                                    <>
+                                        <Feather name="search" size={80} color="#d1d5db" />
+                                        <Text style={styles.emptyText}>No matching categories</Text>
+                                        <Text style={styles.emptySubText}>
+                                            Try a different search term or clear filters
+                                        </Text>
+                                    </>
+                                ) : (
+                                    <>
+                                        <MaterialCommunityIcons name="folder-open-outline" size={80} color="#d1d5db" />
+                                        <Text style={styles.emptyText}>No categories yet</Text>
+                                        <Text style={styles.emptySubText}>
+                                            Tap the + button to add your first product category
+                                        </Text>
+                                    </>
+                                )}
+                            </View>
+                        }
+                        refreshControl={
+                            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+                        }
+                    />
+
+                    {/* Floating Action Button */}
+                    <TouchableOpacity
+                        style={styles.floatingActionButton}
                         onPress={() => {
-                            router.push("/suplier/(tabs)/addCategory");
+                            router.push("/suplier/addCategory");
                             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                         }}
                     >
-                        <AntDesign name="plus" size={22} color="#fff" />
+                        <AntDesign name="plus" size={24} color="#ffffff" />
                     </TouchableOpacity>
-                </View>
-            </Animated.View>
-
-            {/* Content */}
-            {loading ? (
-                <View style={styles.loadingContainer}>
-                    <ActivityIndicator size="large" color="#3b82f6" />
-                </View>
-            ) : (
-                <FlatList
-                    data={categories}
-                    renderItem={renderCategoryCard}
-                    keyExtractor={(item) => item.id}
-                    contentContainerStyle={styles.categoriesList}
-                    showsVerticalScrollIndicator={false}
-                    ListEmptyComponent={
-                        <View style={styles.emptyContainer}>
-                            <MaterialCommunityIcons name="folder-open-outline" size={80} color="#d1d5db" />
-                            <Text style={styles.emptyText}>No categories yet</Text>
-                            <Text style={styles.emptySubText}>
-                                Tap the + button to add your first product category
-                            </Text>
-                        </View>
-                    }
-                    refreshControl={
-                        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-                    }
-                />
+                </>
             )}
 
             {/* Category Detail Modal */}
             <CategoryDetailModal />
+
+            {/* Filter Modal */}
+            <FilterModal />
         </View>
     );
 }
@@ -830,5 +982,131 @@ const styles = StyleSheet.create({
     },
     statusTextInactive: {
         color: "#ef4444",
+    },
+    headerTitleContainer: {
+        flexDirection: "row",
+        alignItems: "center",
+    },
+    addButton: {
+        backgroundColor: "#3b82f6",
+        padding: 10,
+        borderRadius: 8,
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+    },
+    addButtonText: {
+        fontSize: 16,
+        fontWeight: "600",
+        color: "#ffffff",
+        marginLeft: 8,
+    },
+    loadingText: {
+        fontSize: 16,
+        fontWeight: "500",
+        color: "#6b7280",
+        marginTop: 16,
+    },
+    floatingActionButton: {
+        position: 'absolute',
+        bottom: 20,
+        right: 20,
+        width: 56,
+        height: 56,
+        borderRadius: 28,
+        backgroundColor: '#4F46E5',
+        justifyContent: 'center',
+        alignItems: 'center',
+        elevation: 5,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        zIndex: 999,
+    },
+    searchContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: 16,
+        paddingVertical: 12,
+        backgroundColor: 'white',
+        borderBottomWidth: 1,
+        borderBottomColor: '#e5e7eb',
+    },
+    searchInputContainer: {
+        flex: 1,
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#f3f4f6',
+        borderRadius: 8,
+        paddingHorizontal: 12,
+        height: 44,
+    },
+    searchIcon: {
+        marginRight: 8,
+    },
+    searchInput: {
+        flex: 1,
+        fontSize: 16,
+        color: '#374151',
+        height: '100%',
+    },
+    filterButton: {
+        marginLeft: 12,
+        height: 44,
+        width: 44,
+        borderRadius: 8,
+        backgroundColor: '#f3f4f6',
+        justifyContent: 'center',
+        alignItems: 'center',
+        position: 'relative',
+    },
+    filterActiveDot: {
+        position: 'absolute',
+        top: 10,
+        right: 10,
+        width: 8,
+        height: 8,
+        borderRadius: 4,
+        backgroundColor: '#4F46E5',
+    },
+    filterModalContainer: {
+        backgroundColor: 'white',
+        borderRadius: 12,
+        padding: 16,
+        width: '80%',
+        alignSelf: 'center',
+        elevation: 5,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+    },
+    filterModalTitle: {
+        fontSize: 18,
+        fontWeight: '600',
+        color: '#111827',
+        marginBottom: 16,
+        textAlign: 'center',
+    },
+    filterOption: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingVertical: 12,
+        paddingHorizontal: 16,
+        borderRadius: 8,
+        marginBottom: 8,
+    },
+    activeFilterOption: {
+        backgroundColor: '#eff6ff',
+    },
+    filterOptionText: {
+        fontSize: 16,
+        color: '#374151',
+    },
+    activeFilterText: {
+        color: '#4F46E5',
+        fontWeight: '500',
     },
 }); 

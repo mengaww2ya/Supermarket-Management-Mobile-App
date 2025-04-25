@@ -2,12 +2,11 @@ import React, { useState, useEffect } from "react";
 import {
   Text,
   View,
-  StyleSheet,
-  ScrollView,
   TouchableOpacity,
-  Dimensions,
+  ScrollView,
   StatusBar,
   RefreshControl,
+  ActivityIndicator,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
@@ -19,163 +18,182 @@ import {
   Feather,
   MaterialIcons,
   Octicons,
-  Entypo
 } from '@expo/vector-icons';
 import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withTiming,
-  withSpring,
-  Easing,
   FadeInDown,
-  FadeInRight,
-  FadeIn,
-  interpolate,
-  Extrapolate,
-  useAnimatedScrollHandler
 } from 'react-native-reanimated';
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { SafeAreaView } from "react-native-safe-area-context";
 import * as Haptics from 'expo-haptics';
 import HomeHeader from "../../components/HomeHeader";
-
-const { width, height } = Dimensions.get("window");
+import {
+  collection,
+  query,
+  where,
+  getDocs,
+  getDoc,
+  doc,
+  getFirestore,
+  collectionGroup
+} from "firebase/firestore";
+import { db, auth } from "../../../firebase/firebaseConfig";
 
 // Management option card component
 const ManagementCard = ({ title, description, icon, iconBgColor, onPress, index }) => {
-  const scale = useSharedValue(1);
-  const cardOpacity = useSharedValue(1);
-
-  const handlePressIn = () => {
-    'worklet';
-    scale.value = withTiming(0.97, { duration: 200 });
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-  };
-
-  const handlePressOut = () => {
-    'worklet';
-    scale.value = withTiming(1, { duration: 300 });
-  };
-
-  const cardStyle = useAnimatedStyle(() => {
-    return {
-      transform: [{ scale: scale.value }],
-      opacity: cardOpacity.value,
-    };
-  });
-
   return (
     <Animated.View
       entering={FadeInDown.delay(50 * index).duration(400)}
-      style={[styles.managementCard, cardStyle]}
+      className="w-[48%] p-4 rounded-xl mb-4"
+      style={{
+        backgroundColor: `${iconBgColor}15`, // 15% opacity
+      }}
     >
       <TouchableOpacity
         activeOpacity={0.95}
-        onPress={onPress}
-        onPressIn={handlePressIn}
-        onPressOut={handlePressOut}
-        style={styles.managementCardTouchable}
+        onPress={() => {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+          onPress();
+        }}
       >
-        <View style={[styles.iconContainer, { backgroundColor: iconBgColor }]}>
+        <View style={{ backgroundColor: iconBgColor }} className="w-12 h-12 rounded-full items-center justify-center mb-3">
           {icon}
         </View>
-
-        <View style={styles.cardContent}>
-          <Text style={styles.cardTitle}>{title}</Text>
-          <Text style={styles.cardDescription}>{description}</Text>
-        </View>
-
-        <View style={styles.arrowContainer}>
-          <Ionicons name="chevron-forward" size={20} color="#a3a3a3" />
-        </View>
+        <Text className="text-gray-800 font-medium mb-1">{title}</Text>
+        <Text className="text-gray-500 text-xs">{description}</Text>
       </TouchableOpacity>
     </Animated.View>
   );
 };
 
 // Stat card component
-const StatCard = ({ title, value, icon, color, index }) => {
+const StatCard = ({ title, value, icon, color, index, isLoading }) => {
   return (
     <Animated.View
       entering={FadeInDown.delay(100 * index).duration(400)}
-      style={[styles.statCard]}
+      className="w-[48%] bg-white p-4 rounded-xl mb-4 shadow-sm border border-gray-100"
     >
-      <LinearGradient
-        colors={[`${color}10`, `${color}30`]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={styles.statGradient}
-      />
-
-      <View style={[styles.statIconContainer, { backgroundColor: `${color}30` }]}>
+      <View style={{ backgroundColor: `${color}30` }} className="w-10 h-10 rounded-lg items-center justify-center mb-2">
         {icon}
       </View>
-
-      <Text style={styles.statValue}>{value}</Text>
-      <Text style={styles.statTitle}>{title}</Text>
+      {isLoading ? (
+        <ActivityIndicator size="small" color={color} />
+      ) : (
+        <Text className="text-xl font-bold text-gray-800">{value}</Text>
+      )}
+      <Text className="text-sm text-gray-500">{title}</Text>
     </Animated.View>
   );
 };
 
 export default function InventoryManagement() {
   const router = useRouter();
-  const insets = useSafeAreaInsets();
   const [refreshing, setRefreshing] = useState(false);
-
-  const scrollY = useSharedValue(0);
-
-  // Scroll handler for animations
-  const scrollHandler = useAnimatedScrollHandler({
-    onScroll: (event) => {
-      scrollY.value = event.contentOffset.y;
-    },
+  const [loading, setLoading] = useState(true);
+  const [inventoryStats, setInventoryStats] = useState({
+    totalProducts: 0,
+    categories: 0,
+    lowStock: 0,
+    outOfStock: 0
   });
 
-  // Animated styles for header shadow
-  const headerStyle = useAnimatedStyle(() => {
-    return {
-      shadowOpacity: interpolate(
-        scrollY.value,
-        [0, 50],
-        [0, 0.2],
-        Extrapolate.CLAMP
-      ),
-    };
-  });
+  const currentUser = auth.currentUser;
+
+  // Fetch inventory statistics from database
+  const fetchInventoryStats = async () => {
+    try {
+      if (!currentUser) return;
+
+      const supplierId = currentUser.uid;
+      let totalProducts = 0;
+      let categories = 0;
+      let lowStock = 0;
+      let outOfStock = 0;
+
+      // Get categories count from supplier_category collection
+      const supplierCategoriesRef = collection(db, 'supplier_category');
+      const categoriesQuery = query(
+        supplierCategoriesRef,
+        where("supplierId", "==", supplierId)
+      );
+      const categoriesSnapshot = await getDocs(categoriesQuery);
+      categories = categoriesSnapshot.size;
+
+      // Loop through each category to count products
+      for (const categoryDoc of categoriesSnapshot.docs) {
+        const categoryId = categoryDoc.id;
+
+        // Get products from the subcollection for each category
+        const categoryProductsRef = collection(db, 'supplier_category', categoryId, 'products');
+        const productsQuery = query(
+          categoryProductsRef,
+          where("supplierId", "==", supplierId)
+        );
+
+        const productsSnapshot = await getDocs(productsQuery);
+
+        // Add to total products count
+        totalProducts += productsSnapshot.size;
+
+        // Count low stock and out of stock products
+        productsSnapshot.forEach((doc) => {
+          const product = doc.data();
+          if (product.quantity === 0 || product.quantity === "0") {
+            outOfStock++;
+          } else if (product.lowStockThreshold &&
+            product.quantity <= product.lowStockThreshold) {
+            lowStock++;
+          }
+        });
+      }
+
+      setInventoryStats({
+        totalProducts,
+        categories,
+        lowStock,
+        outOfStock
+      });
+    } catch (error) {
+      console.error("Error fetching inventory stats:", error);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
+  // Initial fetch
+  useEffect(() => {
+    fetchInventoryStats();
+  }, []);
 
   // Handle refresh
   const onRefresh = React.useCallback(() => {
     setRefreshing(true);
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-
-    // Simulate data refresh
-    setTimeout(() => {
-      setRefreshing(false);
-    }, 1500);
+    fetchInventoryStats();
   }, []);
 
   // Inventory stats data
   const stats = [
     {
       title: "Total Products",
-      value: "324",
+      value: inventoryStats.totalProducts.toString(),
       icon: <MaterialCommunityIcons name="package-variant" size={22} color="#3b82f6" />,
       color: "#3b82f6"
     },
     {
       title: "Categories",
-      value: "12",
+      value: inventoryStats.categories.toString(),
       icon: <Ionicons name="grid-outline" size={22} color="#8b5cf6" />,
       color: "#8b5cf6"
     },
     {
       title: "Low Stock",
-      value: "24",
+      value: inventoryStats.lowStock.toString(),
       icon: <Feather name="alert-triangle" size={22} color="#f97316" />,
       color: "#f97316"
     },
     {
       title: "Out of Stock",
-      value: "8",
+      value: inventoryStats.outOfStock.toString(),
       icon: <MaterialIcons name="inventory" size={22} color="#ef4444" />,
       color: "#ef4444"
     },
@@ -233,242 +251,77 @@ export default function InventoryManagement() {
   ];
 
   return (
-    <View style={styles.container}>
-      <StatusBar barStyle="dark-content" />
+    <SafeAreaView className="flex-1 bg-gray-50">
+      <StatusBar style="light" />
 
-      {/* Header */}
-      <Animated.View style={headerStyle}>
-        <HomeHeader
-          title="Inventory Management"
-          showBackButton={true}
-          onBackPress={() => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            router.back();
-          }}
-        />
-      </Animated.View>
+      {/* Home Header */}
+      <HomeHeader
+        title="Inventory Management"
+        showBackButton={true}
+        onBackPress={() => {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          router.back();
+        }}
+      />
 
-      {/* Main Content */}
-      <Animated.ScrollView
-        style={styles.content}
+      <ScrollView
+        className="flex-1"
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
-        onScroll={scrollHandler}
-        scrollEventThrottle={16}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            tintColor="#3b82f6"
-            colors={["#3b82f6", "#10b981"]}
+            colors={["#4F46E5"]}
+            tintColor="#4F46E5"
           />
         }
       >
-        {/* Inventory Summary */}
-        <Animated.View
-          entering={FadeInDown.duration(500)}
-          style={styles.summaryContainer}
-        >
-          <LinearGradient
-            colors={['#f0f4fd', '#e6eeff']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.summaryGradient}
-          >
-            <View style={styles.summaryContent}>
-              <View style={styles.summaryTextContainer}>
-                <Text style={[styles.summaryTitle, { color: '#333' }]}>Inventory Overview</Text>
-                <Text style={[styles.summarySubtitle, { color: '#666' }]}>Manage your product inventory</Text>
-              </View>
-              <View style={styles.summaryIconContainer}>
-                <MaterialCommunityIcons name="clipboard-text-outline" size={70} color="rgba(59, 130, 246, 0.15)" />
-              </View>
+        <View className="p-4">
+          {/* Stats Section */}
+          <View className="mb-6">
+            <View className="flex-row justify-center items-center mb-4">
+              <Feather name="bar-chart-2" size={20} color="#4F46E5" className="mr-2" />
+              <Text className="text-lg font-semibold text-gray-800">Inventory Statistics</Text>
             </View>
-          </LinearGradient>
-        </Animated.View>
 
-        {/* Stats Grid */}
-        <View style={styles.statsGrid}>
-          {stats.map((stat, index) => (
-            <StatCard
-              key={stat.title}
-              title={stat.title}
-              value={stat.value}
-              icon={stat.icon}
-              color={stat.color}
-              index={index}
-            />
-          ))}
-        </View>
+            <View className="flex-row flex-wrap justify-between">
+              {stats.map((stat, index) => (
+                <StatCard
+                  key={stat.title}
+                  title={stat.title}
+                  value={stat.value}
+                  icon={stat.icon}
+                  color={stat.color}
+                  index={index}
+                  isLoading={loading}
+                />
+              ))}
+            </View>
+          </View>
 
-        <View style={styles.managementOptionsContainer}>
-          {managementOptions.map((option, index) => (
-            <ManagementCard
-              key={option.title}
-              title={option.title}
-              description={option.description}
-              icon={option.icon}
-              iconBgColor={option.iconBgColor}
-              onPress={() => {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                option.action();
-              }}
-              index={index}
-            />
-          ))}
+          {/* Management Options */}
+          <View className="mb-6">
+            <View className="flex-row justify-center items-center mb-4">
+              <Feather name="settings" size={20} color="#4F46E5" className="mr-2" />
+              <Text className="text-lg font-semibold text-gray-800">Management Tools</Text>
+            </View>
+
+            <View className="flex-row flex-wrap justify-between">
+              {managementOptions.map((option, index) => (
+                <ManagementCard
+                  key={option.title}
+                  title={option.title}
+                  description={option.description}
+                  icon={option.icon}
+                  iconBgColor={option.iconBgColor}
+                  onPress={option.action}
+                  index={index}
+                />
+              ))}
+            </View>
+          </View>
         </View>
-      </Animated.ScrollView>
-    </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#f9f9fc",
-  },
-  content: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingHorizontal: 16,
-    paddingBottom: 30,
-  },
-  summaryContainer: {
-    marginTop: 16,
-    marginBottom: 20,
-    borderRadius: 16,
-    overflow: 'hidden',
-    shadowColor: '#a3a3c2',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.12,
-    shadowRadius: 12,
-    elevation: 4,
-  },
-  summaryGradient: {
-    padding: 20,
-  },
-  summaryContent: {
-    flexDirection: 'row',
-  },
-  summaryTextContainer: {
-    flex: 1,
-  },
-  summaryTitle: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: '#fff',
-    marginBottom: 6,
-  },
-  summarySubtitle: {
-    fontSize: 15,
-    color: 'rgba(255, 255, 255, 0.9)',
-  },
-  summaryIconContainer: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingRight: 10,
-  },
-  sectionHeader: {
-    marginTop: 8,
-    marginBottom: 16,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#333',
-  },
-  statsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    marginBottom: 20,
-    justifyContent: 'space-between',
-  },
-  statCard: {
-    width: '48%',
-    backgroundColor: 'white',
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
-    borderWidth: 1,
-    borderColor: 'rgba(240, 240, 240, 1)',
-    position: 'relative',
-    overflow: 'hidden',
-  },
-  statGradient: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    top: 0,
-    bottom: 0,
-  },
-  statIconContainer: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  statValue: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 4,
-  },
-  statTitle: {
-    fontSize: 14,
-    color: '#6b7280',
-  },
-  managementOptionsContainer: {
-    marginBottom: 20,
-  },
-  managementCard: {
-    width: '100%',
-    backgroundColor: 'white',
-    borderRadius: 16,
-    marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
-    borderWidth: 1,
-    borderColor: 'rgba(240, 240, 240, 1)',
-  },
-  managementCardTouchable: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 16,
-  },
-  iconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 16,
-  },
-  cardContent: {
-    flex: 1,
-  },
-  cardTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 4,
-  },
-  cardDescription: {
-    fontSize: 14,
-    color: '#6b7280',
-  },
-  arrowContainer: {
-    justifyContent: 'center',
-    paddingLeft: 12,
-  },
-});

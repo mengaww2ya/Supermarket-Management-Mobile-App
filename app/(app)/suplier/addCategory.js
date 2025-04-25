@@ -24,6 +24,7 @@ import { Ionicons, MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-ico
 import { StatusBar } from 'expo-status-bar';
 import { LinearGradient } from 'expo-linear-gradient';
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import HomeHeader from "../../components/HomeHeader";
 
 export default function AddCategory() {
     const router = useRouter();
@@ -65,6 +66,12 @@ export default function AddCategory() {
 
     // Keyboard state
     const [keyboardVisible, setKeyboardVisible] = useState(false);
+
+    // Handle back navigation
+    const handleBackPress = () => {
+        Vibration.vibrate(20); // Light haptic feedback
+        router.back();
+    };
 
     useEffect(() => {
         // Start entrance animation
@@ -408,66 +415,32 @@ export default function AddCategory() {
 
     return (
         <SafeAreaView className="flex-1 bg-gray-50">
-            <StatusBar style="dark" />
+            <StatusBar style="light" />
+
+            {/* Add HomeHeader */}
+            <HomeHeader
+                title={isEditMode ? "Edit Category" : "Add Category"}
+                showBackButton={true}
+                onBackPress={handleBackPress}
+            />
 
             <KeyboardAvoidingView
                 behavior={Platform.OS === "ios" ? "padding" : "height"}
                 className="flex-1"
             >
                 <ScrollView
-                    contentContainerStyle={{ flexGrow: 1 }}
-                    keyboardShouldPersistTaps="handled"
                     className="flex-1"
+                    showsVerticalScrollIndicator={false}
+                    contentContainerStyle={{ paddingBottom: 120 }}
                 >
-                    {/* Header */}
-                    <View className="px-4 pt-4 pb-2 flex-row justify-between items-center">
-                        <TouchableOpacity
-                            onPress={() => router.push("/suplier/(tabs)/categories")}
-                            className="w-10 h-10 rounded-full bg-gray-100 justify-center items-center"
-                        >
-                            <Ionicons name="arrow-back" size={20} color="#4b5563" />
-                        </TouchableOpacity>
-
-                        <Text className="text-xl font-bold text-gray-800">
-                            {isEditMode ? "Update Category" : "Add Category"}
-                        </Text>
-
-                        <View className="w-10" />
-                    </View>
-
                     <Animated.View
-                        className="flex-1 px-4 pt-4 pb-6 justify-center items-center"
                         style={{
                             opacity: fadeAnim,
-                            transform: [
-                                { scale: scaleAnim },
-                                { translateX: shakeAnim }
-                            ]
+                            transform: [{ scale: scaleAnim }],
                         }}
+                        className="p-4"
                     >
                         <View className="bg-white w-full rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-                            {/* Form Header */}
-                            <LinearGradient
-                                colors={['#3b82f6', '#2563eb']}
-                                start={{ x: 0, y: 0 }}
-                                end={{ x: 1, y: 0 }}
-                                className="px-4 py-5"
-                            >
-                                <View className="flex-row items-center">
-                                    <View className="w-10 h-10 bg-white/20 rounded-full justify-center items-center mr-3">
-                                        <Ionicons name="layers" size={20} color="#ffffff" />
-                                    </View>
-                                    <View>
-                                        <Text className="text-white text-lg font-bold">
-                                            {isEditMode ? "Update Category" : "Create Category"}
-                                        </Text>
-                                        <Text className="text-blue-100 text-xs">
-                                            {isEditMode ? "Update category details" : "Add a new product category"}
-                                        </Text>
-                                    </View>
-                                </View>
-                            </LinearGradient>
-
                             <View className="p-5">
                                 {/* Category Name Input */}
                                 <View className="mb-4">

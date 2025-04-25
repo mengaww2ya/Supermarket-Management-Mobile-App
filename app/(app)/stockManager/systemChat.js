@@ -45,26 +45,26 @@ export default function SystemChat() {
       const querySnapshot = await getDocs(q);
       const usersData = querySnapshot.docs.map(doc => {
         const userData = doc.data();
-        
+
         // Normalize role values
         let normalizedRole = userData.role;
-        
+
         // Handle role variations
         if (normalizedRole === 'delivery') {
           normalizedRole = 'deliveryAgent';
         }
-        
+
         if (normalizedRole === 'suplier' || normalizedRole === 'vendor') {
           normalizedRole = 'supplier';
         }
-        
+
         return {
           id: doc.id,
           ...userData,
           role: normalizedRole
         };
       });
-      
+
       setUsers(usersData);
       setFilteredUsers(usersData);
     } catch (error) {
@@ -98,13 +98,13 @@ export default function SystemChat() {
         const name = user.name?.toLowerCase() || '';
         const email = user.email?.toLowerCase() || '';
         const phone = user.phone || '';
-        
-        return firstName.includes(query) || 
-               lastName.includes(query) ||
-               fullName.includes(query) ||
-               name.includes(query) ||
-               email.includes(query) || 
-               phone.includes(query);
+
+        return firstName.includes(query) ||
+          lastName.includes(query) ||
+          fullName.includes(query) ||
+          name.includes(query) ||
+          email.includes(query) ||
+          phone.includes(query);
       });
     }
 
@@ -154,18 +154,18 @@ export default function SystemChat() {
 
   const navigateToChat = (user) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    
+
     try {
       router.push({
         pathname: "/chatRoom",
-        params: { 
+        params: {
           uid: user.uid,
           name: user.name || user.email || 'User'
         }
       });
     } catch (navError) {
       console.error("Navigation error:", navError);
-      
+
       setTimeout(() => {
         router.push(`/chatRoom?uid=${user.uid}&name=${encodeURIComponent(user.name || user.email || 'User')}`);
       }, 100);
@@ -179,14 +179,14 @@ export default function SystemChat() {
       </View>
       <Text style={styles.emptyTitle}>No users found</Text>
       <Text style={styles.emptyText}>
-        {searchQuery.trim() !== '' 
-          ? "Try a different search term or clear filters" 
-          : selectedRole 
-            ? "Try removing role filters" 
+        {searchQuery.trim() !== ''
+          ? "Try a different search term or clear filters"
+          : selectedRole
+            ? "Try removing role filters"
             : "There are no users available to message"}
       </Text>
       {(searchQuery.trim() !== '' || selectedRole) && (
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.clearButton}
           onPress={() => {
             setSearchQuery('');
@@ -208,7 +208,7 @@ export default function SystemChat() {
       if (item.firstName) return item.firstName;
       return item.email || 'Unknown User';
     };
-    
+
     const getInitials = () => {
       if (item.firstName && item.lastName) {
         return `${item.firstName.charAt(0)}${item.lastName.charAt(0)}`;
@@ -227,12 +227,12 @@ export default function SystemChat() {
       }
       return item.email ? item.email.charAt(0).toUpperCase() : '?';
     };
-    
+
     const getRoleDetails = (role) => {
       let details = { label: 'User', color: '#6c757d' };
-      
+
       const normalizedRole = role === 'delivery' ? 'deliveryAgent' : role;
-      
+
       switch (normalizedRole) {
         case 'admin':
           details = { label: 'Admin', color: '#dc3545' };
@@ -256,20 +256,20 @@ export default function SystemChat() {
           details = { label: 'Supplier', color: '#f59e0b' };
           break;
         default:
-          details = { 
-            label: role ? role.charAt(0).toUpperCase() + role.slice(1) : 'User', 
-            color: '#6c757d' 
+          details = {
+            label: role ? role.charAt(0).toUpperCase() + role.slice(1) : 'User',
+            color: '#6c757d'
           };
       }
-      
+
       return details;
     };
-    
+
     const displayName = getName();
     const roleDetails = getRoleDetails(item.role);
-    
+
     return (
-      <TouchableOpacity 
+      <TouchableOpacity
         style={styles.userItem}
         onPress={() => navigateToChat(item)}
         activeOpacity={0.7}
@@ -285,14 +285,14 @@ export default function SystemChat() {
             </View>
           )}
         </View>
-        
+
         <View style={styles.userInfo}>
           <Text style={styles.userName}>{displayName}</Text>
           <Text style={styles.userEmail} numberOfLines={1}>
             {item.email || ''}
           </Text>
         </View>
-        
+
         <View style={[styles.roleBadge, { backgroundColor: `${roleDetails.color}20` }]}>
           <Text style={[styles.roleText, { color: roleDetails.color }]}>
             {roleDetails.label}
@@ -305,18 +305,18 @@ export default function SystemChat() {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar style="dark" />
-      
+
       <View style={styles.header}>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.backButton}
           onPress={() => router.back()}
         >
           <Feather name="arrow-left" size={24} color="#333" />
         </TouchableOpacity>
-        
+
         <Text style={styles.headerTitle}>Messaging</Text>
-        
-        <TouchableOpacity 
+
+        <TouchableOpacity
           style={styles.messagesButton}
           onPress={() => router.push('/stockManager/(tabs)/messages')}
         >
@@ -324,7 +324,7 @@ export default function SystemChat() {
           <Text style={styles.messagesButtonText}>Messages</Text>
         </TouchableOpacity>
       </View>
-      
+
       <View style={styles.searchContainer}>
         <Feather name="search" size={20} color="#4F46E5" style={styles.searchIcon} />
         <TextInput
@@ -346,26 +346,26 @@ export default function SystemChat() {
           style={styles.filterButton}
           onPress={toggleFilterModal}
         >
-          <Feather 
-            name="filter" 
-            size={20} 
-            color={selectedRole ? "#4F46E5" : "#6B7280"} 
+          <Feather
+            name="filter"
+            size={20}
+            color={selectedRole ? "#4F46E5" : "#6B7280"}
           />
         </TouchableOpacity>
       </View>
-      
+
       {selectedRole && (
         <View style={styles.selectedFilterContainer}>
           <View style={styles.selectedFilterChip}>
             <Text style={styles.selectedFilterText}>
-              {selectedRole === 'customer' ? 'Customers' : 
-               selectedRole === 'deliveryAgent' ? 'Delivery Agents' : 
-               selectedRole === 'stockManager' ? 'Stock Managers' : 
-               selectedRole === 'customerAssistance' ? 'Customer Support' : 
-               selectedRole === 'manager' ? 'Managers' : 
-               selectedRole === 'admin' ? 'Admins' : 
-               selectedRole === 'supplier' ? 'Suppliers' :
-               selectedRole.charAt(0).toUpperCase() + selectedRole.slice(1)}
+              {selectedRole === 'customer' ? 'Customers' :
+                selectedRole === 'deliveryAgent' ? 'Delivery Agents' :
+                  selectedRole === 'stockManager' ? 'Stock Managers' :
+                    selectedRole === 'customerAssistance' ? 'Customer Support' :
+                      selectedRole === 'manager' ? 'Managers' :
+                        selectedRole === 'admin' ? 'Admins' :
+                          selectedRole === 'supplier' ? 'Suppliers' :
+                            selectedRole.charAt(0).toUpperCase() + selectedRole.slice(1)}
             </Text>
             <TouchableOpacity onPress={() => setSelectedRole(null)}>
               <Feather name="x" size={16} color="#333" />
@@ -373,7 +373,7 @@ export default function SystemChat() {
           </View>
         </View>
       )}
-      
+
       {loading ? (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#007bff" />
@@ -384,35 +384,37 @@ export default function SystemChat() {
           data={filteredUsers}
           renderItem={renderUserItem}
           keyExtractor={(item) => item.id}
-          contentContainerStyle={filteredUsers.length === 0 ? 
-            {flex: 1} : 
-            {paddingVertical: 10, paddingBottom: 30}
+          contentContainerStyle={filteredUsers.length === 0 ?
+            { flex: 1 } :
+            { paddingVertical: 10, paddingBottom: 30 }
           }
           showsVerticalScrollIndicator={false}
           ListEmptyComponent={renderEmptyState}
         />
       )}
-      
+
       <Modal
         visible={filterModalVisible}
         transparent={true}
         animationType="none"
         onRequestClose={toggleFilterModal}
       >
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.filterModalOverlay}
           activeOpacity={1}
           onPress={toggleFilterModal}
         >
-          <Animated.View 
+          <Animated.View
             style={[
               styles.filterModalContainer,
               {
                 transform: [
-                  { scale: filterAnimation.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [0.9, 1]
-                  })},
+                  {
+                    scale: filterAnimation.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [0.9, 1]
+                    })
+                  },
                 ],
                 opacity: filterAnimation
               }
@@ -421,20 +423,20 @@ export default function SystemChat() {
             <View style={styles.filterModalContent}>
               <View style={styles.filterModalHeader}>
                 <Text style={styles.filterModalTitle}>Filter By Role</Text>
-                <TouchableOpacity 
+                <TouchableOpacity
                   style={styles.closeButton}
                   onPress={toggleFilterModal}
                 >
                   <Feather name="x" size={22} color="#fff" />
                 </TouchableOpacity>
               </View>
-              
-              <ScrollView 
+
+              <ScrollView
                 style={styles.roleListContainer}
                 showsVerticalScrollIndicator={false}
               >
                 {['customer', 'deliveryAgent', 'stockManager', 'customerAssistance', 'manager', 'admin', 'supplier'].map((role) => (
-                  <TouchableOpacity 
+                  <TouchableOpacity
                     key={role}
                     style={[
                       styles.roleListItem,
@@ -454,15 +456,15 @@ export default function SystemChat() {
                       styles.roleListText,
                       selectedRole === role && styles.selectedRoleListText
                     ]}>
-                      {role === 'customer' ? 'Customers' : 
-                       role === 'deliveryAgent' ? 'Delivery Agents' : 
-                       role === 'stockManager' ? 'Stock Managers' : 
-                       role === 'customerAssistance' ? 'Customer Assistances' : 
-                       role === 'manager' ? 'Managers' : 
-                       role === 'admin' ? 'Admins' : 
-                       role === 'supplier' ? 'Suppliers' : role}
+                      {role === 'customer' ? 'Customers' :
+                        role === 'deliveryAgent' ? 'Delivery Agents' :
+                          role === 'stockManager' ? 'Stock Managers' :
+                            role === 'customerAssistance' ? 'Customer Assistances' :
+                              role === 'manager' ? 'Managers' :
+                                role === 'admin' ? 'Admins' :
+                                  role === 'supplier' ? 'Suppliers' : role}
                     </Text>
-                    
+
                     {selectedRole === role && (
                       <View style={styles.radioSelected} />
                     )}
@@ -472,9 +474,9 @@ export default function SystemChat() {
                   </TouchableOpacity>
                 ))}
               </ScrollView>
-              
+
               <View style={styles.buttonContainer}>
-                <TouchableOpacity 
+                <TouchableOpacity
                   style={styles.clearFilterButton}
                   onPress={clearFilter}
                   activeOpacity={0.8}
