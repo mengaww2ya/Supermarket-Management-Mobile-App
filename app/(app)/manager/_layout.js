@@ -99,6 +99,41 @@ export default function ManagerLayout() {
                     headerTitleAlign: 'center',
                 }}
             />
+            <Stack.Screen
+                name="discounts/DiscountDashboard"
+                options={{
+                    title: 'Promotions & Discounts',
+                    headerTitleAlign: 'center',
+                }}
+            />
+            <Stack.Screen
+                name="discounts/CreateDiscount"
+                options={{
+                    title: 'Create Discount',
+                    headerTitleAlign: 'center',
+                }}
+            />
+            <Stack.Screen
+                name="discounts/ViewDiscounts"
+                options={{
+                    title: 'View Discounts',
+                    headerTitleAlign: 'center',
+                }}
+            />
+            <Stack.Screen
+                name="discounts/DiscountAnalytics"
+                options={{
+                    title: 'Discount Analytics',
+                    headerTitleAlign: 'center',
+                }}
+            />
+            <Stack.Screen
+                name="discounts/DiscountedOrders"
+                options={{
+                    title: 'Discounted Orders',
+                    headerTitleAlign: 'center',
+                }}
+            />
         </Stack>
     );
 }

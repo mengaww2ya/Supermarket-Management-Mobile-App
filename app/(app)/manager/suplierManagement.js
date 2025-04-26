@@ -13,7 +13,8 @@ import {
   ActivityIndicator,
   StatusBar,
   ScrollView,
-  RefreshControl
+  RefreshControl,
+  Platform
 } from "react-native";
 import { Feather, MaterialIcons, Ionicons, AntDesign, FontAwesome } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
@@ -39,8 +40,11 @@ export default function SupplierManagement() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [filterModalVisible, setFilterModalVisible] = useState(false);
+  const [categoryFilterModalVisible, setCategoryFilterModalVisible] = useState(false);
   const [activeFilter, setActiveFilter] = useState("all");
   const [error, setError] = useState(null);
+  const [categories, setCategories] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState(null);
   
   // Pre-create animated values for list items
   const itemFades = useRef([]);
@@ -98,10 +102,7 @@ export default function SupplierManagement() {
           ...data,
           status: data.status || "active",
           lastActive: data.updatedAt?.toDate() || new Date(),
-          joinDate: data.createdAt?.toDate() || new Date(),
-          rating: data.rating || (Math.random() * 3 + 2).toFixed(1), // Temporary random rating
-          products: data.products || Math.floor(Math.random() * 100), // Temporary random products
-          totalOrders: data.totalOrders || Math.floor(Math.random() * 1000) // Temporary random orders
+          joinDate: data.createdAt?.toDate() || new Date()
         };
       });
 
@@ -110,12 +111,118 @@ export default function SupplierManagement() {
 
       setSuppliers(suppliersList);
       setFilteredSuppliers(suppliersList);
+      
+      // Fetch product categories
+      fetchCategories();
     } catch (err) {
       console.error('Error fetching suppliers:', err);
       setError('Failed to fetch suppliers. Please try again.');
     } finally {
       setLoading(false);
       setRefreshing(false);
+    }
+  };
+
+  // Fetch product categories
+  const fetchCategories = async () => {
+    try {
+      const categoriesRef = collection(db, "supplier_category");
+      const categorySnapshot = await getDocs(categoriesRef);
+      const categoriesList = categorySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      
+      setCategories(categoriesList);
+    } catch (err) {
+      console.error("Error fetching categories:", err);
+    }
+  };
+
+  // Fetch supplier products by category for filtering
+  const fetchSupplierProductsByCategory = async (categoryId) => {
+    try {
+      setLoading(true);
+      
+      if (!categoryId) {
+        setSelectedCategory(null);
+        setFilteredSuppliers(suppliers);
+        setLoading(false);
+        return;
+      }
+      
+      // Get products from the category that have supplierId
+      const productsRef = collection(db, "supplier_category", categoryId, "products");
+      const productsSnapshot = await getDocs(productsRef);
+      
+      // Extract unique supplier IDs from products
+      const supplierIds = new Set();
+      productsSnapshot.docs.forEach(doc => {
+        const data = doc.data();
+        if (data.supplierId) {
+          supplierIds.add(data.supplierId);
+        }
+      });
+      
+      // Filter suppliers by those IDs
+      const filteredByCategory = suppliers.filter(supplier => 
+        supplierIds.has(supplier.id)
+      );
+      
+      setFilteredSuppliers(filteredByCategory);
+      setSelectedCategory(categoryId);
+    } catch (err) {
+      console.error("Error fetching supplier products by category:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch supplier stats when a supplier is selected
+  const fetchSupplierStats = async (supplierId) => {
+    try {
+      // Update the supplier object to show loading state
+      setSelectedSupplier(prev => ({
+        ...prev,
+        loadingStats: true
+      }));
+      
+      // Fetch product count
+      let productCount = 0;
+      const categoriesSnapshot = await getDocs(collection(db, "supplier_category"));
+      
+      // For each category, check products with this supplier's ID
+      const categoryPromises = categoriesSnapshot.docs.map(async (categoryDoc) => {
+        const productsRef = collection(db, "supplier_category", categoryDoc.id, "products");
+        const q = query(productsRef, where("supplierId", "==", supplierId));
+        const productsSnapshot = await getDocs(q);
+        return productsSnapshot.size;
+      });
+      
+      // Wait for all queries to finish and sum the results
+      const results = await Promise.all(categoryPromises);
+      productCount = results.reduce((sum, count) => sum + count, 0);
+      
+      // Fetch order count
+      const ordersRef = collection(db, "orders");
+      const ordersQuery = query(ordersRef, where("supplierId", "==", supplierId));
+      const ordersSnapshot = await getDocs(ordersQuery);
+      const orderCount = ordersSnapshot.size;
+      
+      // Update the supplier object with real data
+      setSelectedSupplier(prev => ({
+        ...prev,
+        products: productCount,
+        totalOrders: orderCount,
+        loadingStats: false
+      }));
+      
+    } catch (error) {
+      console.error("Error fetching supplier stats:", error);
+      setSelectedSupplier(prev => ({
+        ...prev,
+        loadingStats: false
+      }));
     }
   };
 
@@ -168,6 +275,9 @@ export default function SupplierManagement() {
   const openModal = (supplier) => {
     setSelectedSupplier(supplier);
     setModalVisible(true);
+    
+    // Fetch real stats for this supplier
+    fetchSupplierStats(supplier.id);
 
     // Haptic feedback
     if (Platform.OS !== 'web') {
@@ -199,13 +309,15 @@ export default function SupplierManagement() {
       );
     }
 
-    // Apply status filter
-    if (activeFilter !== "all") {
-      result = result.filter(item => item.status === activeFilter);
+    // If there's a category filter applied, respect it
+    if (selectedCategory) {
+      // Result is already filtered by category from fetchSupplierProductsByCategory
+      // This is just to show correct numbers when search is also applied
+      return;
     }
 
     setFilteredSuppliers(result);
-  }, [searchQuery, activeFilter, suppliers]);
+  }, [searchQuery, suppliers, selectedCategory]);
 
   // Status badge color based on status
   const getStatusColor = (status) => {
@@ -310,29 +422,8 @@ export default function SupplierManagement() {
                 </View>
 
                 <Text className="text-gray-500 text-xs mt-1">
-                  {item.category || 'General Supplier'}
+                  {item.productType || 'General Supplier'}
                 </Text>
-
-                <View className="flex-row items-center mt-2">
-                  <View className="flex-row items-center">
-                    <AntDesign name="star" size={12} color="#F59E0B" />
-                    <Text className="text-gray-700 text-xs ml-1">{item.rating}</Text>
-                  </View>
-                  
-                  <Text className="text-gray-400 mx-2">•</Text>
-                  
-                  <View className="flex-row items-center">
-                    <FontAwesome name="cube" size={12} color="#6366F1" />
-                    <Text className="text-gray-700 text-xs ml-1">{item.products} products</Text>
-                  </View>
-                  
-                  <Text className="text-gray-400 mx-2">•</Text>
-                  
-                  <View className="flex-row items-center">
-                    <Feather name="shopping-bag" size={12} color="#10B981" />
-                    <Text className="text-gray-700 text-xs ml-1">{item.totalOrders} orders</Text>
-                  </View>
-                </View>
               </View>
             </View>
           </View>
@@ -368,8 +459,8 @@ export default function SupplierManagement() {
             style={{ 
               backgroundColor: 'white',
               borderRadius: 16,
-              width: width * 0.85,
-              maxHeight: height * 0.7,
+              width: width * 0.9,
+              maxHeight: height * 0.8,
               opacity: fadeAnim,
               shadowColor: "#000",
               shadowOffset: { width: 0, height: 4 },
@@ -379,7 +470,7 @@ export default function SupplierManagement() {
             }}
           >
             <View className="py-3 px-4 border-b border-gray-100 flex-row items-center justify-between">
-              <Text className="text-lg font-bold text-gray-800">Supplier Details</Text>
+              <Text className="text-xl font-bold text-gray-800">Supplier Details</Text>
               <TouchableOpacity
                 className="p-1 rounded-full bg-gray-100"
                 onPress={() => setModalVisible(false)}
@@ -388,26 +479,30 @@ export default function SupplierManagement() {
               </TouchableOpacity>
             </View>
             
-            <ScrollView className="px-4 py-3">
-              <View className="flex-row items-center mb-4">
+            <ScrollView 
+              className="px-4 py-3"
+              contentContainerStyle={{ paddingBottom: 20 }}
+            >
+              {/* Profile Header */}
+              <View className="flex-row items-center mb-5">
                 {selectedSupplier.profileImage ? (
                   <Image
                     source={{ uri: selectedSupplier.profileImage }}
-                    className="w-16 h-16 rounded-full mr-4 border-2 border-indigo-500"
+                    className="w-20 h-20 rounded-full mr-4 border-2 border-indigo-500"
                     style={{ backgroundColor: '#E5E7EB' }}
                   />
                 ) : (
                   <View 
-                    className="w-16 h-16 rounded-full mr-4 items-center justify-center border-2 border-indigo-500" 
+                    className="w-20 h-20 rounded-full mr-4 items-center justify-center border-2 border-indigo-500" 
                     style={{ backgroundColor: avatarColor }}
                   >
-                    <Text className="text-white font-bold text-xl">
+                    <Text className="text-white font-bold text-2xl">
                       {initials}
                     </Text>
                   </View>
                 )}
-                <View>
-                  <Text className="text-xl font-bold text-gray-800">
+                <View className="flex-1">
+                  <Text className="text-2xl font-bold text-gray-800">
                     {companyName}
                   </Text>
                   <View className="flex-row items-center mt-1">
@@ -416,97 +511,171 @@ export default function SupplierManagement() {
                       style={{ backgroundColor: statusStyle.bg }}
                     >
                       <Text
-                        className="text-xs font-medium"
+                        className="text-sm font-medium"
                         style={{ color: statusStyle.text }}
                       >
                         {statusStyle.label}
                       </Text>
                     </View>
+                    <Text className="text-gray-500 text-sm">
+                      {selectedSupplier.productType ? `${selectedSupplier.productType}` : 'General Supplier'}
+                    </Text>
+                  </View>
+                </View>
+              </View>
+              
+              {/* Company Information */}
+              <View className="bg-gray-50 rounded-xl p-4 mb-5">
+                <Text className="text-lg font-bold text-gray-800 mb-4">Company Information</Text>
+                
+                <View className="mb-4">
+                  <Text className="text-sm font-medium text-gray-500">Company Name</Text>
+                  <Text className="text-base font-semibold text-gray-800">{selectedSupplier.companyName || 'N/A'}</Text>
+                </View>
+                
+                <View className="mb-4">
+                  <Text className="text-sm font-medium text-gray-500">Year Established</Text>
+                  <Text className="text-base font-semibold text-gray-800">{selectedSupplier.yearEstablished || 'N/A'}</Text>
+                </View>
+                
+                <View className="mb-4">
+                  <Text className="text-sm font-medium text-gray-500">Tax ID / Registration</Text>
+                  <Text className="text-base font-semibold text-gray-800">{selectedSupplier.taxId || 'N/A'}</Text>
+                </View>
+                
+                <View className="flex-row items-center mb-4">
+                  <View className="w-10 h-10 rounded-full bg-amber-100 items-center justify-center mr-3">
+                    <Feather name="tag" size={18} color="#F59E0B" />
+                  </View>
+                  <View>
+                    <Text className="text-sm font-medium text-gray-500">Product Type</Text>
+                    <Text className="text-base font-semibold text-gray-800">{selectedSupplier.productType || 'General Products'}</Text>
+                  </View>
+                </View>
+                
                     <View className="flex-row items-center">
-                      <AntDesign name="star" size={12} color="#F59E0B" />
-                      <Text className="text-gray-700 text-xs ml-1">{selectedSupplier.rating}</Text>
+                  <View className="w-10 h-10 rounded-full bg-purple-100 items-center justify-center mr-3">
+                    <Feather name="calendar" size={18} color="#8B5CF6" />
                     </View>
+                  <View>
+                    <Text className="text-sm font-medium text-gray-500">Registered Since</Text>
+                    <Text className="text-base font-semibold text-gray-800">{formatDate(selectedSupplier.createdAt?.toDate() || selectedSupplier.joinDate)}</Text>
                   </View>
                 </View>
               </View>
               
               {/* Contact information */}
-              <View className="bg-gray-50 rounded-xl p-4 mb-4">
-                <Text className="text-base font-bold text-gray-800 mb-3">Contact Information</Text>
+              <View className="bg-gray-50 rounded-xl p-4 mb-5">
+                <Text className="text-lg font-bold text-gray-800 mb-4">Contact Information</Text>
                 
-                <View className="flex-row items-center mb-3">
-                  <View className="w-9 h-9 rounded-full bg-blue-100 items-center justify-center mr-3">
-                    <Feather name="mail" size={16} color="#3B82F6" />
+                <View className="flex-row items-center mb-4">
+                  <View className="w-10 h-10 rounded-full bg-blue-100 items-center justify-center mr-3">
+                    <Feather name="mail" size={18} color="#3B82F6" />
                   </View>
                   <View>
-                    <Text className="text-xs font-medium text-gray-500">Email</Text>
-                    <Text className="text-sm font-semibold text-gray-800">{selectedSupplier.email || 'N/A'}</Text>
+                    <Text className="text-sm font-medium text-gray-500">Email</Text>
+                    <Text className="text-base font-semibold text-gray-800">{selectedSupplier.email || 'N/A'}</Text>
                   </View>
                 </View>
                 
-                <View className="flex-row items-center mb-3">
-                  <View className="w-9 h-9 rounded-full bg-green-100 items-center justify-center mr-3">
-                    <Feather name="phone" size={16} color="#10B981" />
+                <View className="flex-row items-center mb-4">
+                  <View className="w-10 h-10 rounded-full bg-green-100 items-center justify-center mr-3">
+                    <Feather name="phone" size={18} color="#10B981" />
                   </View>
                   <View>
-                    <Text className="text-xs font-medium text-gray-500">Phone</Text>
-                    <Text className="text-sm font-semibold text-gray-800">{selectedSupplier.phone || 'N/A'}</Text>
+                    <Text className="text-sm font-medium text-gray-500">Phone</Text>
+                    <Text className="text-base font-semibold text-gray-800">{selectedSupplier.phone || 'N/A'}</Text>
+                  </View>
+                </View>
+                
+                <View className="flex-row items-center mb-4">
+                  <View className="w-10 h-10 rounded-full bg-red-100 items-center justify-center mr-3">
+                    <Feather name="globe" size={18} color="#EF4444" />
+                  </View>
+                  <View className="flex-1">
+                    <Text className="text-sm font-medium text-gray-500">Website</Text>
+                    <Text className="text-base font-semibold text-gray-800" numberOfLines={1}>
+                      {selectedSupplier.website || 'N/A'}
+                    </Text>
                   </View>
                 </View>
                 
                 <View className="flex-row items-center">
-                  <View className="w-9 h-9 rounded-full bg-purple-100 items-center justify-center mr-3">
-                    <Feather name="calendar" size={16} color="#8B5CF6" />
+                  <View className="w-10 h-10 rounded-full bg-indigo-100 items-center justify-center mr-3">
+                    <Feather name="map-pin" size={18} color="#6366F1" />
                   </View>
                   <View>
-                    <Text className="text-xs font-medium text-gray-500">Registered Since</Text>
-                    <Text className="text-sm font-semibold text-gray-800">{formatDate(selectedSupplier.joinDate)}</Text>
+                    <Text className="text-sm font-medium text-gray-500">Address</Text>
+                    <Text className="text-base font-semibold text-gray-800">{selectedSupplier.address || 'N/A'}</Text>
                   </View>
                 </View>
               </View>
               
               {/* Supplier Statistics */}
-              <View className="bg-gray-50 rounded-xl p-4 mb-4">
-                <Text className="text-base font-bold text-gray-800 mb-3">Supplier Statistics</Text>
+              <View className="bg-gray-50 rounded-xl p-4 mb-5">
+                <Text className="text-lg font-bold text-gray-800 mb-4">Supplier Statistics</Text>
                 
+                {selectedSupplier.loadingStats ? (
+                  <View className="py-4 items-center">
+                    <ActivityIndicator size="small" color="#4F46E5" />
+                    <Text className="text-sm text-gray-500 mt-2">Loading statistics...</Text>
+                  </View>
+                ) : (
                 <View className="flex-row justify-between">
-                  <View className="bg-white rounded-lg p-3 shadow-sm flex-1 mr-2 items-center">
-                    <Text className="text-xs font-medium text-gray-500">Products</Text>
-                    <Text className="text-lg font-bold text-indigo-600 mt-1">{selectedSupplier.products}</Text>
+                    <View className="bg-white rounded-lg p-4 shadow-sm flex-1 mr-2 items-center">
+                      <Text className="text-sm font-medium text-gray-500">Products</Text>
+                      <Text className="text-xl font-bold text-indigo-600 mt-2">{selectedSupplier.products || 0}</Text>
                   </View>
                   
-                  <View className="bg-white rounded-lg p-3 shadow-sm flex-1 ml-2 items-center">
-                    <Text className="text-xs font-medium text-gray-500">Total Orders</Text>
-                    <Text className="text-lg font-bold text-green-600 mt-1">{selectedSupplier.totalOrders}</Text>
+                    <View className="bg-white rounded-lg p-4 shadow-sm flex-1 ml-2 items-center">
+                      <Text className="text-sm font-medium text-gray-500">Total Orders</Text>
+                      <Text className="text-xl font-bold text-green-600 mt-2">{selectedSupplier.totalOrders || 0}</Text>
+                    </View>
                   </View>
-                </View>
+                )}
               </View>
               
               {/* Action Buttons */}
               <View className="flex-row justify-between mb-2">
                 <TouchableOpacity
-                  className="bg-indigo-500 py-3 rounded-lg flex-row justify-center items-center flex-1 mr-2"
+                  className="bg-indigo-500 py-4 rounded-lg flex-row justify-center items-center flex-1 mr-2"
                   onPress={() => {
                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                     setModalVisible(false);
-                    router.push(`/(app)/supplierProducts?id=${selectedSupplier.id}`);
+                    router.push(`/(app)/manager/supplierProducts?id=${selectedSupplier.id}`);
                   }}
                 >
-                  <FontAwesome name="cube" size={16} color="white" />
-                  <Text className="ml-2 text-white font-bold">View Products</Text>
+                  <FontAwesome name="cube" size={18} color="white" />
+                  <Text className="ml-2 text-white font-bold text-base">View Products</Text>
                 </TouchableOpacity>
                 
                 <TouchableOpacity
-                  className="bg-green-500 py-3 rounded-lg flex-row justify-center items-center flex-1 ml-2"
+                  className="bg-green-500 py-4 rounded-lg flex-row justify-center items-center flex-1 ml-2"
                   onPress={() => {
                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                     setModalVisible(false);
-                    // Add messaging functionality similar to customerList
-                    alert("Messaging feature coming soon!");
+                    
+                    // Pass parameters to chatRoom
+                    const params = {
+                      uid: selectedSupplier.id,
+                      recipientId: selectedSupplier.id,
+                      name: selectedSupplier.companyName || `${selectedSupplier.firstName || ''} ${selectedSupplier.lastName || ''}`,
+                      recipientName: selectedSupplier.companyName || `${selectedSupplier.firstName || ''} ${selectedSupplier.lastName || ''}`,
+                      image: selectedSupplier.profileImage || '',
+                      email: selectedSupplier.email || ''
+                    };
+                    
+                    // Convert params to query string
+                    const queryString = Object.entries(params)
+                      .filter(([_, value]) => value !== undefined && value !== null && value !== '')
+                      .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
+                      .join('&');
+                      
+                    router.push(`/(app)/chatRoom?${queryString}`);
                   }}
                 >
-                  <MaterialIcons name="chat" size={16} color="white" />
-                  <Text className="ml-2 text-white font-bold">Contact</Text>
+                  <MaterialIcons name="chat" size={18} color="white" />
+                  <Text className="ml-2 text-white font-bold text-base">Contact</Text>
                 </TouchableOpacity>
               </View>
             </ScrollView>
@@ -516,19 +685,19 @@ export default function SupplierManagement() {
     );
   };
   
-  // Render filter modal
-  const renderFilterModal = () => {
+  // Render category filter modal
+  const renderCategoryFilterModal = () => {
     return (
       <Modal
-        visible={filterModalVisible}
+        visible={categoryFilterModalVisible}
         transparent={true}
         animationType="fade"
-        onRequestClose={() => setFilterModalVisible(false)}
+        onRequestClose={() => setCategoryFilterModalVisible(false)}
       >
         <TouchableOpacity 
           style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)' }}
           activeOpacity={1}
-          onPress={() => setFilterModalVisible(false)}
+          onPress={() => setCategoryFilterModalVisible(false)}
         >
           <View style={{ 
             position: 'absolute', 
@@ -541,63 +710,54 @@ export default function SupplierManagement() {
             shadowOffset: { width: 0, height: 2 },
             shadowOpacity: 0.25,
             shadowRadius: 3.84,
-            elevation: 5
+            elevation: 5,
+            maxWidth: width * 0.7,
+            maxHeight: height * 0.7
           }}>
+            <View className="border-b border-gray-100 pb-2 mb-2">
+              <Text className="text-base font-bold text-gray-800 px-2">
+                Filter by Category
+              </Text>
+            </View>
+            
+            <ScrollView style={{ maxHeight: height * 0.5 }}>
             <TouchableOpacity
               className="flex-row items-center px-4 py-3"
               onPress={() => {
-                setActiveFilter('all');
-                setFilterModalVisible(false);
+                  fetchSupplierProductsByCategory(null);
+                  setCategoryFilterModalVisible(false);
               }}
             >
               <View className="w-6 h-6 rounded-full bg-gray-200 items-center justify-center mr-3">
-                <Feather name="users" size={14} color="#6B7280" />
+                  <Feather name="grid" size={14} color="#6B7280" />
               </View>
-              <Text className={`font-medium ${activeFilter === 'all' ? 'text-blue-600' : 'text-gray-800'}`}>All Suppliers</Text>
-              {activeFilter === 'all' && <MaterialIcons name="check" size={20} color="#4F46E5" style={{ marginLeft: 8 }} />}
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              className="flex-row items-center px-4 py-3"
-              onPress={() => {
-                setActiveFilter('active');
-                setFilterModalVisible(false);
-              }}
-            >
-              <View className="w-6 h-6 rounded-full bg-green-100 items-center justify-center mr-3">
-                <Feather name="user-check" size={14} color="#10B981" />
-              </View>
-              <Text className={`font-medium ${activeFilter === 'active' ? 'text-green-600' : 'text-gray-800'}`}>Active</Text>
-              {activeFilter === 'active' && <MaterialIcons name="check" size={20} color="#10B981" style={{ marginLeft: 8 }} />}
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              className="flex-row items-center px-4 py-3"
-              onPress={() => {
-                setActiveFilter('inactive');
-                setFilterModalVisible(false);
-              }}
-            >
-              <View className="w-6 h-6 rounded-full bg-red-100 items-center justify-center mr-3">
-                <Feather name="user-x" size={14} color="#EF4444" />
-              </View>
-              <Text className={`font-medium ${activeFilter === 'inactive' ? 'text-red-600' : 'text-gray-800'}`}>Inactive</Text>
-              {activeFilter === 'inactive' && <MaterialIcons name="check" size={20} color="#EF4444" style={{ marginLeft: 8 }} />}
+                <Text className={`font-medium ${!selectedCategory ? 'text-blue-600' : 'text-gray-800'}`}>
+                  All Categories
+                </Text>
+                {!selectedCategory && <MaterialIcons name="check" size={20} color="#4F46E5" style={{ marginLeft: 8 }} />}
             </TouchableOpacity>
             
+              {categories.map(category => (
             <TouchableOpacity
+                  key={category.id}
               className="flex-row items-center px-4 py-3"
               onPress={() => {
-                setActiveFilter('certified');
-                setFilterModalVisible(false);
+                    fetchSupplierProductsByCategory(category.id);
+                    setCategoryFilterModalVisible(false);
               }}
             >
-              <View className="w-6 h-6 rounded-full bg-blue-100 items-center justify-center mr-3">
-                <Feather name="award" size={14} color="#3B82F6" />
+                  <View className="w-6 h-6 rounded-full bg-indigo-100 items-center justify-center mr-3">
+                    <Feather name="tag" size={14} color="#4F46E5" />
               </View>
-              <Text className={`font-medium ${activeFilter === 'certified' ? 'text-blue-600' : 'text-gray-800'}`}>Certified</Text>
-              {activeFilter === 'certified' && <MaterialIcons name="check" size={20} color="#3B82F6" style={{ marginLeft: 8 }} />}
+                  <Text className={`font-medium ${selectedCategory === category.id ? 'text-indigo-600' : 'text-gray-800'}`}>
+                    {category.name}
+                  </Text>
+                  {selectedCategory === category.id && (
+                    <MaterialIcons name="check" size={20} color="#4F46E5" style={{ marginLeft: 8 }} />
+                  )}
             </TouchableOpacity>
+              ))}
+            </ScrollView>
           </View>
         </TouchableOpacity>
       </Modal>
@@ -626,17 +786,43 @@ export default function SupplierManagement() {
           )}
         </View>
         
+        {/* Category Filter Button */}
         <TouchableOpacity 
           className="bg-gray-100 p-3 rounded-lg"
-          onPress={() => setFilterModalVisible(true)}
+          onPress={() => setCategoryFilterModalVisible(true)}
         >
           <Feather 
             name="filter" 
             size={20} 
-            color={activeFilter !== 'all' ? '#4F46E5' : '#6B7280'} 
+            color={selectedCategory ? '#4F46E5' : '#6B7280'} 
           />
         </TouchableOpacity>
       </View>
+      
+      {/* Active Filters Display */}
+      {selectedCategory && (
+        <View className="px-4 py-2 bg-white border-b border-gray-200 flex-row flex-wrap items-center">
+          <Text className="text-xs text-gray-500 mr-2">Filtered by:</Text>
+          
+          {selectedCategory && (
+            <View className="bg-indigo-50 px-2 py-1 rounded-full mr-2 mb-1 flex-row items-center">
+              <Text className="text-xs text-indigo-600 mr-1">
+                {categories.find(c => c.id === selectedCategory)?.name || 'Category'}
+              </Text>
+              <TouchableOpacity onPress={() => fetchSupplierProductsByCategory(null)}>
+                <Feather name="x" size={12} color="#4F46E5" />
+              </TouchableOpacity>
+            </View>
+          )}
+          
+          <TouchableOpacity 
+            onPress={() => fetchSupplierProductsByCategory(null)}
+            className="mb-1"
+          >
+            <Text className="text-xs text-gray-500">Clear all</Text>
+          </TouchableOpacity>
+        </View>
+      )}
 
       {/* Supplier List */}
       {loading ? (
@@ -721,8 +907,8 @@ export default function SupplierManagement() {
       {/* Supplier Detail Modal */}
       {renderSupplierModal()}
       
-      {/* Filter Modal */}
-      {renderFilterModal()}
+      {/* Category Filter Modal */}
+      {renderCategoryFilterModal()}
     </SafeAreaView>
   );
 }

@@ -76,7 +76,7 @@ const actionItems = [
     icon: "tag",
     iconType: "MaterialCommunityIcons",
     color: "#7E5AF1",
-    route: "/manager/promotionDiscount",
+    route: "/manager/discounts/DiscountDashboard",
     gradient: ["#F7F4FE", "#F2ECFD"],
     stats: "20 Active Promos"
   },
