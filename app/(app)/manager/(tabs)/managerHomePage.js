@@ -139,13 +139,6 @@ const performanceMetricsData = [
 // Key Management Areas
 const quickLinks = [
   {
-    title: "Customer Service",
-    icon: "support-agent",
-    iconType: "MaterialIcons",
-    route: "/manager/customerAssistance",
-    color: "#10B981"
-  },
-  {
     title: "Delivery",
     icon: "local-shipping",
     iconType: "MaterialIcons",
@@ -158,13 +151,6 @@ const quickLinks = [
     iconType: "MaterialIcons",
     route: "/manager/HandlingEscalatedIssues",
     color: "#F59E0B"
-  },
-  {
-    title: "Channels",
-    icon: "store",
-    iconType: "MaterialIcons",
-    route: "/manager/ManageChannels",
-    color: "#8B5CF6"
   }
 ];
 

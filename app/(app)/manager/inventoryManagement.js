@@ -956,18 +956,18 @@ export default function InventoryManagement() {
       <View className="px-4 pt-2 pb-4">
         <View className="flex-row items-center mb-4">
           <View className="flex-1 flex-row items-center bg-white rounded-lg shadow-sm px-3">
-            <MaterialIcons name="search" size={22} color="#9CA3AF" />
-            <TextInput
-              className="flex-1 py-2 px-2 text-gray-800"
-              placeholder="Search products..."
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-            />
-            {searchQuery !== "" && (
-              <TouchableOpacity onPress={() => setSearchQuery("")}>
-                <MaterialIcons name="clear" size={20} color="#9CA3AF" />
-              </TouchableOpacity>
-            )}
+          <MaterialIcons name="search" size={22} color="#9CA3AF" />
+          <TextInput
+            className="flex-1 py-2 px-2 text-gray-800"
+            placeholder="Search products..."
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+          />
+          {searchQuery !== "" && (
+            <TouchableOpacity onPress={() => setSearchQuery("")}>
+              <MaterialIcons name="clear" size={20} color="#9CA3AF" />
+            </TouchableOpacity>
+          )}
           </View>
           
           <TouchableOpacity 

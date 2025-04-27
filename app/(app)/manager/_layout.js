@@ -58,41 +58,6 @@ export default function ManagerLayout() {
                 }}
             />
             <Stack.Screen
-                name="ManageChannels"
-                options={{
-                    title: 'Manage Channels',
-                    headerTitleAlign: 'center',
-                }}
-            />
-            <Stack.Screen
-                name="ChannelOverview"
-                options={{
-                    title: 'Channel Overview',
-                    headerTitleAlign: 'center',
-                }}
-            />
-            <Stack.Screen
-                name="customerAssistance"
-                options={{
-                    title: 'Customer Assistance',
-                    headerTitleAlign: 'center',
-                }}
-            />
-            <Stack.Screen
-                name="customerServicePerformance"
-                options={{
-                    title: 'Service Performance',
-                    headerTitleAlign: 'center',
-                }}
-            />
-            <Stack.Screen
-                name="monitorCustomerAssistance"
-                options={{
-                    title: 'Monitor Assistance',
-                    headerTitleAlign: 'center',
-                }}
-            />
-            <Stack.Screen
                 name="HandlingEscalatedIssues"
                 options={{
                     title: 'Escalated Issues',
