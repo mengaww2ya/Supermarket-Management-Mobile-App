@@ -90,26 +90,6 @@ const actionItems = [
     gradient: ["#F4F9FF", "#ECF4FC"],
     stats: "20 Suppliers"
   },
-  {
-    title: "Sales & Revenue",
-    subtitle: "Financial performance",
-    icon: "chart-line",
-    iconType: "MaterialCommunityIcons",
-    color: "#3AAEDC",
-    route: "/manager/saleRevenueManagement",
-    gradient: ["#F0FBFF", "#E6F7FC"],
-    stats: "$120K Revenue"
-  },
-  {
-    title: "Alerts & Notifications",
-    subtitle: "View important alerts",
-    icon: "bell",
-    iconType: "MaterialCommunityIcons",
-    color: "#EF4444",
-    route: "/manager/alertNotificationManagement",
-    gradient: ["#FEF2F2", "#FCE9E9"],
-    stats: "33 Alerts"
-  },
 ];
 
 // Performance Metrics
@@ -488,121 +468,6 @@ const QuickAccessButton = ({ link, index, onPress }) => {
   );
 };
 
-// Task Item component
-const TaskItem = ({ task, index }) => {
-  const [completed, setCompleted] = React.useState(false);
-  const opacityAnim = useRef(new Animated.Value(0)).current;
-  const translateXAnim = useRef(new Animated.Value(-20)).current;
-  const scaleAnim = useRef(new Animated.Value(1)).current;
-
-  useEffect(() => {
-    Animated.parallel([
-      Animated.timing(opacityAnim, {
-        toValue: 1,
-        duration: 400,
-        delay: index * 150,
-        useNativeDriver: true
-      }),
-      Animated.timing(translateXAnim, {
-        toValue: 0,
-        duration: 400,
-        delay: index * 150,
-        useNativeDriver: true
-      })
-    ]).start();
-  }, []);
-
-  const handleToggleComplete = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-
-    // Animate the task when marked complete
-    Animated.sequence([
-      Animated.timing(scaleAnim, {
-        toValue: 0.95,
-        duration: 100,
-        useNativeDriver: true
-      }),
-      Animated.timing(scaleAnim, {
-        toValue: 1,
-        duration: 100,
-        useNativeDriver: true
-      })
-    ]).start();
-
-    setCompleted(!completed);
-  };
-
-  return (
-    <Animated.View
-      style={{
-        opacity: opacityAnim,
-        transform: [
-          { translateX: translateXAnim },
-          { scale: scaleAnim }
-        ],
-        backgroundColor: completed ? "rgba(243, 244, 246, 0.9)" : "white",
-        borderRadius: 16,
-        padding: 16,
-        marginBottom: 12,
-        flexDirection: "row",
-        alignItems: "center",
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.05,
-        shadowRadius: 3,
-      }}
-    >
-      <TouchableOpacity
-        onPress={handleToggleComplete}
-        style={{
-          width: 24,
-          height: 24,
-          borderRadius: 12,
-          borderWidth: 2,
-          borderColor: completed ? "#10B981" : "#9CA3AF",
-          marginRight: 16,
-          justifyContent: "center",
-          alignItems: "center",
-          backgroundColor: completed ? "#10B981" : "transparent"
-        }}
-      >
-        {completed && (
-          <MaterialIcons name="check" size={16} color="white" />
-        )}
-      </TouchableOpacity>
-
-      <Text
-        style={{
-          flex: 1,
-          fontSize: 16,
-          fontWeight: "500",
-          color: completed ? "#9CA3AF" : "#374151",
-          textDecorationLine: completed ? 'line-through' : 'none',
-        }}
-      >
-        {task.text}
-      </Text>
-
-      <View style={{
-        backgroundColor: task.priority === "high" ? "#FEE2E2" :
-          task.priority === "medium" ? "#FEF3C7" : "#DBEAFE",
-        paddingHorizontal: 10,
-        paddingVertical: 4,
-        borderRadius: 100,
-      }}>
-        <Text style={{
-          fontSize: 12,
-          fontWeight: "600",
-          color: task.priority === "high" ? "#EF4444" :
-            task.priority === "medium" ? "#F59E0B" : "#3B82F6",
-        }}>
-          {task.priority}
-        </Text>
-      </View>
-    </Animated.View>
-  );
-};
-
 // Section Header component
 const SectionHeader = ({ title, color = "#4F46E5", icon }) => {
   return (
@@ -630,7 +495,6 @@ const SectionHeader = ({ title, color = "#4F46E5", icon }) => {
 export default function ManagerHomePage() {
   const router = useRouter();
   const fadeAnim = useRef(new Animated.Value(0)).current;
-  const [focusExpanded, setFocusExpanded] = React.useState(true);
 
   // Performance metrics state (from Firebase)
   const [performanceMetrics, setPerformanceMetrics] = useState([]);
@@ -783,18 +647,6 @@ export default function ManagerHomePage() {
     router.push(route);
   };
 
-  const todaysTasks = [
-    { text: "Review low stock inventory items", priority: "high", id: 1 },
-    { text: "Approve weekly staff schedules", priority: "medium", id: 2 },
-    { text: "Respond to 3 customer escalations", priority: "high", id: 3 },
-    { text: "Review weekly sales report", priority: "low", id: 4 },
-  ];
-
-  const toggleFocusSection = () => {
-    setFocusExpanded(!focusExpanded);
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-  };
-
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#F3F4F6" }}>
       <HomeHeader title="Manager Dashboard" />
@@ -936,60 +788,6 @@ export default function ManagerHomePage() {
                 onPress={handleNavigation}
               />
             ))}
-          </View>
-
-          {/* Today's Focus */}
-          <View style={{ marginBottom: 32 }}>
-            <View style={{
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "space-between",
-              marginBottom: 16,
-              marginTop: 16
-            }}>
-              <View style={{ flexDirection: "row", alignItems: "center" }}>
-                <View style={{
-                  width: 6,
-                  height: 24,
-                  backgroundColor: "#4F46E5",
-                  borderRadius: 3,
-                  marginRight: 10
-                }} />
-                <Text style={{
-                  fontSize: 20,
-                  fontWeight: "bold",
-                  color: "#1F2937",
-                }}>
-                  Today's Focus
-                </Text>
-              </View>
-
-              <TouchableOpacity
-                onPress={toggleFocusSection}
-                style={{
-                  width: 36,
-                  height: 36,
-                  borderRadius: 18,
-                  backgroundColor: "#F3F4F6",
-                  justifyContent: "center",
-                  alignItems: "center"
-                }}
-              >
-                <MaterialIcons
-                  name={focusExpanded ? "expand-less" : "expand-more"}
-                  size={24}
-                  color="#6B7280"
-                />
-              </TouchableOpacity>
-            </View>
-
-            {focusExpanded && (
-              <View style={{ marginTop: 8 }}>
-                {todaysTasks.map((task, index) => (
-                  <TaskItem key={task.id} task={task} index={index} />
-                ))}
-              </View>
-            )}
           </View>
         </Animated.View>
       </ScrollView>

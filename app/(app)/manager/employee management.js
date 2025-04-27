@@ -1125,12 +1125,9 @@ export default function EmployeeManagement() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#F9FAFB' }}>
+       {/* Header */}
+       <HomeHeader title="Employee Management" />
       <Animated.View style={{ flex: 1, opacity: fadeAnim }}>
-        {/* Header */}
-        <View style={{ padding: 16 }}>
-          <HomeHeader title="Employee Management" />
-        </View>
-
         {/* Search and Filter Bar */}
         <View style={{
           flexDirection: 'row',
