@@ -37,7 +37,7 @@ import HomeHeader from '../../components/HomeHeader';
 import { heightPercentageToDP as hp, widthPercentageToDP as wp } from 'react-native-responsive-screen';
 import * as Haptics from 'expo-haptics';
 
-const DEFAULT_PROFILE_IMAGE = require('../../../assets/images/PrifileDemo.png');
+const DEFAULT_PROFILE_IMAGE = require('../../../assets/images/profile_demo.png');
 
 // Predefined support responses
 const QUICK_RESPONSES = [

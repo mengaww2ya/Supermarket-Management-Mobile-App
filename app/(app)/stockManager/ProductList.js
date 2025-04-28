@@ -14,7 +14,9 @@ import {
   Dimensions,
   Alert,
   StyleSheet,
-  FlatList
+  FlatList,
+  Picker,
+  Switch
 } from 'react-native';
 import { db } from '../../../firebase/firebaseConfig';
 import { collection, getDocs, query, where, orderBy, doc, deleteDoc, writeBatch, updateDoc, onSnapshot } from 'firebase/firestore';
@@ -26,6 +28,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useFocusEffect } from '@react-navigation/native';
 import * as Notifications from 'expo-notifications';
 import * as Haptics from 'expo-haptics';
+import { Picker as NativePicker } from '@react-native-picker/picker';
 
 const { width, height } = Dimensions.get('window');
 const imageSize = 100; // Fixed size for the product image
@@ -51,6 +54,10 @@ const ProductList = () => {
   const [selectAll, setSelectAll] = useState(false);
   const [expiredProducts, setExpiredProducts] = useState([]);
   const [approachingExpiryProducts, setApproachingExpiryProducts] = useState([]);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editProduct, setEditProduct] = useState(null);
+  const [editModalAnimation] = useState(new Animated.Value(0));
+  const [editBackdropAnimation] = useState(new Animated.Value(0));
 
   // Animation values
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -174,7 +181,7 @@ const ProductList = () => {
   useEffect(() => {
     const productsRef = collection(db, 'Products');
     const q = query(productsRef, where('status', '!=', 'Deleted'));
-
+    
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const productsData = [];
       snapshot.forEach((doc) => {
@@ -200,7 +207,7 @@ const ProductList = () => {
       const productsRef = collection(db, 'Products');
       const q = query(productsRef, where('status', '!=', 'Deleted'));
       const querySnapshot = await getDocs(q);
-
+      
       const productsData = [];
       const expired = [];
       const approachingExpiry = [];
@@ -322,7 +329,7 @@ const ProductList = () => {
     if (!scaleAnims[id]) {
       scaleAnims[id] = new Animated.Value(1);
     }
-
+    
     setPressedCardId(id);
 
     // Scale down animation
@@ -348,7 +355,7 @@ const ProductList = () => {
     if (!scaleAnims[id]) {
       scaleAnims[id] = new Animated.Value(1);
     }
-
+    
     // Scale up animation
     Animated.spring(scaleAnims[id], {
       toValue: 1,
@@ -408,35 +415,95 @@ const ProductList = () => {
   };
 
   const handleUpdateProduct = (product) => {
-    closeProductModal();
+    setEditProduct(product);
+    setShowEditModal(true);
+    
+    // Animate modal entrance
+    Animated.parallel([
+      Animated.timing(editBackdropAnimation, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: true,
+      }),
+      Animated.spring(editModalAnimation, {
+        toValue: 1,
+        friction: 8,
+        useNativeDriver: true,
+      })
+    ]).start();
+  };
 
-    // Navigate to add product with all product details for editing
-    router.push({
-      pathname: "/stockManager/addProduct",
-      params: {
-        editMode: "true",
-        id: product.id,
-        productName: product.productName,
-        description: product.description || "",
-        price: product.price.toString(),
-        discountPrice: product.discountPrice?.toString() || "",
-        hasDiscount: product.hasDiscount ? "true" : "false",
-        discountStartDate: product.discountStartDate || "",
-        discountEndDate: product.discountEndDate || "",
-        stockQuantity: product.stockQuantity?.toString() || "0",
-        unitType: product.unitType || "",
-        brand: product.brand || "",
-        supplier: product.supplier || "",
-        categoryId: product.categoryId || "",
-        status: product.status || "Active",
-        hasSpecialOffer: product.hasSpecialOffer ? "true" : "false",
-        specialOfferQuantity: product.specialOfferDetails?.quantity?.toString() || "",
-        specialOfferDiscount: product.specialOfferDetails?.discountPercentage?.toString() || "",
-        productionDate: product.productionDate || "",
-        expirationDate: product.expirationDate || "",
-        image: product.image || ""
-      }
+  const closeEditModal = () => {
+    // Animate modal exit
+    Animated.parallel([
+      Animated.timing(editBackdropAnimation, {
+        toValue: 0,
+        duration: 200,
+        useNativeDriver: true,
+      }),
+      Animated.spring(editModalAnimation, {
+        toValue: 0,
+        friction: 8,
+        useNativeDriver: true,
+      })
+    ]).start(() => {
+      setShowEditModal(false);
+      setEditProduct(null);
     });
+  };
+
+  const handleEditSave = async (updatedProduct) => {
+    try {
+      const productRef = doc(db, 'Products', updatedProduct.id);
+      
+      // Format dates properly
+      const formattedProduct = {
+        ...updatedProduct,
+        price: parseFloat(updatedProduct.price) || 0,
+        discountPrice: parseFloat(updatedProduct.discountPrice) || 0,
+        stockQuantity: parseInt(updatedProduct.stockQuantity) || 0,
+        hasDiscount: updatedProduct.hasDiscount === 'true',
+        hasSpecialOffer: updatedProduct.hasSpecialOffer === 'true',
+        specialOfferDetails: updatedProduct.hasSpecialOffer === 'true' ? {
+          quantity: parseInt(updatedProduct.specialOfferQuantity) || 0,
+          discountPercentage: parseInt(updatedProduct.specialOfferDiscount) || 0
+        } : null,
+        lastUpdated: new Date().toISOString()
+      };
+
+      await updateDoc(productRef, formattedProduct);
+
+      // Update local state
+      setProducts(prev => 
+        prev.map(product => 
+          product.id === updatedProduct.id ? formattedProduct : product
+        )
+      );
+      setFilteredProducts(prev => 
+        prev.map(product => 
+          product.id === updatedProduct.id ? formattedProduct : product
+        )
+      );
+
+      // Show success message
+      Alert.alert("Success", "Product updated successfully!");
+
+      // Provide haptic feedback
+      if (Platform.OS === 'ios') {
+        try {
+          await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        } catch (e) {
+          Vibration.vibrate(50);
+        }
+      } else {
+        Vibration.vibrate(50);
+      }
+
+      closeEditModal();
+    } catch (error) {
+      console.error("Error updating product:", error);
+      Alert.alert("Error", "Failed to update product. Please try again.");
+    }
   };
 
   const handleDeleteProduct = async (productId) => {
@@ -1349,6 +1416,304 @@ const ProductList = () => {
                     <Text className="text-white font-medium ml-2">Edit</Text>
                   </TouchableOpacity>
                 </View>
+              </View>
+            </ScrollView>
+          </Animated.View>
+        </View>
+      )}
+
+      {/* Edit Product Modal */}
+      {showEditModal && editProduct && (
+        <View className="absolute inset-0 justify-center items-center z-50">
+          <Animated.View
+            className="absolute inset-0 bg-black/50"
+            style={{ opacity: editBackdropAnimation }}
+            onTouchStart={closeEditModal}
+          />
+
+          <Animated.View
+            className="w-[90%] bg-white rounded-2xl overflow-hidden"
+            style={{
+              transform: [
+                {
+                  scale: editModalAnimation.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [0.9, 1]
+                  })
+                },
+                {
+                  translateY: editModalAnimation.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [20, 0]
+                  })
+                }
+              ],
+              opacity: editModalAnimation,
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: 10 },
+              shadowOpacity: 0.25,
+              shadowRadius: 10,
+              elevation: 10,
+              maxHeight: height * 0.85
+            }}
+          >
+            <ScrollView bounces={false} showsVerticalScrollIndicator={false}>
+              <View className="p-5">
+                <View className="flex-row justify-between items-center mb-4">
+                  <Text className="text-2xl font-bold text-gray-800">Edit Product</Text>
+                  <TouchableOpacity
+                    onPress={closeEditModal}
+                    className="w-10 h-10 rounded-full bg-gray-100 justify-center items-center"
+                  >
+                    <Ionicons name="close" size={24} color="#4b5563" />
+                  </TouchableOpacity>
+                </View>
+
+                {/* Product Image */}
+                <View className="mb-4">
+                  <Text className="text-sm font-medium text-gray-700 mb-2">Product Image</Text>
+                  <TouchableOpacity
+                    className="w-full h-40 bg-gray-100 rounded-lg justify-center items-center"
+                    onPress={() => {/* Add image picker functionality */}}
+                  >
+                    {editProduct.image ? (
+                      <Image
+                        source={{ uri: editProduct.image }}
+                        className="w-full h-full rounded-lg"
+                        resizeMode="cover"
+                      />
+                    ) : (
+                      <View className="items-center">
+                        <Ionicons name="image-outline" size={40} color="#9ca3af" />
+                        <Text className="text-gray-400 mt-2">Tap to add image</Text>
+                      </View>
+                    )}
+                  </TouchableOpacity>
+                </View>
+
+                {/* Product Name */}
+                <View className="mb-4">
+                  <Text className="text-sm font-medium text-gray-700 mb-2">Product Name</Text>
+                  <TextInput
+                    className="border border-gray-200 rounded-lg px-4 py-3"
+                    value={editProduct.productName}
+                    onChangeText={(text) => setEditProduct({...editProduct, productName: text})}
+                    placeholder="Enter product name"
+                  />
+                </View>
+
+                {/* Description */}
+                <View className="mb-4">
+                  <Text className="text-sm font-medium text-gray-700 mb-2">Description</Text>
+                  <TextInput
+                    className="border border-gray-200 rounded-lg px-4 py-3"
+                    value={editProduct.description}
+                    onChangeText={(text) => setEditProduct({...editProduct, description: text})}
+                    placeholder="Enter product description"
+                    multiline
+                    numberOfLines={3}
+                  />
+                </View>
+
+                {/* Price */}
+                <View className="mb-4">
+                  <Text className="text-sm font-medium text-gray-700 mb-2">Price</Text>
+                  <TextInput
+                    className="border border-gray-200 rounded-lg px-4 py-3"
+                    value={editProduct.price.toString()}
+                    onChangeText={(text) => setEditProduct({...editProduct, price: text})}
+                    placeholder="Enter price"
+                    keyboardType="numeric"
+                  />
+                </View>
+
+                {/* Discount Section */}
+                <View className="mb-4">
+                  <View className="flex-row items-center mb-2">
+                    <Text className="text-sm font-medium text-gray-700 flex-1">Has Discount</Text>
+                    <Switch
+                      value={editProduct.hasDiscount === 'true'}
+                      onValueChange={(value) => setEditProduct({...editProduct, hasDiscount: value ? 'true' : 'false'})}
+                    />
+                  </View>
+                  {editProduct.hasDiscount === 'true' && (
+                    <>
+                      <TextInput
+                        className="border border-gray-200 rounded-lg px-4 py-3 mb-2"
+                        value={editProduct.discountPrice?.toString() || ''}
+                        onChangeText={(text) => setEditProduct({...editProduct, discountPrice: text})}
+                        placeholder="Discount Price"
+                        keyboardType="numeric"
+                      />
+                      <TextInput
+                        className="border border-gray-200 rounded-lg px-4 py-3 mb-2"
+                        value={editProduct.discountStartDate}
+                        onChangeText={(text) => setEditProduct({...editProduct, discountStartDate: text})}
+                        placeholder="Discount Start Date (YYYY-MM-DD)"
+                      />
+                      <TextInput
+                        className="border border-gray-200 rounded-lg px-4 py-3"
+                        value={editProduct.discountEndDate}
+                        onChangeText={(text) => setEditProduct({...editProduct, discountEndDate: text})}
+                        placeholder="Discount End Date (YYYY-MM-DD)"
+                      />
+                    </>
+                  )}
+                </View>
+
+                {/* Stock Quantity */}
+                <View className="mb-4">
+                  <Text className="text-sm font-medium text-gray-700 mb-2">Stock Quantity</Text>
+                  <TextInput
+                    className="border border-gray-200 rounded-lg px-4 py-3"
+                    value={editProduct.stockQuantity.toString()}
+                    onChangeText={(text) => setEditProduct({...editProduct, stockQuantity: text})}
+                    placeholder="Enter stock quantity"
+                    keyboardType="numeric"
+                  />
+                </View>
+
+                {/* Unit Type */}
+                <View className="mb-4">
+                  <Text className="text-sm font-medium text-gray-700 mb-2">Unit Type</Text>
+                  <TextInput
+                    className="border border-gray-200 rounded-lg px-4 py-3"
+                    value={editProduct.unitType}
+                    onChangeText={(text) => setEditProduct({...editProduct, unitType: text})}
+                    placeholder="Enter unit type (e.g., kg, pcs)"
+                  />
+                </View>
+
+                {/* Brand */}
+                <View className="mb-4">
+                  <Text className="text-sm font-medium text-gray-700 mb-2">Brand</Text>
+                  <TextInput
+                    className="border border-gray-200 rounded-lg px-4 py-3"
+                    value={editProduct.brand}
+                    onChangeText={(text) => setEditProduct({...editProduct, brand: text})}
+                    placeholder="Enter brand name"
+                  />
+                </View>
+
+                {/* Supplier */}
+                <View className="mb-4">
+                  <Text className="text-sm font-medium text-gray-700 mb-2">Supplier</Text>
+                  <TextInput
+                    className="border border-gray-200 rounded-lg px-4 py-3"
+                    value={editProduct.supplier}
+                    onChangeText={(text) => setEditProduct({...editProduct, supplier: text})}
+                    placeholder="Enter supplier name"
+                  />
+                </View>
+
+                {/* Category */}
+                <View className="mb-4">
+                  <Text className="text-sm font-medium text-gray-700 mb-2">Category</Text>
+                  <View className="border border-gray-200 rounded-lg overflow-hidden">
+                    <NativePicker
+                      selectedValue={editProduct.categoryId}
+                      onValueChange={(value) => setEditProduct({...editProduct, categoryId: value})}
+                      style={{ backgroundColor: 'white' }}
+                    >
+                      <NativePicker.Item label="Select Category" value="" />
+                      {categories.map(category => (
+                        <NativePicker.Item
+                          key={category.id}
+                          label={category.categoryName}
+                          value={category.id}
+                        />
+                      ))}
+                    </NativePicker>
+                  </View>
+                </View>
+
+                {/* Special Offer Section */}
+                <View className="mb-4">
+                  <View className="flex-row items-center mb-2">
+                    <Text className="text-sm font-medium text-gray-700 flex-1">Has Special Offer</Text>
+                    <Switch
+                      value={editProduct.hasSpecialOffer === 'true'}
+                      onValueChange={(value) => setEditProduct({...editProduct, hasSpecialOffer: value ? 'true' : 'false'})}
+                    />
+                  </View>
+                  {editProduct.hasSpecialOffer === 'true' && (
+                    <>
+                      <TextInput
+                        className="border border-gray-200 rounded-lg px-4 py-3 mb-2"
+                        value={editProduct.specialOfferDetails?.quantity?.toString() || ''}
+                        onChangeText={(text) => setEditProduct({
+                          ...editProduct,
+                          specialOfferDetails: {
+                            ...editProduct.specialOfferDetails,
+                            quantity: text
+                          }
+                        })}
+                        placeholder="Special Offer Quantity"
+                        keyboardType="numeric"
+                      />
+                      <TextInput
+                        className="border border-gray-200 rounded-lg px-4 py-3"
+                        value={editProduct.specialOfferDetails?.discountPercentage?.toString() || ''}
+                        onChangeText={(text) => setEditProduct({
+                          ...editProduct,
+                          specialOfferDetails: {
+                            ...editProduct.specialOfferDetails,
+                            discountPercentage: text
+                          }
+                        })}
+                        placeholder="Special Offer Discount (%)"
+                        keyboardType="numeric"
+                      />
+                    </>
+                  )}
+                </View>
+
+                {/* Production Date */}
+                <View className="mb-4">
+                  <Text className="text-sm font-medium text-gray-700 mb-2">Production Date</Text>
+                  <TextInput
+                    className="border border-gray-200 rounded-lg px-4 py-3"
+                    value={editProduct.productionDate}
+                    onChangeText={(text) => setEditProduct({...editProduct, productionDate: text})}
+                    placeholder="Production Date (YYYY-MM-DD)"
+                  />
+                </View>
+
+                {/* Expiration Date */}
+                <View className="mb-4">
+                  <Text className="text-sm font-medium text-gray-700 mb-2">Expiration Date</Text>
+                  <TextInput
+                    className="border border-gray-200 rounded-lg px-4 py-3"
+                    value={editProduct.expirationDate}
+                    onChangeText={(text) => setEditProduct({...editProduct, expirationDate: text})}
+                    placeholder="Expiration Date (YYYY-MM-DD)"
+                  />
+                </View>
+
+                {/* Status */}
+                <View className="mb-4">
+                  <Text className="text-sm font-medium text-gray-700 mb-2">Status</Text>
+                  <View className="border border-gray-200 rounded-lg overflow-hidden">
+                    <NativePicker
+                      selectedValue={editProduct.status}
+                      onValueChange={(value) => setEditProduct({...editProduct, status: value})}
+                      style={{ backgroundColor: 'white' }}
+                    >
+                      <NativePicker.Item label="Active" value="Active" />
+                      <NativePicker.Item label="Inactive" value="Inactive" />
+                      <NativePicker.Item label="Expired" value="Expired" />
+                      <NativePicker.Item label="Approaching Expiry" value="Approaching Expiry" />
+                    </NativePicker>
+                  </View>
+                </View>
+
+                {/* Save Button */}
+                <TouchableOpacity
+                  className="bg-indigo-600 py-3 rounded-lg mt-4"
+                  onPress={() => handleEditSave(editProduct)}
+                >
+                  <Text className="text-white text-center font-semibold">Save Changes</Text>
+                </TouchableOpacity>
               </View>
             </ScrollView>
           </Animated.View>

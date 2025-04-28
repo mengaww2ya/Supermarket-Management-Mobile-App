@@ -308,100 +308,103 @@ export default function ViewCategory() {
     };
     
     const renderCategoryItem = ({ item }) => {
-        const dateAdded = item.dateAdded ? new Date(item.dateAdded) : null;
-        const formattedDate = dateAdded ? 
-            `${dateAdded.toLocaleDateString()} at ${dateAdded.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}` 
-            : "No date";
-            
-        const hasDiscount = item.discountAvailable && item.discountPercentage > 0;
-        const isActive = activeCard === item.id;
+        const rowTranslate = rowTranslateAnimatedValues[item.id] || new Animated.Value(1);
         
         return (
             <Animated.View 
-                style={[
-                    { 
-                        transform: [{ scale: isActive ? 0.98 : scaleAnim }], 
-                        opacity: fadeAnim,
-                        marginVertical: 8,
-                        marginHorizontal: 8
-                    }
-                ]}
+                style={{
+                    transform: [{ scale: rowTranslate }],
+                    opacity: rowTranslate
+                }}
             >
                 <TouchableOpacity 
                     onPress={() => {
                         setSelectedCategory(item);
                         setModalVisible(true);
-                        provideFeedback('light');
                     }}
                     onPressIn={() => handleCardPressIn(item.id)}
                     onPressOut={handleCardPressOut}
-                    activeOpacity={0.9}
-                    className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden"
+                    className={`mb-4 rounded-xl overflow-hidden border border-gray-200 bg-white shadow-sm ${
+                        activeCard === item.id ? 'shadow-lg border-orange-500' : ''
+                    }`}
                 >
-                    <LinearGradient
-                        colors={['#ffffff', '#f9fafb']}
-                        start={{ x: 0, y: 0 }}
-                        end={{ x: 1, y: 1 }}
-                        className="absolute inset-0 opacity-80"
-                    />
-                    
-                    <View className="flex-row">
-                        {/* Category Image - Left side */}
-                        <View className="w-[120] h-[120] relative">
+                    <View className="flex-row p-4">
+                        {/* Category Image */}
+                        <View className="w-20 h-20 rounded-lg overflow-hidden mr-4">
                             {item.image ? (
                                 <Image 
                                     source={{ uri: item.image }} 
                                     className="w-full h-full"
-                                    resizeMode="contain"
-                                    style={{ backgroundColor: '#f9fafb' }}
+                                    resizeMode="cover"
                                 />
                             ) : (
                                 <View className="w-full h-full bg-gray-100 justify-center items-center">
-                                    <Ionicons name="image-outline" size={32} color="#d1d5db" />
+                                    <Ionicons name="image-outline" size={24} color="#9ca3af" />
                                 </View>
                             )}
-                            
-                            {/* Status Badge */}
-                            <View 
-                                className={`absolute bottom-2 right-2 px-2 py-1 rounded-full ${
-                                    item.status === "Active" ? "bg-green-500" : "bg-gray-500"
-                                }`}
-                            >
-                                <Text className="text-white text-[10px] font-medium">
-                                    {item.status}
-                                </Text>
                             </View>
                             
-                            {/* Discount Badge */}
-                            {hasDiscount && (
-                                <View className="absolute top-2 left-2 bg-amber-500 px-2 py-1 rounded-full">
-                                    <Text className="text-white text-[10px] font-bold">
-                                        {item.discountPercentage}% OFF
+                        {/* Category Info */}
+                        <View className="flex-1">
+                            <View className="flex-row justify-between items-start mb-1">
+                                <Text className="text-lg font-semibold text-gray-800 flex-1">
+                                    {item.categoryName}
                                     </Text>
+                                <View className="flex-row">
+                                    {/* Edit Button */}
+                                    <TouchableOpacity
+                                        onPress={() => {
+                                            router.push({
+                                                pathname: "/stockManager/addCategory",
+                                                params: {
+                                                    editMode: "true",
+                                                    categoryId: item.id,
+                                                    categoryName: item.categoryName,
+                                                    description: item.description || "",
+                                                    status: item.status || "Active",
+                                                    discountAvailable: item.discountAvailable || "false",
+                                                    discountPercentage: item.discountPercentage || "0",
+                                                    image: item.image || ""
+                                                }
+                                            });
+                                        }}
+                                        className="p-2 mr-2"
+                                    >
+                                        <Ionicons name="create-outline" size={20} color="#4f46e5" />
+                                    </TouchableOpacity>
+
+                                    {/* Delete Button */}
+                                    <TouchableOpacity
+                                        onPress={() => confirmDelete(item)}
+                                        className="p-2"
+                                    >
+                                        <Ionicons name="trash-outline" size={20} color="#ef4444" />
+                                    </TouchableOpacity>
                                 </View>
-                            )}
                         </View>
                         
-                        {/* Category Details - Right side */}
-                        <View className="flex-1 p-3">
-                            <Text className="text-lg font-bold text-gray-800">{item.categoryName}</Text>
-                            
-                            {item.description && (
-                                <Text className="text-gray-600 text-sm mt-1" numberOfLines={2}>
-                                    {item.description}
+                            <Text className="text-sm text-gray-600 mb-2" numberOfLines={2}>
+                                {item.description || "No description available"}
                                 </Text>
-                            )}
                             
-                            <View className="flex-row items-center mt-2">
-                                <Ionicons name="calendar-outline" size={12} color="#9ca3af" />
-                                <Text className="text-gray-500 text-xs ml-1">
-                                    Added: {formattedDate}
+                            <View className="flex-row items-center">
+                                <View className={`px-2 py-1 rounded-full ${
+                                    item.status === "Active" ? "bg-green-100" : "bg-red-100"
+                                }`}>
+                                    <Text className={`text-xs font-medium ${
+                                        item.status === "Active" ? "text-green-800" : "text-red-800"
+                                    }`}>
+                                        {item.status || "Inactive"}
                                 </Text>
                             </View>
                             
-                            <View className="flex-row items-center justify-end mt-3">
-                                <Text className="text-gray-400 text-xs mr-1">Tap for details</Text>
-                                <Ionicons name="chevron-forward" size={12} color="#9ca3af" />
+                                {item.discountAvailable && (
+                                    <View className="ml-2 px-2 py-1 rounded-full bg-amber-100">
+                                        <Text className="text-xs font-medium text-amber-800">
+                                            {item.discountPercentage}% OFF
+                                        </Text>
+                                    </View>
+                                )}
                             </View>
                         </View>
                     </View>

@@ -22,7 +22,7 @@ import { Ionicons, MaterialIcons, MaterialCommunityIcons, Feather, FontAwesome5,
 import { LinearGradient } from 'expo-linear-gradient';
 import HomeHeader from "app/components/HomeHeader";
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
-import { collection, getDocs, query, where, orderBy, updateDoc, doc, serverTimestamp, getDoc } from 'firebase/firestore';
+import { collection, getDocs, query, where, orderBy, updateDoc, doc, serverTimestamp, getDoc, addDoc } from 'firebase/firestore';
 import { db } from "../../../firebase/firebaseConfig";
 
 const { width, height } = Dimensions.get('window');
@@ -67,8 +67,8 @@ export default function DeliveryOrders() {
     try {
     setLoading(true);
     
-      // Query the orders collection
-      const ordersRef = collection(db, "orders");
+      // Query the customer_order collection - simplified query to avoid index requirement
+      const ordersRef = collection(db, "customer_order");
       const ordersQuery = query(
         ordersRef, 
         orderBy("createdAt", "desc")
@@ -77,7 +77,7 @@ export default function DeliveryOrders() {
       const querySnapshot = await getDocs(ordersQuery);
       
       if (querySnapshot.empty) {
-        console.log("No orders found");
+        console.log("No delivery orders found");
         setOrders([]);
         setFilteredOrders([]);
       setLoading(false);
@@ -98,7 +98,7 @@ export default function DeliveryOrders() {
           address: data.deliveryDetails?.address || "N/A",
           location: data.deliveryDetails?.location,
           notes: data.deliveryDetails?.notes || "",
-          status: data.orderStatus || "pending",
+          status: data.deliveryStatus || "not_assigned",
           totalItems: data.items?.length || 0,
           items: data.items || [],
           date: data.createdAt?.toDate() || new Date(),
@@ -108,17 +108,29 @@ export default function DeliveryOrders() {
           subtotal: data.payment?.subtotal || 0,
           deliveryFee: data.payment?.deliveryFee || 0,
           userId: data.userId || "",
+          assignedAgent: data.assignedDeliveryAgent || null,
+          deliveryHistory: data.orderStatusHistory || [],
+          actionHistory: data.actionHistory || [],
+          stockStatus: data.stockStatus || "pending_confirmation",
+          managerApproval: data.managerApproval || { approved: false }
         };
       });
+
+      // Filter orders that are relevant for delivery
+      const deliveryOrders = fetchedOrders.filter(order => 
+        order.paymentStatus === "completed" && 
+        !order.managerApproval.approved && 
+        ["not_assigned", "assigned", "in_progress", "out_for_delivery"].includes(order.status)
+      );
       
       // Set the orders
-      setOrders(fetchedOrders);
+      setOrders(deliveryOrders);
       
       // Extract unique status categories from orders
-      const uniqueStatuses = [...new Set(fetchedOrders.map(order => order.status))];
+      const uniqueStatuses = [...new Set(deliveryOrders.map(order => order.status))];
       const formattedStatuses = uniqueStatuses.map(status => ({
         id: status,
-        label: status.charAt(0).toUpperCase() + status.slice(1),
+        label: status.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' '),
         icon: getStatusIcon(status)
       }));
       
@@ -130,16 +142,16 @@ export default function DeliveryOrders() {
       
       // Compute stats
       const stats = {
-        totalOrders: fetchedOrders.length,
-        pendingOrders: fetchedOrders.filter(order => order.status === 'pending').length,
-        assignedOrders: fetchedOrders.filter(order => order.status === 'assigned').length,
-        completedOrders: fetchedOrders.filter(order => order.status === 'completed').length,
+        totalOrders: deliveryOrders.length,
+        pendingOrders: deliveryOrders.filter(order => order.status === 'not_assigned').length,
+        assignedOrders: deliveryOrders.filter(order => order.status === 'assigned').length,
+        completedOrders: deliveryOrders.filter(order => order.status === 'delivered').length,
       };
       
       setStats(stats);
       
-      // Apply initial filter - by default show all orders
-      applyFilters(fetchedOrders, selectedFilter, searchQuery);
+      // Apply initial filter
+      applyFilters(deliveryOrders, selectedFilter, searchQuery);
       
       // Start animations
       startEntranceAnimations();
@@ -156,18 +168,18 @@ export default function DeliveryOrders() {
   // Get icon name for status
   const getStatusIcon = (status) => {
     switch (status.toLowerCase()) {
-      case 'pending':
+      case 'not_assigned':
         return 'time-outline';
       case 'assigned':
         return 'bicycle-outline';
-      case 'in progress':
+      case 'in_progress':
         return 'reload-outline';
-      case 'completed':
-        return 'checkmark-circle-outline';
-      case 'cancelled':
-        return 'close-circle-outline';
+      case 'out_for_delivery':
+        return 'car-outline';
       case 'delivered':
         return 'checkmark-done-outline';
+      case 'cancelled':
+        return 'close-circle-outline';
       default:
         return 'ellipsis-horizontal-outline';
     }
@@ -960,6 +972,64 @@ export default function DeliveryOrders() {
     };
     
     const statusColor = getStatusColor(selectedOrder.status);
+
+    const handleAssignOrder = async () => {
+      try {
+        // Check if we have all required data
+        if (!agentId) {
+          Alert.alert('Error', 'Delivery agent ID is missing');
+          return;
+        }
+
+        const orderRef = doc(db, 'customer_order', selectedOrder.id);
+        
+        // Create assignment data with proper checks
+        const assignmentData = {
+          orderStatus: 'processing',
+          deliveryStatus: 'assigned',
+          assignedDeliveryAgent: {
+            id: agentId,
+            // Use a fallback value if agentName is undefined
+            name: agentName || 'Delivery Agent',
+            assignedAt: serverTimestamp()
+          }
+        };
+
+        // Update the order document
+        await updateDoc(orderRef, assignmentData);
+
+        // Create delivery task with proper checks
+        const taskRef = collection(db, 'delivery_tasks');
+        const taskData = {
+          orderId: selectedOrder.id,
+          agentId: agentId,
+          agentName: agentName || 'Delivery Agent',
+          status: 'assigned',
+          createdAt: serverTimestamp(),
+          customerInfo: {
+            name: selectedOrder.customer || 'Customer',
+            phoneNumber: selectedOrder.customerPhone || 'N/A',
+            email: selectedOrder.customerEmail || 'N/A'
+          },
+          deliveryDetails: {
+            address: selectedOrder.address || 'N/A',
+            notes: selectedOrder.notes || ''
+          },
+          items: selectedOrder.items || [],
+          orderRef: selectedOrder.orderRef,
+          amount: selectedOrder.amount || 0
+        };
+
+        await addDoc(taskRef, taskData);
+
+        Alert.alert('Success', 'Order successfully assigned to delivery agent');
+        closeOrderDetailModal();
+        fetchOrders(); // Refresh the orders list
+      } catch (error) {
+        console.error('Error assigning order:', error);
+        Alert.alert('Error', `Failed to assign order: ${error.message}`);
+      }
+    };
     
     return (
       <Modal
@@ -994,397 +1064,119 @@ export default function DeliveryOrders() {
               elevation: 10,
             }}
           >
-            <TouchableOpacity activeOpacity={1} onPress={() => {}}>
-              <View style={{ maxHeight: hp('85%'), display: 'flex', flexDirection: 'column' }}>
-                <LinearGradient
-                  colors={[statusColor + '20', '#f8fafc']}
-                  start={[0, 0]}
-                  end={[0, 1]}
-                  style={{
-                    padding: 20,
-                    borderBottomLeftRadius: 20,
-                    borderBottomRightRadius: 20,
-                  }}
-                >
-                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                    <View style={{ flex: 1 }}>
-                      <Text style={{ 
-                        fontSize: 20, 
-                        fontWeight: 'bold', 
-                        color: '#0f172a',
-                        marginBottom: 4,
-                      }}>
-                        Order #{selectedOrder.orderRef}
-                      </Text>
-                      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <ScrollView style={{ maxHeight: hp('85%') }}>
+              <View style={{ padding: 20 }}>
+                {/* Order header section */}
+                <View style={{ marginBottom: 20 }}>
+                  <Text style={{ fontSize: 24, fontWeight: 'bold' }}>Order #{selectedOrder.orderRef}</Text>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 8 }}>
                         <View style={{
-                          width: 8,
-                          height: 8,
-                          borderRadius: 4,
+                      width: 10,
+                      height: 10,
+                      borderRadius: 5,
                           backgroundColor: statusColor,
-                          marginRight: 6,
+                      marginRight: 8
                         }} />
-                        <Text style={{ color: statusColor, fontWeight: '600', textTransform: 'capitalize' }}>
+                    <Text style={{ color: statusColor, fontWeight: '600' }}>
                           {selectedOrder.status}
                         </Text>
                       </View>
                     </View>
                     
-        <TouchableOpacity
-                      onPress={closeOrderDetailModal}
-                      style={{
-                        width: 36,
-                        height: 36,
-                        borderRadius: 18,
-                        backgroundColor: 'rgba(203, 213, 225, 0.4)',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                      }}
-                    >
-                      <Feather name="x" size={20} color="#64748b" />
-                    </TouchableOpacity>
+                {/* Customer info section */}
+                <View style={{ marginBottom: 20 }}>
+                  <Text style={{ fontSize: 18, fontWeight: '600', marginBottom: 10 }}>Customer Information</Text>
+                  <View style={{ backgroundColor: '#f8fafc', padding: 15, borderRadius: 10 }}>
+                    <Text style={{ fontSize: 16 }}>{customerData?.fullName || selectedOrder.customer}</Text>
+                    <Text style={{ marginTop: 5, color: '#64748b' }}>{selectedOrder.customerPhone}</Text>
+                    <Text style={{ color: '#64748b' }}>{selectedOrder.customerEmail}</Text>
                 </View>
-                  
-                  <View style={{
-                    flexDirection: 'row',
-                    marginTop: 16, 
-                    alignItems: 'center'
-                  }}>
-                    <View style={{ 
-                      width: 60, 
-                      height: 60, 
-                      borderRadius: 30,
-                      backgroundColor: '#e2e8f0',
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                      borderWidth: 2,
-                      borderColor: '#fff',
-                    }}>
-                      <Ionicons name="person" size={30} color="#94a3b8" />
                   </View>
                     
-                    <View style={{ marginLeft: 16, flex: 1 }}>
-                      <Text style={{ 
-                        fontSize: 18, 
-                        fontWeight: 'bold', 
-                        color: '#0f172a',
-                        marginBottom: 2,
-                      }}>
-                        {customerData?.fullName || customerData?.name || selectedOrder.customer}
-                      </Text>
-                      
-                      <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 2 }}>
-                        <Feather name="phone" size={14} color="#64748b" />
-                        <Text style={{ 
-                          color: '#64748b', 
-                          marginLeft: 6, 
-                          fontSize: 14,
-                        }}>
-                          {customerData?.phoneNumber || customerData?.phone || selectedOrder.customerPhone}
-                        </Text>
-                </View>
-                      
-                      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                        <Feather name="mail" size={14} color="#64748b" />
-                        <Text style={{ 
-                          color: '#64748b', 
-                          marginLeft: 6, 
-                          fontSize: 14,
-                        }}>
-                          {customerData?.email || selectedOrder.customerEmail || "No email provided"}
-                        </Text>
-              </View>
-                    </View>
-                  </View>
-                </LinearGradient>
-                
-                <ScrollView 
-                  style={{ maxHeight: hp('55%') }}
-                  showsVerticalScrollIndicator={false}
-                >
-                  <View style={{ padding: 20 }}>
-                    {/* Delivery Address */}
-                    <View style={{
-                      backgroundColor: '#f8fafc',
-                      borderRadius: 16,
-                      padding: 16,
-                      marginBottom: 16,
-                    }}>
-                      <Text style={{ 
-                        fontSize: 16, 
-                        fontWeight: 'bold', 
-                        marginBottom: 16,
-                        color: '#0f172a',
-                      }}>
-                        Delivery Address
-                </Text>
-                      
-                      <View style={{ flexDirection: 'row', marginBottom: 12 }}>
-                        <View style={{
-                          width: 36, 
-                          alignItems: 'center',
-                          marginRight: 8,
-                        }}>
-                          <View style={{
-                            width: 26,
-                            height: 26,
-                            borderRadius: 13,
-                            backgroundColor: '#f43f5e',
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                          }}>
-                            <Feather name="map-pin" size={14} color="white" />
-                </View>
-            </View>
-            
-                        <View style={{ flex: 1 }}>
-                          <Text style={{ color: '#0f172a', fontWeight: '500', marginBottom: 2 }}>
-                            Shipping Address
-                          </Text>
-                          <Text style={{ color: '#64748b', fontSize: 14 }}>
-                            {selectedOrder.address}
-                          </Text>
-                        </View>
-              </View>
-              
+                {/* Delivery address section */}
+                <View style={{ marginBottom: 20 }}>
+                  <Text style={{ fontSize: 18, fontWeight: '600', marginBottom: 10 }}>Delivery Address</Text>
+                  <View style={{ backgroundColor: '#f8fafc', padding: 15, borderRadius: 10 }}>
+                    <Text style={{ fontSize: 16 }}>{selectedOrder.address}</Text>
                       {selectedOrder.notes && (
-                        <View style={{ flexDirection: 'row', marginTop: 8 }}>
-                          <View style={{
-                            width: 36, 
-                            alignItems: 'center',
-                            marginRight: 8,
-                          }}>
-                            <View style={{
-                              width: 26,
-                              height: 26,
-                              borderRadius: 13,
-                              backgroundColor: '#3b82f6',
-                              justifyContent: 'center',
-                              alignItems: 'center',
-                            }}>
-                              <Feather name="info" size={14} color="white" />
-                            </View>
-              </View>
-              
-                          <View style={{ flex: 1 }}>
-                            <Text style={{ color: '#0f172a', fontWeight: '500', marginBottom: 2 }}>
-                              Delivery Notes
-                            </Text>
-                            <Text style={{ color: '#64748b', fontSize: 14 }}>
-                              {selectedOrder.notes}
-                            </Text>
-                          </View>
-                        </View>
+                      <Text style={{ marginTop: 5, color: '#64748b' }}>{selectedOrder.notes}</Text>
                       )}
                 </View>
-                
-                    {/* Order Summary */}
-                    <View style={{
-                      backgroundColor: '#f8fafc',
-                      borderRadius: 16,
-                      padding: 16,
-                      marginBottom: 16,
-                    }}>
-                      <Text style={{ 
-                        fontSize: 16, 
-                        fontWeight: 'bold', 
-                        marginBottom: 16,
-                        color: '#0f172a',
-                      }}>
-                        Order Summary
-                      </Text>
-                      
-                      <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12 }}>
-                        <View style={{ flex: 1 }}>
-                          <Text style={{ color: '#64748b', fontSize: 13, marginBottom: 4 }}>Order Date</Text>
-                          <Text style={{ color: '#0f172a', fontWeight: '500' }}>
-                            {formatDate(selectedOrder.date)}
-                          </Text>
                 </View>
                         
-                        <View style={{ flex: 1, alignItems: 'flex-end' }}>
-                          <Text style={{ color: '#64748b', fontSize: 13, marginBottom: 4 }}>Payment Method</Text>
-                          <Text style={{ color: '#0f172a', fontWeight: '500', textTransform: 'capitalize' }}>
-                            {selectedOrder.paymentMethod}
-                          </Text>
-              </View>
-            </View>
-            
-                      <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 8 }}>
-                        <View style={{ flex: 1 }}>
-                          <Text style={{ color: '#64748b', fontSize: 13, marginBottom: 4 }}>Payment Status</Text>
-                          <View style={{ 
-                            flexDirection: 'row', 
-                            alignItems: 'center',
-                            backgroundColor: selectedOrder.paymentStatus === 'completed' ? '#dcfce7' : '#fef9c3',
-                            paddingHorizontal: 8,
-                            paddingVertical: 3,
-                            borderRadius: 12,
-                            alignSelf: 'flex-start'
-                          }}>
-                            <View style={{
-                              width: 6,
-                              height: 6,
-                              borderRadius: 3,
-                              backgroundColor: selectedOrder.paymentStatus === 'completed' ? '#10b981' : '#f59e0b',
-                              marginRight: 4
-                            }} />
-                            <Text style={{ 
-                              color: selectedOrder.paymentStatus === 'completed' ? '#10b981' : '#f59e0b',
-                              fontSize: 13,
-                              fontWeight: '600',
-                              textTransform: 'capitalize'
-                            }}>
-                              {selectedOrder.paymentStatus}
-                            </Text>
-                          </View>
-                        </View>
-                        
-                        <View style={{ flex: 1, alignItems: 'flex-end' }}>
-                          <Text style={{ color: '#64748b', fontSize: 13, marginBottom: 4 }}>Total Items</Text>
-                          <Text style={{ color: '#0f172a', fontWeight: '500' }}>
-                            {selectedOrder.totalItems}
-                          </Text>
-                        </View>
-                      </View>
-                    </View>
-                    
-                    {/* Order Items */}
-                    <View style={{ marginBottom: 16 }}>
-                      <View style={{ 
+                {/* Order items section */}
+                <View style={{ marginBottom: 20 }}>
+                  <Text style={{ fontSize: 18, fontWeight: '600', marginBottom: 10 }}>Order Items</Text>
+                  <View style={{ backgroundColor: '#f8fafc', padding: 15, borderRadius: 10 }}>
+                    {selectedOrder.items.map((item, index) => (
+                      <View key={index} style={{
                         flexDirection: 'row', 
                         justifyContent: 'space-between', 
-                        alignItems: 'center',
-                        marginBottom: 12
+                        paddingVertical: 10,
+                        borderBottomWidth: index < selectedOrder.items.length - 1 ? 1 : 0,
+                        borderBottomColor: '#e2e8f0'
                       }}>
-                        <Text style={{ 
-                          fontSize: 16, 
-                          fontWeight: 'bold',
-                          color: '#0f172a',
-                        }}>
-                          Order Items
-                        </Text>
-                        <Text style={{ fontWeight: '700', color: '#0f172a' }}>
-                          {selectedOrder.amount.toFixed(2)} Birr
-                        </Text>
+                        <View>
+                          <Text style={{ fontSize: 16 }}>{item.productName}</Text>
+                          <Text style={{ color: '#64748b' }}>Quantity: {item.quantity}</Text>
                       </View>
-                      
-                      <View style={{
-                        backgroundColor: '#f8fafc',
-                        borderRadius: 16,
-                        padding: 16,
-                      }}>
-                        {selectedOrder.items.map((item, index) => (
-                          <View 
-                            key={item.id || index}
-                            style={{
-                              flexDirection: 'row',
-                              padding: 10,
-                              backgroundColor: 'white',
-                              borderRadius: 12,
-                              marginBottom: index < selectedOrder.items.length - 1 ? 8 : 0,
-                              elevation: 1,
-                              shadowColor: '#000',
-                              shadowOffset: { width: 0, height: 1 },
-                              shadowOpacity: 0.1,
-                              shadowRadius: 1,
-                            }}
-                          >
-                            <View style={{ 
-                              marginRight: 12, 
-                              width: 40, 
-                              height: 40, 
-                              backgroundColor: '#f1f5f9', 
-                              borderRadius: 8, 
-                              justifyContent: 'center', 
-                              alignItems: 'center',
-                            }}>
-                              <MaterialCommunityIcons name="food" size={20} color="#64748b" />
-                            </View>
-                            
-                            <View style={{ flex: 1 }}>
-                              <Text style={{ fontWeight: '500', color: '#0f172a', marginBottom: 2 }}>
-                                {item.productName}
-                              </Text>
-                              <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                                <Text style={{ color: '#64748b', fontSize: 13 }}>
-                                  {item.quantity} x {item.price.toFixed(2)} Birr
-                                </Text>
-                                <Text style={{ fontWeight: '600', color: '#0f172a' }}>
-                                  {item.totalPrice.toFixed(2)} Birr
-                                </Text>
-                              </View>
-                            </View>
+                        <Text style={{ fontWeight: '600' }}>{item.totalPrice} Birr</Text>
                           </View>
                         ))}
-                        
-                        {/* Price Summary */}
-                        <View style={{ marginTop: 16, paddingTop: 12, borderTopWidth: 1, borderTopColor: '#e2e8f0' }}>
-                          <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 }}>
-                            <Text style={{ color: '#64748b' }}>Subtotal:</Text>
-                            <Text style={{ color: '#0f172a' }}>{selectedOrder.subtotal.toFixed(2)} Birr</Text>
+                          </View>
                           </View>
                           
-                          <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 }}>
-                            <Text style={{ color: '#64748b' }}>Delivery Fee:</Text>
-                            <Text style={{ color: '#0f172a' }}>{selectedOrder.deliveryFee.toFixed(2)} Birr</Text>
+                {/* Payment details section */}
+                <View style={{ marginBottom: 20 }}>
+                  <Text style={{ fontSize: 18, fontWeight: '600', marginBottom: 10 }}>Payment Details</Text>
+                  <View style={{ backgroundColor: '#f8fafc', padding: 15, borderRadius: 10 }}>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 5 }}>
+                      <Text>Subtotal:</Text>
+                      <Text>{selectedOrder.subtotal} Birr</Text>
                           </View>
-                          
-                          <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 8, paddingTop: 8, borderTopWidth: 1, borderTopColor: '#e2e8f0' }}>
-                            <Text style={{ fontWeight: '600', color: '#0f172a' }}>Total:</Text>
-                            <Text style={{ fontWeight: '700', color: '#0f172a', fontSize: 16 }}>
-                              {selectedOrder.amount.toFixed(2)} Birr
-                            </Text>
-                          </View>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 5 }}>
+                      <Text>Delivery Fee:</Text>
+                      <Text>{selectedOrder.deliveryFee} Birr</Text>
+                    </View>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingTop: 10, borderTopWidth: 1, borderTopColor: '#e2e8f0' }}>
+                      <Text style={{ fontWeight: '600' }}>Total:</Text>
+                      <Text style={{ fontWeight: '600' }}>{selectedOrder.amount} Birr</Text>
                         </View>
                       </View>
                     </View>
                   </View>
                 </ScrollView>
                 
-                {/* Action Buttons */}
+            {/* Assign button section */}
+            {selectedOrder.status === 'not_assigned' && (
                 <View style={{ 
-                  flexDirection: 'row', 
-                  padding: 16, 
+                padding: 20,
                   borderTopWidth: 1, 
-                  borderTopColor: '#f1f5f9',
-                  backgroundColor: '#f8fafc',
+                borderTopColor: '#e2e8f0',
+                backgroundColor: '#fff'
                 }}>
                 <TouchableOpacity
+                  onPress={handleAssignOrder}
                     style={{
-                      flex: 1,
+                    backgroundColor: '#3B82F6',
                       paddingVertical: 12,
-                      borderRadius: 12,
+                    borderRadius: 10,
+                    flexDirection: 'row',
                       justifyContent: 'center',
-                      alignItems: 'center',
-                      backgroundColor: '#eff6ff',
-                      marginRight: 8,
-                    }}
-                    onPress={closeOrderDetailModal}
-                  >
-                    <Text style={{ color: '#3b82f6', fontWeight: '600' }}>Close</Text>
+                    alignItems: 'center'
+                  }}
+                >
+                  <Ionicons name="bicycle" size={20} color="white" style={{ marginRight: 8 }} />
+                  <Text style={{
+                    color: '#fff',
+                    fontSize: 16,
+                    fontWeight: '600'
+                  }}>
+                    Assign Order
+                  </Text>
                 </TouchableOpacity>
-                  
-                  {selectedOrder.status === 'pending' && (
-                    <TouchableOpacity 
-                      style={{
-                        flex: 1,
-                        backgroundColor: '#3b82f6',
-                        paddingVertical: 12,
-                        borderRadius: 12,
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        flexDirection: 'row',
-                      }}
-                      onPress={() => confirmAssignment(selectedOrder.id)}
-                    >
-                      <Feather name="truck" size={16} color="white" style={{ marginRight: 8 }} />
-                      <Text style={{ color: 'white', fontWeight: '600' }}>Assign Delivery</Text>
-                    </TouchableOpacity>
-                  )}
                 </View>
-          </View>
-        </TouchableOpacity>
+            )}
       </Animated.View>
         </TouchableOpacity>
       </Modal>

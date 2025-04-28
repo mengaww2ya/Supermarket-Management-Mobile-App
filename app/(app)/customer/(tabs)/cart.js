@@ -11,7 +11,7 @@ import {
     Alert,
 } from "react-native";
 import { db } from "../../../../firebase/firebaseConfig";
-import { collection, getDocs, updateDoc, doc, deleteDoc } from "firebase/firestore";
+import { collection, getDocs, updateDoc, doc, deleteDoc, query, where } from "firebase/firestore";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { useRouter } from 'expo-router';
 import HomeHeader from "../../../components/HomeHeader";
@@ -48,12 +48,20 @@ export default function Cart() {
                 setLoading(true);
                 console.log(`[CART DEBUG] Starting to fetch cart items for user: ${userId}`);
                 
-                // Create reference to the cart collection
-                const cartCollection = collection(db, `users/${userId}/cart`);
-                console.log(`[CART DEBUG] Cart collection reference created`);
+                // Create reference to the customer_cart collection
+                const cartCollectionRef = collection(db, "customer_cart");
                 
-                // Get all documents in the cart collection
-                const cartSnapshot = await getDocs(cartCollection);
+                // Create a query to filter by userId and active status
+                const q = query(
+                    cartCollectionRef,
+                    where("userId", "==", userId),
+                    where("status", "==", "active")
+                );
+                
+                console.log(`[CART DEBUG] Cart query created`);
+                
+                // Get filtered documents from the customer_cart collection
+                const cartSnapshot = await getDocs(q);
                 console.log(`[CART DEBUG] Fetched cart snapshot, docs count: ${cartSnapshot.docs.length}`);
                 
                 // Process cart items
@@ -67,16 +75,12 @@ export default function Cart() {
                     };
                 });
                 
-                // Filter out items that have been ordered
-                const activeItems = items.filter(item => item.status !== 'ordered');
-                console.log(`[CART DEBUG] Active items count: ${activeItems.length} out of ${items.length} total`);
-                
-                // Set state with filtered items
-                setCartItems(activeItems);
+                // Set state with items
+                setCartItems(items);
                 
                 // Calculate totals if you have this function
                 if (typeof calculateTotals === 'function') {
-                    calculateTotals(activeItems);
+                    calculateTotals(items);
                 }
                 
                 console.log(`[CART DEBUG] Cart items loaded successfully`);
@@ -116,7 +120,7 @@ export default function Cart() {
         const updatedQuantity = item.quantity + 1;
         const updatedTotalPrice = updatedQuantity * (item.discountPrice || item.price);
 
-        const cartDoc = doc(db, `users/${userId}/cart`, item.id);
+        const cartDoc = doc(db, "customer_cart", item.id);
         await updateDoc(cartDoc, { quantity: updatedQuantity, totalPrice: updatedTotalPrice });
 
         setCartItems(prevItems => prevItems.map(i => i.id === item.id ? { ...i, quantity: updatedQuantity, totalPrice: updatedTotalPrice } : i));
@@ -127,7 +131,7 @@ export default function Cart() {
             const updatedQuantity = item.quantity - 1;
             const updatedTotalPrice = updatedQuantity * (item.discountPrice || item.price);
 
-            const cartDoc = doc(db, `users/${userId}/cart`, item.id);
+            const cartDoc = doc(db, "customer_cart", item.id);
             await updateDoc(cartDoc, { quantity: updatedQuantity, totalPrice: updatedTotalPrice });
 
             setCartItems(prevItems => prevItems.map(i => i.id === item.id ? { ...i, quantity: updatedQuantity, totalPrice: updatedTotalPrice } : i));
@@ -136,7 +140,7 @@ export default function Cart() {
 
     const removeItem = async (itemId) => {
         try {
-            const cartDoc = doc(db, `users/${userId}/cart`, itemId);
+            const cartDoc = doc(db, "customer_cart", itemId);
             await deleteDoc(cartDoc);
             setCartItems(prevItems => prevItems.filter(item => item.id !== itemId));
             
@@ -404,9 +408,7 @@ export default function Cart() {
                             className="bg-gray-100 p-4 rounded-xl items-center mb-3"
                             onPress={() => handleDeliveryMethod("Without Delivery")}
                         >
-                            <Text className="text-gray-600 font-bold text-base">
-                                Pickup in Store
-                            </Text>
+                            
                         </TouchableOpacity>
                         
                         <TouchableOpacity 

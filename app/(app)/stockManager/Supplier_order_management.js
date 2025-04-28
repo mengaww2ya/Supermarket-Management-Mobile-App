@@ -2304,7 +2304,7 @@ export default function SupplierOrderManagement() {
           </TouchableOpacity>
 
           {/* Delivery Management */}
-          <TouchableOpacity
+          {/* <TouchableOpacity
             onPress={() => router.push('/stockManager/manageDelivery')}
             style={{
               width: '48%',
@@ -2332,10 +2332,10 @@ export default function SupplierOrderManagement() {
             </View>
             <Text style={{ color: '#1F2937', fontWeight: '500', marginBottom: 4 }}>Delivery Management</Text>
             <Text style={{ color: '#6B7280', fontSize: 12 }}>Track and manage supplier deliveries</Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
 
           {/* Performance Analytics */}
-          <TouchableOpacity
+          {/* <TouchableOpacity
             onPress={() => router.push('/stockManager/SPerformanceAnalytics')}
             style={{
               width: '48%',
@@ -2363,7 +2363,7 @@ export default function SupplierOrderManagement() {
             </View>
             <Text style={{ color: '#1F2937', fontWeight: '500', marginBottom: 4 }}>Performance Analytics</Text>
             <Text style={{ color: '#6B7280', fontSize: 12 }}>View detailed supplier performance metrics</Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
 
           {/* Cart */}
           <TouchableOpacity

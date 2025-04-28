@@ -47,7 +47,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '../../../../firebase/firebaseConfig';
 
-const DEFAULT_PROFILE_IMAGE = require('../../../../assets/images/PrifileDemo.png');
+const DEFAULT_PROFILE_IMAGE = require('../../../../assets/images/profile_demo.png');
 // Use existing assets as fallbacks instead of requiring non-existent files
 // const SUPPORT_BACKGROUND = require('../../../../assets/images/support-bg.jpg');
 // const SUPPORT_ANIMATION = require('../../../../assets/animations/support-animation.json');

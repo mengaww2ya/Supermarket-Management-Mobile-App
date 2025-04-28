@@ -23,7 +23,7 @@ import HomeHeader from '../components/HomeHeader';
 import { heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import * as Haptics from 'expo-haptics';
 
-const DEFAULT_PROFILE_IMAGE = require('../../assets/images/PrifileDemo.png');
+const DEFAULT_PROFILE_IMAGE = require('../../assets/images/profile_demo.png');
 
 export default function ChatsList() {
   const { userData } = useAuth();

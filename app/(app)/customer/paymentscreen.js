@@ -38,6 +38,29 @@ const { width } = Dimensions.get('window');
 
 const CHAPA_SECRET_KEY = Constants.expoConfig?.extra?.chapaSecretKey || '';
 
+// Utility function to ensure payment verification is properly enforced
+const ensurePaymentIsVerified = (status, verificationSuccess, manualVerification) => {
+  return status === 'success' || verificationSuccess === true || manualVerification === true;
+};
+
+// Utility function to log payment attempts (for audit purposes)
+const logPaymentAttempt = async (userId, txRef, status, amount, details) => {
+  try {
+    const paymentLogsRef = collection(db, 'payment_logs');
+    await addDoc(paymentLogsRef, {
+      userId,
+      txRef,
+      status,
+      amount,
+      details,
+      timestamp: serverTimestamp()
+    });
+  } catch (error) {
+    console.error('Error logging payment attempt:', error);
+    // Non-blocking - continue even if logging fails
+  }
+};
+
 const PaymentScreen = () => {
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
@@ -131,8 +154,14 @@ const PaymentScreen = () => {
   // Function to fetch the user's cart items
   const fetchCartItems = async () => {
     try {
-      const cartCollection = collection(db, `users/${currentUser.uid}/cart`);
-      const cartSnapshot = await getDocs(cartCollection);
+      const cartCollectionRef = collection(db, "customer_cart");
+      const q = query(
+        cartCollectionRef,
+        where("userId", "==", currentUser.uid),
+        where("status", "==", "active")
+      );
+      
+      const cartSnapshot = await getDocs(q);
       const items = cartSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setCartItems(items);
     } catch (error) {
@@ -143,13 +172,19 @@ const PaymentScreen = () => {
   // Function to clear the cart after successful order
   const clearCart = async () => {
     try {
-      const cartCollection = collection(db, `users/${currentUser.uid}/cart`);
-      const cartSnapshot = await getDocs(cartCollection);
+      const cartCollectionRef = collection(db, "customer_cart");
+      const q = query(
+        cartCollectionRef,
+        where("userId", "==", currentUser.uid),
+        where("status", "==", "active")
+      );
+      
+      const cartSnapshot = await getDocs(q);
 
       if (cartSnapshot.empty) return;
 
       const deletePromises = cartSnapshot.docs.map(item => {
-        const cartDoc = doc(db, `users/${currentUser.uid}/cart`, item.id);
+        const cartDoc = doc(db, "customer_cart", item.id);
         return deleteDoc(cartDoc);
       });
 
@@ -241,6 +276,12 @@ const PaymentScreen = () => {
     setIsProcessing(true);
 
     try {
+      // Generate a unique transaction reference if not already generated
+      if (!txRef) {
+        const newTxRef = `TX-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+        setTxRef(newTxRef);
+      }
+
       // Get user info from Firebase
       const userQuery = query(collection(db, 'users'), where('uid', '==', currentUser.uid));
       const userSnapshot = await getDocs(userQuery);
@@ -397,12 +438,22 @@ const PaymentScreen = () => {
   };
 
   const handlePaymentSuccess = async (paymentProvider, isVerified = false) => {
-    // Ensure we have actual payment verification before proceeding
-    if (paymentStatus !== 'success' && !verificationSuccess && !isVerified) {
+    // Use utility function to verify payment status
+    if (!ensurePaymentIsVerified(paymentStatus, verificationSuccess, isVerified)) {
       console.error('Attempted to complete order without verified payment');
+      
+      // Log failed attempt
+      await logPaymentAttempt(
+        currentUser?.uid || 'unknown',
+        txRef || 'no_txref',
+        'verification_failed',
+        totalPrice,
+        'Order creation attempted without verified payment'
+      );
+      
       Alert.alert(
-        'Verification Required',
-        'We cannot process your order until payment is verified. Please try again or contact support.',
+        'Payment Verification Required',
+        'Your order cannot be processed until payment is successfully verified. Please try again or contact customer support.',
         [{ text: 'OK' }]
       );
       setIsProcessing(false);
@@ -418,13 +469,71 @@ const PaymentScreen = () => {
     const orderRef = `OD-${Date.now()}`;
 
     try {
+      // Validate essential requirements before creating an order
       if (!currentUser) {
         throw new Error("User is not logged in");
       }
 
-      if (!cartItems.length) {
+      if (!cartItems || !cartItems.length) {
         throw new Error("No items in cart");
       }
+
+      if (!txRef) {
+        throw new Error("Transaction reference missing");
+      }
+
+      // Perform a final payment verification as a safety measure
+      let finalVerificationResult = null;
+      
+      // Skip this check if we already have strong verification confirmation
+      if (!verificationSuccess && isVerified !== true) {
+        try {
+          finalVerificationResult = await customVerifyPayment(txRef);
+          
+          // If the verification explicitly failed, abort order creation
+          if (finalVerificationResult.status === 'failed' || 
+              (finalVerificationResult.data && finalVerificationResult.data.status === 'failed')) {
+            // Log the failure
+            await logPaymentAttempt(
+              currentUser.uid,
+              txRef,
+              'verification_failed',
+              totalPrice,
+              'Final verification check failed'
+            );
+            
+            throw new Error("Final payment verification failed");
+          }
+        } catch (verificationError) {
+          console.error('Final verification error:', verificationError);
+          
+          // Log the error
+          await logPaymentAttempt(
+            currentUser.uid,
+            txRef,
+            'verification_error',
+            totalPrice,
+            verificationError.message || 'Unknown verification error'
+          );
+          
+          Alert.alert(
+            'Payment Verification Failed',
+            'We could not verify your payment. Your order will not be processed and you will not be charged.',
+            [{ text: 'OK' }]
+          );
+          setIsProcessing(false);
+          return;
+        }
+      }
+
+      // Log successful payment verification
+      await logPaymentAttempt(
+        currentUser.uid,
+        txRef,
+        'verification_success',
+        totalPrice,
+        'Payment verified successfully'
+      );
 
       // Create the order data object with all necessary information
       const orderData = {
@@ -454,31 +563,56 @@ const PaymentScreen = () => {
           status: 'completed',
           tx_ref: txRef,
           paidAt: serverTimestamp(),
+          verified: true,
+          verificationTimestamp: serverTimestamp(),
         },
         orderStatus: 'pending',
         orderStatusHistory: [
-          { status: 'pending', timestamp: new Date() }
+          { status: 'pending', timestamp: new Date(), updatedBy: 'system' }
+        ],
+        // New fields for tracking different roles' actions
+        assignedDeliveryAgent: null,
+        deliveryStatus: 'not_assigned',
+        stockStatus: 'pending_confirmation',
+        warehouseLocation: null,
+        estimatedDeliveryTime: null,
+        managerApproval: {
+          approved: false,
+          approvedBy: null,
+          approvedAt: null,
+          notes: null
+        },
+        // Track all actions performed on the order
+        actionHistory: [
+          {
+            actionType: 'order_placed',
+            actionBy: {
+              userId: currentUser.uid,
+              role: 'customer'
+            },
+            timestamp: new Date(),
+            details: 'Order placed and payment verified'
+          }
         ],
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       };
 
-      console.log('Saving order to database...', orderRef);
+      // Store order in the customer_order collection
+      const customerOrderRef = collection(db, 'customer_order');
+      const newOrderDoc = await addDoc(customerOrderRef, orderData);
+      
+      // Log successful order creation
+      await logPaymentAttempt(
+        currentUser.uid,
+        txRef,
+        'order_created',
+        totalPrice,
+        `Order created with ID: ${newOrderDoc.id}`
+      );
 
-      // Store order in the main orders collection
-      const orderDocRef = await addDoc(collection(db, 'orders'), orderData);
-      console.log('Order saved to main collection with ID:', orderDocRef.id);
-
-      // Also store the order in the user's orders subcollection
-      await addDoc(collection(db, `users/${currentUser.uid}/orders`), {
-        ...orderData,
-        mainOrderId: orderDocRef.id, // Reference to the main order document
-      });
-      console.log('Order saved to user collection');
-
-      // Clear the cart
+      // Clear the cart only after order is successfully created
       await clearCart();
-      console.log('Cart cleared successfully');
 
       // Stop processing indicator
       setIsProcessing(false);
@@ -486,7 +620,7 @@ const PaymentScreen = () => {
       // Show success message and navigate back to home
       Alert.alert(
         'Order Placed Successfully',
-        'Thank you for your purchase! Your order has been received and is being processed.',
+        'Thank you for your purchase! Your payment has been verified and your order has been received.',
         [
           {
             text: 'View Orders',
@@ -511,8 +645,18 @@ const PaymentScreen = () => {
 
     } catch (error) {
       console.error('Error creating order:', error);
+      
+      // Log the error
+      await logPaymentAttempt(
+        currentUser?.uid || 'unknown',
+        txRef || 'no_txref',
+        'order_creation_failed',
+        totalPrice,
+        error.message || 'Unknown error creating order'
+      );
+      
       setIsProcessing(false);
-      handlePaymentFailure('There was an error processing your order. Please try again or contact support.');
+      handlePaymentFailure('Payment was received but there was an error processing your order. Please contact customer support with your transaction ID: ' + txRef);
     }
   };
 
@@ -527,10 +671,10 @@ const PaymentScreen = () => {
     setShowVerificationModal(false);
 
     if (verificationSuccess) {
-      // Only proceed with successful payment
+      // Only proceed with successful payment that's been verified
       handlePaymentSuccess(paymentMethod, true);
     } else if (verificationError) {
-      // Let user know we're trying an alternative verification method
+      // Let user know we're trying one more time with an alternative verification method
       Alert.alert(
         'Checking Payment Status',
         'The standard verification was unsuccessful. We will try one more time to check your payment status.',
@@ -543,103 +687,88 @@ const PaymentScreen = () => {
       // Try custom verification
       customVerifyPayment(txRef).then(result => {
         if (result.status === 'success') {
-          console.log('Custom verification success:', result);
           // If payment status is success in the response, process the order
           if (result.data && result.data.status === 'success') {
             Alert.alert(
               'Payment Confirmed',
-              'Your payment was successfully confirmed via custom verification. Your order will be processed now.',
+              'Your payment was successfully confirmed. Your order will be processed now.',
               [{ text: 'OK' }]
             );
             handlePaymentSuccess(paymentMethod, true);
             return;
           }
 
-          // If pending but found, assume payment was successful (Chapa sometimes shows pending even when successful)
-          if (result.data && result.data.status === 'pending') {
+          // If pending but found and verified, assume payment was successful
+          if (result.data && result.data.status === 'pending' && result.data.verified === true) {
             Alert.alert(
               'Payment Received',
-              'Your payment appears to be processing. We will proceed with your order and confirm the payment later.',
+              'Your payment has been received and is being processed by the payment provider. We will proceed with your order.',
               [{ text: 'OK' }]
             );
             handlePaymentSuccess(paymentMethod, true);
+            return;
+          }
+          
+          // If pending but not verified, don't proceed with order
+          if (result.data && result.data.status === 'pending' && result.data.verified !== true) {
+            Alert.alert(
+              'Payment Processing',
+              'Your payment is still being processed. Please wait a moment and try again, or contact customer support if the issue persists.',
+              [{ text: 'OK' }]
+            );
+            setIsProcessing(false);
             return;
           }
         }
 
         // If custom verification fails, start background verification as before
-        console.log('Custom verification failed, starting background verification');
-
         let bgAttempts = 0;
         const maxBgAttempts = 3;
         const checkInBackground = async () => {
           bgAttempts++;
           try {
             const verificationResult = await customVerifyPayment(txRef);
-            console.log(`Background verification attempt ${bgAttempts}:`, verificationResult);
 
             // Check if payment is successful
             if (verificationResult &&
               (verificationResult.status === 'success' ||
                 (verificationResult.data &&
-                  (verificationResult.data.status === 'success' || verificationResult.data.status === 'pending')))) {
-              // Payment verified successfully in background or is pending (treat as success for better UX)
-              console.log('Payment verified successfully in background');
-
-              // Process the successful payment
+                  verificationResult.data.status === 'success'))) {
+              // Payment verified successfully in background
               handlePaymentSuccess(paymentMethod, true);
               return; // Exit background checking
-            } else if (bgAttempts < maxBgAttempts) {
+            } 
+            // If pending and verified, proceed
+            else if (verificationResult && 
+                    verificationResult.data && 
+                    verificationResult.data.status === 'pending' && 
+                    verificationResult.data.verified === true) {
+              handlePaymentSuccess(paymentMethod, true);
+              return;
+            }
+            // Otherwise, try again if attempts remain
+            else if (bgAttempts < maxBgAttempts) {
               // Try again after a longer delay (10 seconds)
               setTimeout(checkInBackground, 10000);
             } else {
-              // As a last resort, ask user if they completed the payment
+              // Maximum attempts reached - don't allow manual confirmation
+              setIsProcessing(false);
               Alert.alert(
-                'Payment Verification',
-                'We couldn\'t automatically verify your payment. If you completed the payment, would you like to continue with your order?',
-                [
-                  {
-                    text: 'I Didn\'t Pay',
-                    style: 'cancel',
-                    onPress: () => {
-                      handlePaymentFailure("Order cancelled by user");
-                    }
-                  },
-                  {
-                    text: 'I Completed Payment',
-                    onPress: () => {
-                      // Trust user and proceed with order
-                      handlePaymentSuccess(paymentMethod, true);
-                    }
-                  }
-                ]
+                'Payment Verification Failed',
+                'We couldn\'t verify your payment after multiple attempts. Please check your payment status with your provider and try again later.',
+                [{ text: 'OK' }]
               );
             }
           } catch (error) {
-            console.error(`Background verification error on attempt ${bgAttempts}:`, error);
+            console.error('Background verification error:', error);
             if (bgAttempts < maxBgAttempts) {
               setTimeout(checkInBackground, 10000);
             } else {
-              // As a last resort, ask user if they completed the payment
+              setIsProcessing(false);
               Alert.alert(
-                'Payment Verification',
-                'We couldn\'t automatically verify your payment. If you completed the payment, would you like to continue with your order?',
-                [
-                  {
-                    text: 'I Didn\'t Pay',
-                    style: 'cancel',
-                    onPress: () => {
-                      handlePaymentFailure("Order cancelled by user");
-                    }
-                  },
-                  {
-                    text: 'I Completed Payment',
-                    onPress: () => {
-                      // Trust user and proceed with order
-                      handlePaymentSuccess(paymentMethod, true);
-                    }
-                  }
-                ]
+                'Verification Error',
+                'We encountered an error verifying your payment. Please contact customer support with your transaction ID: ' + txRef,
+                [{ text: 'OK' }]
               );
             }
           }
@@ -648,24 +777,12 @@ const PaymentScreen = () => {
         // Start background verification
         checkInBackground();
       }).catch(error => {
-        console.error('Error in custom verification:', error);
+        console.error('Custom verification failed:', error);
         setIsProcessing(false);
-
-        // Fallback to user confirmation
         Alert.alert(
-          'Payment Verification',
-          'We encountered an error verifying your payment. If you completed the payment, would you like to proceed with your order?',
-          [
-            {
-              text: 'Cancel',
-              style: 'cancel',
-              onPress: () => handlePaymentFailure("Order cancelled by user")
-            },
-            {
-              text: 'I Completed Payment',
-              onPress: () => handlePaymentSuccess(paymentMethod, true)
-            }
-          ]
+          'Verification Failed',
+          'We encountered an error verifying your payment. Please try again later or contact customer support.',
+          [{ text: 'OK' }]
         );
       });
     } else {

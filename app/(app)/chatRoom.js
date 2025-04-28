@@ -74,7 +74,7 @@ const EMOJI_LIST = [
   '💦', '💨', '🕳️', '💣', '💬', '🗯️', '💭', '💤', '👋', '🎉', '🎊'
 ];
 
-const DEFAULT_PROFILE_IMAGE = require('../../assets/images/PrifileDemo.png');
+const DEFAULT_PROFILE_IMAGE = require('../../assets/images/profile_demo.png');
 
 export default function ChatRoom() {
   const router = useRouter();

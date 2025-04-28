@@ -1,213 +1,291 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
     View,
     Text,
     TextInput,
+    Pressable,
     TouchableOpacity,
-    StyleSheet,
+    Alert,
+    ActivityIndicator,
+    Animated,
     KeyboardAvoidingView,
     Platform,
-    ScrollView,
-    ActivityIndicator,
+    Easing,
 } from 'react-native';
-import { useAuth } from '../context/authContext';
-import { useRouter } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
-import Animated, { FadeInDown } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
+import { Icon } from 'react-native-elements';
+import { useAuth } from '../context/authContext';
+import * as Animatable from 'react-native-animatable';
+import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 
 export default function ForgotPassword() {
     const [email, setEmail] = useState('');
-    const [error, setError] = useState('');
-    const [success, setSuccess] = useState(false);
-    const { resetPassword, loading } = useAuth();
+    const [loading, setLoading] = useState(false);
+    const [fadeAnim] = useState(new Animated.Value(0));
+    const [slideAnim] = useState(new Animated.Value(50));
     const router = useRouter();
+    const { resetPassword } = useAuth();
+    const bubble1Anim = useRef(new Animated.Value(0)).current;
+    const bubble2Anim = useRef(new Animated.Value(0)).current;
+    const bubble3Anim = useRef(new Animated.Value(0)).current;
+    const bubble4Anim = useRef(new Animated.Value(0)).current;
+
+    React.useEffect(() => {
+        Animated.parallel([
+            Animated.timing(fadeAnim, {
+                toValue: 1,
+                duration: 1000,
+                useNativeDriver: true,
+            }),
+            Animated.timing(slideAnim, {
+                toValue: 0,
+                duration: 1000,
+                useNativeDriver: true,
+            }),
+        ]).start();
+
+        // Start bubble animations
+        const startBubbleAnimation = (anim) => {
+            Animated.loop(
+                Animated.sequence([
+                    Animated.timing(anim, {
+                        toValue: 1,
+                        duration: 3000,
+                        easing: Easing.inOut(Easing.ease),
+                        useNativeDriver: true,
+                    }),
+                    Animated.timing(anim, {
+                        toValue: 0,
+                        duration: 3000,
+                        easing: Easing.inOut(Easing.ease),
+                        useNativeDriver: true,
+                    }),
+                ])
+            ).start();
+        };
+
+        startBubbleAnimation(bubble1Anim);
+        startBubbleAnimation(bubble2Anim);
+        startBubbleAnimation(bubble3Anim);
+        startBubbleAnimation(bubble4Anim);
+    }, []);
 
     const handleResetPassword = async () => {
+        if (!email) {
+            Alert.alert('Error', 'Please enter your email address');
+            return;
+        }
+
+        setLoading(true);
         try {
-            setError('');
-            if (!email) {
-                setError('Please enter your email address');
-                return;
-            }
             await resetPassword(email);
-            setSuccess(true);
+            Alert.alert(
+                'Success',
+                'Password reset email sent. Please check your inbox.',
+                [{ text: 'OK', onPress: () => router.back() }]
+            );
         } catch (error) {
-            setError(error.message);
+            Alert.alert('Error', error.message);
+        } finally {
+            setLoading(false);
         }
     };
 
     return (
-        <SafeAreaView style={styles.container}>
-            <KeyboardAvoidingView
+        <SafeAreaView className="flex-1 bg-gray-100">
+            <KeyboardAvoidingView 
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                style={styles.keyboardView}
+                className="flex-1"
             >
-                <ScrollView contentContainerStyle={styles.scrollContainer}>
-                    <Animated.View entering={FadeInDown.duration(1000).springify()} style={styles.header}>
-                        <TouchableOpacity
-                            style={styles.backButton}
+                <View className="bg-green-500 p-5 items-center rounded-b-3xl shadow-lg relative overflow-hidden">
+                    {/* Animated Bubbles */}
+                    <Animated.View 
+                        style={{
+                            position: 'absolute',
+                            top: -80,
+                            right: -80,
+                            width: 160,
+                            height: 160,
+                            backgroundColor: 'rgba(74, 222, 128, 0.2)',
+                            borderRadius: 80,
+                            transform: [
+                                {
+                                    translateX: bubble1Anim.interpolate({
+                                        inputRange: [0, 1],
+                                        outputRange: [0, 20],
+                                    }),
+                                },
+                                {
+                                    translateY: bubble1Anim.interpolate({
+                                        inputRange: [0, 1],
+                                        outputRange: [0, 20],
+                                    }),
+                                },
+                            ],
+                        }}
+                    />
+                    <Animated.View 
+                        style={{
+                            position: 'absolute',
+                            bottom: -80,
+                            left: -80,
+                            width: 160,
+                            height: 160,
+                            backgroundColor: 'rgba(74, 222, 128, 0.2)',
+                            borderRadius: 80,
+                            transform: [
+                                {
+                                    translateX: bubble2Anim.interpolate({
+                                        inputRange: [0, 1],
+                                        outputRange: [0, 20],
+                                    }),
+                                },
+                                {
+                                    translateY: bubble2Anim.interpolate({
+                                        inputRange: [0, 1],
+                                        outputRange: [0, 20],
+                                    }),
+                                },
+                            ],
+                        }}
+                    />
+                    <Animated.View 
+                        style={{
+                            position: 'absolute',
+                            top: 20,
+                            right: 20,
+                            width: 80,
+                            height: 80,
+                            backgroundColor: 'rgba(74, 222, 128, 0.2)',
+                            borderRadius: 40,
+                            transform: [
+                                {
+                                    translateX: bubble3Anim.interpolate({
+                                        inputRange: [0, 1],
+                                        outputRange: [0, 10],
+                                    }),
+                                },
+                                {
+                                    translateY: bubble3Anim.interpolate({
+                                        inputRange: [0, 1],
+                                        outputRange: [0, 10],
+                                    }),
+                                },
+                            ],
+                        }}
+                    />
+                    <Animated.View 
+                        style={{
+                            position: 'absolute',
+                            bottom: 20,
+                            left: 20,
+                            width: 80,
+                            height: 80,
+                            backgroundColor: 'rgba(74, 222, 128, 0.2)',
+                            borderRadius: 40,
+                            transform: [
+                                {
+                                    translateX: bubble4Anim.interpolate({
+                                        inputRange: [0, 1],
+                                        outputRange: [0, 10],
+                                    }),
+                                },
+                                {
+                                    translateY: bubble4Anim.interpolate({
+                                        inputRange: [0, 1],
+                                        outputRange: [0, 10],
+                                    }),
+                                },
+                            ],
+                        }}
+                    />
+                    
+                    <Animatable.View
+                        animation="bounceIn"
+                        duration={1500}
+                        className="w-24 h-24 mb-2 bg-white rounded-full items-center justify-center shadow-lg relative z-10"
+                    >
+                        <Icon
+                            name="key"
+                            type="font-awesome"
+                            size={40}
+                            color="#22C55E"
+                        />
+                    </Animatable.View>
+                    <Animatable.Text 
+                        animation="fadeInDown"
+                        duration={1500}
+                        className="text-2xl font-bold text-white text-center mb-2 relative z-10"
+                        style={{ fontSize: wp('6%') }}
+                    >
+                        Reset Password
+                    </Animatable.Text>
+                </View>
+
+                <Animated.View 
+                    className="flex-1 justify-center items-center px-5"
+                    style={{
+                        opacity: fadeAnim,
+                        transform: [{ translateY: slideAnim }],
+                    }}
+                >
+                    <Animatable.View 
+                        animation="fadeInLeft"
+                        duration={1500}
+                        className="flex-row items-center bg-white rounded-xl mb-4 w-full shadow-md"
+                    >
+                        <Icon
+                            name="envelope"
+                            type="font-awesome"
+                            color="#666"
+                            size={20}
+                            className="p-4"
+                        />
+                        <TextInput
+                            className="flex-1 h-12 px-3 text-base text-gray-700"
+                            placeholder="Enter your email"
+                            placeholderTextColor="#666"
+                            value={email}
+                            onChangeText={setEmail}
+                            keyboardType="email-address"
+                            autoCapitalize="none"
+                            editable={!loading}
+                        />
+                    </Animatable.View>
+
+                    <Animatable.View 
+                        animation="fadeInUp"
+                        duration={1500}
+                        className="w-full mt-5"
+                    >
+                        <Pressable 
+                            className={`bg-green-500 py-4 rounded-xl w-full mb-3 shadow-lg ${
+                                loading ? 'opacity-70' : ''
+                            }`}
+                            onPress={handleResetPassword}
+                            disabled={loading}
+                        >
+                            {loading ? (
+                                <ActivityIndicator color="#fff" />
+                            ) : (
+                                <Text className="text-center text-white text-lg font-bold">
+                                    Reset Password
+                                </Text>
+                            )}
+                        </Pressable>
+
+                        <Pressable 
+                            className="bg-gray-200 py-4 rounded-xl w-full shadow-md"
                             onPress={() => router.back()}
                         >
-                            <Ionicons name="arrow-back" size={24} color="#333" />
-                        </TouchableOpacity>
-                        <Text style={styles.title}>Reset Password</Text>
-                    </Animated.View>
-
-                    <Animated.View
-                        entering={FadeInDown.delay(200).duration(1000).springify()}
-                        style={styles.formContainer}
-                    >
-                        {success ? (
-                            <View style={styles.successContainer}>
-                                <Ionicons name="checkmark-circle" size={64} color="#4CAF50" />
-                                <Text style={styles.successText}>
-                                    Password reset email has been sent to your email address.
-                                </Text>
-                                <Text style={styles.successSubText}>
-                                    Please check your inbox and follow the instructions to reset your password.
-                                </Text>
-                                <TouchableOpacity
-                                    style={styles.loginButton}
-                                    onPress={() => router.push('/(auth)/login')}
-                                >
-                                    <Text style={styles.loginButtonText}>Back to Login</Text>
-                                </TouchableOpacity>
-                            </View>
-                        ) : (
-                            <>
-                                <Text style={styles.description}>
-                                    Enter your email address and we'll send you instructions to reset your password.
-                                </Text>
-                                <View style={styles.inputContainer}>
-                                    <Ionicons name="mail-outline" size={20} color="#666" style={styles.inputIcon} />
-                                    <TextInput
-                                        style={styles.input}
-                                        placeholder="Email"
-                                        value={email}
-                                        onChangeText={setEmail}
-                                        keyboardType="email-address"
-                                        autoCapitalize="none"
-                                    />
-                                </View>
-                                {error ? <Text style={styles.errorText}>{error}</Text> : null}
-                                <TouchableOpacity
-                                    style={styles.resetButton}
-                                    onPress={handleResetPassword}
-                                    disabled={loading}
-                                >
-                                    {loading ? (
-                                        <ActivityIndicator color="#fff" />
-                                    ) : (
-                                        <Text style={styles.resetButtonText}>Send Reset Link</Text>
-                                    )}
-                                </TouchableOpacity>
-                            </>
-                        )}
-                    </Animated.View>
-                </ScrollView>
+                            <Text className="text-center text-gray-700 text-base font-semibold">
+                                Back to Login
+                            </Text>
+                        </Pressable>
+                    </Animatable.View>
+                </Animated.View>
             </KeyboardAvoidingView>
         </SafeAreaView>
     );
-}
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#fff',
-    },
-    keyboardView: {
-        flex: 1,
-    },
-    scrollContainer: {
-        flexGrow: 1,
-        padding: 20,
-    },
-    header: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginTop: 20,
-        marginBottom: 30,
-    },
-    backButton: {
-        padding: 10,
-    },
-    title: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        marginLeft: 10,
-        color: '#333',
-    },
-    formContainer: {
-        flex: 1,
-        justifyContent: 'center',
-    },
-    description: {
-        fontSize: 16,
-        color: '#666',
-        marginBottom: 30,
-        textAlign: 'center',
-    },
-    inputContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        borderWidth: 1,
-        borderColor: '#ddd',
-        borderRadius: 10,
-        marginBottom: 20,
-        paddingHorizontal: 15,
-        height: 50,
-    },
-    inputIcon: {
-        marginRight: 10,
-    },
-    input: {
-        flex: 1,
-        fontSize: 16,
-    },
-    errorText: {
-        color: '#ff3b30',
-        marginBottom: 20,
-        textAlign: 'center',
-    },
-    resetButton: {
-        backgroundColor: '#007AFF',
-        padding: 15,
-        borderRadius: 10,
-        alignItems: 'center',
-    },
-    resetButtonText: {
-        color: '#fff',
-        fontSize: 16,
-        fontWeight: 'bold',
-    },
-    successContainer: {
-        alignItems: 'center',
-        padding: 20,
-    },
-    successText: {
-        fontSize: 18,
-        color: '#333',
-        textAlign: 'center',
-        marginTop: 20,
-        marginBottom: 10,
-    },
-    successSubText: {
-        fontSize: 14,
-        color: '#666',
-        textAlign: 'center',
-        marginBottom: 30,
-    },
-    loginButton: {
-        backgroundColor: '#007AFF',
-        padding: 15,
-        borderRadius: 10,
-        width: '100%',
-        alignItems: 'center',
-    },
-    loginButtonText: {
-        color: '#fff',
-        fontSize: 16,
-        fontWeight: 'bold',
-    },
-}); 
+} 

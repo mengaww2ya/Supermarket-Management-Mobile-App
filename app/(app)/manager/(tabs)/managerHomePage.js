@@ -498,11 +498,13 @@ export default function ManagerHomePage() {
     const fetchPerformanceData = async () => {
       setIsLoading(true);
       try {
-        // Get orders from dedicated orders collection
-        const ordersRef = collection(db, 'orders');
-        const ordersQuery = query(ordersRef, orderBy('createdAt', 'desc'));
-        const ordersSnapshot = await getDocs(ordersQuery);
-
+        // Get today's date at midnight for comparison
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const todayTimestamp = Timestamp.fromDate(today);
+        
+        // Initialize counters
+        let totalOrders = 0;
         let pendingCount = 0;
         let processingCount = 0;
         let inTransitCount = 0;
@@ -510,21 +512,23 @@ export default function ManagerHomePage() {
         let cancelledCount = 0;
         let totalSalesAmount = 0;
         let todaySalesAmount = 0;
-        let totalOrders = 0;
+        
+        // Get orders from customer_order collection
+        const ordersRef = collection(db, 'customer_order');
+        const ordersQuery = query(ordersRef, orderBy('createdAt', 'desc'));
+        const ordersSnapshot = await getDocs(ordersQuery);
 
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const todayTimestamp = Timestamp.fromDate(today);
-
-        // Get order data from main orders collection
+        // Process each order
         ordersSnapshot.forEach(doc => {
           const orderData = { id: doc.id, ...doc.data() };
           totalOrders++;
+          
+          // Normalize status
+          const status = orderData.status || orderData.orderStatus || 'Pending';
+          const normalizedStatus = status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
 
           // Count orders by status
-          const status = orderData.status?.charAt(0).toUpperCase() + orderData.status?.slice(1).toLowerCase() || 'Pending';
-
-          switch (status) {
+          switch (normalizedStatus) {
             case 'Pending':
               pendingCount++;
               break;
@@ -532,7 +536,7 @@ export default function ManagerHomePage() {
               processingCount++;
               break;
             case 'In Transit':
-            case 'In transit':
+            case 'On the way':
               inTransitCount++;
               break;
             case 'Delivered':
@@ -545,82 +549,82 @@ export default function ManagerHomePage() {
           }
 
           // Calculate revenue from non-cancelled orders
-          if (status !== 'Cancelled' && status !== 'Canceled') {
-            // Try to get amount from payment object first
+          if (normalizedStatus !== 'Cancelled' && normalizedStatus !== 'Canceled') {
             let orderTotal = 0;
 
-            if (orderData.payment && orderData.payment.amount) {
+            // Calculate order total
+            if (orderData.payment?.amount) {
               orderTotal = parseFloat(orderData.payment.amount);
-            }
-            // Otherwise calculate from items
-            else if (orderData.cartItems && orderData.cartItems.length > 0) {
-              orderTotal = orderData.cartItems.reduce((sum, item) =>
+            } else if (orderData.payment?.subtotal) {
+              const subtotal = parseFloat(orderData.payment.subtotal) || 0;
+              const deliveryFee = parseFloat(orderData.payment.deliveryFee) || 0;
+              orderTotal = subtotal + deliveryFee;
+            } else if (orderData.items?.length > 0) {
+              orderTotal = orderData.items.reduce((sum, item) => 
                 sum + (parseFloat(item.price) * (item.quantity || 1)), 0);
-            }
-            // If amount is directly on the order
-            else if (orderData.totalAmount) {
+            } else if (orderData.totalAmount) {
               orderTotal = parseFloat(orderData.totalAmount);
             }
 
             totalSalesAmount += orderTotal;
 
-            // Calculate today's sales
-            if (orderData.createdAt && orderData.createdAt.toDate() >= todayTimestamp.toDate()) {
+            // Add to today's sales if order is from today
+            if (orderData.createdAt?.toDate() >= todayTimestamp.toDate()) {
               todaySalesAmount += orderTotal;
             }
           }
         });
 
-        // Format the metrics for display
-        const formattedData = [
+        // Format metrics as an array matching the expected structure
+        const formattedMetrics = [
           {
             title: "Revenue",
-            value: `${Math.round(totalSalesAmount / 1000)}K Birr`,
+            value: `${totalSalesAmount.toFixed(2)} Birr`,
             icon: "trending-up",
             iconType: "MaterialIcons",
-            change: `+${Math.round((todaySalesAmount / totalSalesAmount) * 100)}%`,
+            change: "+15%",
             status: "positive",
             colorClass: "bg-green-100",
             iconColor: "#10b981"
           },
           {
             title: "Orders",
-            value: totalOrders.toLocaleString(),
+            value: totalOrders.toString(),
             icon: "shopping-cart",
             iconType: "MaterialIcons",
-            change: `+${Math.round((pendingCount / totalOrders) * 100)}%`,
+            change: `${pendingCount} Pending`,
             status: "positive",
             colorClass: "bg-red-100",
             iconColor: "#ef4444"
           },
           {
-            title: "Profit",
-            value: `${Math.round((totalSalesAmount * 0.25) / 1000)}K Birr`, // Assuming 25% profit margin
+            title: "Today's Sales",
+            value: `${todaySalesAmount.toFixed(2)} Birr`,
             icon: "attach-money",
             iconType: "MaterialIcons",
-            change: `+${Math.round((todaySalesAmount * 0.25) / (totalSalesAmount * 0.25) * 100)}%`,
+            change: "+12%",
             status: "positive",
             colorClass: "bg-blue-100",
             iconColor: "#3b82f6"
           },
           {
-            title: "Order Completion",
-            value: `${Math.round((deliveredCount / totalOrders) * 100)}%`,
-            icon: "check-circle",
+            title: "Delivered",
+            value: deliveredCount.toString(),
+            icon: "local-shipping",
             iconType: "MaterialIcons",
-            change: `+${deliveredCount}`,
+            change: `${((deliveredCount/totalOrders) * 100).toFixed(1)}%`,
             status: "positive",
             colorClass: "bg-purple-100",
             iconColor: "#8b5cf6"
           }
         ];
 
-        setPerformanceMetrics(formattedData);
-      } catch (err) {
-        console.error("Error fetching performance data:", err);
-        setError("Failed to load performance data");
-        // Fallback to default data if fetch fails
-        setPerformanceMetrics(performanceMetricsData);
+        // Update performance metrics state with the formatted array
+        setPerformanceMetrics(formattedMetrics);
+        
+      } catch (error) {
+        console.error('Error fetching performance data:', error);
+        setError('Failed to load performance data');
       } finally {
         setIsLoading(false);
       }

@@ -361,34 +361,34 @@ export default function StockManagerHome() {
   
   // Create state for menu options animations - fix for the hooks error
   const [menuCardScales] = useState(() => 
-    menuOptions.map(() => new Animated.Value(1))
+    Array.isArray(menuOptions) ? menuOptions.map(() => new Animated.Value(1)) : []
   );
   const [menuCardPressed, setMenuCardPressed] = useState(() => 
-    menuOptions.map(() => false)
+    Array.isArray(menuOptions) ? menuOptions.map(() => false) : []
   );
   
   // Animation values for stock options - from Manage_stock_levels.js
   const [stockOptionScales] = useState(() => 
-    stockOptions.map(() => new Animated.Value(1))
+    Array.isArray(stockOptions) ? stockOptions.map(() => new Animated.Value(1)) : []
   );
   const [stockOptionPressed, setStockOptionPressed] = useState(() => 
-    stockOptions.map(() => false)
+    Array.isArray(stockOptions) ? stockOptions.map(() => false) : []
   );
   
   // Animation values for quick actions
   const [quickActionScales] = useState(() => 
-    quickActions.map(() => new Animated.Value(1))
+    Array.isArray(quickActions) ? quickActions.map(() => new Animated.Value(1)) : []
   );
   
   // Create state for product card animations
   const [productCardScales, setProductCardScales] = useState([]);
 
   // Add state for recent activities
-  const [activityData, setActivityData] = useState(recentActivities);
+  const [activityData, setActivityData] = useState(Array.isArray(recentActivities) ? recentActivities : []);
   const [activityFilter, setActivityFilter] = useState('all');
   const [loadingActivities, setLoadingActivities] = useState(false);
   const [activityCardScales] = useState(() => 
-    recentActivities.map(() => new Animated.Value(1))
+    Array.isArray(recentActivities) ? recentActivities.map(() => new Animated.Value(1)) : []
   );
   
   // Add state for activity modal
@@ -456,13 +456,15 @@ export default function StockManagerHome() {
 
   // Set up product card animations when data changes
   useEffect(() => {
-    if (stats.recentlyAdded.length > 0) {
+    if (stats && stats.recentlyAdded && stats.recentlyAdded.length > 0) {
       setProductCardScales(stats.recentlyAdded.map(() => new Animated.Value(1)));
     }
   }, [stats.recentlyAdded]);
 
   // Add these new functions to handle animations
   const handleMenuCardPressIn = (index) => {
+    if (!Array.isArray(menuCardPressed) || !Array.isArray(menuCardScales) || index >= menuCardScales.length) return;
+    
     const newPressedState = [...menuCardPressed];
     newPressedState[index] = true;
     setMenuCardPressed(newPressedState);
@@ -476,6 +478,8 @@ export default function StockManagerHome() {
   };
   
   const handleMenuCardPressOut = (index) => {
+    if (!Array.isArray(menuCardPressed) || !Array.isArray(menuCardScales) || index >= menuCardScales.length) return;
+    
     const newPressedState = [...menuCardPressed];
     newPressedState[index] = false;
     setMenuCardPressed(newPressedState);
@@ -490,6 +494,11 @@ export default function StockManagerHome() {
   
   // Handle stock option press with animation - from Manage_stock_levels.js
   const handleStockOptionPress = (index, route) => {
+    if (!Array.isArray(stockOptionPressed) || !Array.isArray(stockOptionScales) || index >= stockOptionScales.length) {
+      router.push(route);
+      return;
+    }
+    
     // Set the pressed index for visual feedback
     const newPressedState = [...stockOptionPressed];
     newPressedState[index] = true;
@@ -564,25 +573,25 @@ export default function StockManagerHome() {
   };
   
   const handleProductCardPressIn = (index) => {
-    if (productCardScales[index]) {
+    if (!Array.isArray(productCardScales) || index >= productCardScales.length || !productCardScales[index]) return;
+    
       Animated.spring(productCardScales[index], {
         toValue: 0.96,
         useNativeDriver: true,
         speed: 20,
         bounciness: 6,
       }).start();
-    }
   };
   
   const handleProductCardPressOut = (index) => {
-    if (productCardScales[index]) {
+    if (!Array.isArray(productCardScales) || index >= productCardScales.length || !productCardScales[index]) return;
+    
       Animated.spring(productCardScales[index], {
         toValue: 1,
         useNativeDriver: true,
         speed: 20,
         bounciness: 6,
       }).start();
-    }
   };
   
   // Add missing card animation handlers
@@ -729,9 +738,9 @@ export default function StockManagerHome() {
   
   // Create dashboardData from stats for use in the UI
   const dashboardData = {
-    totalProducts: stats.totalProducts,
-    lowStockCount: stats.lowStockItems,
-    categoryCount: stats.categories,
+    totalProducts: stats?.totalProducts || 0,
+    lowStockCount: stats?.lowStockItems || 0,
+    categoryCount: stats?.categories || 0,
     productGrowth: "+12%",
     categoryGrowth: "+5%",
     lowStockChange: -3,
@@ -1002,7 +1011,7 @@ export default function StockManagerHome() {
 
   if (loading) {
   return (
-      <SafeAreaView className="flex-1 bg-gray-50 justify-center items-center">
+      <SafeAreaView className="flex-1 bg-white justify-center items-center">
         <View className="bg-white p-6 rounded-2xl shadow-md items-center">
           <Animated.View 
             style={{ 
@@ -1033,7 +1042,7 @@ export default function StockManagerHome() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50 dark:bg-gray-900">
+    <SafeAreaView className="flex-1 bg-white">
       <StatusBar style="light" />
       
       {/* Header */}
@@ -1041,17 +1050,41 @@ export default function StockManagerHome() {
       
       {/* Welcome Banner */}
       <Animated.View 
-        style={{ opacity: fadeAnim, transform: [{ translateY: fadeAnim.interpolate({
+        style={{ 
+          opacity: fadeAnim, 
+          transform: [{ 
+            translateY: fadeAnim.interpolate({
           inputRange: [0, 1],
           outputRange: [20, 0]
-        }) }] }}
-        className="mx-4 rounded-xl shadow-lg overflow-hidden my-2 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700"
+            }) 
+          }],
+          backgroundColor: "white",
+          marginHorizontal: 16,
+          borderRadius: 16,
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: 1 },
+          shadowOpacity: 0.05,
+          shadowRadius: 3,
+          marginVertical: 8,
+          borderWidth: 1,
+          borderColor: "#F3F4F6",
+          overflow: "hidden"
+        }}
       >
-        <View className="px-5 py-4">
+        <View style={{ padding: 20 }}>
           <View className="flex-row justify-between items-center">
             <View>
-              <Text className="text-gray-900 dark:text-white font-bold text-xl">Welcome Back, {userName}</Text>
-              <Text className="text-gray-500 dark:text-gray-400 text-sm mt-1">{new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</Text>
+              <Text style={{
+                fontSize: 22,
+                fontWeight: "700", 
+                color: "#111827",
+                marginBottom: 4
+              }}>{userName}</Text>
+              <Text style={{
+                fontSize: 14,
+                color: "#4B5563",
+                marginTop: 2
+              }}>{new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</Text>
             </View>
             
             <Animated.View 
@@ -1059,45 +1092,75 @@ export default function StockManagerHome() {
                 transform: [{ scale: scale.interpolate({
                   inputRange: [0, 1],
                   outputRange: [0.8, 1]
-                }) }]
+                }) }],
+                backgroundColor: "#4F46E515",
+                width: 50,
+                height: 50,
+                borderRadius: 12,
+                alignItems: "center",
+                justifyContent: "center"
               }}
-              className="bg-indigo-100 dark:bg-indigo-900/30 p-3 rounded-full"
             >
-              <Ionicons name="cube" size={24} color="#6366f1" />
+              <Ionicons name="cube" size={26} color="#4F46E5" />
             </Animated.View>
           </View>
           
-          <View className="flex-row justify-between mt-5">
+          <View style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            marginTop: 20
+          }}>
             <Pressable 
-              className="bg-blue-50 dark:bg-blue-900/20 px-3 py-2.5 rounded-lg flex-row items-center"
+              style={{
+                backgroundColor: "#EBF5FF",
+                paddingHorizontal: 12,
+                paddingVertical: 10,
+                borderRadius: 12,
+                flexDirection: "row",
+                alignItems: "center"
+              }}
               onPress={() => router.push("/stockManager/ProductList")}
             >
               <Ionicons name="cube" size={18} color="#3b82f6" style={{marginRight: 6}} />
               <View>
-                <Text className="text-blue-600 dark:text-blue-400 font-bold">{dashboardData.totalProducts}</Text>
-                <Text className="text-gray-600 dark:text-gray-400 text-xs">Products</Text>
+                <Text style={{ color: "#3b82f6", fontWeight: "700" }}>{dashboardData.totalProducts}</Text>
+                <Text style={{ color: "#64748B", fontSize: 12 }}>Products</Text>
               </View>
             </Pressable>
             
             <Pressable 
-              className="bg-amber-50 dark:bg-amber-900/20 px-3 py-2.5 rounded-lg flex-row items-center"
+              style={{
+                backgroundColor: "#FFF7ED",
+                paddingHorizontal: 12,
+                paddingVertical: 10,
+                borderRadius: 12,
+                flexDirection: "row",
+                alignItems: "center"
+              }}
               onPress={() => router.push("/stockManager/Low-stock alerts")}
             >
               <Ionicons name="alert-circle" size={18} color="#d97706" style={{marginRight: 6}} />
               <View>
-                <Text className="text-amber-600 dark:text-amber-400 font-bold">{dashboardData.lowStockCount}</Text>
-                <Text className="text-gray-600 dark:text-gray-400 text-xs">Low Stock</Text>
+                <Text style={{ color: "#d97706", fontWeight: "700" }}>{dashboardData.lowStockCount}</Text>
+                <Text style={{ color: "#64748B", fontSize: 12 }}>Low Stock</Text>
               </View>
             </Pressable>
             
             <Pressable
-              className="bg-emerald-50 dark:bg-emerald-900/20 px-3 py-2.5 rounded-lg flex-row items-center"
+              style={{
+                backgroundColor: "#ECFDF5",
+                paddingHorizontal: 12,
+                paddingVertical: 10,
+                borderRadius: 12,
+                flexDirection: "row",
+                alignItems: "center"
+              }}
               onPress={() => router.push("/stockManager/ViewCategory")}
             >
               <Ionicons name="albums" size={18} color="#10b981" style={{marginRight: 6}} />
               <View>
-                <Text className="text-emerald-600 dark:text-emerald-400 font-bold">{dashboardData.categoryCount}</Text>
-                <Text className="text-gray-600 dark:text-gray-400 text-xs">Categories</Text>
+                <Text style={{ color: "#10b981", fontWeight: "700" }}>{dashboardData.categoryCount}</Text>
+                <Text style={{ color: "#64748B", fontSize: 12 }}>Categories</Text>
               </View>
             </Pressable>
           </View>
@@ -1115,301 +1178,451 @@ export default function StockManagerHome() {
         {/* Inventory Overview */}
         <View className="mx-4 mt-4">
           <View className="flex-row justify-between items-center mb-4">
-            <Text className="text-gray-800 dark:text-gray-200 font-bold text-lg">Inventory Overview</Text>
-            <View className="bg-blue-50 dark:bg-blue-900/30 px-3 py-1.5 rounded-full">
-              <Text className="text-blue-600 dark:text-blue-400 font-medium text-sm">Real-time</Text>
+            <Text style={{
+              fontSize: 20,
+              fontWeight: "700",
+              color: "#111827",
+              marginBottom: 6,
+              marginLeft: 2
+            }}>Inventory Overview</Text>
+            <View style={{
+              backgroundColor: "#3b82f610",
+              paddingHorizontal: 12,
+              paddingVertical: 6,
+              borderRadius: 20,
+              borderWidth: 1,
+              borderColor: "#3b82f620"
+            }}>
+              <Text style={{
+                fontSize: 13,
+                color: "#3b82f6",
+                fontWeight: "600"
+              }}>Real-time</Text>
             </View>
           </View>
           
           <View className="flex-row flex-wrap justify-between">
-            <Animated.View style={{ opacity: fadeAnim, transform: [{ translateY: fadeAnim.interpolate({
-              inputRange: [0, 1],
-              outputRange: [20, 0]
-            }) }] }} className="w-[48%] mb-4">
-              <Pressable 
-                className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 overflow-hidden relative" 
-                onPress={() => router.push("/stockManager/ProductList")}
-                onPressIn={() => handleCardPressIn(0)}
-                onPressOut={() => handleCardPressOut(0)}
-              >
-                <LinearGradient
-                  colors={['#f0f9ff', '#e0f2fe']}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                  className="absolute inset-0 opacity-60"
-                />
-                <View className="flex-row justify-between items-start mb-3">
-                  <View className="bg-blue-50 dark:bg-blue-900/20 p-2 rounded-lg">
-                    <Ionicons name="cube" size={20} color="#3b82f6" />
-                  </View>
-                  <View className="bg-green-50 dark:bg-green-900/30 px-2 py-1 rounded-full">
-                    <Text className="text-green-600 dark:text-green-400 text-xs font-medium">{dashboardData.productGrowth}</Text>
-                  </View>
-                </View>
-                <Text className="text-2xl font-bold text-gray-800 dark:text-white">{dashboardData.totalProducts}</Text>
-                <Text className="text-gray-500 dark:text-gray-400 text-sm mt-1">Total Products</Text>
-              </Pressable>
-            </Animated.View>
-            
-            <Animated.View style={{ opacity: fadeAnim, transform: [{ translateY: fadeAnim.interpolate({
-              inputRange: [0, 1],
-              outputRange: [20, 0]
-            }) }] }} className="w-[48%] mb-4">
-              <Pressable 
-                className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 overflow-hidden relative" 
-                onPress={() => router.push("/stockManager/ViewCategory")}
-                onPressIn={() => handleCardPressIn(1)}
-                onPressOut={() => handleCardPressOut(1)}
-              >
-                <LinearGradient
-                  colors={['#eef2ff', '#e0e7ff']}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                  className="absolute inset-0 opacity-60"
-                />
-                <View className="flex-row justify-between items-start mb-3">
-                  <View className="bg-indigo-50 dark:bg-indigo-900/20 p-2 rounded-lg">
-                    <Ionicons name="albums" size={20} color="#6366f1" />
-                  </View>
-                  <View className="bg-green-50 dark:bg-green-900/30 px-2 py-1 rounded-full">
-                    <Text className="text-green-600 dark:text-green-400 text-xs font-medium">{dashboardData.categoryGrowth}</Text>
-                  </View>
-                </View>
-                <Text className="text-2xl font-bold text-gray-800 dark:text-white">{dashboardData.categoryCount}</Text>
-                <Text className="text-gray-500 dark:text-gray-400 text-sm mt-1">Categories</Text>
-              </Pressable>
-            </Animated.View>
-            
-            <Animated.View style={{ opacity: fadeAnim, transform: [{ translateY: fadeAnim.interpolate({
-              inputRange: [0, 1],
-              outputRange: [20, 0]
-            }) }] }} className="w-[48%] mb-4">
-              <Pressable 
-                className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 overflow-hidden relative" 
-                onPress={() => router.push("/stockManager/Low-stock alerts")}
-                onPressIn={() => handleCardPressIn(2)}
-                onPressOut={() => handleCardPressOut(2)}
-              >
-                <LinearGradient
-                  colors={['#fef2f2', '#fee2e2']}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                  className="absolute inset-0 opacity-60"
-                />
-                <View className="flex-row justify-between items-start mb-3">
-                  <View className="bg-red-50 dark:bg-red-900/20 p-2 rounded-lg">
-                    <Ionicons name="alert-circle" size={20} color="#ef4444" />
-                  </View>
-                  <View className={`${dashboardData.lowStockChange > 0 ? 'bg-red-50 dark:bg-red-900/30' : 'bg-green-50 dark:bg-green-900/30'} px-2 py-1 rounded-full`}>
-                    <Text className={`${dashboardData.lowStockChange > 0 ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'} text-xs font-medium`}>
-                      {dashboardData.lowStockChange > 0 ? '+' : ''}{dashboardData.lowStockChange}%
-                    </Text>
-                  </View>
-                </View>
-                <Text className="text-2xl font-bold text-gray-800 dark:text-white">{dashboardData.lowStockCount}</Text>
-                <Text className="text-gray-500 dark:text-gray-400 text-sm mt-1">Low Stock Items</Text>
-              </Pressable>
-            </Animated.View>
-            
-            <Animated.View style={{ opacity: fadeAnim, transform: [{ translateY: fadeAnim.interpolate({
-              inputRange: [0, 1],
-              outputRange: [20, 0]
-            }) }] }} className="w-[48%] mb-4">
-              <Pressable 
-                className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 overflow-hidden relative" 
-                onPress={() => router.push("/stockManager/Supplier_order_management")}
-                onPressIn={() => handleCardPressIn(3)}
-                onPressOut={() => handleCardPressOut(3)}
-              >
-                <LinearGradient
-                  colors={['#ecfdf5', '#d1fae5']}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                  className="absolute inset-0 opacity-60"
-                />
-                <View className="flex-row justify-between items-start mb-3">
-                  <View className="bg-emerald-50 dark:bg-emerald-900/20 p-2 rounded-lg">
-                    <MaterialCommunityIcons name="truck-delivery" size={20} color="#10b981" />
-                  </View>
-                  <View className="bg-green-50 dark:bg-green-900/30 px-2 py-1 rounded-full">
-                    <Text className="text-green-600 dark:text-green-400 text-xs font-medium">{dashboardData.pendingOrdersChange}%</Text>
-                  </View>
-                </View>
-                <Text className="text-2xl font-bold text-gray-800 dark:text-white">{dashboardData.pendingOrders}</Text>
-                <Text className="text-gray-500 dark:text-gray-400 text-sm mt-1">Pending Orders</Text>
-              </Pressable>
-            </Animated.View>
-          </View>
-        </View>
-        
-        {/* Recent Activities */}
-        <View className="mx-4 mt-4">
-          <View className="flex-row justify-between items-center mb-4">
-            <Text className="text-gray-800 dark:text-gray-200 font-bold text-lg">Recent Activity</Text>
-            <TouchableOpacity 
-              className="bg-blue-50 dark:bg-blue-900/30 px-3 py-1.5 rounded-full"
-              onPress={() => setActivityFilter('all')}
-            >
-              <Text className="text-blue-600 dark:text-blue-400 font-medium text-sm">View All</Text>
-            </TouchableOpacity>
-          </View>
-          
-          {activityData.map((activity, index) => (
             <Animated.View 
-              key={index} 
+              style={{ 
+                width: "48%",
+                marginBottom: 16,
+                opacity: fadeAnim, 
+                transform: [
+                  { 
+                    translateY: fadeAnim.interpolate({
+              inputRange: [0, 1],
+              outputRange: [20, 0]
+                    })
+                  }
+                ] 
+              }}
+            >
+              <TouchableOpacity
+                style={{
+                  borderRadius: 16,
+                  overflow: "hidden",
+                  backgroundColor: "#3b82f615", // Blue with 15% opacity
+                  padding: 16,
+                  shadowColor: "#000",
+                  shadowOffset: { width: 0, height: 1 },
+                  shadowOpacity: 0.05,
+                  shadowRadius: 3,
+                }} 
+                onPress={() => router.push("/stockManager/ProductList")}
+                activeOpacity={0.9}
+              >
+                <View style={{
+                  width: 48,
+                  height: 48,
+                  borderRadius: 12,
+                  backgroundColor: "#3b82f625", // Blue with 25% opacity
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginBottom: 12,
+                }}>
+                  <Ionicons name="cube" size={24} color="#3b82f6" />
+                  </View>
+                
+                <Text style={{
+                  fontSize: 24,
+                  fontWeight: "bold",
+                  color: "#1F2937",
+                  marginBottom: 4,
+                }}>
+                  {dashboardData.totalProducts}
+                </Text>
+                
+                <Text style={{
+                  fontSize: 14,
+                  color: "#6B7280",
+                  marginBottom: 4,
+                }}>
+                  Total Products
+                </Text>
+                
+                <View style={{
+                  paddingHorizontal: 8,
+                  paddingVertical: 4,
+                  borderRadius: 100,
+                  backgroundColor: "#10b98115", // Green with 15% opacity
+                  alignSelf: "flex-start",
+                  marginTop: 4,
+                }}>
+                  <Text style={{
+                    fontSize: 10,
+                    color: "#10b981",
+                    fontWeight: "600"
+                  }}>
+                    {dashboardData.productGrowth}
+                  </Text>
+                  </View>
+              </TouchableOpacity>
+            </Animated.View>
+            
+            <Animated.View 
+              style={{ 
+                width: "48%",
+                marginBottom: 16,
+                opacity: fadeAnim, 
+                transform: [
+                  { 
+                    translateY: fadeAnim.interpolate({
+              inputRange: [0, 1],
+              outputRange: [20, 0]
+                    })
+                  }
+                ] 
+              }}
+            >
+              <TouchableOpacity
+                style={{
+                  borderRadius: 16,
+                  overflow: "hidden",
+                  backgroundColor: "#6366f115", // Indigo with 15% opacity
+                  padding: 16,
+                  shadowColor: "#000",
+                  shadowOffset: { width: 0, height: 1 },
+                  shadowOpacity: 0.05,
+                  shadowRadius: 3,
+                }}
+                onPress={() => router.push("/stockManager/ViewCategory")}
+                activeOpacity={0.9}
+              >
+                <View style={{
+                  width: 48,
+                  height: 48,
+                  borderRadius: 12,
+                  backgroundColor: "#6366f125", // Indigo with 25% opacity
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginBottom: 12,
+                }}>
+                  <Ionicons name="albums" size={24} color="#6366f1" />
+                  </View>
+                
+                <Text style={{
+                  fontSize: 24,
+                  fontWeight: "bold",
+                  color: "#1F2937",
+                  marginBottom: 4,
+                }}>
+                  {dashboardData.categoryCount}
+                </Text>
+                
+                <Text style={{
+                  fontSize: 14,
+                  color: "#6B7280",
+                  marginBottom: 4,
+                }}>
+                  Categories
+                </Text>
+                
+                <View style={{
+                  paddingHorizontal: 8,
+                  paddingVertical: 4,
+                  borderRadius: 100,
+                  backgroundColor: "#10b98115", // Green with 15% opacity
+                  alignSelf: "flex-start",
+                  marginTop: 4,
+                }}>
+                  <Text style={{
+                    fontSize: 10,
+                    color: "#10b981",
+                    fontWeight: "600"
+                  }}>
+                    {dashboardData.categoryGrowth}
+                  </Text>
+                  </View>
+              </TouchableOpacity>
+            </Animated.View>
+            
+            <Animated.View 
+              style={{ 
+                width: "48%",
+                marginBottom: 16,
+                opacity: fadeAnim, 
+                transform: [
+                  { 
+                    translateY: fadeAnim.interpolate({
+              inputRange: [0, 1],
+              outputRange: [20, 0]
+                    })
+                  }
+                ] 
+              }}
+            >
+              <TouchableOpacity
+                style={{
+                  borderRadius: 16,
+                  overflow: "hidden",
+                  backgroundColor: "#ef444415", // Red with 15% opacity
+                  padding: 16,
+                  shadowColor: "#000",
+                  shadowOffset: { width: 0, height: 1 },
+                  shadowOpacity: 0.05,
+                  shadowRadius: 3,
+                }}  
+                onPress={() => router.push("/stockManager/Low-stock alerts")}
+                activeOpacity={0.9}
+              >
+                <View style={{
+                  width: 48,
+                  height: 48,
+                  borderRadius: 12,
+                  backgroundColor: "#ef444425", // Red with 25% opacity
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginBottom: 12,
+                }}>
+                  <Ionicons name="alert-circle" size={24} color="#ef4444" />
+                  </View>
+                
+                <Text style={{
+                  fontSize: 24,
+                  fontWeight: "bold",
+                  color: "#1F2937",
+                  marginBottom: 4,
+                }}>
+                  {dashboardData.lowStockCount}
+                    </Text>
+                
+                <Text style={{
+                  fontSize: 14,
+                  color: "#6B7280",
+                  marginBottom: 4,
+                }}>
+                  Low Stock Items
+                </Text>
+                
+                <View style={{
+                  paddingHorizontal: 8,
+                  paddingVertical: 4,
+                  borderRadius: 100,
+                  backgroundColor: `${dashboardData.lowStockChange > 0 ? "#ef444415" : "#10b98115"}`,
+                  alignSelf: "flex-start",
+                  marginTop: 4,
+                }}>
+                  <Text style={{
+                    fontSize: 10,
+                    color: dashboardData.lowStockChange > 0 ? "#ef4444" : "#10b981",
+                    fontWeight: "600"
+                  }}>
+                    {dashboardData.lowStockChange > 0 ? "+" : ""}{dashboardData.lowStockChange}%
+                  </Text>
+                  </View>
+              </TouchableOpacity>
+            </Animated.View>
+            
+            <Animated.View 
               style={{
+                width: "48%",
+                marginBottom: 16,
                 opacity: fadeAnim,
-                transform: [{
+                transform: [
+                  { 
                   translateY: fadeAnim.interpolate({
                     inputRange: [0, 1],
-                    outputRange: [20 * (index + 1), 0]
-                  })
-                }]
+                      outputRange: [20, 0]
+                    })
+                  }
+                ] 
               }}
-              className="mb-3"
             >
-              <Pressable 
-                className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 border border-gray-100 dark:border-gray-700 flex-row items-center relative overflow-hidden"
-                onPress={() => handleActivityPress(index, activity)}
-                onPressIn={() => handleActivityPressIn(index)}
-                onPressOut={() => handleActivityPressOut(index)}
+              <TouchableOpacity
+                style={{
+                  borderRadius: 16,
+                  overflow: "hidden",
+                  backgroundColor: "#10b98115", // Green with 15% opacity
+                  padding: 16,
+                  shadowColor: "#000",
+                  shadowOffset: { width: 0, height: 1 },
+                  shadowOpacity: 0.05,
+                  shadowRadius: 3,
+                }}
+                onPress={() => router.push("/stockManager/Supplier_order_management")}
+                activeOpacity={0.9}
               >
-                <LinearGradient
-                  colors={['#f9fafb', '#f3f4f6']}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                  className="absolute inset-0 opacity-60"
-                />
-                <View className={`${activity.color} w-10 h-10 rounded-full items-center justify-center mr-3`}>
-                  {activity.iconType === "Ionicons" && <Ionicons name={activity.icon} size={18} color={activity.textColor} />}
-                  {activity.iconType === "MaterialIcons" && <MaterialIcons name={activity.icon} size={18} color={activity.textColor} />}
-                  {activity.iconType === "MaterialCommunityIcons" && <MaterialCommunityIcons name={activity.icon} size={18} color={activity.textColor} />}
+                <View style={{
+                  width: 48,
+                  height: 48,
+                  borderRadius: 12,
+                  backgroundColor: "#10b98125", // Green with 25% opacity
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginBottom: 12,
+                }}>
+                  <MaterialCommunityIcons name="truck-delivery" size={24} color="#10b981" />
                 </View>
                 
-                <View className="flex-1">
-                  <Text className="font-semibold text-gray-800 dark:text-white">{activity.title}</Text>
-                  <Text className="text-gray-500 dark:text-gray-400 text-xs mt-1">{activity.description}</Text>
-                </View>
+                <Text style={{
+                  fontSize: 24,
+                  fontWeight: "bold",
+                  color: "#1F2937",
+                  marginBottom: 4,
+                }}>
+                  {dashboardData.pendingOrders}
+                </Text>
                 
-                <View>
-                  <Text className="text-gray-400 dark:text-gray-500 text-xs">{formatRelativeTime(activity.timestamp)}</Text>
+                <Text style={{
+                  fontSize: 14,
+                  color: "#6B7280",
+                  marginBottom: 4,
+                }}>
+                  Pending Orders
+                </Text>
+                
+                <View style={{
+                  paddingHorizontal: 8,
+                  paddingVertical: 4,
+                  borderRadius: 100,
+                  backgroundColor: "#10b98115", // Green with 15% opacity
+                  alignSelf: "flex-start",
+                  marginTop: 4,
+                }}>
+                  <Text style={{
+                    fontSize: 10,
+                    color: "#10b981",
+                    fontWeight: "600"
+                  }}>
+                    {dashboardData.pendingOrdersChange}%
+                  </Text>
                 </View>
-              </Pressable>
+              </TouchableOpacity>
             </Animated.View>
-          ))}
+          </View>
         </View>
 
         {/* Management Tools (Merged) */}
         <View className="mx-4 mt-4">
           <View className="flex-row justify-between items-center mb-4">
-            <Text className="text-gray-800 dark:text-gray-200 font-bold text-lg">Management Tools</Text>
+            <Text style={{
+              fontSize: 20,
+              fontWeight: "700",
+              color: "#111827",
+              marginBottom: 6,
+              marginLeft: 2
+            }}>Management Tools</Text>
           </View>
           
           <View className="flex-row flex-wrap justify-between">
-            {/* Main Management Tools */}
-            {stockOptions.map((option, index) => (
+            {/* Main Management Tools - without quick action tools */}
+            {stockOptions.filter(option => 
+              option.title !== "Check Price" && 
+              option.title !== "Restock" && 
+              option.title !== "Export"
+            ).map((option, index) => (
               <Animated.View
                 key={`stock-${index}`}
                 style={{
+                  width: "48%",
+                  marginBottom: 16,
                   opacity: fadeAnim,
-                  transform: [{
+                  transform: [
+                    { 
                     translateY: fadeAnim.interpolate({
                       inputRange: [0, 1],
-                      outputRange: [20 * (index + 1), 0]
-                    })
-                  }]
+                        outputRange: [20, 0]
+                      })
+                    }
+                  ]
                 }}
-                className="w-[48%] mb-4"
               >
-                <Pressable
+                <TouchableOpacity
+                  style={{
+                    borderRadius: 16,
+                    overflow: "hidden",
+                    backgroundColor: `${option.iconColor}15`,
+                    padding: 16,
+                    shadowColor: "#000",
+                    shadowOffset: { width: 0, height: 1 },
+                    shadowOpacity: 0.05,
+                    shadowRadius: 3,
+                  }}
                   onPress={() => router.push(option.route)}
-                  onPressIn={() => handleCardPressIn(index)}
-                  onPressOut={() => handleCardPressOut(index)}
-                  className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 overflow-hidden relative"
+                  activeOpacity={0.9}
                 >
-                  <LinearGradient
-                    colors={[option.gradientFrom, option.gradientTo]}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 1 }}
-                    className="absolute inset-0 opacity-60"
-                  />
-                  <View className="flex-row justify-between items-start mb-3">
-                    <View className={`${option.color} p-2 rounded-lg`}>
+                  <View style={{
+                    width: 48,
+                    height: 48,
+                    borderRadius: 12,
+                    backgroundColor: `${option.iconColor}25`,
+                    alignItems: "center",
+                    justifyContent: "center",
+                    marginBottom: 12,
+                  }}>
                       {option.iconType === "Ionicons" && (
-                        <Ionicons name={option.icon} size={20} color={option.iconColor} />
+                      <Ionicons name={option.icon} size={24} color={option.iconColor} />
                       )}
                       {option.iconType === "MaterialIcons" && (
-                        <MaterialIcons name={option.icon} size={20} color={option.iconColor} />
+                      <MaterialIcons name={option.icon} size={24} color={option.iconColor} />
                       )}
                       {option.iconType === "FontAwesome5" && (
-                        <FontAwesome5 name={option.icon} size={18} color={option.iconColor} />
+                      <FontAwesome5 name={option.icon} size={22} color={option.iconColor} />
                       )}
                       {option.iconType === "MaterialCommunityIcons" && (
-                        <MaterialCommunityIcons name={option.icon} size={20} color={option.iconColor} />
+                      <MaterialCommunityIcons name={option.icon} size={24} color={option.iconColor} />
                       )}
                     </View>
+
+                  <Text style={{
+                    fontSize: 16,
+                    fontWeight: "bold",
+                    color: "#1F2937",
+                    marginBottom: 4,
+                  }}>
+                    {option.title}
+                  </Text>
+
+                  <Text style={{
+                    fontSize: 12,
+                    color: "#6B7280",
+                    marginBottom: 8,
+                  }} numberOfLines={2}>
+                    {option.description}
+                  </Text>
+
                     {option.badge && (
-                      <View className="bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded-full">
-                        <Text className="text-gray-600 dark:text-gray-400 text-xs font-medium">{option.badge}</Text>
+                    <View style={{
+                      paddingHorizontal: 8,
+                      paddingVertical: 4,
+                      borderRadius: 100,
+                      backgroundColor: `${option.iconColor}15`,
+                      alignSelf: "flex-start",
+                    }}>
+                      <Text style={{
+                        fontSize: 10,
+                        color: option.iconColor,
+                        fontWeight: "600"
+                      }}>
+                        {option.badge}
+                      </Text>
                       </View>
                     )}
-                  </View>
-                  <Text className="font-bold text-gray-800 dark:text-white">{option.title}</Text>
-                  <Text className="text-gray-500 dark:text-gray-400 text-xs mt-1" numberOfLines={2}>{option.description}</Text>
-                </Pressable>
+                </TouchableOpacity>
               </Animated.View>
             ))}
-            
-            {/* Quick Action Tools */}
-            {quickActions.map((action, index) => (
-              <Animated.View
-                key={`action-${index}`}
-                style={{
-                  opacity: fadeAnim,
-                  transform: [{
-                    translateY: fadeAnim.interpolate({
-                      inputRange: [0, 1],
-                      outputRange: [20 * (index + stockOptions.length + 1), 0]
-                    })
-                  }]
-                }}
-                className="w-[48%] mb-4"
-              >
-                <Pressable
-                  onPress={() => action.action()}
-                  onPressIn={() => handleCardPressIn(index + stockOptions.length)}
-                  onPressOut={() => handleCardPressOut(index + stockOptions.length)}
-                  className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 overflow-hidden relative"
-                >
-                  <LinearGradient
-                    colors={[action.gradientFrom, action.gradientTo]}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 1 }}
-                    className="absolute inset-0 opacity-60"
-                  />
-                  <View className="flex-row justify-between items-start mb-3">
-                    <View className={`${action.color} p-2 rounded-lg`}>
-                      {action.iconType === "Ionicons" && (
-                        <Ionicons name={action.icon} size={20} color={action.iconColor} />
-                      )}
-                      {action.iconType === "MaterialCommunityIcons" && (
-                        <MaterialCommunityIcons name={action.icon} size={20} color={action.iconColor} />
-                      )}
                     </View>
                   </View>
-                  <Text className="font-bold text-gray-800 dark:text-white">{action.title}</Text>
-                  <Text className="text-gray-500 dark:text-gray-400 text-xs mt-1">{action.title === "Scan Barcode" ? "Scan product barcodes for quick lookup" : 
-                         action.title === "Check Price" ? "Verify current product pricing" :
-                         action.title === "Restock" ? "Quick restock process for products" :
-                         "Export inventory data as reports"}</Text>
-                </Pressable>
-              </Animated.View>
-            ))}
-          </View>
-        </View>
-
-        {/* Rest of the existing UI components */}
-        {/* ... */}
       </Animated.ScrollView>
     </SafeAreaView>
   );

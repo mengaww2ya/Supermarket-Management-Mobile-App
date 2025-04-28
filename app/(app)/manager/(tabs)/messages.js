@@ -27,7 +27,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '../../../../firebase/firebaseConfig';
 
-const DEFAULT_PROFILE_IMAGE = require('../../../../assets/images/PrifileDemo.png');
+const DEFAULT_PROFILE_IMAGE = require('../../../../assets/images/profile_demo.png');
 
 export default function MessagesTab() {
   const router = useRouter();

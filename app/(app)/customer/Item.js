@@ -19,16 +19,18 @@ import Ionicons from "react-native-vector-icons/Ionicons";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import FontAwesome from "react-native-vector-icons/FontAwesome";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { db } from '../../../firebase/firebaseConfig';
-import { doc, getDoc, updateDoc, increment } from 'firebase/firestore';
+import { db, auth } from '../../../firebase/firebaseConfig';
+import { doc, getDoc, updateDoc, increment, collection, setDoc, getDocs, query, where, deleteDoc } from 'firebase/firestore';
 import HomeHeader from "../../components/HomeHeader";
 import { LinearGradient } from "expo-linear-gradient";
+import { useAuth } from 'app/context/authContext';
 
 const { width, height } = Dimensions.get("window");
 
 export default function Item() {
   const router = useRouter();
   const { productId } = useLocalSearchParams();
+  const { user } = useAuth();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -36,6 +38,8 @@ export default function Item() {
   const [quantity, setQuantity] = useState(1);
   const [selectedTab, setSelectedTab] = useState('description');
   const [isFavorite, setIsFavorite] = useState(false);
+  const [userRating, setUserRating] = useState(0);
+  const [userHasRated, setUserHasRated] = useState(false);
   
   const scrollY = useRef(new Animated.Value(0)).current;
   const headerOpacity = scrollY.interpolate({
@@ -64,7 +68,38 @@ export default function Item() {
     fetchProduct();
   }, [productId]);
 
-    const fetchProduct = async () => {
+  useEffect(() => {
+    // Check if user has already rated this product
+    if (user && productId) {
+      fetchUserRating();
+    }
+  }, [user, productId]);
+
+  const fetchUserRating = async () => {
+    try {
+      if (!user) return;
+      
+      const ratingsRef = collection(db, "ProductRatings");
+      const q = query(
+        ratingsRef,
+        where("userId", "==", user.uid),
+        where("productId", "==", productId)
+      );
+      
+      const querySnapshot = await getDocs(q);
+      
+      if (!querySnapshot.empty) {
+        const ratingDoc = querySnapshot.docs[0];
+        const ratingData = ratingDoc.data();
+        setUserRating(ratingData.rating);
+        setUserHasRated(true);
+      }
+    } catch (error) {
+      console.error("Error fetching user rating:", error);
+    }
+  };
+
+  const fetchProduct = async () => {
     try {
       setLoading(true);
       const docRef = doc(db, "Products", productId);
@@ -138,21 +173,73 @@ export default function Item() {
 
   const handleLikePress = async (ratingValue) => {
     try {
-      // Update product ratings in Firestore
-      const docRef = doc(db, "Products", productId);
-      await updateDoc(docRef, {
-        totalRatings: increment(ratingValue),
-        numberOfReviews: increment(1)
-      });
+      if (!user) {
+        Alert.alert(
+          "Sign In Required",
+          "Please sign in to rate products",
+          [{ text: "OK" }]
+        );
+        return;
+      }
+
+      // Get references
+      const productRef = doc(db, "Products", productId);
+      const ratingId = `${user.uid}_${productId}`;
+      const ratingRef = doc(db, "ProductRatings", ratingId);
       
-      Alert.alert(
-        "Rating Submitted",
-        `Thank you for rating ${product.productName}!`,
-        [{ text: "OK", onPress: () => setModalVisible(false) }]
-      );
+      // Check if user has already rated
+      const ratingDoc = await getDoc(ratingRef);
+      
+      if (ratingDoc.exists()) {
+        // User has already rated, update their rating
+        const oldRating = ratingDoc.data().rating;
+        const ratingDifference = ratingValue - oldRating;
+        
+        // Update the product's total ratings
+        await updateDoc(productRef, {
+          totalRatings: increment(ratingDifference)
+        });
+        
+        // Update user's rating document
+        await updateDoc(ratingRef, {
+          rating: ratingValue,
+          updatedAt: new Date()
+        });
+        
+        Alert.alert(
+          "Rating Updated",
+          `Thank you for updating your rating for ${product.productName}!`,
+          [{ text: "OK", onPress: () => setModalVisible(false) }]
+        );
+      } else {
+        // First time rating, create new rating doc and increment review count
+        await setDoc(ratingRef, {
+          userId: user.uid,
+          productId: productId,
+          rating: ratingValue,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        });
+        
+        // Update the product's total ratings and review count
+        await updateDoc(productRef, {
+          totalRatings: increment(ratingValue),
+          numberOfReviews: increment(1)
+        });
+        
+        Alert.alert(
+          "Rating Submitted",
+          `Thank you for rating ${product.productName}!`,
+          [{ text: "OK", onPress: () => setModalVisible(false) }]
+        );
+      }
+      
+      // Update local state
+      setUserRating(ratingValue);
+      setUserHasRated(true);
       
       // Refetch product to get updated ratings
-    fetchProduct();
+      fetchProduct();
     } catch (error) {
       console.error("Error updating rating:", error);
       Alert.alert("Error", "Failed to submit rating");
@@ -261,49 +348,25 @@ export default function Item() {
     <SafeAreaView style={{ flex: 1, backgroundColor: '#F9FAFB' }}>
       <StatusBar barStyle="dark-content" />
       
-      <Animated.View
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          height: 60,
-          backgroundColor: 'white',
-          zIndex: 99,
-          opacity: headerOpacity,
-          flexDirection: 'row',
-          alignItems: 'center',
-          paddingHorizontal: 16,
-          borderBottomWidth: 1,
-          borderBottomColor: '#f0f0f0',
-        }}
-      >
-        <TouchableOpacity onPress={() => router.back()}>
-          <Ionicons name="arrow-back" size={24} color="#1F2937" />
-        </TouchableOpacity>
-        <Text 
-          style={{ 
-            flex: 1, 
-            marginLeft: 16, 
-            fontSize: 16, 
-            fontWeight: 'bold', 
-            color: '#1F2937' 
-          }}
-          numberOfLines={1}
-        >
-          {productName}
-        </Text>
-        <TouchableOpacity onPress={toggleFavorite} style={{ marginRight: 16 }}>
-          <Ionicons 
-            name={isFavorite ? "heart" : "heart-outline"} 
-            size={24} 
-            color={isFavorite ? "#EF4444" : "#1F2937"} 
-          />
-        </TouchableOpacity>
-        <TouchableOpacity onPress={handleShare}>
-          <Ionicons name="share-social-outline" size={24} color="#1F2937" />
-        </TouchableOpacity>
-      </Animated.View>
+      <HomeHeader 
+        title={productName}
+        showBackButton={true}
+        onBackPress={() => router.back()}
+        rightIcon={
+          <View style={{ flexDirection: 'row' }}>
+            <TouchableOpacity onPress={toggleFavorite} style={{ marginRight: 16 }}>
+              <Ionicons 
+                name={isFavorite ? "heart" : "heart-outline"} 
+                size={24} 
+                color={isFavorite ? "#EF4444" : "#1F2937"} 
+              />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={handleShare}>
+              <Ionicons name="share-social-outline" size={24} color="#1F2937" />
+            </TouchableOpacity>
+          </View>
+        }
+      />
       
       <Animated.ScrollView
         showsVerticalScrollIndicator={false}
@@ -317,82 +380,6 @@ export default function Item() {
           transform: [{ scale: scaleAnim }] 
         }}
       >
-        {/* Back Button */}
-        <TouchableOpacity 
-          style={{ 
-            position: 'absolute', 
-            top: 16, 
-            left: 16, 
-            zIndex: 10,
-            backgroundColor: 'rgba(255,255,255,0.8)',
-            borderRadius: 20,
-            width: 40,
-            height: 40,
-            justifyContent: 'center',
-            alignItems: 'center',
-            shadowColor: "#000",
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.1,
-            shadowRadius: 3.84,
-            elevation: 5,
-          }}
-          onPress={() => router.back()}
-        >
-          <Ionicons name="arrow-back" size={24} color="#1F2937" />
-        </TouchableOpacity>
-        
-        {/* Action Buttons */}
-        <View style={{ 
-          position: 'absolute', 
-          top: 16, 
-          right: 16, 
-          zIndex: 10,
-          flexDirection: 'row',
-        }}>
-          <TouchableOpacity 
-            style={{ 
-              backgroundColor: 'rgba(255,255,255,0.8)',
-              borderRadius: 20,
-              width: 40,
-              height: 40,
-              justifyContent: 'center',
-              alignItems: 'center',
-              marginRight: 8,
-              shadowColor: "#000",
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 0.1,
-              shadowRadius: 3.84,
-              elevation: 5,
-            }}
-            onPress={toggleFavorite}
-          >
-            <Ionicons 
-              name={isFavorite ? "heart" : "heart-outline"} 
-              size={24} 
-              color={isFavorite ? "#EF4444" : "#1F2937"} 
-            />
-          </TouchableOpacity>
-          
-          <TouchableOpacity 
-            style={{
-              backgroundColor: 'rgba(255,255,255,0.8)',
-              borderRadius: 20,
-              width: 40,
-              height: 40,
-              justifyContent: 'center',
-              alignItems: 'center',
-              shadowColor: "#000",
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 0.1,
-              shadowRadius: 3.84,
-              elevation: 5,
-            }}
-            onPress={handleShare}
-          >
-            <Ionicons name="share-social-outline" size={24} color="#1F2937" />
-          </TouchableOpacity>
-        </View>
-        
         {/* Product Image */}
         <View style={{ width: '100%', height: 300, backgroundColor: '#fff' }}>
           <Image
@@ -695,9 +682,28 @@ export default function Item() {
                 onPress={() => setModalVisible(true)}
               >
                 <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 16 }}>
-                  Rate This Product
+                  {userHasRated ? "Update Your Rating" : "Rate This Product"}
                 </Text>
               </TouchableOpacity>
+
+              {userHasRated && (
+                <View style={{ marginTop: 16, alignItems: 'center' }}>
+                  <Text style={{ fontSize: 14, color: '#6B7280', marginBottom: 8 }}>
+                    Your current rating:
+                  </Text>
+                  <View style={{ flexDirection: 'row' }}>
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <Ionicons
+                        key={star}
+                        name={star <= userRating ? "star" : "star-outline"}
+                        size={24}
+                        color={star <= userRating ? "#FFC107" : "#CBD5E0"}
+                        style={{ marginHorizontal: 4 }}
+                      />
+                    ))}
+                  </View>
+                </View>
+              )}
             </View>
           )}
         </View>
@@ -792,8 +798,19 @@ export default function Item() {
               marginBottom: 16,
               textAlign: 'center' 
             }}>
-              Rate {productName}
+              {userHasRated ? `Update Rating for ${productName}` : `Rate ${productName}`}
             </Text>
+            
+            {userHasRated && (
+              <Text style={{ 
+                fontSize: 14, 
+                color: '#6B7280', 
+                marginBottom: 16,
+                textAlign: 'center' 
+              }}>
+                Your current rating: {userRating}
+              </Text>
+            )}
             
             <View style={{ 
               flexDirection: 'row', 
@@ -805,24 +822,24 @@ export default function Item() {
                   key={ratingValue}
                   style={{ 
                     alignItems: 'center', 
-                    paddingHorizontal: 8 
+                    paddingHorizontal: 8,
+                    opacity: ratingValue === userRating ? 0.7 : 1
                   }}
                   onPress={() => handleLikePress(ratingValue)}
                 >
                   <Ionicons 
                     name="star" 
                     size={32} 
-                    color="#FFC107" 
-                    style={{ opacity: ratingValue <= 0 ? 0.3 : 1 }}
+                    color={ratingValue <= userRating ? "#FFC107" : "#CBD5E0"} 
                   />
                   <Text style={{ 
                     marginTop: 4, 
                     fontSize: 12, 
                     color: '#4B5563',
-                    fontWeight: '500'
+                    fontWeight: ratingValue === userRating ? '700' : '500'
                   }}>
                     {ratingValue}
-                    </Text>
+                  </Text>
                 </TouchableOpacity>
               ))}
             </View>

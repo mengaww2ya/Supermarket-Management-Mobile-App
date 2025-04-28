@@ -46,7 +46,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '../../../firebase/firebaseConfig';
 
-const DEFAULT_PROFILE_IMAGE = require('../../../assets/images/PrifileDemo.png');
+const DEFAULT_PROFILE_IMAGE = require('../../../assets/images/profile_demo.png');
 const { width, height } = Dimensions.get('window');
 
 export default function ManagerSystemChat() {

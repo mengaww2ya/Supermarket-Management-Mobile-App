@@ -205,63 +205,63 @@ const SectionHeader = ({ title, onSeeAll, color = '#22C55E' }) => {
   );
 };
 
-// Hero Banner Component
-const HeroBanner = ({ onPress }) => {
-  return (
-    <TouchableOpacity
-      style={{
-        marginHorizontal: 16,
-        marginTop: 16,
-        marginBottom: 8,
-        borderRadius: 16,
-        overflow: 'hidden',
-        height: 180,
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 6 },
-        shadowOpacity: 0.2,
-        shadowRadius: 8,
-        elevation: 6,
-      }}
-      onPress={onPress}
-    >
-      <LinearGradient
-        colors={['#22C55E', '#4ADE80', '#86EFAC']}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={{
-          width: '100%',
-          height: '100%',
-          padding: 20,
-          justifyContent: 'center'
-        }}
-      >
-        <View style={{ position: 'absolute', bottom: -20, right: -20, opacity: 0.1 }}>
-          <Ionicons name="cart" size={150} color="white" />
-        </View>
-        <View style={{ width: '70%' }}>
-          <Text style={{ fontSize: 14, color: '#D1FAE5', fontWeight: '600', marginBottom: 8 }}>
-            LIMITED TIME OFFER
-          </Text>
-          <Text style={{ fontSize: 24, color: 'white', fontWeight: 'bold', marginBottom: 12 }}>
-            Get 20% Off on Your First Order!
-          </Text>
-          <View style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            backgroundColor: 'rgba(255,255,255,0.2)',
-            alignSelf: 'flex-start',
-            paddingHorizontal: 12,
-            paddingVertical: 8,
-            borderRadius: 20
-          }}>
-            <Text style={{ color: 'white', fontWeight: '600', marginRight: 4 }}>Shop Now</Text>
-            <Ionicons name="arrow-forward" size={16} color="white" />
-          </View>
-        </View>
-      </LinearGradient>
-    </TouchableOpacity>
-  );
-};
+// // Hero Banner Component
+// const HeroBanner = ({ onPress }) => {
+//   return (
+//     <TouchableOpacity
+//       style={{
+//         marginHorizontal: 16,
+//         marginTop: 16,
+//         marginBottom: 8,
+//         borderRadius: 16,
+//         overflow: 'hidden',
+//         height: 180,
+//         shadowColor: "#000",
+//         shadowOffset: { width: 0, height: 6 },
+//         shadowOpacity: 0.2,
+//         shadowRadius: 8,
+//         elevation: 6,
+//       }}
+//       onPress={onPress}
+//     >
+//       <LinearGradient
+//         colors={['#22C55E', '#4ADE80', '#86EFAC']}
+//         start={{ x: 0, y: 0 }}
+//         end={{ x: 1, y: 1 }}
+//         style={{
+//           width: '100%',
+//           height: '100%',
+//           padding: 20,
+//           justifyContent: 'center'
+//         }}
+//       >
+//         <View style={{ position: 'absolute', bottom: -20, right: -20, opacity: 0.1 }}>
+//           <Ionicons name="cart" size={150} color="white" />
+//         </View>
+//         <View style={{ width: '70%' }}>
+//           <Text style={{ fontSize: 14, color: '#D1FAE5', fontWeight: '600', marginBottom: 8 }}>
+//             LIMITED TIME OFFER
+//           </Text>
+//           <Text style={{ fontSize: 24, color: 'white', fontWeight: 'bold', marginBottom: 12 }}>
+//             Get 20% Off on Your First Order!
+//           </Text>
+//           <View style={{
+//             flexDirection: 'row',
+//             alignItems: 'center',
+//             backgroundColor: 'rgba(255,255,255,0.2)',
+//             alignSelf: 'flex-start',
+//             paddingHorizontal: 12,
+//             paddingVertical: 8,
+//             borderRadius: 20
+//           }}>
+//             <Text style={{ color: 'white', fontWeight: '600', marginRight: 4 }}>Shop Now</Text>
+//             <Ionicons name="arrow-forward" size={16} color="white" />
+//           </View>
+//         </View>
+//       </LinearGradient>
+//     </TouchableOpacity>
+//   );
+// };
 
 export default function Homepage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -727,7 +727,7 @@ export default function Homepage() {
             }
           >
             {/* Hero Banner */}
-            <HeroBanner onPress={() => console.log('Banner pressed')} />
+            {/* <HeroBanner onPress={() => console.log('Banner pressed')} /> */}
 
             {/* Category Chips */}
             {!loading && standardCategories.length > 0 && (

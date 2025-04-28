@@ -321,7 +321,7 @@ export default function HomeHeader({ title, showBackButton = false, onBackPress,
   };
 
   const displayName = user?.displayName || user?.email?.split('@')[0] || 'User';
-  const ProfileImgPlaceholder = require('../../assets/images/PrifileDemo.png');
+  const ProfileImgPlaceholder = require('../../assets/images/profile_demo.png');
 
   // Interpolate rotation for the rotating bubble
   const spin = rotateAnim.interpolate({

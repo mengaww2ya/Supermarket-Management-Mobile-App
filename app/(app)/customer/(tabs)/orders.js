@@ -37,6 +37,8 @@ import { useAuth } from "../../../context/authContext";
 import LottieView from 'lottie-react-native';
 
 const { width, height } = Dimensions.get('window');
+// Add bottom padding value for safe area insets
+const bottom = Platform.OS === 'ios' ? 34 : 16;
 
 // Create an animated FlatList component to fix the useNativeDriver error
 const AnimatedFlatList = Animated.createAnimatedComponent(FlatList);
@@ -61,9 +63,16 @@ export default function CustomerOrdersScreen() {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [orderDetailVisible, setOrderDetailVisible] = useState(false);
   const [filterModalVisible, setFilterModalVisible] = useState(false);
+  const [activeRange, setActiveRange] = useState('all');
+  const [showExpandedDetails, setShowExpandedDetails] = useState(false); // New state for expanded details
 
   // Get authentication context
   const { user } = useAuth();
+
+  // Log current state for debugging
+  useEffect(() => {
+    // Remove console.log debug statements
+  }, [user, orders, filteredOrders, loading, error, activeTab]);
 
   // Tab options for filtering orders
   const tabs = [
@@ -74,127 +83,6 @@ export default function CustomerOrdersScreen() {
     { id: 'delivered', label: 'Delivered' },
     { id: 'cancelled', label: 'Cancelled' },
   ];
-
-  // Mock data for development and testing
-  const createMockOrders = useCallback(() => {
-    const now = new Date();
-    const yesterday = new Date(now);
-    yesterday.setDate(yesterday.getDate() - 1);
-
-    const lastWeek = new Date(now);
-    lastWeek.setDate(lastWeek.getDate() - 7);
-
-    return [
-      {
-        id: 'order-1',
-        orderNumber: 'ORD-8392',
-        date: now,
-        status: 'pending',
-        totalAmount: 234.50,
-        items: [
-          { id: 'item-1', name: 'Organic Apple', quantity: 3, price: 25.50, image: 'https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6' },
-          { id: 'item-2', name: 'Fresh Milk', quantity: 2, price: 45.00, image: 'https://images.unsplash.com/photo-1550583724-b2692b85b150' },
-          { id: 'item-3', name: 'Whole Wheat Bread', quantity: 1, price: 68.00, image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff' },
-        ],
-        deliveryAddress: '123 Main Street, Addis Ababa',
-        paymentMethod: 'Cash on Delivery',
-        deliveryDate: null,
-        trackingCode: 'TRK293847',
-      },
-      {
-        id: 'order-2',
-        orderNumber: 'ORD-7291',
-        date: yesterday,
-        status: 'processing',
-        totalAmount: 547.75,
-        items: [
-          { id: 'item-4', name: 'Chicken Breast', quantity: 1, price: 175.25, image: 'https://images.unsplash.com/photo-1604503468506-a8da13d82791' },
-          { id: 'item-5', name: 'Pasta', quantity: 2, price: 125.00, image: 'https://images.unsplash.com/photo-1551462147-37885acc36f1' },
-          { id: 'item-6', name: 'Tomato Sauce', quantity: 1, price: 85.50, image: 'https://images.unsplash.com/photo-1608949621330-a7f43c279142' },
-          { id: 'item-7', name: 'Cheese', quantity: 1, price: 37.00, image: 'https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d' },
-        ],
-        deliveryAddress: '456 Oak Avenue, Bahir Dar',
-        paymentMethod: 'Credit Card',
-        deliveryDate: null,
-        trackingCode: 'TRK748392',
-      },
-      {
-        id: 'order-3',
-        orderNumber: 'ORD-6182',
-        date: lastWeek,
-        status: 'delivered',
-        totalAmount: 362.25,
-        items: [
-          { id: 'item-8', name: 'Rice', quantity: 1, price: 125.75, image: 'https://images.unsplash.com/photo-1586201375761-83865001e8d7' },
-          { id: 'item-9', name: 'Vegetable Mix', quantity: 1, price: 95.50, image: 'https://images.unsplash.com/photo-1540420773420-3366772f4999' },
-          { id: 'item-10', name: 'Olive Oil', quantity: 1, price: 141.00, image: 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5' },
-        ],
-        deliveryAddress: '789 Pine Road, Hawassa',
-        paymentMethod: 'Mobile Payment',
-        deliveryDate: new Date(lastWeek.getTime() + (2 * 24 * 60 * 60 * 1000)),
-        trackingCode: 'TRK583921',
-        deliveryAgent: {
-          name: 'John Doe',
-          phone: '+251987654321',
-          rating: 4.8,
-        },
-      },
-      {
-        id: 'order-4',
-        orderNumber: 'ORD-5429',
-        date: new Date(lastWeek.getTime() - (5 * 24 * 60 * 60 * 1000)),
-        status: 'cancelled',
-        totalAmount: 187.50,
-        items: [
-          { id: 'item-11', name: 'Bottled Water (Pack)', quantity: 2, price: 75.00, image: 'https://images.unsplash.com/photo-1616118132534-381148898bb4' },
-          { id: 'item-12', name: 'Cookies', quantity: 1, price: 37.50, image: 'https://images.unsplash.com/photo-1499636136210-6f4ee915583e' },
-        ],
-        deliveryAddress: '101 Cedar Lane, Dire Dawa',
-        paymentMethod: 'Cash on Delivery',
-        deliveryDate: null,
-        cancellationReason: 'Customer requested cancellation',
-        trackingCode: 'TRK129384',
-      },
-      {
-        id: 'order-5',
-        orderNumber: 'ORD-4372',
-        date: new Date(now.getTime() - (14 * 24 * 60 * 60 * 1000)),
-        status: 'delivered',
-        totalAmount: 724.30,
-        items: [
-          { id: 'item-13', name: 'Coffee Beans', quantity: 1, price: 198.50, image: 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd' },
-          { id: 'item-14', name: 'Tea Assortment', quantity: 1, price: 156.80, image: 'https://images.unsplash.com/photo-1523920290228-4f321a939b4c' },
-          { id: 'item-15', name: 'Honey', quantity: 1, price: 124.00, image: 'https://images.unsplash.com/photo-1587049352851-8d4e89133924' },
-          { id: 'item-16', name: 'Breakfast Cereal', quantity: 2, price: 122.50, image: 'https://images.unsplash.com/photo-1545082376-d3face9bc559' },
-        ],
-        deliveryAddress: '202 Maple Court, Gondar',
-        paymentMethod: 'Credit Card',
-        deliveryDate: new Date(now.getTime() - (12 * 24 * 60 * 60 * 1000)),
-        trackingCode: 'TRK675821',
-        deliveryAgent: {
-          name: 'Jane Smith',
-          phone: '+251912345678',
-          rating: 4.9,
-        },
-      },
-      {
-        id: 'order-6',
-        orderNumber: 'ORD-3291',
-        date: new Date(now.getTime() - (3 * 24 * 60 * 60 * 1000)),
-        status: 'shipping',
-        totalAmount: 412.75,
-        items: [
-          { id: 'item-17', name: 'Fresh Vegetables Mix', quantity: 1, price: 145.25, image: 'https://images.unsplash.com/photo-1466551359784-f9e121d4807e' },
-          { id: 'item-18', name: 'Fruits Basket', quantity: 1, price: 267.50, image: 'https://images.unsplash.com/photo-1610832958506-aa56368176cf' },
-        ],
-        deliveryAddress: '303 Elm Boulevard, Mekelle',
-        paymentMethod: 'Mobile Payment',
-        deliveryDate: null,
-        trackingCode: 'TRK429876',
-        estimatedDelivery: new Date(now.getTime() + (1 * 24 * 60 * 60 * 1000)),
-      },
-    ];
-  }, []);
 
   // Fetch orders from Firestore
   const fetchOrders = useCallback(async () => {
@@ -208,78 +96,76 @@ export default function CustomerOrdersScreen() {
         return;
       }
 
-      // Get only the current user's orders
-      const ordersCollectionRef = collection(db, "users", user.uid, "orders");
-      const ordersSnapshot = await getDocs(ordersCollectionRef);
+      // Get orders from the customer_order collection, filtered by user ID
+      const ordersCollectionRef = collection(db, "customer_order");
+      
+      // Create a query to get orders for the current user
+      const ordersQuery = query(
+        ordersCollectionRef,
+        where("userId", "==", user.uid)
+      );
+      
+      const ordersSnapshot = await getDocs(ordersQuery);
 
       if (ordersSnapshot.empty) {
-        console.log("No orders found for this user");
         setOrders([]);
         setFilteredOrders([]);
         setLoading(false);
         return;
       }
 
-      const userOrders = ordersSnapshot.docs.map(doc => {
+      // Transform the firestore documents into order objects
+      const userOrders = [];
+      
+      ordersSnapshot.forEach((doc) => {
         const data = doc.data();
-
+        
         // Format date fields from Firestore timestamps
-        const date = data.createdAt?.toDate ? data.createdAt.toDate() :
-          data.date?.toDate ? data.date.toDate() : new Date();
-        const deliveryDate = data.deliveryDate?.toDate ? data.deliveryDate.toDate() : null;
-        const estimatedDelivery = data.estimatedDelivery?.toDate ? data.estimatedDelivery.toDate() : null;
-        const lastUpdated = data.lastUpdated?.toDate ? data.lastUpdated.toDate() :
-          data.updatedAt?.toDate ? data.updatedAt.toDate() : null;
+        const createdAt = data.createdAt?.toDate ? data.createdAt.toDate() : new Date();
+        const updatedAt = data.updatedAt?.toDate ? data.updatedAt.toDate() : null;
+        const estimatedDelivery = data.estimatedDeliveryTime?.toDate ? data.estimatedDeliveryTime.toDate() : null;
 
-        // Get payment info
-        const payment = data.payment || {};
-        const paymentMethod = payment.method || 'N/A';
-
-        // Get customer details
-        const customerDetails = data.customerDetails || {};
-
-        // Get delivery details
-        const deliveryDetails = data.deliveryDetails || {};
-        const deliveryAddress = deliveryDetails.address || 'N/A';
-
-        // Get delivery agent
-        const deliveryAgent = data.deliveryAgent || {};
-
-        // Get items
+        // Get order items
         const items = Array.isArray(data.items) ? data.items : [];
 
-        return {
+        // Get order status history for the latest updates
+        const statusHistory = data.orderStatusHistory || [];
+        
+        const orderObject = {
           id: doc.id,
-          customerId: user.uid,
-          customerName: `${customerDetails.firstName || ''} ${customerDetails.lastName || ''}`.trim() || customerDetails.email || 'Unknown Customer',
-          customerEmail: customerDetails.email || 'N/A',
-          customerPhone: customerDetails.phoneNumber || 'N/A',
+          orderRef: data.orderRef || `Order #${doc.id.slice(0, 6)}`,
           orderNumber: data.orderRef || `Order #${doc.id.slice(0, 6)}`,
-          date,
-          lastUpdated,
-          status: data.orderStatus || data.status || 'pending',
-          totalAmount: payment.amount || 0,
-          subtotal: payment.subtotal || 0,
-          deliveryFee: payment.deliveryFee || 0,
+          createdAt,
+          date: createdAt,
+          updatedAt,
+          lastUpdated: updatedAt,
+          status: data.orderStatus || 'pending',
+          orderStatus: data.orderStatus || 'pending',
+          deliveryStatus: data.deliveryStatus || 'not_assigned',
+          stockStatus: data.stockStatus || 'pending_confirmation',
           items,
-          deliveryAddress,
-          paymentMethod,
-          deliveryDate,
+          customerInfo: data.customerInfo || {},
+          deliveryDetails: data.deliveryDetails || {},
+          payment: data.payment || {},
+          totalAmount: data.payment?.amount || 0,
+          subtotal: data.payment?.subtotal || 0,
+          deliveryFee: data.payment?.deliveryFee || 0,
           estimatedDelivery,
-          trackingCode: data.trackingCode || '',
-          deliveryAgent: deliveryAgent.name ? {
-            name: deliveryAgent.name || 'N/A',
-            phone: deliveryAgent.phoneNumber || 'N/A',
-            rating: 4.8, // Default rating if not provided
-          } : null,
-          cancellationReason: data.cancellationReason || '',
+          assignedDeliveryAgent: data.assignedDeliveryAgent || null,
+          orderStatusHistory: statusHistory,
+          managerApproval: data.managerApproval || { approved: false },
+          warehouseLocation: data.warehouseLocation || null,
+          actionBy: data.actionBy || null,
+          actionType: data.actionType || null,
+          details: data.details || null,
         };
+        
+        userOrders.push(orderObject);
       });
 
-      // Sort orders by date (newest first)
-      userOrders.sort((a, b) => b.date - a.date);
-
-      console.log(`Found ${userOrders.length} orders for this user`);
+      // Sort orders by creation date (newest first)
+      userOrders.sort((a, b) => b.createdAt - a.createdAt);
+      
       setOrders(userOrders);
 
       // Apply initial filtering based on the active tab
@@ -288,64 +174,42 @@ export default function CustomerOrdersScreen() {
     } catch (error) {
       console.error("Error fetching orders:", error);
       setError("Failed to load orders. Please try again.");
-
-      // Use mock data as fallback ONLY in development
-      if (__DEV__) {
-        console.log("Using mock data as fallback in development");
-        const mockOrders = createMockOrders();
-        setOrders(mockOrders);
-        filterOrdersByTab(mockOrders, activeTab);
-      } else {
-        setOrders([]);
-        setFilteredOrders([]);
-      }
+      setOrders([]);
+      setFilteredOrders([]);
     } finally {
       setLoading(false);
       setIsRefreshing(false);
     }
-  }, [user, createMockOrders, activeTab, filterOrdersByTab]);
+  }, [user, activeTab]);
 
-  // Filter orders based on active tab
-  const filterOrdersByTab = useCallback((ordersList, tab) => {
-    if (tab === 'all') {
-      setFilteredOrders(ordersList);
+  // Initialize filterOrdersByTab before it's used
+  const filterOrdersByTab = useCallback((ordersToFilter, tab) => {
+    if (!ordersToFilter) {
+      setFilteredOrders([]);
       return;
     }
 
-    const filtered = ordersList.filter(order => order.status === tab);
-    setFilteredOrders(filtered);
-  }, []);
+    let filtered = [...ordersToFilter];
 
-  // Filter orders based on search query
-  const filterOrdersBySearch = useCallback((query) => {
-    if (!query.trim()) {
-      filterOrdersByTab(orders, activeTab);
-      return;
-    }
-
-    const searchLower = query.toLowerCase().trim();
-
-    const filtered = orders.filter(order => {
-      return (
-        order.orderNumber.toLowerCase().includes(searchLower) ||
-        order.deliveryAddress.toLowerCase().includes(searchLower) ||
-        order.items.some(item => item.name.toLowerCase().includes(searchLower))
+    // Apply search filter if query exists
+    if (searchQuery) {
+      filtered = filtered.filter(order => 
+        order.orderNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (order.deliveryDetails?.address && order.deliveryDetails.address.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        order.items.some(item => (item.productName || '').toLowerCase().includes(searchQuery.toLowerCase()))
       );
-    });
+    }
+
+    // Apply status filter
+    if (tab !== 'all') {
+      filtered = filtered.filter(order => order.status === tab);
+    }
 
     setFilteredOrders(filtered);
-  }, [orders, activeTab, filterOrdersByTab]);
+  }, [searchQuery]);
 
-  // Refresh control handler
-  const onRefresh = useCallback(() => {
-    setIsRefreshing(true);
-    fetchOrders();
-  }, [fetchOrders]);
-
-  // Effect to fetch orders on mount and when tab changes
+  // Effect to handle initial fetch and refresh
   useEffect(() => {
-    fetchOrders();
-
     // Animate entrance
     Animated.parallel([
       Animated.timing(fadeAnim, {
@@ -355,10 +219,25 @@ export default function CustomerOrdersScreen() {
       }),
       Animated.timing(translateY, {
         toValue: 0,
-        duration: 600,
+        duration: 700,
         useNativeDriver: true,
       }),
     ]).start();
+
+    // Fetch orders
+    fetchOrders();
+  }, [fetchOrders]);
+
+  // Watch for active tab changes
+  useEffect(() => {
+    // Apply filtering when active tab or orders change
+    filterOrdersByTab(orders, activeTab);
+  }, [orders, activeTab, filterOrdersByTab]);
+
+  // Handle refresh
+  const handleRefresh = useCallback(() => {
+    setIsRefreshing(true);
+    fetchOrders();
   }, [fetchOrders]);
 
   // Effect to update filtered orders when active tab changes
@@ -368,8 +247,8 @@ export default function CustomerOrdersScreen() {
 
   // Effect to filter orders when search query changes
   useEffect(() => {
-    filterOrdersBySearch(searchQuery);
-  }, [searchQuery, filterOrdersBySearch]);
+    filterOrdersByTab(orders, activeTab);
+  }, [searchQuery, filterOrdersByTab]);
 
   // Update the effect for opening the order detail modal
   useEffect(() => {
@@ -385,6 +264,8 @@ export default function CustomerOrdersScreen() {
         duration: 300,
         useNativeDriver: true,
       }).start();
+      // Reset expanded details state when closing modal
+      setShowExpandedDetails(false);
     }
   }, [orderDetailVisible]);
 
@@ -606,6 +487,8 @@ export default function CustomerOrdersScreen() {
 
   // Render a single order card
   const renderOrderCard = ({ item }) => {
+    if (!item) return null;
+    
     const statusColors = getStatusColor(item.status || 'pending');
     const statusText = (item.status || 'pending').charAt(0).toUpperCase() + (item.status || 'pending').slice(1);
     const formattedDate = item.date ? formatDate(item.date) : 'Unknown date';
@@ -641,7 +524,7 @@ export default function CustomerOrdersScreen() {
               <View style={[styles.orderStatusDot, { backgroundColor: statusColors.text }]} />
               <View>
                 <Text style={styles.orderNumber}>
-                  {item.orderNumber || `Order #${item.id.slice(0, 6)}`}
+                  {item.orderRef || `Order #${item.id.slice(0, 6)}`}
                 </Text>
                 <Text style={styles.orderDate}>{formattedDate}</Text>
               </View>
@@ -685,19 +568,23 @@ export default function CustomerOrdersScreen() {
 
             {/* Order details */}
             <View style={styles.orderInfoContainer}>
+              {item.deliveryDetails && item.deliveryDetails.address && (
               <View style={styles.orderInfoRow}>
                 <FontAwesome5 name="map-marker-alt" size={16} color="#94a3b8" style={styles.orderInfoIcon} />
-                <Text style={styles.orderInfoText}>
-                  {item.deliveryAddress || 'No address provided'}
+                  <Text style={styles.orderInfoText} numberOfLines={2}>
+                    {item.deliveryDetails.address}
                 </Text>
               </View>
+              )}
 
+              {item.payment && item.payment.method && (
               <View style={styles.orderInfoRow}>
                 <Feather name="credit-card" size={16} color="#94a3b8" style={styles.orderInfoIcon} />
                 <Text style={styles.orderInfoText}>
-                  {item.paymentMethod || 'Payment info not available'}
+                    {item.payment.method} {item.payment.provider ? `(${item.payment.provider})` : ''}
                 </Text>
               </View>
+              )}
 
               {item.status === 'shipping' && item.estimatedDelivery && (
                 <View style={styles.estimatedDeliveryContainer}>
@@ -742,7 +629,7 @@ export default function CustomerOrdersScreen() {
                     // Navigate to tracking page
                     router.push({
                       pathname: `/(app)/customer/trackOrder`,
-                      params: { trackingCode: item.trackingCode || '' }
+                      params: { orderId: item.id, trackingCode: item.trackingCode || '' }
                     });
                   }}
                 >
@@ -787,14 +674,20 @@ export default function CustomerOrdersScreen() {
                           onPress: async () => {
                             try {
                               // Get reference to the order document
-                              const userRef = doc(db, "users", user.uid);
-                              const orderRef = doc(collection(userRef, "orders"), item.id);
+                              const orderRef = doc(db, "customer_order", item.id);
 
                               // Update order status to cancelled
                               await updateDoc(orderRef, {
-                                status: 'cancelled',
-                                cancellationReason: 'Customer requested cancellation',
-                                updatedAt: new Date()
+                                orderStatus: 'cancelled',
+                                updatedAt: new Date(),
+                                orderStatusHistory: [
+                                  ...(item.orderStatusHistory || []),
+                                  {
+                                    status: 'cancelled',
+                                    timestamp: new Date(),
+                                    updatedBy: 'customer'
+                                  }
+                                ]
                               });
 
                               // Update local state
@@ -803,11 +696,20 @@ export default function CustomerOrdersScreen() {
                                   ? {
                                     ...order,
                                     status: 'cancelled',
-                                    cancellationReason: 'Customer requested cancellation'
+                                    orderStatus: 'cancelled',
+                                    orderStatusHistory: [
+                                      ...(order.orderStatusHistory || []),
+                                      {
+                                        status: 'cancelled',
+                                        timestamp: new Date(),
+                                        updatedBy: 'customer'
+                                      }
+                                    ]
                                   }
                                   : order
                               );
                               setOrders(updatedOrders);
+                              filterOrdersByTab(updatedOrders, activeTab);
 
                               // Show success message
                               Alert.alert(
@@ -841,26 +743,113 @@ export default function CustomerOrdersScreen() {
   };
 
   // Render empty state when no orders are found
-  const renderEmptyState = () => (
+  const renderEmptyState = () => {
+    // Debug function to investigate the issue - remove all log statements
+    const debugOrdersFetching = async () => {
+      try {
+        if (!user?.uid) {
+          return;
+        }
+        
+        // Try a raw query to see what's in the collection
+        const ordersCollectionRef = collection(db, "customer_order");
+        const allOrdersQuery = query(ordersCollectionRef);
+        const allOrdersSnapshot = await getDocs(allOrdersQuery);
+        
+        if (allOrdersSnapshot.empty) {
+          // Do nothing, no logging
+        } else {
+          // Don't log any order data
+        }
+        
+        // Now try exact query for this user
+        const userOrdersQuery = query(
+          ordersCollectionRef,
+          where("userId", "==", user.uid)
+        );
+        
+        const userOrdersSnapshot = await getDocs(userOrdersQuery);
+        
+        if (!userOrdersSnapshot.empty) {
+          // Don't log user order data
+        }
+      } catch (error) {
+        console.error("Error debugging orders:", error);
+      }
+    };
+  
+    return (
     <View style={styles.noOrdersContainer}>
+        {error ? (
+          // Error state
+          <>
+            <Feather name="alert-circle" size={64} color="#ef4444" />
+            <Text style={[styles.noOrdersTitle, { color: '#ef4444' }]}>
+              Error Loading Orders
+            </Text>
+            <Text style={styles.noOrdersText}>
+              {error}
+            </Text>
+            <TouchableOpacity
+              style={[styles.shopNowButton, { backgroundColor: '#ef4444' }]}
+              onPress={() => fetchOrders()}
+            >
+              <Feather name="refresh-cw" size={20} color="white" />
+              <Text style={styles.shopNowButtonText}>Try Again</Text>
+            </TouchableOpacity>
+            
+            {/* Debug button */}
+            <TouchableOpacity
+              style={{
+                marginTop: 20,
+                backgroundColor: '#334155',
+                paddingHorizontal: 16,
+                paddingVertical: 8,
+                borderRadius: 8,
+                flexDirection: 'row',
+                alignItems: 'center',
+              }}
+              onPress={debugOrdersFetching}
+            >
+              <Feather name="terminal" size={16} color="white" style={{ marginRight: 8 }} />
+              <Text style={{ color: 'white', fontWeight: '500' }}>Debug Orders</Text>
+            </TouchableOpacity>
+          </>
+        ) : searchQuery.trim() || activeTab !== 'all' ? (
+          // No search results
+          <>
+            <Feather name="search" size={64} color="#64748b" />
+            <Text style={styles.noOrdersTitle}>
+              No orders found
+            </Text>
+            <Text style={styles.noOrdersText}>
+              Try changing your filters or search query
+            </Text>
+            <TouchableOpacity
+              style={[styles.shopNowButton, { backgroundColor: '#64748b' }]}
+              onPress={() => {
+                setSearchQuery('');
+                setActiveTab('all');
+              }}
+            >
+              <Feather name="x" size={20} color="white" />
+              <Text style={styles.shopNowButtonText}>Clear Filters</Text>
+            </TouchableOpacity>
+          </>
+        ) : (
+          // No orders yet
+          <>
       <Image
         source={{ uri: 'https://cdn-icons-png.flaticon.com/512/4076/4076432.png' }}
         style={styles.noOrdersImage}
         resizeMode="contain"
       />
-
       <Text style={styles.noOrdersTitle}>
-        {searchQuery.trim() || activeTab !== 'all'
-          ? 'No orders found'
-          : 'No orders yet'}
+              No orders yet
       </Text>
-
       <Text style={styles.noOrdersText}>
-        {searchQuery.trim() || activeTab !== 'all'
-          ? 'Try changing your filters or search query'
-          : 'Browse our products and place your first order'}
+              Browse our products and place your first order
       </Text>
-
       <TouchableOpacity
         style={styles.shopNowButton}
         onPress={() => router.push("/(app)/customer/(tabs)/homepage")}
@@ -868,8 +857,28 @@ export default function CustomerOrdersScreen() {
         <Feather name="shopping-bag" size={20} color="white" />
         <Text style={styles.shopNowButtonText}>Shop Now</Text>
       </TouchableOpacity>
+            
+            {/* Debug button */}
+            <TouchableOpacity
+              style={{
+                marginTop: 20,
+                backgroundColor: '#334155',
+                paddingHorizontal: 16,
+                paddingVertical: 8,
+                borderRadius: 8,
+                flexDirection: 'row',
+                alignItems: 'center',
+              }}
+              onPress={debugOrdersFetching}
+            >
+              <Feather name="terminal" size={16} color="white" style={{ marginRight: 8 }} />
+              <Text style={{ color: 'white', fontWeight: '500' }}>Debug Orders</Text>
+            </TouchableOpacity>
+          </>
+        )}
     </View>
   );
+  };
 
   // Render order detail modal
   const renderOrderDetailModal = () => {
@@ -916,103 +925,55 @@ export default function CustomerOrdersScreen() {
             }
           ]}
         >
-          <ScrollView bounces={false} showsVerticalScrollIndicator={false}>
-            <LinearGradient
-              colors={orderStatusColors.gradientColors || ['#0ea5e9', '#0284c7']}
-              style={{
-                padding: 24,
-                borderTopLeftRadius: 20,
-                borderTopRightRadius: 20,
-              }}
-            >
-              <View style={{
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-                alignItems: 'center'
-              }}>
-                <View style={styles.orderNumberPill}>
-                  <Text style={styles.orderNumberPillText}>
-                    {selectedOrder.orderRef || `Order #${selectedOrder.id.slice(0, 6)}`}
-                  </Text>
-                </View>
-
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalHeaderTitle}>Order Details</Text>
                 <TouchableOpacity
-                  style={{
-                    width: 40,
-                    height: 40,
-                    borderRadius: 20,
-                    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                  }}
-                  onPress={() => {
-                    setOrderDetailVisible(false);
-                  }}
-                >
-                  <Feather name="x" size={20} color="white" />
+              style={styles.modalCloseButton}
+              onPress={() => setOrderDetailVisible(false)}
+            >
+              <Feather name="x" size={20} color="#64748b" />
                 </TouchableOpacity>
               </View>
 
-              <Text style={{
-                fontSize: 24,
-                fontWeight: 'bold',
-                color: 'white',
-                marginTop: 12
-              }}>
-                Order Details
+          <ScrollView bounces={false} showsVerticalScrollIndicator={false}>
+            {/* Order number, date, and status */}
+            <View style={[
+              styles.orderDetailSection, 
+              { backgroundColor: orderStatusColors.bg }
+            ]}>
+              <View style={styles.orderNumberContainer}>
+                <Text style={[styles.orderNumberText, { color: orderStatusColors.text }]}>
+                  {selectedOrder.orderRef || `Order #${selectedOrder.id.slice(0, 6)}`}
               </Text>
-
-              <View style={styles.orderDetailStatusContainer}>
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  {selectedOrder.orderStatus === 'pending' && <Feather name="clock" size={18} color="white" style={{ marginRight: 8 }} />}
-                  {selectedOrder.orderStatus === 'Processing' && <Feather name="refresh-cw" size={18} color="white" style={{ marginRight: 8 }} />}
-                  {selectedOrder.orderStatus === 'shipping' && <Feather name="truck" size={18} color="white" style={{ marginRight: 8 }} />}
-                  {selectedOrder.orderStatus === 'delivered' && <Feather name="check-circle" size={18} color="white" style={{ marginRight: 8 }} />}
-                  {selectedOrder.orderStatus === 'cancelled' && <Feather name="x-circle" size={18} color="white" style={{ marginRight: 8 }} />}
-
-                  <Text style={{ fontSize: 16, fontWeight: '600', color: 'white' }}>
-                    {selectedOrder.orderStatus || statusText}
+                <View style={[
+                  styles.orderStatusBadge, 
+                  { backgroundColor: 'rgba(255, 255, 255, 0.85)' }
+                ]}>
+                  <Text style={{ color: orderStatusColors.text, fontWeight: '600', fontSize: 12 }}>
+                    {statusText}
                   </Text>
                 </View>
+                </View>
 
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <Feather name="calendar" size={14} color="rgba(255, 255, 255, 0.8)" style={{ marginRight: 6 }} />
-                  <Text style={{ fontSize: 14, color: 'rgba(255, 255, 255, 0.8)' }}>
+              <View style={styles.orderDateContainer}>
+                <Feather name="calendar" size={14} color={orderStatusColors.text} style={{ marginRight: 6, opacity: 0.8 }} />
+                <Text style={[styles.orderDateText, { color: orderStatusColors.text }]}>
                     {selectedOrder.createdAt ? formatDate(selectedOrder.createdAt) :
                       selectedOrder.date ? formatDate(selectedOrder.date) : 'Unknown date'}
                   </Text>
-                </View>
               </View>
 
-              {/* Add last updated information if available */}
-              {(selectedOrder.lastUpdated || selectedOrder.updatedAt) && (
-                <View style={{
-                  marginTop: 8,
-                  backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                  paddingHorizontal: 12,
-                  paddingVertical: 6,
-                  borderRadius: 8
-                }}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <Feather name="refresh-cw" size={12} color="rgba(255, 255, 255, 0.9)" style={{ marginRight: 6 }} />
-                    <Text style={{ fontSize: 12, color: 'rgba(255, 255, 255, 0.9)' }}>
-                      Last updated: {selectedOrder.lastUpdated ? formatDate(selectedOrder.lastUpdated) :
-                        selectedOrder.updatedAt ? formatDate(selectedOrder.updatedAt) : 'Unknown'}
-                    </Text>
-                  </View>
-                </View>
-              )}
-
               {/* Order progress tracker */}
-              {selectedOrder.orderStatus !== 'cancelled' && (
+              {selectedOrder.status !== 'cancelled' && (
                 <View style={styles.orderProgressTracker}>
                   <View style={styles.orderProgressLine}>
                     <View style={[
                       styles.orderProgressLineFill,
                       {
-                        width: selectedOrder.orderStatus === 'pending' ? '0%' :
-                          selectedOrder.orderStatus === 'Processing' ? '33%' :
-                            selectedOrder.orderStatus === 'shipping' ? '66%' : '100%'
+                        width: selectedOrder.status === 'pending' ? '0%' :
+                          selectedOrder.status === 'processing' ? '33%' :
+                            selectedOrder.status === 'shipping' ? '66%' : '100%',
+                        backgroundColor: orderStatusColors.text
                       }
                     ]} />
                   </View>
@@ -1021,25 +982,29 @@ export default function CustomerOrdersScreen() {
                     <View style={styles.orderProgressStep}>
                       <View style={[
                         styles.orderProgressDot,
-                        { backgroundColor: 'white' }
+                        { backgroundColor: 'white', borderColor: orderStatusColors.text }
                       ]}>
-                        <Feather name="check" size={12} color="#0ea5e9" />
+                        <Feather name="check" size={12} color={orderStatusColors.text} />
                       </View>
-                      <Text style={styles.orderProgressText}>Order Placed</Text>
+                      <Text style={[styles.orderProgressText, { color: orderStatusColors.text }]}>Order Placed</Text>
                     </View>
 
                     <View style={styles.orderProgressStep}>
                       <View style={[
                         styles.orderProgressDot,
                         {
-                          backgroundColor: selectedOrder.orderStatus === 'pending' ? 'rgba(255, 255, 255, 0.3)' : 'white'
+                          backgroundColor: selectedOrder.status === 'pending' ? 'transparent' : 'white',
+                          borderColor: orderStatusColors.text
                         }
                       ]}>
-                        {selectedOrder.orderStatus !== 'pending' && <Feather name="check" size={12} color="#0ea5e9" />}
+                        {selectedOrder.status !== 'pending' && <Feather name="check" size={12} color={orderStatusColors.text} />}
                       </View>
                       <Text style={[
                         styles.orderProgressText,
-                        { opacity: selectedOrder.orderStatus === 'pending' ? 0.6 : 1 }
+                        { 
+                          color: orderStatusColors.text,
+                          opacity: selectedOrder.status === 'pending' ? 0.6 : 1 
+                        }
                       ]}>Processing</Text>
                     </View>
 
@@ -1047,18 +1012,20 @@ export default function CustomerOrdersScreen() {
                       <View style={[
                         styles.orderProgressDot,
                         {
-                          backgroundColor: (selectedOrder.orderStatus === 'pending' || selectedOrder.orderStatus === 'Processing')
-                            ? 'rgba(255, 255, 255, 0.3)' : 'white'
+                          backgroundColor: (selectedOrder.status === 'pending' || selectedOrder.status === 'processing')
+                            ? 'transparent' : 'white',
+                          borderColor: orderStatusColors.text
                         }
                       ]}>
-                        {(selectedOrder.orderStatus !== 'pending' && selectedOrder.orderStatus !== 'Processing') &&
-                          <Feather name="check" size={12} color="#0ea5e9" />
+                        {(selectedOrder.status !== 'pending' && selectedOrder.status !== 'processing') &&
+                          <Feather name="check" size={12} color={orderStatusColors.text} />
                         }
                       </View>
                       <Text style={[
                         styles.orderProgressText,
                         {
-                          opacity: (selectedOrder.orderStatus === 'pending' || selectedOrder.orderStatus === 'Processing') ? 0.6 : 1
+                          color: orderStatusColors.text,
+                          opacity: (selectedOrder.status === 'pending' || selectedOrder.status === 'processing') ? 0.6 : 1
                         }
                       ]}>Shipping</Text>
                     </View>
@@ -1067,323 +1034,43 @@ export default function CustomerOrdersScreen() {
                       <View style={[
                         styles.orderProgressDot,
                         {
-                          backgroundColor: selectedOrder.orderStatus === 'delivered' ? 'white' : 'rgba(255, 255, 255, 0.3)'
+                          backgroundColor: selectedOrder.status === 'delivered' ? 'white' : 'transparent',
+                          borderColor: orderStatusColors.text
                         }
                       ]}>
-                        {selectedOrder.orderStatus === 'delivered' && <Feather name="check" size={12} color="#0ea5e9" />}
+                        {selectedOrder.status === 'delivered' && <Feather name="check" size={12} color={orderStatusColors.text} />}
                       </View>
                       <Text style={[
                         styles.orderProgressText,
-                        { opacity: selectedOrder.orderStatus === 'delivered' ? 1 : 0.6 }
+                        { 
+                          color: orderStatusColors.text,
+                          opacity: selectedOrder.status === 'delivered' ? 1 : 0.6 
+                        }
                       ]}>Delivered</Text>
                     </View>
                   </View>
                 </View>
               )}
-            </LinearGradient>
+            </View>
 
             <View style={styles.orderDetailContent}>
-              {/* Customer Details */}
-              {(selectedOrder.customerDetails || selectedOrder.customer) && (
-                <View style={[styles.orderDetailCard, { borderLeftWidth: 4, borderLeftColor: '#0ea5e9' }]}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 16 }}>
-                    <FontAwesome5 name="user-circle" size={20} color="#0ea5e9" style={{ marginRight: 8 }} />
-                    <Text style={[styles.orderDetailCardTitle, { marginBottom: 0 }]}>
-                      Customer Information
-                    </Text>
-                  </View>
-
-                  <View style={styles.orderDetailRow}>
-                    <View style={[styles.orderDetailIcon, { backgroundColor: '#f0f9ff' }]}>
-                      <Feather name="user" size={16} color="#0ea5e9" />
-                    </View>
-
-                    <View style={{ flex: 1 }}>
-                      <Text style={styles.orderDetailLabel}>
-                        Name
-                      </Text>
-                      <Text style={styles.orderDetailValue}>
-                        {selectedOrder.customerDetails ?
-                          `${selectedOrder.customerDetails.firstName || ''} ${selectedOrder.customerDetails.lastName || ''}` :
-                          selectedOrder.customer ?
-                            `${selectedOrder.customer.firstName || ''} ${selectedOrder.customer.lastName || ''}` :
-                            'Not available'}
-                      </Text>
-                    </View>
-                  </View>
-
-                  <View style={styles.orderDetailRow}>
-                    <View style={[styles.orderDetailIcon, { backgroundColor: '#f0f9ff' }]}>
-                      <Feather name="mail" size={16} color="#0ea5e9" />
-                    </View>
-
-                    <View style={{ flex: 1 }}>
-                      <Text style={styles.orderDetailLabel}>
-                        Email
-                      </Text>
-                      <Text style={styles.orderDetailValue}>
-                        {selectedOrder.customerDetails ?
-                          selectedOrder.customerDetails.email :
-                          selectedOrder.customer ?
-                            selectedOrder.customer.email :
-                            'Not available'}
-                      </Text>
-                    </View>
-                  </View>
-
-                  <View style={styles.orderDetailRow}>
-                    <View style={[styles.orderDetailIcon, { backgroundColor: '#f0f9ff' }]}>
-                      <Feather name="phone" size={16} color="#0ea5e9" />
-                    </View>
-
-                    <View style={{ flex: 1 }}>
-                      <Text style={styles.orderDetailLabel}>
-                        Phone
-                      </Text>
-                      <Text style={styles.orderDetailValue}>
-                        {selectedOrder.customerDetails ?
-                          selectedOrder.customerDetails.phoneNumber :
-                          selectedOrder.customer ?
-                            selectedOrder.customer.phoneNumber :
-                            'Not available'}
-                      </Text>
-                    </View>
-                  </View>
-
-                  {/* Additional customer information if available */}
-                  {((selectedOrder.customerDetails && selectedOrder.customerDetails.address) ||
-                    (selectedOrder.customer && selectedOrder.customer.address)) && (
-                      <View style={styles.orderDetailRow}>
-                        <View style={[styles.orderDetailIcon, { backgroundColor: '#f0f9ff' }]}>
-                          <Feather name="map" size={16} color="#0ea5e9" />
-                        </View>
-
-                        <View style={{ flex: 1 }}>
-                          <Text style={styles.orderDetailLabel}>
-                            Address
-                          </Text>
-                          <Text style={styles.orderDetailValue}>
-                            {selectedOrder.customerDetails && selectedOrder.customerDetails.address ?
-                              selectedOrder.customerDetails.address :
-                              selectedOrder.customer && selectedOrder.customer.address ?
-                                selectedOrder.customer.address : 'Not available'}
-                          </Text>
-                        </View>
-                      </View>
-                    )}
-                </View>
-              )}
-
-              {/* Delivery Details */}
-              <View style={styles.orderDetailCard}>
-                <Text style={styles.orderDetailCardTitle}>
-                  Delivery Information
-                </Text>
-
-                {(selectedOrder.deliveryDetails || selectedOrder.deliveryAddress) && (
-                  <View style={styles.orderDetailRow}>
-                    <View style={[styles.orderDetailIcon, { backgroundColor: '#f0fdf4' }]}>
-                      <Feather name="map-pin" size={16} color="#16a34a" />
-                    </View>
-
-                    <View style={{ flex: 1 }}>
-                      <Text style={styles.orderDetailLabel}>
-                        Delivery Address
-                      </Text>
-                      <Text style={styles.orderDetailValue}>
-                        {selectedOrder.deliveryDetails ?
-                          selectedOrder.deliveryDetails.address :
-                          selectedOrder.deliveryAddress || 'Address not available'}
-                      </Text>
-                    </View>
-                  </View>
-                )}
-
-                {(selectedOrder.deliveryDetails && selectedOrder.deliveryDetails.notes) && (
-                  <View style={styles.orderDetailRow}>
-                    <View style={[styles.orderDetailIcon, { backgroundColor: '#f0fdf4' }]}>
-                      <Feather name="file-text" size={16} color="#16a34a" />
-                    </View>
-
-                    <View style={{ flex: 1 }}>
-                      <Text style={styles.orderDetailLabel}>
-                        Delivery Notes
-                      </Text>
-                      <Text style={styles.orderDetailValue}>
-                        {selectedOrder.deliveryDetails.notes || 'No notes provided'}
-                      </Text>
-                    </View>
-                  </View>
-                )}
-
-                {(selectedOrder.payment || selectedOrder.paymentMethod) && (
-                  <View style={styles.orderDetailRow}>
-                    <View style={[styles.orderDetailIcon, { backgroundColor: '#eff6ff' }]}>
-                      <Feather name="credit-card" size={16} color="#3b82f6" />
-                    </View>
-
-                    <View style={{ flex: 1 }}>
-                      <Text style={styles.orderDetailLabel}>
-                        Payment Method
-                      </Text>
-                      <Text style={styles.orderDetailValue}>
-                        {selectedOrder.payment ?
-                          `${selectedOrder.payment.method || 'Not specified'} ${selectedOrder.payment.provider ? `(${selectedOrder.payment.provider})` : ''}` :
-                          selectedOrder.paymentMethod || 'Not specified'}
-                      </Text>
-                    </View>
-                  </View>
-                )}
-
-                {/* Add payment provider as separate item if available */}
-                {selectedOrder.payment && selectedOrder.payment.provider && (
-                  <View style={styles.orderDetailRow}>
-                    <View style={[styles.orderDetailIcon, { backgroundColor: '#eef2ff' }]}>
-                      <FontAwesome5 name="money-check" size={16} color="#4f46e5" />
-                    </View>
-
-                    <View style={{ flex: 1 }}>
-                      <Text style={styles.orderDetailLabel}>
-                        Payment Provider
-                      </Text>
-                      <Text style={[styles.orderDetailValue, { color: '#4f46e5', fontWeight: '700' }]}>
-                        {selectedOrder.payment.provider}
-                      </Text>
-                    </View>
-                  </View>
-                )}
-
-                {/* Delivery Agent Information */}
-                {selectedOrder.deliveryAgent && (
-                  <View style={[styles.orderDetailHighlight, { backgroundColor: '#f0fdfa' }]}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
-                      <Feather name="user-check" size={16} color="#0d9488" style={{ marginRight: 8 }} />
-                      <Text style={[styles.orderDetailHighlightTitle, { color: '#0d9488' }]}>
-                        Delivery Agent
-                      </Text>
-                    </View>
-
-                    <View style={styles.deliveryAgentCard}>
-                      <View style={styles.deliveryAgentAvatar}>
-                        <FontAwesome5 name="user-alt" size={14} color="#0d9488" />
-                      </View>
-                      <View style={{ flex: 1 }}>
-                        <Text style={styles.deliveryAgentName}>
-                          {selectedOrder.deliveryAgent.name}
-                        </Text>
-                        <Text style={styles.orderDetailHighlightText}>
-                          Email: {selectedOrder.deliveryAgent.email || 'N/A'}
-                        </Text>
-                        <Text style={styles.orderDetailHighlightText}>
-                          Phone: {selectedOrder.deliveryAgent.phoneNumber || 'N/A'}
-                        </Text>
-                        <Text style={styles.orderDetailHighlightText}>
-                          Assigned: {selectedOrder.deliveryAgent.assignedAt ? formatDate(selectedOrder.deliveryAgent.assignedAt) : 'N/A'}
-                        </Text>
-                      </View>
-                    </View>
-                  </View>
-                )}
-
-                {/* Order Status History */}
-                {(selectedOrder.orderStatusHistory && selectedOrder.orderStatusHistory.length > 0) ? (
-                  <View style={[styles.orderDetailHighlight, { backgroundColor: '#f5f3ff' }]}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
-                      <Feather name="clock" size={16} color="#7c3aed" style={{ marginRight: 8 }} />
-                      <Text style={[styles.orderDetailHighlightTitle, { color: '#7c3aed' }]}>
-                        Status History
-                      </Text>
-                    </View>
-
-                    {selectedOrder.orderStatusHistory.map((statusItem, index) => (
-                      <View key={index} style={{
-                        flexDirection: 'row',
-                        paddingVertical: 6,
-                        borderBottomWidth: index === selectedOrder.orderStatusHistory.length - 1 ? 0 : 1,
-                        borderBottomColor: 'rgba(124, 58, 237, 0.2)'
-                      }}>
-                        <View style={{
-                          width: 12,
-                          height: 12,
-                          borderRadius: 6,
-                          backgroundColor: '#7c3aed',
-                          marginTop: 4,
-                          marginRight: 8
-                        }} />
-                        <View style={{ flex: 1 }}>
-                          <Text style={{ fontSize: 14, fontWeight: '600', color: '#4c1d95' }}>
-                            {statusItem.status}
-                          </Text>
-                          <Text style={{ fontSize: 12, color: '#6b7280' }}>
-                            {statusItem.timestamp ? formatDate(statusItem.timestamp) : 'No timestamp'}
-                          </Text>
-                          {statusItem.note && (
-                            <Text style={{ fontSize: 12, color: '#6b7280', marginTop: 2, fontStyle: 'italic' }}>
-                              {statusItem.note}
-                            </Text>
-                          )}
-                        </View>
-                      </View>
-                    ))}
-                  </View>
-                ) : (
-                  // Fallback for orders without explicit history
-                  <View style={[styles.orderDetailHighlight, { backgroundColor: '#f5f3ff' }]}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
-                      <Feather name="clock" size={16} color="#7c3aed" style={{ marginRight: 8 }} />
-                      <Text style={[styles.orderDetailHighlightTitle, { color: '#7c3aed' }]}>
-                        Status History
-                      </Text>
-                    </View>
-
-                    <View style={{
-                      flexDirection: 'row',
-                      paddingVertical: 6
-                    }}>
-                      <View style={{
-                        width: 12,
-                        height: 12,
-                        borderRadius: 6,
-                        backgroundColor: '#7c3aed',
-                        marginTop: 4,
-                        marginRight: 8
-                      }} />
-                      <View style={{ flex: 1 }}>
-                        <Text style={{ fontSize: 14, fontWeight: '600', color: '#4c1d95' }}>
-                          {selectedOrder.orderStatus || selectedOrder.status || 'Current Status'}
-                        </Text>
-                        <Text style={{ fontSize: 12, color: '#6b7280' }}>
-                          {selectedOrder.createdAt ? formatDate(selectedOrder.createdAt) :
-                            selectedOrder.date ? formatDate(selectedOrder.date) : 'Unknown date'}
-                        </Text>
-                      </View>
-                    </View>
-                  </View>
-                )}
-              </View>
-
+              {/* Essential Order Information - Always Visible */}
+              
               {/* Order Items */}
               <View style={styles.orderDetailCard}>
-                <Text style={styles.orderDetailCardTitle}>
-                  Order Items ({Array.isArray(selectedOrder.items) ? selectedOrder.items.length : 0})
-                </Text>
+                <View style={styles.orderDetailCardHeader}>
+                  <FontAwesome5 name="shopping-bag" size={18} color="#0ea5e9" style={{ marginRight: 8 }} />
+                  <Text style={styles.orderDetailCardTitle}>
+                    Order Items ({Array.isArray(selectedOrder.items) ? selectedOrder.items.length : 0})
+                  </Text>
+                </View>
 
                 {Array.isArray(selectedOrder.items) && selectedOrder.items.length > 0 ? (
-                  selectedOrder.items.map((item, index) => (
-                    <Animated.View
+                  // Show only first 2 items if not expanded
+                  (showExpandedDetails ? selectedOrder.items : selectedOrder.items.slice(0, 2)).map((item, index) => (
+                    <View
                       key={item.id || index}
-                      style={[
-                        styles.orderItemRow,
-                        {
-                          opacity: fadeAnim,
-                          transform: [{
-                            translateY: fadeAnim.interpolate({
-                              inputRange: [0, 1],
-                              outputRange: [20, 0]
-                            })
-                          }]
-                        }
-                      ]}
+                      style={styles.orderItemRow}
                     >
                       <Image
                         source={{ uri: item.image || 'https://via.placeholder.com/60?text=Item' }}
@@ -1394,7 +1081,7 @@ export default function CustomerOrdersScreen() {
 
                       <View style={styles.orderItemDetails}>
                         <Text style={styles.orderItemName}>
-                          {item.productName || item.name || `Item ${index + 1}`}
+                          {item.productName || `Item ${index + 1}`}
                         </Text>
 
                         <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 4 }}>
@@ -1423,33 +1110,8 @@ export default function CustomerOrdersScreen() {
                                 : parseFloat(item.price || '0').toFixed(2)} Birr
                           </Text>
                         </View>
-
-                        {item.status && (
-                          <View style={{
-                            flexDirection: 'row',
-                            alignItems: 'center',
-                            marginTop: 4
-                          }}>
-                            <View style={{
-                              width: 8,
-                              height: 8,
-                              borderRadius: 4,
-                              backgroundColor: item.status === 'ordered' ? '#10b981' :
-                                item.status === 'processing' ? '#f59e0b' :
-                                  item.status === 'cancelled' ? '#ef4444' : '#6b7280',
-                              marginRight: 4
-                            }} />
-                            <Text style={{
-                              fontSize: 12,
-                              color: '#6b7280',
-                              textTransform: 'capitalize'
-                            }}>
-                              {item.status}
-                            </Text>
-                          </View>
-                        )}
                       </View>
-                    </Animated.View>
+                    </View>
                   ))
                 ) : (
                   <View style={styles.noItemsContainer}>
@@ -1457,86 +1119,347 @@ export default function CustomerOrdersScreen() {
                     <Text style={styles.noItemsText}>No item details available</Text>
                   </View>
                 )}
+                
+                {/* Show remaining items count or "Show More" button */}
+                {!showExpandedDetails && Array.isArray(selectedOrder.items) && selectedOrder.items.length > 2 && (
+                  <TouchableOpacity 
+                    style={{
+                      padding: 10,
+                      alignItems: 'center',
+                      borderTopWidth: 1,
+                      borderTopColor: '#f1f5f9',
+                      marginTop: 8
+                    }}
+                    onPress={() => setShowExpandedDetails(true)}
+                  >
+                    <Text style={{ color: '#3b82f6', fontWeight: '600' }}>
+                      Show {selectedOrder.items.length - 2} more items
+                    </Text>
+                  </TouchableOpacity>
+                )}
 
-                <View style={styles.orderSummary}>
-                  {selectedOrder.payment && (
-                    <>
-                      <View style={styles.orderSummaryRow}>
-                        <Text style={styles.orderSummaryLabel}>
-                          Subtotal
-                        </Text>
-                        <Text style={styles.orderSummaryValue}>
-                          {selectedOrder.payment.subtotal?.toFixed(2) ||
-                            (typeof selectedOrder.totalAmount === 'number'
-                              ? (selectedOrder.totalAmount * 0.85).toFixed(2)
-                              : (parseFloat(selectedOrder.totalAmount || '0') * 0.85).toFixed(2))} Birr
-                        </Text>
-                      </View>
+                {/* Payment Summary - Always visible */}
+                {selectedOrder.payment && (
+                  <View style={styles.orderSummary}>
+                    <View style={styles.orderSummaryRow}>
+                      <Text style={styles.orderSummaryLabel}>
+                        Subtotal
+                      </Text>
+                      <Text style={styles.orderSummaryValue}>
+                        {selectedOrder.payment.subtotal?.toFixed(2) || '0.00'} Birr
+                      </Text>
+                    </View>
 
-                      <View style={styles.orderSummaryRow}>
-                        <Text style={styles.orderSummaryLabel}>
-                          Delivery Fee
-                        </Text>
-                        <Text style={styles.orderSummaryValue}>
-                          {selectedOrder.payment.deliveryFee?.toFixed(2) ||
-                            (typeof selectedOrder.totalAmount === 'number'
-                              ? (selectedOrder.totalAmount * 0.1).toFixed(2)
-                              : (parseFloat(selectedOrder.totalAmount || '0') * 0.1).toFixed(2))} Birr
-                        </Text>
-                      </View>
+                    <View style={styles.orderSummaryRow}>
+                      <Text style={styles.orderSummaryLabel}>
+                        Delivery Fee
+                      </Text>
+                      <Text style={styles.orderSummaryValue}>
+                        {selectedOrder.payment.deliveryFee?.toFixed(2) || '0.00'} Birr
+                      </Text>
+                    </View>
 
-                      {selectedOrder.payment.tax && (
-                        <View style={styles.orderSummaryRow}>
-                          <Text style={styles.orderSummaryLabel}>
-                            Tax
-                          </Text>
-                          <Text style={styles.orderSummaryValue}>
-                            {selectedOrder.payment.tax.toFixed(2)} Birr
-                          </Text>
-                        </View>
-                      )}
-
-                      <View style={styles.orderTotalRow}>
-                        <Text style={styles.orderTotalLabel}>
-                          Total
-                        </Text>
-                        <Text style={styles.orderTotalValue}>
-                          {selectedOrder.payment.amount?.toFixed(2) ||
-                            (typeof selectedOrder.totalAmount === 'number'
-                              ? selectedOrder.totalAmount.toFixed(2)
-                              : parseFloat(selectedOrder.totalAmount || '0').toFixed(2))} Birr
-                        </Text>
-                      </View>
-
-                      {selectedOrder.payment.provider && (
-                        <View style={styles.orderSummaryRow}>
-                          <Text style={styles.orderSummaryLabel}>
-                            Payment Provider
-                          </Text>
-                          <Text style={[styles.orderSummaryValue, { color: '#3b82f6' }]}>
-                            {selectedOrder.payment.provider}
-                          </Text>
-                        </View>
-                      )}
-
-                      {selectedOrder.payment.transactionId && (
-                        <View style={styles.orderSummaryRow}>
-                          <Text style={styles.orderSummaryLabel}>
-                            Transaction ID
-                          </Text>
-                          <Text style={styles.orderSummaryValue}>
-                            {selectedOrder.payment.transactionId}
-                          </Text>
-                        </View>
-                      )}
-                    </>
-                  )}
-                </View>
+                    <View style={styles.orderTotalRow}>
+                      <Text style={styles.orderTotalLabel}>
+                        Total
+                      </Text>
+                      <Text style={styles.orderTotalValue}>
+                        {selectedOrder.payment.amount?.toFixed(2) || '0.00'} Birr
+                      </Text>
+                    </View>
+                  </View>
+                )}
               </View>
 
-              {/* Action Buttons */}
+              {/* Delivery Address - Always visible */}
+              {selectedOrder.deliveryDetails && selectedOrder.deliveryDetails.address && (
+                <View style={styles.orderDetailCard}>
+                  <View style={styles.orderDetailCardHeader}>
+                    <Feather name="map-pin" size={18} color="#16a34a" style={{ marginRight: 8 }} />
+                    <Text style={styles.orderDetailCardTitle}>
+                      Delivery Address
+                    </Text>
+                  </View>
+                  
+                  <Text style={{
+                    fontSize: 15,
+                    color: '#334155',
+                    paddingVertical: 10,
+                    lineHeight: 20
+                  }}>
+                    {selectedOrder.deliveryDetails.address}
+                  </Text>
+                </View>
+              )}
+              
+              {/* Show More Details Button - Only when not expanded */}
+              {!showExpandedDetails && (
+                <TouchableOpacity
+                  style={{
+                    backgroundColor: '#f8fafc',
+                    padding: 14,
+                    borderRadius: 10,
+                    alignItems: 'center',
+                    marginVertical: 16,
+                    borderWidth: 1,
+                    borderColor: '#e2e8f0'
+                  }}
+                  onPress={() => setShowExpandedDetails(true)}
+                >
+                  <Text style={{ color: '#64748b', fontWeight: '600' }}>
+                    Show More Details
+                  </Text>
+                </TouchableOpacity>
+              )}
+
+              {/* Extended Details - Only visible when expanded */}
+              {showExpandedDetails && (
+                <>
+              {/* Customer Details */}
+              {selectedOrder.customerInfo && (
+                    <View style={styles.orderDetailCard}>
+                      <View style={styles.orderDetailCardHeader}>
+                        <FontAwesome5 name="user-circle" size={18} color="#0ea5e9" style={{ marginRight: 8 }} />
+                        <Text style={styles.orderDetailCardTitle}>
+                      Customer Information
+                    </Text>
+                  </View>
+
+                  <View style={styles.orderDetailRow}>
+                    <View style={[styles.orderDetailIcon, { backgroundColor: '#f0f9ff' }]}>
+                      <Feather name="user" size={16} color="#0ea5e9" />
+                    </View>
+
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.orderDetailLabel}>
+                        Name
+                      </Text>
+                      <Text style={styles.orderDetailValue}>
+                        {selectedOrder.customerInfo.name || 'Not available'}
+                      </Text>
+                    </View>
+                  </View>
+
+                  <View style={styles.orderDetailRow}>
+                    <View style={[styles.orderDetailIcon, { backgroundColor: '#f0f9ff' }]}>
+                      <Feather name="mail" size={16} color="#0ea5e9" />
+                    </View>
+
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.orderDetailLabel}>
+                        Email
+                      </Text>
+                      <Text style={styles.orderDetailValue}>
+                        {selectedOrder.customerInfo.email || 'Not available'}
+                      </Text>
+                    </View>
+                  </View>
+
+                  <View style={styles.orderDetailRow}>
+                    <View style={[styles.orderDetailIcon, { backgroundColor: '#f0f9ff' }]}>
+                      <Feather name="phone" size={16} color="#0ea5e9" />
+                    </View>
+
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.orderDetailLabel}>
+                        Phone
+                      </Text>
+                      <Text style={styles.orderDetailValue}>
+                        {selectedOrder.customerInfo.phoneNumber ? `+${selectedOrder.customerInfo.countryCode || '251'} ${selectedOrder.customerInfo.phoneNumber}` : 'Not available'}
+                      </Text>
+                    </View>
+                  </View>
+                </View>
+              )}
+
+                  {/* More Delivery Details */}
+              <View style={styles.orderDetailCard}>
+                    <View style={styles.orderDetailCardHeader}>
+                      <Feather name="map-pin" size={18} color="#16a34a" style={{ marginRight: 8 }} />
+                <Text style={styles.orderDetailCardTitle}>
+                  Delivery Information
+                </Text>
+                    </View>
+
+                    {(selectedOrder.deliveryDetails && selectedOrder.deliveryDetails.notes) && (
+                  <View style={styles.orderDetailRow}>
+                    <View style={[styles.orderDetailIcon, { backgroundColor: '#f0fdf4' }]}>
+                          <Feather name="file-text" size={16} color="#16a34a" />
+                    </View>
+
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.orderDetailLabel}>
+                            Delivery Notes
+                      </Text>
+                      <Text style={styles.orderDetailValue}>
+                            {selectedOrder.deliveryDetails.notes || 'No notes provided'}
+                      </Text>
+                    </View>
+                  </View>
+                )}
+
+                    {selectedOrder.payment && (
+                  <View style={styles.orderDetailRow}>
+                        <View style={[styles.orderDetailIcon, { backgroundColor: '#eff6ff' }]}>
+                          <Feather name="credit-card" size={16} color="#3b82f6" />
+                    </View>
+
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.orderDetailLabel}>
+                            Payment Method
+                      </Text>
+                      <Text style={styles.orderDetailValue}>
+                            {selectedOrder.payment.method ? 
+                              `${selectedOrder.payment.method} ${selectedOrder.payment.provider ? `(${selectedOrder.payment.provider})` : ''}` : 
+                              'Not specified'}
+                      </Text>
+                    </View>
+                  </View>
+                )}
+
+                    {/* Payment Transaction Details */}
+                    {selectedOrder.payment && selectedOrder.payment.tx_ref && (
+                  <View style={styles.orderDetailRow}>
+                    <View style={[styles.orderDetailIcon, { backgroundColor: '#eff6ff' }]}>
+                          <Feather name="hash" size={16} color="#3b82f6" />
+                    </View>
+
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.orderDetailLabel}>
+                            Transaction ID
+                      </Text>
+                      <Text style={styles.orderDetailValue}>
+                            {selectedOrder.payment.tx_ref}
+                      </Text>
+                    </View>
+                  </View>
+                )}
+
+                {/* Delivery Agent Information */}
+                {selectedOrder.assignedDeliveryAgent && (
+                  <View style={[styles.orderDetailHighlight, { backgroundColor: '#f0fdfa' }]}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
+                      <Feather name="user-check" size={16} color="#0d9488" style={{ marginRight: 8 }} />
+                      <Text style={[styles.orderDetailHighlightTitle, { color: '#0d9488' }]}>
+                        Delivery Agent
+                      </Text>
+                    </View>
+
+                    <View style={styles.deliveryAgentCard}>
+                      <View style={styles.deliveryAgentAvatar}>
+                        <FontAwesome5 name="user-alt" size={14} color="#0d9488" />
+                      </View>
+                      <View style={{ flex: 1 }}>
+                        <Text style={styles.deliveryAgentName}>
+                          {selectedOrder.assignedDeliveryAgent.name || 'Not assigned yet'}
+                        </Text>
+                        <Text style={styles.orderDetailHighlightText}>
+                          Phone: {selectedOrder.assignedDeliveryAgent.phoneNumber || 'N/A'}
+                        </Text>
+                      </View>
+                    </View>
+                  </View>
+                )}
+                  </View>
+
+                {/* Order Status History */}
+                {(selectedOrder.orderStatusHistory && selectedOrder.orderStatusHistory.length > 0) ? (
+                    <View style={styles.orderDetailCard}>
+                      <View style={styles.orderDetailCardHeader}>
+                        <Feather name="clock" size={18} color="#7c3aed" style={{ marginRight: 8 }} />
+                        <Text style={styles.orderDetailCardTitle}>
+                          Order Status History
+                      </Text>
+                    </View>
+
+                    {selectedOrder.orderStatusHistory.map((statusItem, index) => (
+                      <View key={index} style={{
+                        flexDirection: 'row',
+                          paddingVertical: 10,
+                        borderBottomWidth: index === selectedOrder.orderStatusHistory.length - 1 ? 0 : 1,
+                          borderBottomColor: '#f1f5f9'
+                      }}>
+                        <View style={{
+                          width: 12,
+                          height: 12,
+                          borderRadius: 6,
+                          backgroundColor: '#7c3aed',
+                          marginTop: 4,
+                            marginRight: 12
+                        }} />
+                        <View style={{ flex: 1 }}>
+                          <Text style={{ fontSize: 14, fontWeight: '600', color: '#4c1d95' }}>
+                            {statusItem.status.charAt(0).toUpperCase() + statusItem.status.slice(1)}
+                          </Text>
+                          <Text style={{ fontSize: 12, color: '#6b7280' }}>
+                            {statusItem.timestamp?.toDate ? formatDate(statusItem.timestamp.toDate()) : 'No timestamp'}
+                          </Text>
+                          {statusItem.updatedBy && (
+                            <Text style={{ fontSize: 12, color: '#6b7280', marginTop: 2, fontStyle: 'italic' }}>
+                              Updated by: {statusItem.updatedBy}
+                            </Text>
+                          )}
+                        </View>
+                      </View>
+                    ))}
+                  </View>
+                ) : (
+                  // Fallback for orders without explicit history
+                    <View style={styles.orderDetailCard}>
+                      <View style={styles.orderDetailCardHeader}>
+                        <Feather name="clock" size={18} color="#7c3aed" style={{ marginRight: 8 }} />
+                        <Text style={styles.orderDetailCardTitle}>
+                          Order Status History
+                      </Text>
+                    </View>
+
+                    <View style={{
+                      flexDirection: 'row',
+                        paddingVertical: 10
+                    }}>
+                      <View style={{
+                        width: 12,
+                        height: 12,
+                        borderRadius: 6,
+                        backgroundColor: '#7c3aed',
+                        marginTop: 4,
+                          marginRight: 12
+                      }} />
+                      <View style={{ flex: 1 }}>
+                        <Text style={{ fontSize: 14, fontWeight: '600', color: '#4c1d95' }}>
+                          {selectedOrder.status.charAt(0).toUpperCase() + selectedOrder.status.slice(1)}
+                        </Text>
+                        <Text style={{ fontSize: 12, color: '#6b7280' }}>
+                          {selectedOrder.createdAt ? formatDate(selectedOrder.createdAt) : 'Unknown date'}
+                        </Text>
+                      </View>
+                    </View>
+                  </View>
+                )}
+                  
+                  {/* Show Less Button */}
+                  <TouchableOpacity
+                    style={{
+                      backgroundColor: '#f8fafc',
+                      padding: 14,
+                      borderRadius: 10,
+                      alignItems: 'center',
+                      marginVertical: 16,
+                      borderWidth: 1,
+                      borderColor: '#e2e8f0'
+                    }}
+                    onPress={() => setShowExpandedDetails(false)}
+                  >
+                    <Text style={{ color: '#64748b', fontWeight: '600' }}>
+                      Show Less Details
+                        </Text>
+                  </TouchableOpacity>
+                    </>
+                  )}
+
+              {/* Action Buttons - Always visible */}
               <View style={styles.orderActionButtons}>
-                {(selectedOrder.orderStatus === 'pending' || selectedOrder.orderStatus === 'Processing') && (
+                {selectedOrder.status === 'pending' && (
                   <TouchableOpacity
                     style={styles.cancelOrderButton}
                     onPress={() => {
@@ -1556,21 +1479,18 @@ export default function CustomerOrdersScreen() {
                             onPress: async () => {
                               try {
                                 // Get reference to the order document
-                                const userRef = doc(db, "users", user.uid);
-                                const orderRef = doc(collection(userRef, "orders"), selectedOrder.id);
+                                const orderRef = doc(db, "customer_order", selectedOrder.id);
 
                                 // Update order status to cancelled
                                 await updateDoc(orderRef, {
-                                  status: 'cancelled',
                                   orderStatus: 'cancelled',
-                                  cancellationReason: 'Customer requested cancellation',
                                   updatedAt: new Date(),
                                   orderStatusHistory: [
                                     ...(selectedOrder.orderStatusHistory || []),
                                     {
                                       status: 'cancelled',
                                       timestamp: new Date(),
-                                      note: 'Customer requested cancellation'
+                                      updatedBy: 'customer'
                                     }
                                   ]
                                 });
@@ -1582,20 +1502,19 @@ export default function CustomerOrdersScreen() {
                                       ...order,
                                       status: 'cancelled',
                                       orderStatus: 'cancelled',
-                                      cancellationReason: 'Customer requested cancellation',
                                       orderStatusHistory: [
                                         ...(order.orderStatusHistory || []),
                                         {
                                           status: 'cancelled',
                                           timestamp: new Date(),
-                                          note: 'Customer requested cancellation'
+                                          updatedBy: 'customer'
                                         }
                                       ]
                                     }
                                     : order
                                 );
                                 setOrders(updatedOrders);
-                                setFilteredOrders(updatedOrders);
+                                filterOrdersByTab(updatedOrders, activeTab);
 
                                 // Show success message
                                 Alert.alert(
@@ -1622,7 +1541,7 @@ export default function CustomerOrdersScreen() {
                   </TouchableOpacity>
                 )}
 
-                {selectedOrder.orderStatus === 'shipping' && (
+                {selectedOrder.status === 'shipping' && (
                   <TouchableOpacity
                     style={styles.primaryActionButton}
                     onPress={() => {
@@ -1688,24 +1607,27 @@ export default function CustomerOrdersScreen() {
           flexDirection: 'row',
           justifyContent: 'space-between',
           alignItems: 'center',
-          marginBottom: 20,
+          marginBottom: 16,
         }}>
-          <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#0f172a' }}>
+          <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#0f172a' }}>
             Filter Orders
           </Text>
 
           <TouchableOpacity
             style={{
-              width: 40,
-              height: 40,
-              borderRadius: 20,
+              width: 36,
+              height: 36,
+              borderRadius: 18,
               backgroundColor: '#f1f5f9',
               justifyContent: 'center',
               alignItems: 'center',
             }}
-            onPress={() => setFilterModalVisible(false)}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              setFilterModalVisible(false);
+            }}
           >
-            <Feather name="x" size={20} color="#64748b" />
+            <Feather name="x" size={18} color="#64748b" />
           </TouchableOpacity>
         </View>
 
@@ -1713,51 +1635,131 @@ export default function CustomerOrdersScreen() {
           fontSize: 16,
           fontWeight: '600',
           color: '#334155',
-          marginBottom: 16,
+          marginBottom: 12,
         }}>
           Order Status
         </Text>
 
         <View style={styles.filterOptionsContainer}>
-          {tabs.map(tab => (
+          {tabs.map(tab => {
+            const statusColors = getStatusColor(tab.id);
+            return (
             <TouchableOpacity
               key={tab.id}
               style={[
                 styles.filterOptionCard,
-                activeTab === tab.id && styles.filterOptionCardActive
+                  activeTab === tab.id && { 
+                    backgroundColor: statusColors.bg,
+                    borderRadius: 12,
+                  }
               ]}
               onPress={() => {
                 setActiveTab(tab.id);
-                setFilterModalVisible(false); // Close filter modal when option is selected
+                  setFilterModalVisible(false);
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
               }}
             >
-              <View style={[
+                <LinearGradient
+                  colors={activeTab === tab.id ? statusColors.gradientColors : ['transparent', 'transparent']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                  style={[
                 styles.filterOptionIcon,
-                { backgroundColor: getStatusColor(tab.id).bg }
-              ]}>
-                {tab.id === 'pending' && <Feather name="clock" size={18} color={getStatusColor(tab.id).text} />}
-                {tab.id === 'processing' && <Feather name="refresh-cw" size={18} color={getStatusColor(tab.id).text} />}
-                {tab.id === 'shipping' && <Feather name="truck" size={18} color={getStatusColor(tab.id).text} />}
-                {tab.id === 'delivered' && <Feather name="check-circle" size={18} color={getStatusColor(tab.id).text} />}
-                {tab.id === 'cancelled' && <Feather name="x-circle" size={18} color={getStatusColor(tab.id).text} />}
-                {tab.id === 'all' && <Feather name="layers" size={18} color={getStatusColor(tab.id).text} />}
-              </View>
+                    { backgroundColor: activeTab === tab.id ? 'transparent' : statusColors.bg }
+                  ]}
+                >
+                  {tab.id === 'pending' && <Feather name="clock" size={16} color={statusColors.text} />}
+                  {tab.id === 'processing' && <Feather name="refresh-cw" size={16} color={statusColors.text} />}
+                  {tab.id === 'shipping' && <Feather name="truck" size={16} color={statusColors.text} />}
+                  {tab.id === 'delivered' && <Feather name="check-circle" size={16} color={statusColors.text} />}
+                  {tab.id === 'cancelled' && <Feather name="x-circle" size={16} color={statusColors.text} />}
+                  {tab.id === 'all' && <Feather name="layers" size={16} color={statusColors.text} />}
+                </LinearGradient>
 
               <Text style={[
                 styles.filterOptionText,
-                activeTab === tab.id && styles.filterOptionTextActive
+                  activeTab === tab.id && { 
+                    color: statusColors.text,
+                    fontWeight: '700'
+                  }
               ]}>
                 {tab.label}
               </Text>
 
               {activeTab === tab.id && (
-                <View style={styles.filterOptionCheckmark}>
-                  <Feather name="check" size={16} color="#fff" />
-                </View>
+                  <Animated.View 
+                    style={[
+                      styles.filterOptionCheckmark,
+                      { backgroundColor: statusColors.text }
+                    ]}
+                  >
+                    <Feather name="check" size={14} color="#fff" />
+                  </Animated.View>
               )}
             </TouchableOpacity>
-          ))}
+            );
+          })}
+        </View>
+
+        <View style={styles.filterSeparator} />
+
+        <Text style={{
+          fontSize: 16,
+          fontWeight: '600',
+          color: '#334155',
+          marginVertical: 12,
+        }}>
+          Date Range
+        </Text>
+
+        <View style={styles.dateRangeContainer}>
+          <TouchableOpacity 
+            style={[
+              styles.dateRangeOption,
+              activeRange === 'all' && styles.dateRangeOptionActive
+            ]}
+            onPress={() => {
+              setActiveRange('all');
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            }}
+          >
+            <Text style={[
+              styles.dateRangeText,
+              activeRange === 'all' && styles.dateRangeTextActive
+            ]}>All Time</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity 
+            style={[
+              styles.dateRangeOption,
+              activeRange === 'month' && styles.dateRangeOptionActive
+            ]}
+            onPress={() => {
+              setActiveRange('month');
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            }}
+          >
+            <Text style={[
+              styles.dateRangeText,
+              activeRange === 'month' && styles.dateRangeTextActive
+            ]}>This Month</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity 
+            style={[
+              styles.dateRangeOption,
+              activeRange === 'week' && styles.dateRangeOptionActive
+            ]}
+            onPress={() => {
+              setActiveRange('week');
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            }}
+          >
+            <Text style={[
+              styles.dateRangeText,
+              activeRange === 'week' && styles.dateRangeTextActive
+            ]}>This Week</Text>
+          </TouchableOpacity>
         </View>
 
         <View style={styles.filterButtonsContainer}>
@@ -1765,10 +1767,12 @@ export default function CustomerOrdersScreen() {
             style={styles.resetFilterButton}
             onPress={() => {
               setActiveTab('all');
+              setActiveRange('all');
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
             }}
           >
-            <Text style={styles.resetFilterButtonText}>Reset</Text>
+            <Feather name="refresh-cw" size={16} color="#475569" style={{ marginRight: 6 }} />
+            <Text style={styles.resetFilterButtonText}>Reset All</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -1778,7 +1782,8 @@ export default function CustomerOrdersScreen() {
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
             }}
           >
-            <Text style={styles.applyFilterButtonText}>Apply Filter</Text>
+            <Text style={styles.applyFilterButtonText}>Apply Filters</Text>
+            <Feather name="check" size={16} color="white" style={{ marginLeft: 6 }} />
           </TouchableOpacity>
         </View>
       </Animated.View>
@@ -1794,6 +1799,9 @@ export default function CustomerOrdersScreen() {
           <ActivityIndicator size="large" color="#0ea5e9" />
           <Text style={{ marginTop: 12, fontSize: 16, color: '#64748b' }}>
             Loading your orders...
+          </Text>
+          <Text style={{ marginTop: 4, fontSize: 12, color: '#94a3b8' }}>
+            This may take a moment
           </Text>
         </View>
       </SafeAreaView>
@@ -1823,7 +1831,7 @@ export default function CustomerOrdersScreen() {
         refreshControl={
           <RefreshControl
             refreshing={isRefreshing}
-            onRefresh={onRefresh}
+            onRefresh={handleRefresh}
             tintColor="#0ea5e9"
             colors={['#0ea5e9']}
           />
@@ -1991,6 +1999,7 @@ const styles = StyleSheet.create({
     height: 60,
     borderRadius: 8,
     marginRight: 12,
+    backgroundColor: '#f1f5f9',
   },
   orderItemDetails: {
     flex: 1,
@@ -2109,10 +2118,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 24,
+    minHeight: 400,
   },
   noOrdersImage: {
-    width: 200,
-    height: 200,
+    width: 150,
+    height: 150,
     opacity: 0.8,
     marginBottom: 16,
   },
@@ -2158,210 +2168,68 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(15, 23, 42, 0.7)',
     justifyContent: 'center',
     alignItems: 'center',
-    zIndex: 10000,
+    zIndex: 1000,
     elevation: 10,
   },
   modalContent: {
     backgroundColor: 'white',
-    borderRadius: 20,
+    borderRadius: 16,
     overflow: 'hidden',
     width: width * 0.9,
-    maxHeight: height * 0.8,
+    maxHeight: height * 0.85,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 10,
   },
-  filterModal: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(15, 23, 42, 0.7)',
-    justifyContent: 'flex-end',
-    zIndex: 1000,
-  },
-  filterModalContent: {
-    backgroundColor: 'white',
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    padding: 20,
-    paddingBottom: Platform.OS === 'ios' ? 40 : 20,
-    maxHeight: height * 0.8,
-  },
-  filterModalHandle: {
-    height: 4,
-    width: 40,
-    borderRadius: 2,
-    backgroundColor: '#cbd5e1',
-    alignSelf: 'center',
-    marginBottom: 16,
-  },
-  filterOptionsContainer: {
-    marginBottom: 24,
-  },
-  filterOptionCard: {
+  modalHeader: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 12,
+    padding: 16,
     borderBottomWidth: 1,
     borderBottomColor: '#f1f5f9',
   },
-  filterOptionCardActive: {
-    backgroundColor: '#eff6ff',
+  modalHeaderTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#0f172a',
   },
-  filterOptionIcon: {
+  modalCloseButton: {
     width: 36,
     height: 36,
     borderRadius: 18,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 12,
-  },
-  filterOptionText: {
-    fontSize: 16,
-    color: '#334155',
-    fontWeight: '500',
-  },
-  filterOptionTextActive: {
-    color: '#3b82f6',
-    fontWeight: '600',
-  },
-  filterOptionCheckmark: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: '#3b82f6',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginLeft: 'auto',
-  },
-  filterButtonsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    gap: 12,
-  },
-  resetFilterButton: {
-    flex: 1,
-    paddingVertical: 14,
-    borderRadius: 8,
-    alignItems: 'center',
     backgroundColor: '#f1f5f9',
-  },
-  resetFilterButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#334155',
-  },
-  applyFilterButton: {
-    flex: 1,
-    paddingVertical: 14,
-    borderRadius: 8,
     alignItems: 'center',
-    backgroundColor: '#3b82f6',
-  },
-  applyFilterButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: 'white',
-  },
-  lottieContainer: {
-    width: 150,
-    height: 150,
-    marginBottom: 20,
-    alignSelf: 'center',
-  },
-  itemsPreviewContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    marginTop: 8,
-    alignItems: 'center',
-  },
-  moreItemsContainer: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: '#e2e8f0',
     justifyContent: 'center',
+  },
+  orderDetailSection: {
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f1f5f9',
+  },
+  orderNumberContainer: {
+    flexDirection: 'row',
     alignItems: 'center',
-    marginLeft: 4,
-  },
-  moreItemsText: {
-    fontSize: 12,
-    fontWeight: 'bold',
-    color: '#475569',
-  },
-  itemPreviewImage: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    marginLeft: -8,
-    borderWidth: 2,
-    borderColor: 'white',
-  },
-  itemCountText: {
-    marginLeft: 8,
-    color: '#64748b',
-    fontSize: 14,
-  },
-  orderInfoContainer: {
-    marginTop: 16,
-  },
-  orderInfoRow: {
-    flexDirection: 'row',
+    justifyContent: 'space-between',
     marginBottom: 8,
-    alignItems: 'flex-start',
   },
-  orderInfoIcon: {
-    marginRight: 8,
-    marginTop: 2,
-  },
-  orderInfoText: {
-    flex: 1,
-    fontSize: 14,
-    color: '#64748b',
-  },
-  estimatedDeliveryContainer: {
-    flexDirection: 'row',
-    marginTop: 8,
-    backgroundColor: '#f0fdfa',
-    padding: 8,
-    borderRadius: 8,
-    alignItems: 'flex-start',
-  },
-  estimatedDeliveryText: {
-    flex: 1,
-    fontSize: 14,
-    color: '#0d9488',
-  },
-  badge: {
-    position: 'absolute',
-    top: -6,
-    right: -6,
-    backgroundColor: '#ef4444',
-    borderRadius: 10,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    zIndex: 1,
-  },
-  badgeText: {
-    color: 'white',
-    fontSize: 10,
+  orderNumberText: {
+    fontSize: 18,
     fontWeight: 'bold',
   },
-  orderNumberPill: {
+  orderStatusBadge: {
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 12,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
   },
-  orderNumberPillText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: 'white',
-  },
-  orderDetailStatusContainer: {
+  orderDateContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: 12,
+  },
+  orderDateText: {
+    fontSize: 14,
   },
   orderProgressTracker: {
     marginTop: 24,
@@ -2375,7 +2243,6 @@ const styles = StyleSheet.create({
   orderProgressLineFill: {
     height: 4,
     borderRadius: 2,
-    backgroundColor: 'white',
   },
   orderProgressSteps: {
     flexDirection: 'row',
@@ -2394,12 +2261,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 8,
+    borderWidth: 2,
   },
   orderProgressText: {
     fontSize: 12,
-    color: 'white',
     fontWeight: '500',
     textAlign: 'center',
+  },
+  orderDetailContent: {
+    padding: 16,
   },
   orderDetailCard: {
     padding: 16,
@@ -2414,11 +2284,18 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#f1f5f9',
   },
+  orderDetailCardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+    paddingBottom: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f1f5f9',
+  },
   orderDetailCardTitle: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '600',
     color: '#0f172a',
-    marginBottom: 16,
   },
   orderDetailRow: {
     flexDirection: 'row',
@@ -2489,9 +2366,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#64748b',
     marginLeft: 4,
-  },
-  orderDetailContent: {
-    padding: 20,
   },
   orderSummary: {
     marginTop: 16,
@@ -2584,5 +2458,193 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#94a3b8',
     marginTop: 8,
+  },
+  filterModal: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'flex-end',
+    zIndex: 1000,
+  },
+  filterModalContent: {
+    backgroundColor: 'white',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: 20,
+    paddingBottom: bottom + 8,
+    maxHeight: height * 0.7,
+  },
+  filterModalHandle: {
+    width: 36,
+    height: 4,
+    backgroundColor: '#e2e8f0',
+    borderRadius: 2,
+    alignSelf: 'center',
+    marginBottom: 12,
+  },
+  filterOptionsContainer: {
+    marginBottom: 12,
+  },
+  filterOptionCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 10,
+    paddingHorizontal: 10,
+    marginBottom: 6,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f1f5f9',
+  },
+  filterOptionIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 10,
+  },
+  filterOptionText: {
+    fontSize: 14,
+    color: '#334155',
+    fontWeight: '500',
+  },
+  filterOptionCheckmark: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 'auto',
+  },
+  filterButtonsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 10,
+    marginTop: 8,
+  },
+  resetFilterButton: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 10,
+    alignItems: 'center',
+    backgroundColor: '#f1f5f9',
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  resetFilterButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#475569',
+  },
+  applyFilterButton: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 10,
+    alignItems: 'center',
+    backgroundColor: '#3b82f6',
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  applyFilterButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: 'white',
+  },
+  itemsPreviewContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginTop: 8,
+    alignItems: 'center',
+  },
+  moreItemsContainer: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: '#e2e8f0',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 4,
+  },
+  moreItemsText: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: '#475569',
+  },
+  itemPreviewImage: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    marginLeft: -8,
+    borderWidth: 2,
+    borderColor: 'white',
+  },
+  itemCountText: {
+    marginLeft: 8,
+    color: '#64748b',
+    fontSize: 14,
+  },
+  orderInfoContainer: {
+    marginTop: 16,
+  },
+  orderInfoRow: {
+    flexDirection: 'row',
+    marginBottom: 8,
+    alignItems: 'flex-start',
+  },
+  orderInfoIcon: {
+    marginRight: 8,
+    marginTop: 2,
+  },
+  orderInfoText: {
+    flex: 1,
+    fontSize: 14,
+    color: '#64748b',
+  },
+  estimatedDeliveryContainer: {
+    flexDirection: 'row',
+    marginTop: 8,
+    backgroundColor: '#f0fdfa',
+    padding: 8,
+    borderRadius: 8,
+    alignItems: 'flex-start',
+  },
+  estimatedDeliveryText: {
+    flex: 1,
+    fontSize: 14,
+    color: '#0d9488',
+  },
+  filterSeparator: {
+    height: 1,
+    backgroundColor: '#e2e8f0',
+    marginVertical: 8,
+  },
+  dateRangeContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 20,
+  },
+  dateRangeOption: {
+    flex: 1,
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    borderRadius: 10,
+    backgroundColor: '#f1f5f9',
+    marginHorizontal: 3,
+    alignItems: 'center',
+  },
+  dateRangeOptionActive: {
+    backgroundColor: '#eff6ff',
+    borderWidth: 1,
+    borderColor: '#3b82f6',
+  },
+  dateRangeText: {
+    fontSize: 13,
+    color: '#64748b',
+    fontWeight: '500',
+  },
+  dateRangeTextActive: {
+    color: '#3b82f6',
+    fontWeight: '600',
   },
 });

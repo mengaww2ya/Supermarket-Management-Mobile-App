@@ -821,7 +821,7 @@ export default function CustomerAssistanceHome() {
               </View>
               
               {/* Recent Activity */}
-              <View className="mb-6">
+              {/* <View className="mb-6">
                 <View className="flex-row justify-between items-center mb-4">
                   <Text className="text-lg font-bold text-gray-800">Recent Activity</Text>
                   <TouchableOpacity>
@@ -852,10 +852,10 @@ export default function CustomerAssistanceHome() {
                     </View>
                   ))}
                 </View>
-              </View>
+              </View> */}
               
               {/* Support Team Section */}
-              <View className="mb-6">
+              {/* <View className="mb-6">
                 <View className="flex-row justify-between items-center mb-4">
                   <Text className="text-lg font-bold text-gray-800">Support Team</Text>
                   <TouchableOpacity>
@@ -903,7 +903,7 @@ export default function CustomerAssistanceHome() {
                     </View>
                   </TouchableOpacity>
                 ))}
-              </View>
+              </View> */}
             </View>
           )}
           

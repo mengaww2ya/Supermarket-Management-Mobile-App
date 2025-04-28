@@ -340,7 +340,7 @@ export const products = [
     categoryName: "Dairy & Eggs",
     description:
       "Fresh and nutritious whole milk, perfect for daily consumption.",
-    image: require("../../assets/images/WholeMilk.png"),
+    image: require("../../assets/images/whole_milk.png"),
     price: 4.99,
     discountPrice: 4.99,
     stockQuantity: 150,
@@ -533,7 +533,7 @@ export const products = [
     categoryId: 3,
     categoryName: "Meat & Seafood",
     description: "Fresh boneless and skinless chicken breast, high in protein.",
-    image: require("../../assets/images/ChickenBreast.png"),
+    image: require("../../assets/images/chicken_breast.png"),
     price: 8.99,
     discountPrice: 8.09, // 10% off applied
     stockQuantity: 120,

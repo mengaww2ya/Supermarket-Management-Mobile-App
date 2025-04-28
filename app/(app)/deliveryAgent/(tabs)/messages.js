@@ -15,7 +15,7 @@ import { heightPercentageToDP as hp, widthPercentageToDP as wp } from 'react-nat
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
 
-const DEFAULT_PROFILE_IMAGE = require('../../../../assets/images/PrifileDemo.png');
+const DEFAULT_PROFILE_IMAGE = require('../../../../assets/images/profile_demo.png');
 
 export default function MessagesScreen() {
   const [recentChats, setRecentChats] = useState([]);

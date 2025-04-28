@@ -1,13 +1,15 @@
 import "dotenv/config";
+
 export default {
   expo: {
-    "plugins": [
+    plugins: [
       "expo-router"
     ],
-    "newArchEnabled": true,
+    newArchEnabled: true,
     userInterfaceStyle: "automatic",
     name: "QUEEN",
     slug: "QUEEN",
+    version: "1.0.0", // 👈 Added this line (App version)
     extra: {
       firebaseApiKey: process.env.FIREBASE_API_KEY,
       firebaseAuthDomain: process.env.FIREBASE_AUTH_DOMAIN,
@@ -26,10 +28,15 @@ export default {
       supplierChapaPublicKey: process.env.SUPPLIER_CHAPA_PUBLIC_KEY,
       supplierChapaSecretKey: process.env.SUPPLIER_CHAPA_SECRET_KEY,
       supplierChapaEncryptionKey: process.env.SUPPLIER_CHAPA_ENCRYPTION_KEY,
-    },
 
+      // EAS project linking
+      eas: {
+        projectId: "3d683789-a14b-496b-86ce-a6959400d966",
+      },
+    },
     android: {
-      package: "com.anonymous.QUEEN"
+      package: "com.h2m2025.queen",
+      versionCode: 1
     }
   }
 };

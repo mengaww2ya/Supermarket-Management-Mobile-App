@@ -18,7 +18,7 @@ import {
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { db } from "../../../firebase/firebaseConfig";
-import { doc, setDoc, collection, addDoc, getDoc, getDocs, updateDoc, increment } from "firebase/firestore";
+import { doc, setDoc, collection, addDoc, getDoc, getDocs, updateDoc, increment, query, where } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
@@ -250,6 +250,7 @@ export default function AddToCart() {
 
       // Create cart item for the current user
       const cartItemData = {
+        userId: currentUser.uid,
         productId,
         productName,
         price: originalPrice,
@@ -264,27 +265,27 @@ export default function AddToCart() {
         status: 'active'
       };
 
-      // Add to user's cart subcollection
-      // Users/{userId}/cart/{cartItemId}
-      const userRef = doc(db, "users", currentUser.uid);
-      const userCartRef = collection(userRef, "cart");
+      // Reference to the customer_cart collection
+      const cartCollectionRef = collection(db, "customer_cart");
       
       // Check if the product is already in the cart
-      // If it is, we might want to update the quantity instead of adding a new item
-      const existingCartRef = collection(db, "users", currentUser.uid, "cart");
-      const existingCartSnap = await getDocs(existingCartRef);
+      const q = query(
+        cartCollectionRef,
+        where("userId", "==", currentUser.uid),
+        where("productId", "==", productId),
+        where("status", "==", "active")
+      );
+      
+      const existingCartSnap = await getDocs(q);
       
       let existingItem = null;
       existingCartSnap.forEach(doc => {
-        const data = doc.data();
-        if (data.productId === productId) {
-          existingItem = { id: doc.id, ...data };
-        }
+        existingItem = { id: doc.id, ...doc.data() };
       });
       
       if (existingItem) {
         // Update existing cart item
-        const existingCartItemRef = doc(db, "users", currentUser.uid, "cart", existingItem.id);
+        const existingCartItemRef = doc(db, "customer_cart", existingItem.id);
         await updateDoc(existingCartItemRef, {
           quantity: increment(quantity),
           totalPrice: (existingItem.quantity + quantity) * parsedPrice,
@@ -292,7 +293,7 @@ export default function AddToCart() {
         });
       } else {
         // Add new cart item
-        await addDoc(userCartRef, cartItemData);
+        await addDoc(cartCollectionRef, cartItemData);
       }
       
       // Update the product stock in the database

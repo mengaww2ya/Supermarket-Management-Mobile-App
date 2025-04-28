@@ -9,7 +9,7 @@ export default function StockManagerHome() {
   const router = useRouter();
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
+    <SafeAreaView className="flex-1 bg-white">
       <StatusBar style="dark" />
 
       {/* Header */}

@@ -483,7 +483,11 @@ export default function ProductDisplay() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#F9FAFB' }}>
-      <HomeHeader title={title || categoryName || "Products"} />
+      <HomeHeader 
+        title={title || categoryName || "Products"} 
+        showBackButton={true}
+        onBackPress={() => router.back()}
+      />
       
       {/* Search Bar */}
       <View style={{ 

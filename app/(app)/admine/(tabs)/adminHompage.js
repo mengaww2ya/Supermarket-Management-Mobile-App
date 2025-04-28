@@ -253,17 +253,17 @@ const menuItems = [
       gradientTo: "#cffafe",
       iconColor: "#06b6d4"
     },
-    {
-      title: "Reports",
-      subtitle: "View financial reports",
-      icon: "chart-bar",
-    iconType: "MaterialCommunityIcons",
-      route: "/admine/reports",
-      color: "bg-emerald-50 dark:bg-emerald-900/20",
-      gradientFrom: "#ecfdf5",
-      gradientTo: "#d1fae5",
-      iconColor: "#10b981"
-    }
+    // {
+    //   title: "Reports",
+    //   subtitle: "View financial reports",
+    //   icon: "chart-bar",
+    // iconType: "MaterialCommunityIcons",
+    //   route: "/admine/reports",
+    //   color: "bg-emerald-50 dark:bg-emerald-900/20",
+    //   gradientFrom: "#ecfdf5",
+    //   gradientTo: "#d1fae5",
+    //   iconColor: "#10b981"
+    // }
   ];
   
   // Format timestamp to relative time
@@ -299,17 +299,17 @@ const menuItems = [
   
   if (loading) {
     return (
-      <View className="flex-1 bg-gray-50 dark:bg-gray-900 justify-center items-center">
+      <View className="flex-1 bg-white justify-center items-center">
         <StatusBar style="dark" />
         <ActivityIndicator size="large" color="#3b82f6" />
-        <Text className="text-gray-600 dark:text-gray-300 font-medium mt-4">Loading dashboard...</Text>
+        <Text className="text-gray-600 font-medium mt-4">Loading dashboard...</Text>
       </View>
     );
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50 dark:bg-gray-900">
-      <StatusBar style="light" />
+    <SafeAreaView className="flex-1 bg-white">
+      <StatusBar style="dark" />
       
       {/* Header */}
       <HomeHeader title="Admin Dashboard" />
@@ -317,45 +317,103 @@ const menuItems = [
       {/* Welcome Banner */}
       <Animated.View 
         entering={FadeInDown.duration(500)}
-        className="mx-4 rounded-xl shadow-lg overflow-hidden my-2 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700"
+        style={{ 
+          backgroundColor: "white",
+          marginHorizontal: 16,
+          borderRadius: 16,
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: 1 },
+          shadowOpacity: 0.05,
+          shadowRadius: 3,
+          marginVertical: 8,
+          borderWidth: 1,
+          borderColor: "#F3F4F6",
+          overflow: "hidden"
+        }}
       >
-        <View className="px-5 py-4">
+        <View style={{ padding: 20 }}>
           <View className="flex-row justify-between items-center">
           <View>
-              <Text className="text-gray-900 dark:text-white font-bold text-xl">Welcome Back, Admin</Text>
-              <Text className="text-gray-500 dark:text-gray-400 text-sm mt-1">{new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</Text>
+              <Text style={{
+                fontSize: 22,
+                fontWeight: "700", 
+                color: "#111827",
+                marginBottom: 4
+              }}>Welcome, Admin</Text>
+              <Text style={{
+                fontSize: 14,
+                color: "#4B5563",
+                marginTop: 2
+              }}>{new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</Text>
             </View>
             
             <Animated.View 
-              style={iconAnimationStyle} 
-              className="bg-blue-100 dark:bg-blue-900/30 p-3 rounded-full"
+              style={[iconAnimationStyle, {
+                backgroundColor: "#3b82f615",
+                width: 50,
+                height: 50,
+                borderRadius: 12,
+                alignItems: "center",
+                justifyContent: "center"
+              }]}
             >
-              <Ionicons name="analytics" size={24} color="#3b82f6" />
+              <Ionicons name="analytics" size={26} color="#3b82f6" />
             </Animated.View>
           </View>
           
-          <View className="flex-row justify-between mt-5">
-            <Pressable className="bg-blue-50 dark:bg-blue-900/20 px-3 py-2.5 rounded-lg flex-row items-center">
+          <View style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            marginTop: 20
+          }}>
+            <Pressable 
+              style={{
+                backgroundColor: "#EBF5FF",
+                paddingHorizontal: 12,
+                paddingVertical: 10,
+                borderRadius: 12,
+                flexDirection: "row",
+                alignItems: "center"
+              }}
+            >
               <Ionicons name="basket" size={18} color="#3b82f6" style={{marginRight: 6}} />
               <View>
-                <Text className="text-blue-600 dark:text-blue-400 font-bold">{stats.orders}</Text>
-                <Text className="text-gray-600 dark:text-gray-400 text-xs">Active Orders</Text>
+                <Text style={{ color: "#3b82f6", fontWeight: "700" }}>{stats.orders}</Text>
+                <Text style={{ color: "#64748B", fontSize: 12 }}>Active Orders</Text>
               </View>
             </Pressable>
             
-            <Pressable className="bg-purple-50 dark:bg-purple-900/20 px-3 py-2.5 rounded-lg flex-row items-center">
+            <Pressable 
+              style={{
+                backgroundColor: "#F5F3FF",
+                paddingHorizontal: 12,
+                paddingVertical: 10,
+                borderRadius: 12,
+                flexDirection: "row",
+                alignItems: "center"
+              }}
+            >
               <Ionicons name="people" size={18} color="#8b5cf6" style={{marginRight: 6}} />
               <View>
-                <Text className="text-purple-600 dark:text-purple-400 font-bold">{stats.employees}</Text>
-                <Text className="text-gray-600 dark:text-gray-400 text-xs">Employees</Text>
+                <Text style={{ color: "#8b5cf6", fontWeight: "700" }}>{stats.employees}</Text>
+                <Text style={{ color: "#64748B", fontSize: 12 }}>Employees</Text>
               </View>
             </Pressable>
             
-            <Pressable className="bg-emerald-50 dark:bg-emerald-900/20 px-3 py-2.5 rounded-lg flex-row items-center">
+            <Pressable
+              style={{
+                backgroundColor: "#ECFDF5",
+                paddingHorizontal: 12,
+                paddingVertical: 10,
+                borderRadius: 12,
+                flexDirection: "row",
+                alignItems: "center"
+              }}
+            >
               <Ionicons name="people-circle" size={18} color="#10b981" style={{marginRight: 6}} />
               <View>
-                <Text className="text-emerald-600 dark:text-emerald-400 font-bold">{stats.customers}</Text>
-                <Text className="text-gray-600 dark:text-gray-400 text-xs">Customers</Text>
+                <Text style={{ color: "#10b981", fontWeight: "700" }}>{stats.customers}</Text>
+                <Text style={{ color: "#64748B", fontSize: 12 }}>Customers</Text>
               </View>
             </Pressable>
           </View>
@@ -372,94 +430,279 @@ const menuItems = [
         {/* System Overview */}
         <View className="mx-4 mt-4">
           <View className="flex-row justify-between items-center mb-4">
-            <Text className="text-gray-800 dark:text-gray-200 font-bold text-lg">System Overview</Text>
-            <View className="bg-blue-50 dark:bg-blue-900/30 px-3 py-1.5 rounded-full">
-              <Text className="text-blue-600 dark:text-blue-400 font-medium text-sm">Real-time</Text>
+            <Text style={{
+              fontSize: 20,
+              fontWeight: "700",
+              color: "#111827",
+              marginBottom: 6,
+              marginLeft: 2
+            }}>System Overview</Text>
+            <View style={{
+              backgroundColor: "#3b82f610",
+              paddingHorizontal: 12,
+              paddingVertical: 6,
+              borderRadius: 20,
+              borderWidth: 1,
+              borderColor: "#3b82f620"
+            }}>
+              <Text style={{
+                fontSize: 13,
+                color: "#3b82f6",
+                fontWeight: "600"
+              }}>Real-time</Text>
             </View>
           </View>
           
           <View className="flex-row flex-wrap justify-between">
-            <Animated.View entering={FadeInDown.delay(200).duration(400)} className="w-[48%] mb-4">
-              <Pressable className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 overflow-hidden relative" onPressIn={onPressIn} onPressOut={onPressOut}>
-                <LinearGradient
-                  colors={['#f0f9ff', '#e0f2fe']}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                  className="absolute inset-0 opacity-60"
-                />
-                <View className="flex-row justify-between items-start mb-3">
-                  <View className="bg-blue-50 dark:bg-blue-900/20 p-2 rounded-lg">
-                    <Ionicons name="people" size={20} color="#3b82f6" />
+            <Animated.View 
+              entering={FadeInDown.delay(200).duration(400)} 
+              style={{
+                width: "48%",
+                marginBottom: 16
+              }}
+            >
+              <Pressable 
+                style={{
+                  borderRadius: 16,
+                  overflow: "hidden",
+                  backgroundColor: "#3b82f615",
+                  padding: 16,
+                  shadowColor: "#000",
+                  shadowOffset: { width: 0, height: 1 },
+                  shadowOpacity: 0.05,
+                  shadowRadius: 3,
+                }}
+                onPressIn={onPressIn} 
+                onPressOut={onPressOut}
+              >
+                <View style={{
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  alignItems: "flex-start",
+                  marginBottom: 12
+                }}>
+                  <View style={{
+                    width: 48,
+                    height: 48,
+                    borderRadius: 12,
+                    backgroundColor: "#3b82f625",
+                    alignItems: "center",
+                    justifyContent: "center"
+                  }}>
+                    <Ionicons name="people" size={24} color="#3b82f6" />
                   </View>
-                  <View className="bg-green-50 dark:bg-green-900/30 px-2 py-1 rounded-full">
-                    <Text className="text-green-600 dark:text-green-400 text-xs font-medium">{stats.employeeGrowth}</Text>
+                  <View style={{
+                    backgroundColor: "#10b98115",
+                    paddingHorizontal: 8,
+                    paddingVertical: 4,
+                    borderRadius: 100
+                  }}>
+                    <Text style={{
+                      fontSize: 10,
+                      color: "#10b981",
+                      fontWeight: "600"
+                    }}>{stats.employeeGrowth}</Text>
                   </View>
                 </View>
-                <Text className="text-2xl font-bold text-gray-800 dark:text-white">{stats.employees}</Text>
-                <Text className="text-gray-500 dark:text-gray-400 text-sm mt-1">Total Employees</Text>
+                <Text style={{
+                  fontSize: 24,
+                  fontWeight: "bold",
+                  color: "#1F2937",
+                  marginBottom: 4
+                }}>{stats.employees}</Text>
+                <Text style={{
+                  fontSize: 14,
+                  color: "#6B7280"
+                }}>Total Employees</Text>
               </Pressable>
             </Animated.View>
             
-            <Animated.View entering={FadeInDown.delay(300).duration(400)} className="w-[48%] mb-4">
-              <Pressable className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 overflow-hidden relative" onPressIn={onPressIn} onPressOut={onPressOut}>
-                <LinearGradient
-                  colors={['#eef2ff', '#e0e7ff']}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                  className="absolute inset-0 opacity-60"
-                />
-                <View className="flex-row justify-between items-start mb-3">
-                  <View className="bg-indigo-50 dark:bg-indigo-900/20 p-2 rounded-lg">
-                    <Ionicons name="people-circle" size={20} color="#6366f1" />
+            <Animated.View 
+              entering={FadeInDown.delay(300).duration(400)} 
+              style={{
+                width: "48%",
+                marginBottom: 16
+              }}
+            >
+              <Pressable 
+                style={{
+                  borderRadius: 16,
+                  overflow: "hidden",
+                  backgroundColor: "#6366f115",
+                  padding: 16,
+                  shadowColor: "#000",
+                  shadowOffset: { width: 0, height: 1 },
+                  shadowOpacity: 0.05,
+                  shadowRadius: 3,
+                }}
+                onPressIn={onPressIn} 
+                onPressOut={onPressOut}
+              >
+                <View style={{
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  alignItems: "flex-start",
+                  marginBottom: 12
+                }}>
+                  <View style={{
+                    width: 48,
+                    height: 48,
+                    borderRadius: 12,
+                    backgroundColor: "#6366f125",
+                    alignItems: "center",
+                    justifyContent: "center"
+                  }}>
+                    <Ionicons name="people-circle" size={24} color="#6366f1" />
                   </View>
-                  <View className="bg-green-50 dark:bg-green-900/30 px-2 py-1 rounded-full">
-                    <Text className="text-green-600 dark:text-green-400 text-xs font-medium">{stats.customerGrowth}</Text>
+                  <View style={{
+                    backgroundColor: "#10b98115",
+                    paddingHorizontal: 8,
+                    paddingVertical: 4,
+                    borderRadius: 100
+                  }}>
+                    <Text style={{
+                      fontSize: 10,
+                      color: "#10b981",
+                      fontWeight: "600"
+                    }}>{stats.customerGrowth}</Text>
                   </View>
                 </View>
-                <Text className="text-2xl font-bold text-gray-800 dark:text-white">{stats.customers}</Text>
-                <Text className="text-gray-500 dark:text-gray-400 text-sm mt-1">Total Customers</Text>
+                <Text style={{
+                  fontSize: 24,
+                  fontWeight: "bold",
+                  color: "#1F2937",
+                  marginBottom: 4
+                }}>{stats.customers}</Text>
+                <Text style={{
+                  fontSize: 14,
+                  color: "#6B7280"
+                }}>Total Customers</Text>
               </Pressable>
             </Animated.View>
             
-            <Animated.View entering={FadeInDown.delay(400).duration(400)} className="w-[48%] mb-4">
-              <Pressable className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 overflow-hidden relative" onPressIn={onPressIn} onPressOut={onPressOut}>
-                <LinearGradient
-                  colors={['#f5f3ff', '#ede9fe']}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                  className="absolute inset-0 opacity-60"
-                />
-                <View className="flex-row justify-between items-start mb-3">
-                  <View className="bg-purple-50 dark:bg-purple-900/20 p-2 rounded-lg">
-                    <MaterialCommunityIcons name="truck-delivery" size={20} color="#8b5cf6" />
+            <Animated.View 
+              entering={FadeInDown.delay(400).duration(400)} 
+              style={{
+                width: "48%",
+                marginBottom: 16
+              }}
+            >
+              <Pressable 
+                style={{
+                  borderRadius: 16,
+                  overflow: "hidden",
+                  backgroundColor: "#8b5cf615",
+                  padding: 16,
+                  shadowColor: "#000",
+                  shadowOffset: { width: 0, height: 1 },
+                  shadowOpacity: 0.05,
+                  shadowRadius: 3,
+                }}
+                onPressIn={onPressIn} 
+                onPressOut={onPressOut}
+              >
+                <View style={{
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  alignItems: "flex-start",
+                  marginBottom: 12
+                }}>
+                  <View style={{
+                    width: 48,
+                    height: 48,
+                    borderRadius: 12,
+                    backgroundColor: "#8b5cf625",
+                    alignItems: "center",
+                    justifyContent: "center"
+                  }}>
+                    <MaterialCommunityIcons name="truck-delivery" size={24} color="#8b5cf6" />
                   </View>
-                  <View className="bg-green-50 dark:bg-green-900/30 px-2 py-1 rounded-full">
-                    <Text className="text-green-600 dark:text-green-400 text-xs font-medium">{stats.supplierGrowth}</Text>
+                  <View style={{
+                    backgroundColor: "#10b98115",
+                    paddingHorizontal: 8,
+                    paddingVertical: 4,
+                    borderRadius: 100
+                  }}>
+                    <Text style={{
+                      fontSize: 10,
+                      color: "#10b981",
+                      fontWeight: "600"
+                    }}>{stats.supplierGrowth}</Text>
                   </View>
                     </View>
-                <Text className="text-2xl font-bold text-gray-800 dark:text-white">{stats.suppliers}</Text>
-                <Text className="text-gray-500 dark:text-gray-400 text-sm mt-1">Total Suppliers</Text>
+                <Text style={{
+                  fontSize: 24,
+                  fontWeight: "bold",
+                  color: "#1F2937",
+                  marginBottom: 4
+                }}>{stats.suppliers}</Text>
+                <Text style={{
+                  fontSize: 14,
+                  color: "#6B7280"
+                }}>Total Suppliers</Text>
               </Pressable>
             </Animated.View>
             
-            <Animated.View entering={FadeInDown.delay(500).duration(400)} className="w-[48%] mb-4">
-              <Pressable className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 overflow-hidden relative" onPressIn={onPressIn} onPressOut={onPressOut}>
-                <LinearGradient
-                  colors={['#ecfdf5', '#d1fae5']}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                  className="absolute inset-0 opacity-60"
-                />
-                <View className="flex-row justify-between items-start mb-3">
-                  <View className="bg-emerald-50 dark:bg-emerald-900/20 p-2 rounded-lg">
-                    <Ionicons name="basket" size={20} color="#10b981" />
+            <Animated.View 
+              entering={FadeInDown.delay(500).duration(400)} 
+              style={{
+                width: "48%",
+                marginBottom: 16
+              }}
+            >
+              <Pressable 
+                style={{
+                  borderRadius: 16,
+                  overflow: "hidden",
+                  backgroundColor: "#10b98115",
+                  padding: 16,
+                  shadowColor: "#000",
+                  shadowOffset: { width: 0, height: 1 },
+                  shadowOpacity: 0.05,
+                  shadowRadius: 3,
+                }}
+                onPressIn={onPressIn} 
+                onPressOut={onPressOut}
+              >
+                <View style={{
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  alignItems: "flex-start",
+                  marginBottom: 12
+                }}>
+                  <View style={{
+                    width: 48,
+                    height: 48,
+                    borderRadius: 12,
+                    backgroundColor: "#10b98125",
+                    alignItems: "center",
+                    justifyContent: "center"
+                  }}>
+                    <Ionicons name="basket" size={24} color="#10b981" />
                     </View>
-                  <View className="bg-green-50 dark:bg-green-900/30 px-2 py-1 rounded-full">
-                    <Text className="text-green-600 dark:text-green-400 text-xs font-medium">{stats.orderGrowth}</Text>
+                  <View style={{
+                    backgroundColor: "#10b98115",
+                    paddingHorizontal: 8,
+                    paddingVertical: 4,
+                    borderRadius: 100
+                  }}>
+                    <Text style={{
+                      fontSize: 10,
+                      color: "#10b981",
+                      fontWeight: "600"
+                    }}>{stats.orderGrowth}</Text>
                   </View>
               </View>
-                <Text className="text-2xl font-bold text-gray-800 dark:text-white">{stats.orders}</Text>
-                <Text className="text-gray-500 dark:text-gray-400 text-sm mt-1">Total Orders</Text>
+                <Text style={{
+                  fontSize: 24,
+                  fontWeight: "bold",
+                  color: "#1F2937",
+                  marginBottom: 4
+                }}>{stats.orders}</Text>
+                <Text style={{
+                  fontSize: 14,
+                  color: "#6B7280"
+                }}>Total Orders</Text>
               </Pressable>
             </Animated.View>
           </View>
@@ -468,7 +711,13 @@ const menuItems = [
         {/* Quick Actions Grid */}
         <View className="mx-4 mt-4">
           <View className="flex-row justify-between items-center mb-4">
-            <Text className="text-gray-800 dark:text-gray-200 font-bold text-lg">Quick Actions</Text>
+            <Text style={{
+              fontSize: 20,
+              fontWeight: "700",
+              color: "#111827",
+              marginBottom: 6,
+              marginLeft: 2
+            }}>Quick Actions</Text>
           </View>
           
           <View className="flex-row flex-wrap justify-between">
@@ -476,43 +725,69 @@ const menuItems = [
               <Animated.View 
                 key={item.title} 
                 entering={FadeInRight.delay(300 + index * 100).duration(400)}
-                className="w-[48%] mb-4"
-                style={animatedStyle}
+                style={{
+                  width: "48%",
+                  marginBottom: 16
+                }}
               >
                 <TouchableOpacity
                   onPress={() => router.push(item.route)}
                   onPressIn={onPressIn}
                   onPressOut={onPressOut}
                   activeOpacity={0.8}
-                  className={`bg-${item.gradientFrom.replace('#', '')} dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden h-36 justify-between p-4 relative`}
+                  style={{
+                    backgroundColor: `${item.iconColor}15`,
+                    borderRadius: 16,
+                    height: 140,
+                    justifyContent: "space-between",
+                    padding: 16,
+                    position: "relative",
+                    shadowColor: "#000",
+                    shadowOffset: { width: 0, height: 1 },
+                    shadowOpacity: 0.05,
+                    shadowRadius: 3,
+                  }}
                 >
-                  <LinearGradient
-                    colors={[item.gradientFrom, item.gradientTo]}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 1 }}
-                    className="absolute inset-0 opacity-60"
-                  />
-                  <View className="flex-row justify-between">
-                    <Animated.View style={iconAnimationStyle} className={`${item.color} p-2 rounded-lg w-10 h-10 items-center justify-center`}>
+                  <View style={{
+                    flexDirection: "row",
+                    justifyContent: "space-between"
+                  }}>
+                    <Animated.View 
+                      style={[iconAnimationStyle, {
+                        width: 48,
+                        height: 48,
+                        borderRadius: 12,
+                        backgroundColor: `${item.iconColor}25`,
+                        alignItems: "center",
+                        justifyContent: "center"
+                      }]}
+                    >
                       {item.iconType === "Ionicons" && (
-                        <Ionicons name={item.icon} size={20} color={item.iconColor} />
+                        <Ionicons name={item.icon} size={24} color={item.iconColor} />
+                      )}
+                      {item.iconType === "MaterialIcons" && (
+                        <MaterialIcons name={item.icon} size={24} color={item.iconColor} />
                       )}
                       {item.iconType === "FontAwesome5" && (
-                        <FontAwesome5 name={item.icon} size={18} color={item.iconColor} />
+                        <FontAwesome5 name={item.icon} size={24} color={item.iconColor} />
                       )}
                       {item.iconType === "MaterialCommunityIcons" && (
-                        <MaterialCommunityIcons name={item.icon} size={20} color={item.iconColor} />
+                        <MaterialCommunityIcons name={item.icon} size={24} color={item.iconColor} />
                       )}
                     </Animated.View>
-                    
-                    <View className="h-7 w-7 rounded-full bg-gray-100 dark:bg-gray-700 items-center justify-center">
-                      <Ionicons name="chevron-forward" size={16} color="#6b7280" />
-                    </View>
                   </View>
                   
                   <View>
-                    <Text className="font-bold text-gray-800 dark:text-white">{item.title}</Text>
-                    <Text className="text-gray-500 dark:text-gray-400 text-xs mt-1">{item.subtitle}</Text>
+                    <Text style={{
+                      fontSize: 16,
+                      fontWeight: "bold",
+                      color: "#1F2937",
+                      marginBottom: 4,
+                    }}>{item.title}</Text>
+                    <Text style={{
+                      fontSize: 12,
+                      color: "#6B7280",
+                    }} numberOfLines={2}>{item.subtitle}</Text>
                   </View>
               </TouchableOpacity>
               </Animated.View>
@@ -521,7 +796,7 @@ const menuItems = [
         </View>
         
         {/* Recent Activity */}
-        <View className="mx-4 mt-4">
+        {/* <View className="mx-4 mt-4">
           <View className="flex-row justify-between items-center mb-4">
             <Text className="text-gray-800 dark:text-gray-200 font-bold text-lg">Recent Activity</Text>
             <TouchableOpacity className="bg-blue-50 dark:bg-blue-900/30 px-3 py-1.5 rounded-full">
@@ -564,7 +839,7 @@ const menuItems = [
               </Animated.View>
             );
           })}
-        </View>
+        </View> */}
       </Animated.ScrollView>
     </SafeAreaView>
   );
