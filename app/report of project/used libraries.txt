@@ -1,0 +1,11 @@
+react native elements
+react native swiper
+ React Native
+  react native navigator
+  drawer navigator
+react-native-reanimated
+expo-image-picker
+  react-native-dropdown-picker
+  react-native-chart-kit
+  react-native-svg
+  react-native-paper

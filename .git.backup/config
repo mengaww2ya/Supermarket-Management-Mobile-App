@@ -1,0 +1,51 @@
+[core]
+	repositoryformatversion = 0
+	filemode = true
+	bare = false
+	logallrefupdates = true
+[remote "origin"]
+	url = https://github.com/mengaww2ya/Supermarket-Management-Mobile-App.git
+	fetch = +refs/heads/*:refs/remotes/origin/*
+[branch "main"]
+	remote = origin
+	merge = refs/heads/main
+[branch "branch-one"]
+	vscode-merge-base = origin/main
+	remote = origin
+	merge = refs/heads/branch-one
+	github-pr-owner-number = "mengaww2ya#Supermarket-Management-Mobile-App#6"
+	gk-merge-base = origin/main
+[branch "login"]
+	vscode-merge-base = origin/branch-one
+	remote = origin
+	merge = refs/heads/login
+[branch "12"]
+	vscode-merge-base = origin/login
+	remote = origin
+	merge = refs/heads/12
+[branch "welcome"]
+	vscode-merge-base = origin/12
+	remote = origin
+	merge = refs/heads/welcome
+[branch "branch1"]
+	vscode-merge-base = origin/welcome
+	remote = origin
+	merge = refs/heads/branch1
+[branch "bran-navigator"]
+	vscode-merge-base = origin/branch1
+	remote = origin
+	merge = refs/heads/bran-navigator
+[branch "homepage"]
+	vscode-merge-base = origin/bran-navigator
+	remote = origin
+	merge = refs/heads/homepage
+[branch "homepagewitherror"]
+	vscode-merge-base = origin/homepage
+	remote = origin
+	merge = refs/heads/homepagewitherror
+[branch "settwo"]
+	vscode-merge-base = origin/homepagewitherror
+	remote = origin
+	merge = refs/heads/settwo
+[pull]
+	rebase = false
