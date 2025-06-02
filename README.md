@@ -52,6 +52,53 @@ A modern cross-platform mobile app built with **React Native**, **Expo**, **Fire
 - ✅ Inventory List  
 - ✅ Sales Summary  
 
-Example:
 
-```md
+---
+
+````md
+---
+
+## 🚀 Getting Started
+
+Follow these instructions to run the app locally on your device or emulator.
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/mengaww2ya/Supermarket-Management-Mobile-App.git
+cd Supermarket-Management-Mobile-App
+````
+
+### 2. Install dependencies
+
+```bash
+npm install
+```
+
+### 3. Create a `.env` file
+
+Create a `.env` file in the root directory and add your Firebase credentials:
+
+```env
+FIREBASE_API_KEY=your_api_key
+FIREBASE_AUTH_DOMAIN=your_auth_domain
+FIREBASE_PROJECT_ID=your_project_id
+FIREBASE_STORAGE_BUCKET=your_storage_bucket
+FIREBASE_MESSAGING_SENDER_ID=your_sender_id
+FIREBASE_APP_ID=your_app_id
+```
+
+### 4. Start the development server
+
+```bash
+npx expo start
+```
+
+You can then use a device with the **Expo Go** app or an emulator to preview the app.
+
+```
+
+---
+
+
+
